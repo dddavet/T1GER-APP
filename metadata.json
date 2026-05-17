@@ -1,0 +1,5 @@
+{
+  "name": "T!ger App",
+  "description": "The AI Accountability Engine for entrepreneurs. Log missions, verify with AI, and build your streak.",
+  "requestFramePermissions": ["camera", "microphone"]
+}

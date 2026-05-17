@@ -1,0 +1,36 @@
+node_modules/@google/genai/dist/index.cjs:    throw new Error('`fetch` is not defined as a global; Either pass `fetch` to the client, `new GeminiNextGenAPIClient({ fetch })` or polyfill the global, `globalThis.fetch = fetch`');
+node_modules/@google/genai/dist/node/index.cjs:    throw new Error('`fetch` is not defined as a global; Either pass `fetch` to the client, `new GeminiNextGenAPIClient({ fetch })` or polyfill the global, `globalThis.fetch = fetch`');
+node_modules/@google/genai/dist/node/index.mjs:    throw new Error('`fetch` is not defined as a global; Either pass `fetch` to the client, `new GeminiNextGenAPIClient({ fetch })` or polyfill the global, `globalThis.fetch = fetch`');
+node_modules/@google/genai/dist/web/index.mjs:    throw new Error('`fetch` is not defined as a global; Either pass `fetch` to the client, `new GeminiNextGenAPIClient({ fetch })` or polyfill the global, `globalThis.fetch = fetch`');
+node_modules/@google/genai/dist/index.mjs:    throw new Error('`fetch` is not defined as a global; Either pass `fetch` to the client, `new GeminiNextGenAPIClient({ fetch })` or polyfill the global, `globalThis.fetch = fetch`');
+node_modules/@protobufjs/fetch/tests/index.js:var fetch = require("..");
+node_modules/gaxios/build/cjs/src/gaxios.js:     * const myFetch: typeof fetch = (...args) => gaxios.fetch(...args);
+node_modules/gaxios/build/cjs/src/gaxios.d.ts:     * const myFetch: typeof fetch = (...args) => gaxios.fetch(...args);
+node_modules/gaxios/build/esm/src/gaxios.js:     * const myFetch: typeof fetch = (...args) => gaxios.fetch(...args);
+node_modules/gaxios/build/esm/src/gaxios.d.ts:     * const myFetch: typeof fetch = (...args) => gaxios.fetch(...args);
+node_modules/google-auth-library/build/src/auth/authclient.js:     * const fetchWithAuthClient: typeof fetch = (...args) => authClient.fetch(...args);
+node_modules/google-auth-library/build/src/auth/googleauth.js:     * const fetchWithAuth: typeof fetch = (...args) => auth.fetch(...args);
+node_modules/google-auth-library/build/src/auth/authclient.d.ts:     * const fetchWithAuthClient: typeof fetch = (...args) => authClient.fetch(...args);
+node_modules/google-auth-library/build/src/auth/googleauth.d.ts:     * const fetchWithAuth: typeof fetch = (...args) => auth.fetch(...args);
+node_modules/node-fetch/README.md:const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
+node_modules/node-fetch/README.md:  globalThis.fetch = fetch
+node_modules/p-retry/readme.md:const fetch = require('node-fetch');
+node_modules/protobufjs/src/root.js:Root.prototype.fetch = util.fetch;
+node_modules/protobufjs/dist/light/protobuf.js:Root.prototype.fetch = util.fetch;
+node_modules/protobufjs/dist/protobuf.js:Root.prototype.fetch = util.fetch;
+node_modules/react-router/dist/production/chunk-4TJ7T2OQ.js:      router.fetch = instrumentedFetch;
+node_modules/react-router/dist/production/chunk-4TJ7T2OQ.js:    if (prefetch === "render") {
+node_modules/react-router/dist/production/chunk-4TJ7T2OQ.js:    if (prefetch === "viewport") {
+node_modules/react-router/dist/production/chunk-FPT5DLVJ.js:    prefetch = "none",
+node_modules/react-router/dist/production/chunk-HZQGQD2X.mjs:      router.fetch = instrumentedFetch;
+node_modules/react-router/dist/production/chunk-HZQGQD2X.mjs:    if (prefetch === "render") {
+node_modules/react-router/dist/production/chunk-HZQGQD2X.mjs:    if (prefetch === "viewport") {
+node_modules/react-router/dist/production/chunk-HZQGQD2X.mjs:    prefetch = "none",
+node_modules/react-router/dist/development/chunk-IK6APEEG.js:      router.fetch = instrumentedFetch;
+node_modules/react-router/dist/development/chunk-IK6APEEG.js:    if (prefetch === "render") {
+node_modules/react-router/dist/development/chunk-IK6APEEG.js:    if (prefetch === "viewport") {
+node_modules/react-router/dist/development/chunk-NXTEWSJO.js:    prefetch = "none",
+node_modules/react-router/dist/development/chunk-QFMPRPBF.mjs:      router.fetch = instrumentedFetch;
+node_modules/react-router/dist/development/chunk-QFMPRPBF.mjs:    if (prefetch === "render") {
+node_modules/react-router/dist/development/chunk-QFMPRPBF.mjs:    if (prefetch === "viewport") {
+node_modules/react-router/dist/development/chunk-QFMPRPBF.mjs:    prefetch = "none",

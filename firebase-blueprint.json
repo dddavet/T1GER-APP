@@ -1,0 +1,343 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and stats",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "streak": { "type": "number" },
+        "streakShields": { "type": "number" },
+        "xp": { "type": "number" },
+        "niche": { "type": "string" },
+        "level": { "type": "number" },
+        "lastMissionDate": { "type": "string", "format": "date" },
+        "isWeekendPlanActive": { "type": "boolean" },
+        "isFlaggedForInterrogation": { "type": "boolean" },
+        "isDayClosed": { "type": "boolean" },
+        "goal": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "username": { "type": "string" },
+        "currentBookId": { "type": "string" },
+        "weeklyInsightsCount": { "type": "number" },
+        "economy": {
+          "type": "object",
+          "properties": {
+            "streakFreezePrice": { "type": "number" },
+            "unlockedSpecialItems": { "type": "array", "items": { "type": "string" } },
+            "marketMessage": { "type": "string" }
+          }
+        }
+      },
+      "required": ["uid", "email", "streak", "xp", "niche", "level"]
+    },
+    "WeekendMission": {
+      "title": "WeekendMission",
+      "description": "Weekend boss mission",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["business", "personal"] },
+        "proofRequirement": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "completed"] }
+      },
+      "required": ["title", "description", "type", "proofRequirement", "status"]
+    },
+    "PublicProfile": {
+      "title": "PublicProfile",
+      "description": "Public user profile for leaderboard",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "xp": { "type": "number" }
+      },
+      "required": ["uid", "displayName", "xp"]
+    },
+    "DailyQuest": {
+      "title": "DailyQuest",
+      "description": "Daily quest definition",
+      "type": "object",
+      "properties": {
+        "mission_title": { "type": "string" },
+        "mission_briefing": { "type": "string" },
+        "required_protocol": { "type": "string", "enum": ["ARTIFACT", "TRIBUNAL", "SENSOR"] },
+        "xp_reward": { "type": "number" }
+      },
+      "required": ["mission_title", "mission_briefing", "required_protocol", "xp_reward"]
+    },
+    "Mission": {
+      "title": "Mission",
+      "description": "Daily mission definition",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["physical", "learning", "business"] },
+        "xpReward": { "type": "number" },
+        "auditResult": { 
+          "type": "object",
+          "properties": {
+            "verified": { "type": "boolean" },
+            "confidence_score": { "type": "number" },
+            "reason": { "type": "string" }
+          }
+        }
+      },
+      "required": ["title", "description", "type", "xpReward"]
+    },
+    "Book": {
+      "title": "Book",
+      "description": "Book definition",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "author": { "type": "string" }
+      },
+      "required": ["title", "author"]
+    },
+    "Insight": {
+      "title": "Insight",
+      "description": "Book insight definition",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "explanation": { "type": "string" },
+        "criticalAnalysis": {
+          "type": "object",
+          "properties": {
+            "works": { "type": "string" },
+            "fails": { "type": "string" },
+            "target": { "type": "string" }
+          }
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "objective": { "type": "string" },
+              "instructions": { "type": "string" },
+              "frequency": { "type": "string" },
+              "successMetric": { "type": "string" }
+            }
+          }
+        }
+      },
+      "required": ["title", "summary", "explanation", "criticalAnalysis", "exercises"]
+    },
+    "UserBookProgress": {
+      "title": "UserBookProgress",
+      "description": "User progress for a book",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "bookId": { "type": "string" },
+        "completedInsights": { "type": "array", "items": { "type": "string" } },
+        "completedExercises": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["userId", "bookId"]
+    },
+    "Circle": {
+      "title": "Circle",
+      "description": "Accountability circle",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "members": { "type": "array", "items": { "type": "string" } },
+        "weeklyScore": { "type": "number" },
+        "inviteCode": { "type": "string" }
+      },
+      "required": ["name", "members", "inviteCode"]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "User activity in circle",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "circleId": { "type": "string" },
+        "type": { "type": "string", "enum": ["insight_read", "exercise_completed", "streak_broken"] },
+        "targetId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "circleId", "type", "timestamp"]
+    },
+    "Reaction": {
+      "title": "Reaction",
+      "description": "Reaction to activity",
+      "type": "object",
+      "properties": {
+        "activityId": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["applied", "discuss", "behind"] }
+      },
+      "required": ["activityId", "userId", "type"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Comment on activity",
+      "type": "object",
+      "properties": {
+        "activityId": { "type": "string" },
+        "userId": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "required": ["activityId", "userId", "text"]
+    },
+    "Friendship": {
+      "title": "Friendship",
+      "description": "Friendship between users",
+      "type": "object",
+      "properties": {
+        "userId1": { "type": "string" },
+        "userId2": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "accepted"] }
+      },
+      "required": ["userId1", "userId2", "status"]
+    },
+    "Challenge": {
+      "title": "Challenge",
+      "description": "Challenge between friends",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "insightId": { "type": "string" },
+        "deadline": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "completed", "failed"] }
+      },
+      "required": ["senderId", "receiverId", "insightId", "deadline", "status"]
+    },
+    "Nudge": {
+      "title": "Nudge",
+      "description": "Nudge to inactive friend",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string" },
+        "receiverId": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "required": ["senderId", "receiverId", "timestamp"]
+    },
+    "DailyQuestion": {
+      "title": "DailyQuestion",
+      "description": "Daily business question",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "question": { "type": "string" },
+        "answer": { "type": "boolean" },
+        "date": { "type": "string" }
+      },
+      "required": ["userId", "question", "answer", "date"]
+    },
+    "HealthRadar": {
+      "title": "HealthRadar",
+      "description": "Business health radar data",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "offer": { "type": "number" },
+        "sales": { "type": "number" },
+        "marketing": { "type": "number" },
+        "mindset": { "type": "number" },
+        "operations": { "type": "number" }
+      },
+      "required": ["userId", "offer", "sales", "marketing", "mindset", "operations"]
+    },
+    "CoachingSession": {
+      "title": "CoachingSession",
+      "description": "Coaching session history",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "messages": { "type": "array", "items": { "type": "object" } },
+        "summary": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "messages", "summary", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile and stats"
+    },
+    "/users/{userId}/missions/{missionId}": {
+      "schema": "Mission",
+      "description": "User's daily missions"
+    },
+    "/users/{userId}/daily_quests/{questId}": {
+      "schema": "DailyQuest",
+      "description": "User's daily quests"
+    },
+    "/users/{userId}/weekendMissions/{missionId}": {
+      "schema": "WeekendMission",
+      "description": "User's weekend boss missions"
+    },
+    "/books/{bookId}": {
+      "schema": "Book",
+      "description": "Book details"
+    },
+    "/books/{bookId}/insights/{insightId}": {
+      "schema": "Insight",
+      "description": "Book insights"
+    },
+    "/users/{userId}/bookProgress/{bookId}": {
+      "schema": "UserBookProgress",
+      "description": "User progress for a book"
+    },
+    "/circles/{circleId}": {
+      "schema": "Circle",
+      "description": "Accountability circles"
+    },
+    "/circles/{circleId}/activities/{activityId}": {
+      "schema": "Activity",
+      "description": "Circle activities"
+    },
+    "/circles/{circleId}/activities/{activityId}/reactions/{reactionId}": {
+      "schema": "Reaction",
+      "description": "Reactions to activities"
+    },
+    "/circles/{circleId}/activities/{activityId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on activities"
+    },
+    "/friendships/{friendshipId}": {
+      "schema": "Friendship",
+      "description": "Friendships"
+    },
+    "/challenges/{challengeId}": {
+      "schema": "Challenge",
+      "description": "Challenges"
+    },
+    "/nudges/{nudgeId}": {
+      "schema": "Nudge",
+      "description": "Nudges"
+    },
+    "/users/{userId}/dailyQuestions/{questionId}": {
+      "schema": "DailyQuestion",
+      "description": "Daily business questions"
+    },
+    "/users/{userId}/healthRadar": {
+      "schema": "HealthRadar",
+      "description": "Business health radar"
+    },
+    "/users/{userId}/coachingSessions/{sessionId}": {
+      "schema": "CoachingSession",
+      "description": "Coaching session history"
+    },
+    "/users_public/{userId}": {
+      "schema": "PublicProfile",
+      "description": "Public user profile for leaderboard"
+    }
+  }
+}

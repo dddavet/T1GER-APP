@@ -1,0 +1,168 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: userId
+    // Fields:
+    //   - uid: string (required) - User ID
+    //   - email: string (required) - User email
+    //   - streak: number (required) - Current streak
+    //   - streakShields: number (optional) - Streak shields
+    //   - xp: number (required) - Total XP
+    //   - lastMissionDate: string (optional) - Last mission date
+    //   - isWeekendPlanActive: boolean (optional) - Weekend plan active
+    //   - goal: string (optional) - 90-day goal
+    //   - niche: string (required) - User niche
+    //   - level: number (required) - User level
+    //   - displayName: string (optional)
+    //   - photoURL: string (optional)
+    //
+    // Collection: circles
+    // Document ID: circleId
+    // Fields:
+    //   - name: string (required)
+    //   - members: array (required)
+    //   - weeklyScore: number (required)
+    //   - inviteCode: string (required)
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+       return request.auth != null;
+    }
+
+    function isOwner(userId) {
+       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidString(val, maxLen) {
+      return val is string && val.size() <= maxLen;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasRequiredFields(fields) {
+       return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) 
+        && hasRequiredFields(['uid', 'email', 'streak', 'xp', 'niche', 'level']) 
+        && isValidEmail(request.resource.data.email)
+        && isValidString(request.resource.data.niche, 50)
+        && request.resource.data.xp >= 0
+        && request.resource.data.streak >= 0;
+      allow update: if isOwner(userId)
+        && (!('email' in request.resource.data) || request.resource.data.email == resource.data.email)
+        && (!('xp' in request.resource.data) || request.resource.data.xp >= 0)
+        && (!('niche' in request.resource.data) || isValidString(request.resource.data.niche, 50))
+        && (!('goal' in request.resource.data) || isValidString(request.resource.data.goal, 500));
+    }
+
+    match /users_public/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isOwner(userId)
+        && isValidString(request.resource.data.displayName, 100)
+        && (!('photoURL' in request.resource.data) || isValidString(request.resource.data.photoURL, 1000000));
+    }
+
+    match /missions/{missionId} {
+      allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.userId && request.auth.uid == request.resource.data.userId;
+      allow delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    match /users/{userId}/weekendMissions/{missionId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && hasRequiredFields(['title', 'description', 'type', 'proofRequirement', 'status']);
+      allow update: if isOwner(userId) && hasOnlyAllowedFields(['title', 'description', 'type', 'proofRequirement', 'status']);
+    }
+
+    match /users/{userId}/daily_quests/{questId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && hasRequiredFields(['mission_title', 'mission_briefing', 'required_protocol', 'xp_reward']) && hasOnlyAllowedFields(['mission_title', 'mission_briefing', 'required_protocol', 'xp_reward']);
+      allow update: if isOwner(userId) && hasOnlyAllowedFields(['mission_title', 'mission_briefing', 'required_protocol', 'xp_reward']);
+    }
+
+    match /books/{bookId} {
+      allow read: if isAuthenticated();
+      match /insights/{insightId} {
+        allow read: if isAuthenticated();
+      }
+    }
+
+    match /users/{userId}/bookProgress/{bookId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /circles/{circleId} {
+      allow read: if isAuthenticated() && request.auth.uid in resource.data.members;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && request.auth.uid in resource.data.members;
+      
+      match /activities/{activityId} {
+        allow read: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)).data.members;
+        allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId;
+        
+        match /reactions/{reactionId} {
+          allow read, create: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)).data.members;
+        }
+        match /comments/{commentId} {
+          allow read, create: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/circles/$(circleId)).data.members;
+        }
+      }
+    }
+
+    match /friendships/{friendshipId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.userId1;
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.userId1 || request.auth.uid == resource.data.userId2);
+    }
+
+    match /challenges/{challengeId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId);
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.senderId;
+      allow update: if isAuthenticated() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId);
+    }
+
+    match /nudges/{nudgeId} {
+      allow read: if isAuthenticated() && (request.auth.uid == resource.data.senderId || request.auth.uid == resource.data.receiverId);
+      allow create: if isAuthenticated() && request.auth.uid == request.resource.data.senderId;
+    }
+
+    match /users/{userId}/dailyQuestions/{questionId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /users/{userId}/healthRadar {
+      allow read, write: if isOwner(userId);
+    }
+
+    match /users/{userId}/coachingSessions/{sessionId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && hasRequiredFields(['messages', 'summary', 'timestamp'])
+        && isValidString(request.resource.data.summary, 200)
+        && request.resource.data.messages is list;
+    }
+  }
+}
