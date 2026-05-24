@@ -85,8 +85,7 @@
     @apply text-zinc-100 font-sans antialiased bg-[#020203];
     background-image: 
       radial-gradient(circle at 15% 50%, var(--bg-glow-1) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%),
-      radial-gradient(circle at 50% 80%, var(--bg-glow-1) 0%, transparent 50%);
+      radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%);
     background-attachment: fixed;
     transition: background-image 0.5s ease;
   }
@@ -124,8 +123,7 @@
       background: #020203;
       background-image: 
         radial-gradient(circle at 15% 50%, var(--bg-glow-1) 0%, transparent 50%),
-        radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, var(--bg-glow-1) 0%, transparent 50%);
+        radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%);
       transform: translateZ(0);
       transition: background-image 0.5s ease;
     }
@@ -379,5 +377,33 @@
   .hide-scrollbar {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
+  }
+
+  /* Tactile 3D Buttons (Duolingo-style Cyberpunk neomorphism) */
+  .btn-gamified-3d {
+    position: relative;
+    background-color: var(--accent-main);
+    color: #000000;
+    border: none;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-radius: 1.25rem;
+    box-shadow: 0 4px 0 0 color-mix(in srgb, var(--accent-main) 70%, black);
+    transition: all 0.08s ease;
+    user-select: none;
+  }
+
+  .btn-gamified-3d:active:not(:disabled) {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 0 transparent !important;
+  }
+
+  .btn-gamified-3d:disabled {
+    background-color: #1a1a24 !important;
+    color: #4a4a5e !important;
+    box-shadow: 0 4px 0 0 #0d0d14 !important;
+    cursor: not-allowed;
+    border: 1px solid rgba(255, 255, 255, 0.03) !important;
   }
 }

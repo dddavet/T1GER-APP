@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'motion/react';
 export const Profile = () => {
   const { appUser, logout, updateAppUser } = useAuth();
   const { stats, user, setActiveView } = useT1ger();
-  const { competencies, learnStreak, tacticalStreak } = useBrain();
+  const { competencies, learnStreak, tacticalStreak, resetBrain } = useBrain();
   const [sessions, setSessions] = useState<any[]>([]);
 
   // Live competency scores from the Brain
@@ -232,13 +232,27 @@ export const Profile = () => {
           <div className="space-y-3 pt-4 border-t border-white/5">
             <button
               onClick={() => {
-                updateAppUser({ onboardingStep: 'identity', onboardingComplete: false });
-                setActiveView('onboarding');
+                if (window.confirm("¿Estás seguro de que deseas reiniciar tu cuenta a CERO? Esto borrará tu historial de lecciones, competencias, rachas y monedas en la nube para que puedas experimentar el onboarding de Duolingo desde el principio.")) {
+                  resetBrain();
+                  updateAppUser({
+                    onboardingStep: 'identity',
+                    onboardingComplete: false,
+                    niche: 'none',
+                    goal: '',
+                    xp: 0,
+                    level: 1,
+                    streak: 0,
+                    learningStyle: undefined,
+                    experienceLevel: undefined,
+                    ageRange: undefined
+                  });
+                  setActiveView('onboarding');
+                }
               }}
               className="w-full p-5 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-3"
             >
               <RefreshCcw className="w-3.5 h-3.5" />
-              Recalibrate Learning Path
+              Recalibrate Learning Path (Reset Complete)
             </button>
             
             <button

@@ -13,7 +13,9 @@ interface TrackStyle {
 }
 
 const TRACK_STYLES: Record<TrackType, TrackStyle> = {
-  apex: { icon: <Target className="w-4 h-4" />, color: 'var(--accent-main)' },
+  investing: { icon: <TrendingUp className="w-4 h-4" />, color: '#10B981' },
+  business: { icon: <Building2 className="w-4 h-4" />, color: '#3B82F6' },
+  ai: { icon: <Cpu className="w-4 h-4" />, color: '#8B5CF6' },
 };
 
 // Zigzag pattern
@@ -26,7 +28,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
   const { pathData, brainState, getSessionMissions, dailyProgress } = useBrain();
 
   const activeLevel = pathData.track?.levels?.[pathData.currentLevelIndex] || pathData.track?.levels?.[0];
-  const trackStyle = TRACK_STYLES[pathData.track?.trackId as TrackType] || TRACK_STYLES.apex;
+  const trackStyle = TRACK_STYLES[pathData.track?.trackId as TrackType] || TRACK_STYLES.investing;
 
   if (!activeLevel || !trackStyle) return null;
 

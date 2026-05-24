@@ -131,7 +131,7 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
   },
   dailySession: null,
   niche: 'general',
-  currentTrackId: 'apex',
+  currentTrackId: 'investing',
   completedDayIds: [],
   learnStreak: 0,
   tacticalStreak: 0,
@@ -162,7 +162,7 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
  * and calculates the user's progress through it.
  */
 export function getCurrentPathData(state: BrainState) {
-  const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['apex'];
+  const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['investing'];
   let currentLevelIndex = 0;
   let currentDayIndex = 0;
   
@@ -508,4 +508,33 @@ export function getTopicProgress(state: BrainState): TopicProgress[] {
       currentDifficulty: state.currentDifficulty[comp],
     };
   });
+}
+
+export interface UserWeaknesses {
+  weakCompetencies: { competency: string; score: number }[];
+  recentFailedMissions: string[];
+}
+
+export function getUserWeaknesses(state: BrainState): UserWeaknesses {
+  const decayedScores = applyDecay(state);
+  
+  const weakCompetencies = Object.entries(decayedScores)
+    .map(([competency, score]) => ({ competency, score }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 3);
+
+  const recentFailedMissions = Array.from(new Set(
+    state.missionHistory
+      .filter(record => !record.completed)
+      .map(record => {
+        const mission = MISSION_BANK.find(m => m.id === record.missionId);
+        return mission ? `${mission.title} (${mission.concept || ''})` : '';
+      })
+      .filter(Boolean)
+  )).slice(-3);
+
+  return {
+    weakCompetencies,
+    recentFailedMissions
+  };
 }

@@ -172,3 +172,72 @@ export const generateSpeech = async (text: string) => null;
 export const generateBadgeIcon = async (title: string) => {
   return `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(title)}&backgroundColor=050505&fontFamily=monospace`;
 };
+
+export const generateAdaptiveLesson = async (
+  niche: string,
+  level: number,
+  baseMission: any,
+  weaknesses: { competency: string; score: number }[],
+  recentFailures: string[],
+  learningStyle: string
+) => {
+  const model = getModel('gemini-1.5-flash');
+  
+  const compContext = weaknesses.map(w => `${w.competency} (score: ${w.score}/100)`).join(', ');
+  const failuresContext = recentFailures.length > 0 ? `Recent mistakes/failures the user made: ${recentFailures.join(', ')}.` : 'No recent mistakes.';
+  
+  const prompt = `You are the T1GER BirdBrain AI Generator. Your goal is to generate a personalized, custom Duolingo-style lesson for an entrepreneur with a niche in "${niche}" who is level ${level}.
+  
+  Current base topic of the lesson: "${baseMission.title}"
+  Concept of the topic: "${baseMission.concept_flashcard || baseMission.concept || ''}"
+  Mission Type: "${baseMission.type || 'flashcard'}"
+  User Learning Style: "${learningStyle}"
+  
+  User Competency Weaknesses to strengthen: ${compContext}
+  ${failuresContext}
+  
+  TASK:
+  Provide a highly customized, adaptive lesson. 
+  - If the user's learning style is "visual", optimize the concept explanation to be extremely punchy, graphic, and visually descriptive.
+  - If they are "interactive", make the concept concise and focus on intuition.
+  - Construct custom, adaptive options and questions:
+    - If the user has weak competencies, make some options or questions test their understanding in those weak areas.
+    - If they had recent failures, design a custom recall question or option that directly addresses the root cause of those mistakes, giving them a redemptive learning opportunity!
+  
+  Return the response in this EXACT JSON structure, mapping the dynamic fields (the output must be valid JSON, with absolutely no markdown wrapping except raw JSON):
+  {
+    "id": "${baseMission.id}",
+    "competency": "${baseMission.competency}",
+    "difficulty": "${baseMission.difficulty}",
+    "type": "${baseMission.type}",
+    "title": "[Dynamic, engaging title matching the personalization]",
+    "concept": "[Dynamic, highly personalized explanation of the concept based on the learning style]",
+    "keyTakeaway": "[Punchy, dynamic 1-sentence summary]",
+    
+    // Recall Question (Multiple Choice Quiz to test what was just taught, or to remediate past failures)
+    "recallQuestion": "[Personalized multiple choice question based on the concept, designed to challenge or reinforce their specific weak points]",
+    "recallOptions": [
+      { "text": "[Option A]", "correct": false },
+      { "text": "[Option B]", "correct": true },
+      { "text": "[Option C]", "correct": false }
+    ],
+    "recallExplanation": "[Clear, insightful explanation of why the correct answer is right and why other options are wrong, matching a mentor's voice]",
+    
+    // Scenario Quiz (For scenario_quiz type)
+    "scenario": "[Custom, dynamic business scenario tailored to their niche and weaknesses]",
+    "options": [
+      { "text": "[Option A]", "correct": false },
+      { "text": "[Option B]", "correct": true },
+      { "text": "[Option C]", "correct": false }
+    ],
+    "failureCritique": "[Personalized review explanation]",
+    
+    "taskBrief": "${baseMission.taskBrief || ''}",
+    "xpReward": ${baseMission.xpReward || 50}
+  }`;
+
+  const result = await withRetry(() => model.generateContent(prompt));
+  const text = result.response.text();
+  const cleaned = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(cleaned);
+};

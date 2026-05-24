@@ -11,7 +11,7 @@ export type Difficulty = 'easy' | 'medium' | 'hard';
 export type MissionType = 'flashcard' | 'scenario_quiz' | 'real_world_task';
 
 // --- NEW LINEAR TRACK DATA STRUCTURES ---
-export type TrackType = 'apex';
+export type TrackType = 'investing' | 'business' | 'ai';
 
 export interface CurriculumDay {
   dayId: string;
@@ -615,36 +615,50 @@ export const MISSION_BANK: BankMission[] = [
 // ============================================================
 
 export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
-  apex: {
-    trackId: 'apex',
-    title: 'THE T1GER APEX PATH',
+  investing: {
+    trackId: 'investing',
+    title: 'INVESTING & WEALTH',
     levels: [
       {
-        levelId: 'apex-level-1', levelNumber: 1, title: 'PHASE 1: THE OFFER', subtitle: 'Building the foundation of value',
+        levelId: 'inv-level-1', levelNumber: 1, title: 'PHASE 1: FOUNDATIONS', subtitle: 'Understanding the market',
         days: [
-          { dayId: 'apex-d1', dayNumber: 1, missionIds: ['offer-e1'] },
-          { dayId: 'apex-d2', dayNumber: 2, missionIds: ['offer-e3'] },
-          { dayId: 'apex-d3', dayNumber: 3, missionIds: ['offer-e2'] },
-          { dayId: 'apex-d4', dayNumber: 4, missionIds: ['offer-m1'] },
-          { dayId: 'apex-d5', dayNumber: 5, missionIds: ['offer-m3'] },
+          { dayId: 'inv-d1', dayNumber: 1, missionIds: ['inv-e1'] },
+          { dayId: 'inv-d2', dayNumber: 2, missionIds: ['inv-e2'] },
+          { dayId: 'inv-d3', dayNumber: 3, missionIds: ['acc-e1'] },
+        ]
+      }
+    ]
+  },
+  business: {
+    trackId: 'business',
+    title: 'BUSINESS & SALES',
+    levels: [
+      {
+        levelId: 'biz-level-1', levelNumber: 1, title: 'PHASE 1: THE OFFER', subtitle: 'Building the foundation of value',
+        days: [
+          { dayId: 'biz-d1', dayNumber: 1, missionIds: ['offer-e1'] },
+          { dayId: 'biz-d2', dayNumber: 2, missionIds: ['offer-e3'] },
+          { dayId: 'biz-d3', dayNumber: 3, missionIds: ['offer-e2'] },
         ]
       },
       {
-        levelId: 'apex-level-2', levelNumber: 2, title: 'PHASE 2: THE CLOSE', subtitle: 'Turning attention into revenue',
+        levelId: 'biz-level-2', levelNumber: 2, title: 'PHASE 2: THE CLOSE', subtitle: 'Turning attention into revenue',
         days: [
-          { dayId: 'apex-d6', dayNumber: 6, missionIds: ['sales-e1'] },
-          { dayId: 'apex-d7', dayNumber: 7, missionIds: ['sales-e2'] },
-          { dayId: 'apex-d8', dayNumber: 8, missionIds: ['sales-e3'] },
-          { dayId: 'apex-d9', dayNumber: 9, missionIds: ['sales-m1'] },
+          { dayId: 'biz-d4', dayNumber: 4, missionIds: ['sales-e1'] },
+          { dayId: 'biz-d5', dayNumber: 5, missionIds: ['sales-e2'] },
+          { dayId: 'biz-d6', dayNumber: 6, missionIds: ['sales-e3'] },
         ]
-      },
+      }
+    ]
+  },
+  ai: {
+    trackId: 'ai',
+    title: 'ARTIFICIAL INTELLIGENCE',
+    levels: [
       {
-        levelId: 'apex-level-3', levelNumber: 3, title: 'PHASE 3: THE GRIND', subtitle: 'Scale through consistency',
+        levelId: 'ai-level-1', levelNumber: 1, title: 'PHASE 1: AI BASICS', subtitle: 'Understanding LLMs',
         days: [
-          { dayId: 'apex-d10', dayNumber: 10, missionIds: ['mktg-e1'] },
-          { dayId: 'apex-d11', dayNumber: 11, missionIds: ['mktg-e3'] },
-          { dayId: 'apex-d12', dayNumber: 12, missionIds: ['mind-e1'] },
-          { dayId: 'apex-d13', dayNumber: 13, missionIds: ['ops-e1'] },
+          { dayId: 'ai-d1', dayNumber: 1, missionIds: ['ai-e1'] },
         ]
       }
     ]

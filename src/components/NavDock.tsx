@@ -1,11 +1,11 @@
 import React from 'react';
 import { useT1ger } from '../contexts/T1gerContext';
-import { Home, BookOpen, ShoppingBag, Users, User } from 'lucide-react';
+import { Shield, BookOpen, ShoppingBag, Users, User } from 'lucide-react';
 import { motion } from 'motion/react';
 
 const tabs = [
-  { id: 'home', icon: Home, label: 'Home' },
   { id: 'learn', icon: BookOpen, label: 'Learn' },
+  { id: 'proof', icon: Shield, label: 'Proof' },
   { id: 'friends', icon: Users, label: 'Squad' },
   { id: 'profile', icon: User, label: 'Profile' },
 ] as const;
