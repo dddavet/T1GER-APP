@@ -352,7 +352,7 @@ export const OnboardingFlow: React.FC = () => {
       const assignedRank = correctAnswers === 3 ? 'Apex Hunter' : correctAnswers === 2 ? 'Hunter Cub' : 'New Predator';
 
       return (
-        <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-16 pb-12 px-6 relative z-50 overflow-hidden">
+        <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
           {/* Neon Atmosphere */}
           <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[100px] bg-[var(--accent-glow)] opacity-10 pointer-events-none" />
 
@@ -398,7 +398,7 @@ export const OnboardingFlow: React.FC = () => {
     }
 
     return (
-      <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-16 pb-12 px-6 relative z-50 overflow-hidden">
+      <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
         {/* Progress bar */}
         <div className="w-full h-2 liquid-glass rounded-full mb-10 overflow-hidden shadow-3d border-white/10 p-0.5">
           <motion.div 
@@ -474,7 +474,7 @@ export const OnboardingFlow: React.FC = () => {
   // STANDARD QUESTIONS SCREEN
   // ============================================================
   return (
-    <div className="w-full h-full bg-[#050505] text-white flex flex-col pt-16 pb-8 px-6 relative z-50 overflow-hidden">
+    <div className="w-full h-full bg-[#050505] text-white flex flex-col pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
       {/* 3D Progress Bar */}
       <div className="w-full h-2 liquid-glass rounded-full mb-10 overflow-hidden shadow-3d border-white/10 p-0.5">
         <motion.div 

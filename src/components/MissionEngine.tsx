@@ -85,7 +85,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   }, [mission]);
 
   return (
-    <div className="w-full min-h-screen bg-[#020204] text-white p-6 flex flex-col justify-between overflow-hidden relative">
+    <div className="w-full min-h-screen bg-[#020204] text-white pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 flex flex-col justify-between overflow-hidden relative">
       {/* Atmospheres */}
       <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full blur-[100px] bg-[var(--bg-glow-1)] opacity-20 pointer-events-none" />
       <div className="absolute top-[30%] -right-[10%] w-[30%] h-[30%] rounded-full blur-[90px] bg-[var(--bg-glow-2)] opacity-15 pointer-events-none" />

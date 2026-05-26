@@ -89,6 +89,36 @@
     background-attachment: fixed;
     transition: background-image 0.5s ease;
   }
+
+  html, body {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input, textarea, [contenteditable="true"] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* Native Safe Area Insets (Notch & Home Gesture Bar) */
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-y {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-margin-top {
+    margin-top: env(safe-area-inset-top);
+  }
+  .safe-margin-bottom {
+    margin-bottom: env(safe-area-inset-bottom);
+  }
   
   /* ====== IPHONE SIMULATOR ON DESKTOP ====== */
   @media (min-width: 768px) {
@@ -108,6 +138,8 @@
     }
     
     #root {
+      --safe-top-inset: 36px;
+      --safe-bottom-inset: 24px;
       position: relative;
       width: 393px;
       height: 852px;

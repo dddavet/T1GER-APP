@@ -19,7 +19,7 @@ export const HUD = React.memo(() => {
   const isPredatorMode = t1gerEmotion === 'PREDATOR';
 
   return (
-    <div className="flex-none z-40 pt-12 pb-3 px-5 flex items-center justify-between bg-transparent gap-2">
+    <div className="flex-none z-40 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-3 px-5 flex items-center justify-between bg-transparent gap-2">
       {/* Left: Dual Streaks Capsules */}
       <div className="flex items-center gap-1.5">
         {/* Learn Streak Capsule */}
