@@ -139,8 +139,11 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
-  // Intercept the entire app experience if onboarding isn't complete
-  if (!appUser || !appUser.onboardingComplete) {
+  // DEVELOPER TESTING OVERRIDE: Set to true to force show the Onboarding Flow immediately on refresh
+  const FORCE_ONBOARDING_TEST = true;
+
+  // Intercept the entire app experience if onboarding isn't complete (or developer override is active)
+  if (FORCE_ONBOARDING_TEST || !appUser || !appUser.onboardingComplete) {
     return <OnboardingFlow />;
   }
 
