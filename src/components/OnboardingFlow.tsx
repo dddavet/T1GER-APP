@@ -7,6 +7,8 @@ import { Brain, Target, Zap, ChevronRight, PlaySquare, FileText, Blocks, Trophy,
 import { OnboardingArchetypeReveal } from './OnboardingArchetypeReveal';
 import { OnboardingMicroLesson } from './OnboardingMicroLesson';
 
+import { CHARACTER_CAST } from '../services/characterStateEngine';
+
 interface DiagnosticQuestion {
   id: string;
   question: string;
@@ -345,6 +347,12 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   // ADAPTIVE PLACEMENT TEST SCREEN
   // ============================================================
   if (diagnosticActive) {
+    const mentor = resolvedTrackId === 'ai'
+      ? CHARACTER_CAST.l1ly
+      : resolvedTrackId === 'investing'
+        ? CHARACTER_CAST.eddy
+        : CHARACTER_CAST.zar1;
+
     if (diagnosticStep === 'result') {
       const skippedLevelsText = correctAnswers === 3 
         ? 'Todos los módulos básicos de Fase 1' 
@@ -359,25 +367,29 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
       return (
         <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
           {/* Neon Atmosphere */}
-          <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[100px] bg-[var(--accent-glow)] opacity-10 pointer-events-none" />
+          <div 
+            className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-10 pointer-events-none" 
+            style={{ backgroundColor: mentor.accentColor }}
+          />
 
           <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto">
             {/* Dynamic mascot celebrating */}
             <motion.img 
               src={correctAnswers >= 2 ? "/tiger_celebrating.png" : "/tiger_sad.png"} 
-              alt="T1GER Mascot" 
-              className="w-40 h-40 object-contain drop-shadow-[0_0_20px_var(--accent-glow)] mb-6"
+              alt={mentor.name} 
+              className="w-40 h-40 object-contain mb-6"
+              style={{ filter: `drop-shadow(0 0 20px ${correctAnswers >= 2 ? mentor.glowColor : 'rgba(239, 68, 68, 0.4)'})` }}
               animate={{ y: [0, -8, 0] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
             />
 
-            <span className="text-[10px] font-black font-mono text-accent bg-accent/10 border border-accent/20 px-3 py-1 rounded-full uppercase tracking-widest mb-3">
+            <span className="text-[10px] font-black font-mono bg-white/[0.04] border px-3 py-1 rounded-full uppercase tracking-widest mb-3" style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>
               Cuestionario Completado
             </span>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2 leading-none">
               Ubicación Calculada
             </h1>
-            <p className="text-lg font-bold text-accent font-mono mb-6">{correctAnswers}/3 ACIERTOS</p>
+            <p className="text-lg font-bold font-mono mb-6" style={{ color: mentor.accentColor }}>{correctAnswers}/3 ACIERTOS</p>
 
             <div className="w-full bg-white/[0.02] border border-white/10 rounded-3xl p-5 text-left space-y-3 shadow-xl mb-6">
               <div>
@@ -387,7 +399,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               <div className="h-[1px] bg-white/5" />
               <div>
                 <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider block">Módulos Omitidos</span>
-                <span className="text-xs font-semibold text-accent uppercase tracking-wide">{skippedLevelsText}</span>
+                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: mentor.accentColor }}>{skippedLevelsText}</span>
               </div>
             </div>
           </div>
@@ -395,6 +407,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
           <button
             onClick={finishPlacementAndContinue}
             className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 max-w-md mx-auto"
+            style={{ 
+              backgroundColor: mentor.accentColor, 
+              color: '#020204',
+              boxShadow: `0 8px 0 0 ${mentor.accentColor}cc, 0 8px 24px 0 ${mentor.glowColor}`
+            }}
           >
             Continuar Onboarding <ArrowRight size={18} className="stroke-[3]" />
           </button>
@@ -407,7 +424,8 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
         {/* Progress bar */}
         <div className="w-full h-2 liquid-glass rounded-full mb-10 overflow-hidden shadow-3d border-white/10 p-0.5">
           <motion.div 
-            className="h-full bg-accent rounded-full shadow-3d-accent"
+            className="h-full rounded-full"
+            style={{ backgroundColor: mentor.accentColor, boxShadow: `0 0 12px ${mentor.glowColor}` }}
             animate={{ width: `${(diagnosticStep === 'q1' ? 33 : diagnosticStep === 'q2' ? 66 : 100)}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
           />
@@ -418,12 +436,16 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
           <div className="flex items-start gap-4 mb-8">
             <img 
               src={selectedDiagnosticOpt !== null ? "/tiger_celebrating.png" : "/tiger_thinking.png"} 
-              alt="Lion T1GER" 
+              alt={mentor.name} 
               className="w-16 h-16 object-contain flex-shrink-0"
+              style={{ filter: `drop-shadow(0 0 10px ${mentor.glowColor})` }}
             />
-            <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
-              <span className="text-[9px] font-black uppercase tracking-widest text-accent block mb-1">
-                T1GER Placement Challenge — {diagnosticStep.toUpperCase()}
+            <div 
+              className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
+              style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}
+            >
+              <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: mentor.accentColor }}>
+                {mentor.name} ({mentor.title}) — {diagnosticStep.toUpperCase()}
               </span>
               <p className="text-sm font-bold leading-snug text-white font-sans">
                 {activeDiagnosticQ.question}
@@ -435,24 +457,34 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
           <div className="space-y-3">
             {activeDiagnosticQ.options.map((opt, i) => {
               const isSelected = selectedDiagnosticOpt === i;
-              
-              let cls = 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300';
-              if (isSelected) {
-                cls = 'bg-accent/5 border-accent text-accent shadow-[0_0_15px_rgba(204,255,0,0.08)]';
-              }
 
               return (
                 <button
                   key={i}
                   onClick={() => handleSelectDiagnosticOpt(i)}
-                  className={`w-full p-4 rounded-[1.5rem] border text-left font-bold text-xs transition-all duration-300 flex items-center justify-between active:scale-[0.98] ${cls}`}
+                  className={`w-full p-4 rounded-[1.5rem] border text-left font-bold text-xs transition-all duration-300 flex items-center justify-between active:scale-[0.98] ${
+                    isSelected ? '' : 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300'
+                  }`}
+                  style={isSelected ? {
+                    backgroundColor: `${mentor.accentColor}0d`,
+                    borderColor: mentor.accentColor,
+                    color: mentor.accentColor,
+                    boxShadow: `0 0 15px ${mentor.glowColor}`
+                  } : {}}
                 >
                   <span className="leading-snug max-w-[85%]">{opt.label}</span>
-                  <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black flex-shrink-0 ${
-                    isSelected 
-                      ? 'border-accent bg-accent text-black' 
-                      : 'border-zinc-700 bg-black/40 text-zinc-500'
-                  }`}>
+                  <div 
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black flex-shrink-0`}
+                    style={isSelected ? {
+                      borderColor: mentor.accentColor,
+                      backgroundColor: mentor.accentColor,
+                      color: '#020204'
+                    } : {
+                      borderColor: '#3f3f46',
+                      backgroundColor: 'rgba(0,0,0,0.4)',
+                      color: '#71717a'
+                    }}
+                  >
                     {String.fromCharCode(65 + i)}
                   </div>
                 </button>
@@ -467,6 +499,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
             disabled={selectedDiagnosticOpt === null}
             onClick={handleNextDiagnostic}
             className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 cursor-pointer"
+            style={selectedDiagnosticOpt !== null ? {
+              backgroundColor: mentor.accentColor,
+              color: '#020204',
+              boxShadow: `0 8px 0 0 ${mentor.accentColor}cc, 0 8px 24px 0 ${mentor.glowColor}`
+            } : {}}
           >
             Siguiente Pregunta <ArrowRight size={18} className="stroke-[3]" />
           </button>

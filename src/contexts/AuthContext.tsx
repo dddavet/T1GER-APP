@@ -24,6 +24,7 @@ export interface AppUser {
   isFlaggedForInterrogation?: boolean; // New: AI Auditor flagged this user
   coins?: number;
   streakShields?: number;
+  activeCoachId?: string; // Persistent selected Coach ID
   lastMissionDate?: any;
   lastActive?: any;
   createdAt?: any;

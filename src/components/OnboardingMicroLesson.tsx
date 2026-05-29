@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ArrowRight, Check, Award, BookOpen, Star } from 'lucide-react';
+import { CHARACTER_CAST } from '../services/characterStateEngine';
 
 interface LessonData {
   trackName: string;
@@ -102,6 +103,12 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
   // Gold Coins Animation Array
   const [coins, setCoins] = useState<{ id: number; left: number; delay: number; duration: number }[]>([]);
 
+  const mentor = React.useMemo(() => {
+    if (track === 'ai') return CHARACTER_CAST.l1ly;
+    if (track === 'investing') return CHARACTER_CAST.eddy;
+    return CHARACTER_CAST.zar1; // business
+  }, [track]);
+
   const haptic = () => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(10);
@@ -136,7 +143,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
       // Complete after delay
       setTimeout(() => {
         setStage('success');
-      }, 1500);
+      }, 1550);
     } else {
       setIsWrong(true);
       setFeedbackText(opt.explanation);
@@ -187,7 +194,8 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest">
                 MISIÓN DE INDUCCIÓN
               </span>
-              <span className="text-[8px] font-mono font-black text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full uppercase tracking-widest">
+              <span className="text-[8px] font-mono font-black text-accent bg-accent/10 border border-accent/20 px-2 py-0.5 rounded-full uppercase tracking-widest"
+                    style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33`, backgroundColor: `${mentor.accentColor}11` }}>
                 Día 1 Fundaciones
               </span>
             </div>
@@ -195,7 +203,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
             <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none mb-1 text-white">
               {lesson.conceptTitle}
             </h1>
-            <span className="text-[10px] font-mono text-accent uppercase tracking-wider block mb-6">
+            <span className="text-[10px] font-mono uppercase tracking-wider block mb-6" style={{ color: mentor.accentColor }}>
               Track {lesson.trackName}
             </span>
 
@@ -206,7 +214,8 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
               className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 shadow-2xl space-y-4"
             >
-              <div className="w-10 h-10 bg-accent/10 border border-accent/20 rounded-2xl flex items-center justify-center text-accent">
+              <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
+                   style={{ backgroundColor: `${mentor.accentColor}1a`, border: `1px solid ${mentor.accentColor}33`, color: mentor.accentColor }}>
                 <BookOpen size={20} />
               </div>
               <p className="text-xs text-zinc-300 font-medium leading-relaxed font-sans">
@@ -219,11 +228,13 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           <div className="flex items-end gap-3 my-6 max-w-md w-full">
             <img 
               src="/tiger_thinking.png" 
-              alt="Mascot" 
+              alt={mentor.name} 
               className="w-16 h-16 object-contain flex-shrink-0 animate-bounce"
+              style={{ filter: `drop-shadow(0 0 10px ${mentor.glowColor})` }}
             />
-            <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:bottom-4 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
-              <span className="text-[8px] font-black uppercase tracking-widest text-accent block mb-0.5">T1GER CONSEJO</span>
+            <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:bottom-4 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
+                 style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}>
+              <span className="text-[8px] font-black uppercase tracking-widest block mb-0.5" style={{ color: mentor.accentColor }}>CONSEJO DE {mentor.name}</span>
               <p className="text-[11px] font-semibold leading-relaxed text-zinc-300 font-sans">
                 "{lesson.mentorTip}"
               </p>
@@ -234,6 +245,11 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           <button
             onClick={() => { haptic(); setStage('puzzle'); }}
             className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97]"
+            style={{
+              backgroundColor: mentor.accentColor,
+              color: '#020204',
+              boxShadow: `0 8px 0 0 ${mentor.accentColor}cc, 0 8px 24px 0 ${mentor.glowColor}`
+            }}
           >
             Afrontar Desafío Técnico <ArrowRight size={18} className="stroke-[3]" />
           </button>
@@ -264,13 +280,20 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
                 const isSelected = selectedOpt === i;
                 
                 let optionStyle = 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.03] text-zinc-300';
+                let optionInlineStyle = {};
+
                 if (isSelected) {
                   if (isAnswered && opt.correct) {
                     optionStyle = 'bg-emerald-500/10 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.08)]';
                   } else if (isWrong && isSelected) {
                     optionStyle = 'bg-rose-500/10 border-rose-500 text-rose-400 shadow-[0_0_15px_rgba(244,63,94,0.08)]';
                   } else {
-                    optionStyle = 'bg-accent/5 border-accent text-accent shadow-[0_0_15px_rgba(204,255,0,0.08)]';
+                    optionInlineStyle = {
+                      backgroundColor: `${mentor.accentColor}0d`,
+                      borderColor: mentor.accentColor,
+                      color: mentor.accentColor,
+                      boxShadow: `0 0 15px ${mentor.glowColor}`
+                    };
                   }
                 }
 
@@ -282,17 +305,23 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
                     className={`w-full p-4 rounded-[1.5rem] border text-left font-bold text-xs transition-all duration-300 flex items-center justify-between active:scale-[0.98] ${optionStyle} ${
                       isWrong && isSelected ? 'animate-shake' : ''
                     }`}
+                    style={optionInlineStyle}
                   >
                     <span className="leading-snug max-w-[85%] whitespace-pre-line">{opt.label}</span>
-                    <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black flex-shrink-0 ${
-                      isSelected 
-                        ? isAnswered && opt.correct 
-                          ? 'border-emerald-500 bg-emerald-500 text-white' 
+                    <div 
+                      className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black flex-shrink-0`}
+                      style={isSelected ? (
+                        isAnswered && opt.correct 
+                          ? { borderColor: '#10b981', backgroundColor: '#10b981', color: '#white' }
                           : isWrong && isSelected 
-                            ? 'border-rose-500 bg-rose-500 text-white' 
-                            : 'border-accent bg-accent text-black' 
-                        : 'border-zinc-700 bg-black/40 text-zinc-500'
-                    }`}>
+                            ? { borderColor: '#f43f5e', backgroundColor: '#f43f5e', color: '#white' }
+                            : { borderColor: mentor.accentColor, backgroundColor: mentor.accentColor, color: '#020204' }
+                      ) : {
+                        borderColor: '#3f3f46',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        color: '#71717a'
+                      }}
+                    >
                       {isAnswered && opt.correct && isSelected ? <Check size={10} className="stroke-[3]" /> : String.fromCharCode(65 + i)}
                     </div>
                   </button>
@@ -317,12 +346,13 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
                 >
                   <img 
                     src={isAnswered ? "/tiger_celebrating.png" : "/tiger_sad.png"} 
-                    alt="Mascot Feedback" 
+                    alt={mentor.name} 
                     className="w-12 h-12 object-contain flex-shrink-0"
+                    style={{ filter: `drop-shadow(0 0 10px ${isAnswered ? mentor.glowColor : 'rgba(239, 68, 68, 0.4)'})` }}
                   />
                   <div className="flex-1 text-left font-sans">
-                    <span className="text-[8px] font-black uppercase tracking-wider block mb-0.5">
-                      {isAnswered ? '¡ACIERTO TOTAL!' : 'RESPUESTA INCORRECTA'}
+                    <span className="text-[8px] font-black uppercase tracking-wider block mb-0.5" style={{ color: isAnswered ? mentor.accentColor : '#f43f5e' }}>
+                      {isAnswered ? `¡${mentor.name} CELEBRA TU ACIERTO!` : `${mentor.name} DETECTÓ UN DEFECTO`}
                     </span>
                     <p className="text-[10px] font-medium leading-relaxed">
                       {feedbackText}
@@ -339,6 +369,11 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               disabled={selectedOpt === null || isAnswered}
               onClick={handleVerify}
               className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              style={selectedOpt !== null && !isAnswered ? {
+                backgroundColor: mentor.accentColor,
+                color: '#020204',
+                boxShadow: `0 8px 0 0 ${mentor.accentColor}cc, 0 8px 24px 0 ${mentor.glowColor}`
+              } : {}}
             >
               Comprobar Respuesta <Check size={18} className="stroke-[3]" />
             </button>
@@ -355,27 +390,29 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
             {/* Mascot Celebrating */}
             <motion.img 
               src="/tiger_celebrating.png" 
-              alt="T1GER Mascot" 
-              className="w-40 h-40 object-contain drop-shadow-[0_0_20px_var(--accent-glow)] mb-4"
+              alt={mentor.name} 
+              className="w-40 h-40 object-contain mb-4"
+              style={{ filter: `drop-shadow(0 0 20px ${mentor.glowColor})` }}
               animate={{ y: [0, -8, 0], scale: [1, 1.03, 1] }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
             />
 
-            <span className="text-[10px] font-black font-mono text-accent bg-accent/10 border border-accent/20 px-3 py-1 rounded-full uppercase tracking-widest">
+            <span className="text-[10px] font-black font-mono bg-white/[0.04] border px-3 py-1 rounded-full uppercase tracking-widest"
+                  style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>
               NIVEL DE INDUCCIÓN CONCLUIDO
             </span>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none">
               ¡Caza Completada!
             </h1>
             <p className="text-xs text-zinc-400 font-medium leading-relaxed max-w-xs font-sans">
-              Has demostrado un instinto formidable. Has asimilado tu primer concepto clave y estás listo para reclamar tus primeras recompensas de Predator.
+              Has demostrado un instinto formidable. Has asimilado tu primer concepto clave con {mentor.name} y estás listo para reclamar tus recompensas.
             </p>
 
             {/* Core Earned Rewards Box */}
             <div className="grid grid-cols-2 gap-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 shadow-inner">
               <div className="text-center">
                 <span className="text-[7px] font-black font-mono text-zinc-500 uppercase tracking-widest block mb-1">XP GANADO</span>
-                <span className="text-2xl font-black text-accent font-mono block">+50</span>
+                <span className="text-2xl font-black font-mono block" style={{ color: mentor.accentColor }}>+50</span>
               </div>
               <div className="text-center border-l border-white/5">
                 <span className="text-[7px] font-black font-mono text-zinc-500 uppercase tracking-widest block mb-1">MONEDAS T1GER</span>
@@ -388,6 +425,11 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           <button
             onClick={handleClaim}
             className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 cursor-pointer active:scale-[0.97]"
+            style={{
+              backgroundColor: mentor.accentColor,
+              color: '#020204',
+              boxShadow: `0 8px 0 0 ${mentor.accentColor}cc, 0 8px 24px 0 ${mentor.glowColor}`
+            }}
           >
             Reclamar y Entrar al Dashboard <Award size={18} className="stroke-[3]" />
           </button>
