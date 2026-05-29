@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useBrain } from '../contexts/BrainContext';
+import { useAuth } from '../contexts/AuthContext';
 import { WindingPath } from '../components/WindingPath';
 import { CURRICULUM_TRACKS } from '../services/missionBank';
 import { Target, Shield, X, TrendingUp, Building2, Cpu, ChevronRight } from 'lucide-react';
 
 export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => void }) => {
   const { pathData, currentTrackId, selectTrack } = useBrain();
+  const { appUser, updateAppUser } = useAuth();
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   // Setup styles for each track inside the selector
@@ -51,7 +53,7 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
       </header>
 
       {/* Progress Stats Bar */}
-      <div className="px-5 mb-10">
+      <div className="px-5 mb-6">
         <div 
           onClick={() => setIsSelectorOpen(true)}
           className="liquid-glass rounded-[2rem] p-5 flex items-center justify-between border border-white/10 shadow-3d cursor-pointer hover:scale-[1.02] hover:border-white/20 transition-all duration-300 group"
@@ -72,6 +74,39 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
               {completionPercentage}%
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* Learning Style Segment Selector */}
+      <div className="px-5 mb-8">
+        <div className="liquid-glass border border-white/5 rounded-3xl p-1.5 flex gap-1 shadow-inner relative z-10">
+          {[
+            { id: 'visual', label: '📺 Aprender viendo' },
+            { id: 'text', label: '📖 Aprender leyendo' },
+            { id: 'interactive', label: '🎮 Otro (free XR)' }
+          ].map((style) => {
+            const isSelected = appUser?.learningStyle === style.id || (!appUser?.learningStyle && style.id === 'text');
+            return (
+              <button
+                key={style.id}
+                onClick={async () => {
+                  if (updateAppUser) {
+                    await updateAppUser({ learningStyle: style.id as any });
+                  }
+                }}
+                className={`flex-1 py-3 px-1 rounded-2xl text-[10px] font-black uppercase tracking-tight transition-all duration-300 ${
+                  isSelected
+                    ? 'bg-accent text-black shadow-lg font-black'
+                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/[0.02]'
+                }`}
+                style={isSelected ? {
+                  boxShadow: '0 4px 15px rgba(204, 255, 0, 0.25)'
+                } : {}}
+              >
+                {style.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 

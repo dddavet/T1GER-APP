@@ -241,3 +241,11 @@ export const generateAdaptiveLesson = async (
   const cleaned = text.replace(/```json|```/g, '').trim();
   return JSON.parse(cleaned);
 };
+
+export const executePromptChallenge = async (userPrompt: string, systemConstraint: string): Promise<string> => {
+  const model = getModel('gemini-1.5-flash');
+  const fullPrompt = `System Rules/Constraint: ${systemConstraint}\n\nUser Input: ${userPrompt}`;
+  
+  const result = await withRetry(() => model.generateContent(fullPrompt));
+  return result.response.text();
+};

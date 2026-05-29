@@ -597,7 +597,7 @@ export const MISSION_BANK: BankMission[] = [
   {
     id: 'ai-e1', competency: 'ai', difficulty: 'easy', type: 'flashcard',
     title: 'LLM BASICS',
-    concept: 'Large Language Models (LLMs) like ChatGPT don\'t "think" — they predict the next most likely word in a sequence based on massive amounts of training data.',
+    concept: 'Large Language Models (LLMs) like ChatGPT don\'t \"think\" — they predict the next most likely word in a sequence based on massive amounts of training data.',
     keyTakeaway: 'LLMs are advanced auto-complete engines.',
     recallQuestion: 'How does an LLM generate its responses?',
     recallOptions: [
@@ -607,6 +607,76 @@ export const MISSION_BANK: BankMission[] = [
     ],
     recallExplanation: 'They are incredibly powerful pattern matchers that predict text strings. They don\'t have true understanding or live search by default.',
     xpReward: 50,
+  },
+  {
+    id: 'ai-e2', competency: 'ai', difficulty: 'easy', type: 'flashcard',
+    title: 'NEURAL NETWORKS',
+    concept: 'Neural Networks are structural layers of algorithms modeled loosely after human brain neurons. They learn by adjusting weights (connections) and biases.',
+    keyTakeaway: 'Networks learn by adjusting numerical weights.',
+    recallQuestion: 'What is the primary function of "weights" inside a neural network?',
+    recallOptions: [
+      { text: 'They weight the physical server processors', correct: false },
+      { text: 'They regulate the strength of connections between neurons', correct: true },
+      { text: 'They define the size of context vocabulary', correct: false },
+    ],
+    recallExplanation: 'Weights scale the signal strength between layers, determining which inputs are key for the predicted output.',
+    xpReward: 50,
+  },
+  {
+    id: 'ai-e3', competency: 'ai', difficulty: 'easy', type: 'flashcard',
+    title: 'ATTENTION MECHANISM',
+    concept: 'The Attention mechanism inside Transformers allows words to communicate and influence each other, weighing meaning dynamically depending on context.',
+    keyTakeaway: 'Attention computes context-aware words.',
+    recallQuestion: 'Why is the self-attention mechanism powerful in Transformers?',
+    recallOptions: [
+      { text: 'It speeds up hard disk download rates', correct: false },
+      { text: 'It allows words to weigh and update their meaning based on surrounding context tokens', correct: true },
+      { text: 'It encrypts database sessions', correct: false },
+    ],
+    recallExplanation: 'Self-attention resolves linguistic ambiguities by linking each word to the most relevant surrounding tokens.',
+    xpReward: 50,
+  },
+  {
+    id: 'ai-e4', competency: 'ai', difficulty: 'medium', type: 'flashcard',
+    title: 'PROMPT ENGINEERING',
+    concept: 'Prompt engineering is the design of instructions to control LLM outputs. Keys include clean constraints, few-shot examples, and chain-of-thought steps.',
+    keyTakeaway: 'Few-shot and step-by-step thinking reduce error.',
+    recallQuestion: 'What is Few-Shot Prompting?',
+    recallOptions: [
+      { text: 'Asking the IA to answer in very few words', correct: false },
+      { text: 'Providing input-output example pairs inside the instruction text', correct: true },
+      { text: 'Training the network on local GPU matrices', correct: false },
+    ],
+    recallExplanation: 'Few-shot examples guide the format, tone, and constraints of response strings perfectly.',
+    xpReward: 60,
+  },
+  {
+    id: 'ai-e5', competency: 'ai', difficulty: 'medium', type: 'flashcard',
+    title: 'RAG VS FINE-TUNING',
+    concept: 'RAG fetches external texts Vector databases to paste in context (exam with notes). Fine-Tuning trains neural weights directly to alter tone or format (studying).',
+    keyTakeaway: 'RAG is open-book notes; Fine-Tuning is memory study.',
+    recallQuestion: 'When is RAG superior to Fine-Tuning?',
+    recallOptions: [
+      { text: 'When you need to change the model\'s overall accent or formatting rules', correct: false },
+      { text: 'When you need the model to reference live, dynamic, or private databases', correct: true },
+      { text: 'When you want to train a model to execute 3D notch layouts', correct: false },
+    ],
+    recallExplanation: 'RAG dynamically feeds facts without needing expensive retraining or causing weight alucinations.',
+    xpReward: 60,
+  },
+  {
+    id: 'ai-e6', competency: 'ai', difficulty: 'hard', type: 'flashcard',
+    title: 'AGENTIC SYSTEMS',
+    concept: 'Autonomous agents operate in a loop: Plan -> Act -> Observe -> Correct. They run code, inspect errors, and invoke APIs to solve goals.',
+    keyTakeaway: 'Agents plan, code, inspect, and self-correct.',
+    recallQuestion: 'What distinguishes an Agent from a simple reactive chatbot?',
+    recallOptions: [
+      { text: 'Agents always require a native iOS build', correct: false },
+      { text: 'Agents run recursive loops to plan, call APIs, and self-correct code execution', correct: true },
+      { text: 'Agents only answer using semantic RAG layers', correct: false },
+    ],
+    recallExplanation: 'Agents reason iteratively, verify their outputs, and use digital tools until their objective is met.',
+    xpReward: 70,
   }
 ];
 
@@ -656,9 +726,19 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
     title: 'ARTIFICIAL INTELLIGENCE',
     levels: [
       {
-        levelId: 'ai-level-1', levelNumber: 1, title: 'PHASE 1: AI BASICS', subtitle: 'Understanding LLMs',
+        levelId: 'ai-level-1', levelNumber: 1, title: 'PHASE 1: AI COGNITION', subtitle: 'LLMs & Neural Networks',
         days: [
           { dayId: 'ai-d1', dayNumber: 1, missionIds: ['ai-e1'] },
+          { dayId: 'ai-d2', dayNumber: 2, missionIds: ['ai-e2'] },
+          { dayId: 'ai-d3', dayNumber: 3, missionIds: ['ai-e3'] },
+        ]
+      },
+      {
+        levelId: 'ai-level-2', levelNumber: 2, title: 'PHASE 2: AI TACTICS', subtitle: 'Prompting & Architectures',
+        days: [
+          { dayId: 'ai-d4', dayNumber: 4, missionIds: ['ai-e4'] },
+          { dayId: 'ai-d5', dayNumber: 5, missionIds: ['ai-e5'] },
+          { dayId: 'ai-d6', dayNumber: 6, missionIds: ['ai-e6'] },
         ]
       }
     ]

@@ -23,6 +23,7 @@ import { EveningInterrogation } from './components/EveningInterrogation';
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
+import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 
 const LoadingSpinner = () => (
   <div className="flex flex-col items-center justify-center h-full w-full bg-[#050505] gap-4">
@@ -68,6 +69,24 @@ const AppContent = () => {
     }, 800);
 
     try {
+      if (baseMission.competency === 'ai') {
+        const dayNum = baseMission.dayNumber || 1;
+        const curated = AI_CURATED_CURRICULUM[dayNum];
+        if (curated) {
+          setActiveMission({
+            ...baseMission,
+            isCuratedAI: true,
+            curatedData: curated,
+            title: curated.title,
+            concept: curated.reading.takeaway,
+          });
+          setActiveView('mission');
+          clearInterval(phraseInterval);
+          setLoadingMission(false);
+          return;
+        }
+      }
+
       // Compile user weaknesses from state
       const weaknesses = getUserWeaknesses(brainState);
       const userNiche = appUser?.niche || 'general';

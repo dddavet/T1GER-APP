@@ -1,11 +1,16 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Camera, CheckCircle2, AlertTriangle, ArrowRight, XCircle, Lightbulb, Brain, TrendingUp, PlaySquare, X } from 'lucide-react';
+import { 
+  Camera, CheckCircle2, AlertTriangle, ArrowRight, XCircle, Lightbulb, Brain, 
+  TrendingUp, PlaySquare, X, BookOpen, Terminal, Play, Sparkles, Cpu, 
+  ChevronDown, ChevronUp, RefreshCw, FileText 
+} from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { COMPETENCY_LABELS } from '../services/missionBank';
 import { getCharacterForTrack, getRandomPhrase } from '../services/characterStateEngine';
+import { executePromptChallenge } from '../services/gemini';
 
 interface MissionEngineProps {
   mission: any;
@@ -26,12 +31,27 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const successPhrase = useMemo(() => getRandomPhrase(character.id, 'success'), [character.id, quizResult]);
   const failPhrase = useMemo(() => getRandomPhrase(character.id, 'fail'), [character.id, quizResult]);
 
-  // Determine steps based on mission type
+  // Determine steps based on mission type & learning style
   const steps = useMemo(() => getStepsForType(mission.type || 'flashcard', mission, learningStyle), [mission, learningStyle]);
   const [stepIndex, setStepIndex] = useState(0);
   const currentStep = steps[stepIndex];
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // Accordion Note States for visual lectures
+  const [expandedNote, setExpandedNote] = useState<number | null>(null);
+
+  // Prompt Injection Sandbox States
+  const [sandboxPrompt, setSandboxPrompt] = useState('');
+  const [sandboxResponse, setSandboxResponse] = useState('');
+  const [sandboxLoading, setSandboxLoading] = useState(false);
+  const [sandboxError, setSandboxError] = useState('');
+  const [sandboxSuccess, setSandboxSuccess] = useState(false);
+
+  // Curated AI Quiz Memos
+  const isCuratedQuiz = useMemo(() => currentStep?.startsWith('curated_quiz_') || false, [currentStep]);
+  const curatedQuizIndex = useMemo(() => isCuratedQuiz ? parseInt(currentStep.split('_')[2]) : 0, [isCuratedQuiz, currentStep]);
+  const currentCuratedQuiz = useMemo(() => isCuratedQuiz ? mission.curatedData?.quizQuestions?.[curatedQuizIndex] : null, [isCuratedQuiz, mission, curatedQuizIndex]);
 
   // Track the competency score before the mission for the result screen
   const compKey = mission.competency as keyof typeof competencies;
@@ -52,6 +72,17 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
   const handleCheckAnswer = () => {
     if (selectedOption === null) return;
+
+    if (isCuratedQuiz && currentCuratedQuiz) {
+      const isCorrect = currentCuratedQuiz.options[selectedOption]?.correct;
+      if (isCorrect) {
+        setQuizResult('correct');
+      } else {
+        setQuizResult('wrong');
+      }
+      setShowExplanation(true);
+      return;
+    }
 
     const optionsList = mission.recallOptions || mission.options || [];
     const isCorrect = optionsList[selectedOption]?.correct;
@@ -81,16 +112,67 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
     setStepIndex(steps.length + 1); // show fail screen
   };
 
+  // Real-time execution of Prompt Sandbox Challenges with Gemini AI
+  const handleExecuteSandbox = async () => {
+    if (!sandboxPrompt.trim()) return;
+    setSandboxLoading(true);
+    setSandboxError('');
+    setSandboxResponse('');
+
+    const challenge = mission.curatedData?.interactive;
+    if (!challenge) return;
+
+    // Frontend negative constraint checking
+    if (challenge.challengeId === 'prompt-h-d1') {
+      if (sandboxPrompt.toUpperCase().includes('TIGER')) {
+        setSandboxLoading(false);
+        setSandboxError("Violación de restricción: No puedes usar la palabra 'TIGER' en tu prompt.");
+        return;
+      }
+    }
+
+    try {
+      const response = await executePromptChallenge(sandboxPrompt, challenge.systemConstraint);
+      setSandboxResponse(response);
+
+      const keyword = challenge.validationKeyword;
+      // Check if keyword is found in the response (case insensitive)
+      const passed = response.toUpperCase().includes(keyword.toUpperCase());
+
+      if (passed) {
+        setSandboxSuccess(true);
+      } else {
+        setSandboxError(`Fallo de validación: El modelo no emitió la palabra clave '${keyword}'. Inténtalo de nuevo con un enfoque diferente.`);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setSandboxError("Error de conexión con la IA de T1GER. Inténtalo de nuevo.");
+    } finally {
+      setSandboxLoading(false);
+    }
+  };
+
   const isSuccess = stepIndex === steps.length;
   const isFail = stepIndex > steps.length;
   const showMainUI = !isSuccess && !isFail;
 
   // Retrieve correct answer text for the fail explanation
   const correctAnswerText = useMemo(() => {
+    if (isCuratedQuiz && currentCuratedQuiz) {
+      const correctOpt = currentCuratedQuiz.options.find((o: any) => o.correct);
+      return correctOpt ? correctOpt.text : '';
+    }
     const optionsList = mission.recallOptions || mission.options || [];
     const correctOpt = optionsList.find((o: any) => o.correct);
     return correctOpt ? correctOpt.text : '';
-  }, [mission]);
+  }, [mission, isCuratedQuiz, currentCuratedQuiz]);
+
+  const correctExplanationText = useMemo(() => {
+    if (isCuratedQuiz && currentCuratedQuiz) {
+      return currentCuratedQuiz.explanation;
+    }
+    return mission.recallExplanation || mission.failureCritique || '';
+  }, [mission, isCuratedQuiz, currentCuratedQuiz]);
 
   return (
     <div className="w-full min-h-screen bg-[#020204] text-white pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 flex flex-col justify-between overflow-hidden relative">
@@ -134,7 +216,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-center py-4 relative z-10 max-w-md mx-auto w-full">
+      <div className="flex-1 flex flex-col justify-center py-4 relative z-10 max-w-md mx-auto w-full overflow-y-auto">
         <AnimatePresence mode="wait">
           {/* ============================================ */}
           {/* SUCCESS SCREEN                               */}
@@ -257,7 +339,402 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ============================================ */}
-          {/* TEACH STEP — Show the concept                */}
+          {/* CURATED AI STEP — Visual Mode (YouTube)      */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'visual_lecture' && (
+            <motion.div
+              key="visual_lecture"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-center gap-3 bg-zinc-950/40 p-3 rounded-2xl border border-white/5 mb-1">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-black font-mono text-sm">
+                  Y
+                </div>
+                <div>
+                  <h3 className="text-xs font-black uppercase text-white leading-none">
+                    {mission.curatedData?.youtube.channelName}
+                  </h3>
+                  <span className="text-[10px] text-zinc-500 font-mono block mt-1">
+                    Duración: {mission.curatedData?.youtube.duration} • Stanford Rigor
+                  </span>
+                </div>
+              </div>
+
+              {/* YouTube Responsive Wrapper */}
+              <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                <iframe
+                  src={`https://www.youtube.com/embed/${mission.curatedData?.youtube.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
+                  title={mission.curatedData?.youtube.title}
+                  className="absolute inset-0 w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+
+              <h2 className="text-lg font-black uppercase italic tracking-tighter text-white mt-2">
+                {mission.curatedData?.youtube.title}
+              </h2>
+
+              {/* Takeaway */}
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4 flex gap-3">
+                <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
+                    Takeaway de Élite
+                  </span>
+                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                    {mission.curatedData?.youtube.takeaway}
+                  </p>
+                </div>
+              </div>
+
+              {/* Accordion Notes */}
+              <div>
+                <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 block mb-2 px-1">
+                  Apuntes del Instructor (Tap para expandir)
+                </span>
+                <div className="space-y-2">
+                  {(mission.curatedData?.youtube.notes || []).map((note: string, idx: number) => {
+                    const isExpanded = expandedNote === idx;
+                    return (
+                      <div
+                        key={idx}
+                        className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300"
+                      >
+                        <button
+                          onClick={() => setExpandedNote(isExpanded ? null : idx)}
+                          className="w-full p-4 flex items-center justify-between text-left gap-4 font-bold text-xs uppercase tracking-tight text-zinc-300 hover:text-white"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-purple-500 text-[10px]">0{idx + 1}.</span>
+                            <span>Concepto clave</span>
+                          </div>
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
+                        </button>
+                        <AnimatePresence initial={false}>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="px-4 pb-4 text-xs font-semibold leading-relaxed text-zinc-400 border-t border-white/5 pt-2"
+                            >
+                              {note}
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <button
+                onClick={advance}
+                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+              >
+                <Brain className="w-4 h-4 stroke-[3]" /> Got It, Take the Quiz
+              </button>
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* CURATED AI STEP — Reading Mode (Translucent) */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'reading_chapter' && (
+            <motion.div
+              key="reading_chapter"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto"
+            >
+              {/* Header */}
+              <div className="flex items-start gap-4 mb-2">
+                <motion.img
+                  src={character.avatarImg}
+                  alt={character.name}
+                  className="w-14 h-14 object-contain flex-shrink-0"
+                  animate={{ y: [0, -3, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
+                    LECTURA CON EL INSTRUCTOR ({character.name})
+                  </p>
+                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                    Predator, he condensado este conocimiento a nivel de posgrado. Léelo atentamente.
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-2">
+                <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black block mb-1">
+                  {mission.curatedData?.reading.subtitle}
+                </span>
+                <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">
+                  {mission.curatedData?.reading.title}
+                </h1>
+              </div>
+
+              {/* Translucent glass paragraphs */}
+              <div className="space-y-4 my-2">
+                {(mission.curatedData?.reading.paragraphs || []).map((paragraph: string, idx: number) => (
+                  <div
+                    key={idx}
+                    className="liquid-glass rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors"
+                  >
+                    <p className="text-xs font-semibold text-zinc-300 leading-relaxed">
+                      {paragraph}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Takeaway */}
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4 flex gap-3">
+                <Lightbulb className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
+                    Conclusión Táctica
+                  </span>
+                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                    {mission.curatedData?.reading.takeaway}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={advance}
+                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+              >
+                <Brain className="w-4 h-4 stroke-[3]" /> Got It, Take the Quiz
+              </button>
+            </motion.div>
+          )}
+
+          {/* =================================================== */}
+          {/* CURATED AI STEP — Prompt Hacking Sandbox (Gemini)   */}
+          {/* =================================================== */}
+          {showMainUI && currentStep === 'prompt_sandbox' && (
+            <motion.div
+              key="prompt_sandbox"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto"
+            >
+              {/* Mascot explaining objective */}
+              <div className="flex items-start gap-4">
+                <img
+                  src={character.avatarImg}
+                  alt={character.name}
+                  className="w-14 h-14 object-contain flex-shrink-0"
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
+                    PROMPT INJECTION ARENA
+                  </span>
+                  <p className="text-xs font-semibold leading-snug text-white font-sans">
+                    {mission.curatedData?.interactive.objective}
+                  </p>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="bg-zinc-950/60 border border-white/5 rounded-2xl p-4">
+                <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-2 font-black">
+                  Constraint Validation Rules
+                </span>
+                <ul className="space-y-1.5 text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-400 font-mono">•</span>
+                    <span>Instrucción: {mission.curatedData?.interactive.instructionPrompt}</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-400 font-mono">•</span>
+                    <span>Salida esperada: {mission.curatedData?.interactive.validationDescription}</span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* Console Input */}
+              <div className="relative rounded-2xl border border-white/10 bg-black overflow-hidden shadow-inner flex flex-col focus-within:border-purple-500/50 transition-colors">
+                <div className="bg-[#0c0c0e] px-4 py-2 border-b border-white/5 flex items-center justify-between">
+                  <span className="text-[9px] font-mono text-zinc-500 font-black uppercase tracking-wider">
+                    Console Input Area
+                  </span>
+                  <Terminal size={12} className="text-zinc-500 animate-pulse" />
+                </div>
+                <textarea
+                  value={sandboxPrompt}
+                  onChange={(e) => setSandboxPrompt(e.target.value)}
+                  placeholder="Escribe tu prompt de ingeniería social aquí para piratear el modelo de sistema..."
+                  disabled={sandboxLoading || sandboxSuccess}
+                  rows={4}
+                  className="w-full p-4 bg-transparent border-0 text-xs font-mono text-zinc-200 placeholder-zinc-700 focus:outline-none resize-none"
+                />
+              </div>
+
+              {/* Custom constraint error logs */}
+              {sandboxError && (
+                <div className="bg-red-500/5 border border-red-500/20 rounded-2xl p-4 flex gap-3 text-red-400">
+                  <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-wider block mb-1">
+                      Fallo del Compilador
+                    </span>
+                    <p className="text-xs font-semibold leading-relaxed text-red-300/90">
+                      {sandboxError}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Success or run button */}
+              {sandboxSuccess ? (
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className="space-y-4"
+                >
+                  <div className="bg-green-500/5 border border-green-500/20 rounded-2xl p-4 flex gap-3 text-green-400">
+                    <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="text-[9px] font-black uppercase tracking-wider block mb-1">
+                        INJECTION SUCCESSFUL
+                      </span>
+                      <p className="text-xs font-semibold leading-relaxed text-green-300/90">
+                        ¡Increíble! Lograste romper el prompt de sistema y burlar la seguridad mediante ingeniería social.
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleSuccess}
+                    className="w-full py-5 rounded-2xl bg-green-500 hover:bg-green-600 text-black font-black text-sm uppercase tracking-widest shadow-[0_4px_0_0_#15803d] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    Got It, Continue <ArrowRight size={18} className="stroke-[3]" />
+                  </button>
+                </motion.div>
+              ) : (
+                <button
+                  onClick={handleExecuteSandbox}
+                  disabled={sandboxLoading || !sandboxPrompt.trim()}
+                  className="w-full py-5 rounded-2xl btn-gamified-3d border-purple-800 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 shadow-[0_4px_0_0_#6b21a8] border-purple-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {sandboxLoading ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Executing injection...
+                    </>
+                  ) : (
+                    <>
+                      <Terminal className="w-4 h-4" /> Run Prompt Injection
+                    </>
+                  )}
+                </button>
+              )}
+
+              {/* Gemini response pane */}
+              {(sandboxResponse || sandboxLoading) && (
+                <div className="bg-zinc-950/80 border border-white/5 rounded-2xl overflow-hidden mt-2">
+                  <div className="bg-[#08080a] px-4 py-2 border-b border-white/5 flex items-center justify-between">
+                    <span className="text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-wider">
+                      Gemini Terminal Response
+                    </span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-ping" />
+                  </div>
+                  <div className="p-4 font-mono text-[11px] text-zinc-400 min-h-[100px] leading-relaxed max-h-[250px] overflow-y-auto">
+                    {sandboxLoading ? (
+                      <div className="flex flex-col gap-2">
+                        <span className="text-zinc-600 italic">Connecting to neural layers...</span>
+                        <div className="h-1.5 w-1/3 bg-zinc-800 rounded-full animate-pulse" />
+                        <div className="h-1.5 w-2/3 bg-zinc-800 rounded-full animate-pulse" />
+                      </div>
+                    ) : (
+                      <span className="text-zinc-300 whitespace-pre-wrap">{sandboxResponse}</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* CURATED AI STEP — Curated Questions          */}
+          {/* ============================================ */}
+          {showMainUI && isCuratedQuiz && currentCuratedQuiz && (
+            <motion.div
+              key={currentStep}
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-center gap-5"
+            >
+              {/* Mascot asking question */}
+              <div className="flex items-start gap-4 mb-2">
+                <img 
+                  src={character.avatarImg} 
+                  alt={character.name} 
+                  className="w-16 h-16 object-contain flex-shrink-0"
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
+                    Concept Challenge {curatedQuizIndex + 1}/{mission.curatedData?.quizQuestions?.length}
+                  </span>
+                  <p className="text-sm font-bold leading-snug text-white font-sans">
+                    {currentCuratedQuiz.question}
+                  </p>
+                </div>
+              </div>
+
+              {/* Options list */}
+              <div className="space-y-3 mb-4">
+                {(currentCuratedQuiz.options || []).map((option: any, i: number) => {
+                  const isSelected = selectedOption === i;
+                  
+                  let cls = 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300';
+                  if (isSelected) {
+                    cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
+                  }
+                  
+                  if (quizResult !== 'idle') {
+                    if (option.correct) {
+                      cls = 'bg-green-500/10 border-green-500 text-green-400';
+                    } else if (isSelected) {
+                      cls = 'bg-red-500/10 border-red-500 text-red-400';
+                    } else {
+                      cls = 'bg-white/[0.01] border-white/5 opacity-30 text-zinc-600';
+                    }
+                  }
+
+                  return (
+                    <button
+                      key={i}
+                      onClick={() => quizResult === 'idle' && setSelectedOption(i)}
+                      disabled={quizResult !== 'idle'}
+                      className={`w-full p-4.5 rounded-[1.5rem] border text-left font-bold text-sm transition-all duration-300 flex items-center justify-between group active:scale-[0.98] ${cls}`}
+                    >
+                      <span>{option.text}</span>
+                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black ${
+                        isSelected 
+                          ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
+                          : 'border-zinc-700 bg-black/40 text-zinc-500'
+                      }`}>
+                        {String.fromCharCode(65 + i)}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* TEACH STEP — Show the concept (Standard)     */}
           {/* ============================================ */}
           {showMainUI && currentStep === 'teach' && (
             <motion.div
@@ -359,9 +836,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             </motion.div>
           )}
 
-          {/* ============================================ */}
-          {/* RECALL STEP — Quiz on what was just taught    */}
-          {/* ============================================ */}
+          {/* ================================================= */}
+          {/* RECALL STEP — Quiz on what was just taught (Std)  */}
+          {/* ================================================= */}
           {showMainUI && currentStep === 'recall' && (
             <motion.div
               key="recall"
@@ -429,7 +906,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ============================================ */}
-          {/* QUIZ STEP — Scenario quiz (non-flashcard)    */}
+          {/* QUIZ STEP — Scenario quiz (non-flashcard Std)*/}
           {/* ============================================ */}
           {showMainUI && currentStep === 'quiz' && (
             <motion.div
@@ -497,7 +974,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ============================================ */}
-          {/* ARTIFACT STEP — Real world task upload        */}
+          {/* ARTIFACT STEP — Real world task upload (Std) */}
           {/* ============================================ */}
           {showMainUI && currentStep === 'artifact' && (
             <motion.div
@@ -545,7 +1022,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ============================================ */}
-          {/* FLASHCARD STEP — Legacy fallback              */}
+          {/* FLASHCARD STEP — Legacy fallback             */}
           {/* ============================================ */}
           {showMainUI && currentStep === 'flashcard' && (
             <motion.div
@@ -590,7 +1067,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       {/* ============================================================ */}
       {/* PERSISTENT DUOLINGO-STYLE SLIDE-UP BOTTOM PANEL              */}
       {/* ============================================================ */}
-      {showMainUI && (currentStep === 'recall' || currentStep === 'quiz') && (
+      {showMainUI && (currentStep === 'recall' || currentStep === 'quiz' || (currentStep && currentStep.startsWith('curated_quiz_'))) && (
         <div className="fixed bottom-0 left-0 right-0 z-30">
           {/* Correct Answer Bottom Panel */}
           <AnimatePresence>
@@ -619,7 +1096,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     <h3 className="text-xs font-black text-green-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
                     <p className="text-[11px] text-green-300 leading-normal font-semibold">
                       <span className="text-white block italic mb-1">"{successPhrase}"</span>
-                      {mission.recallExplanation || mission.failureCritique || ''}
+                      {correctExplanationText}
                     </p>
                   </div>
                 </div>
@@ -661,7 +1138,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
                     <p className="text-[11px] text-red-300 font-semibold leading-normal mb-1">
                       <span className="text-white block italic mb-1">"{failPhrase}"</span>
-                      {mission.recallExplanation || mission.failureCritique || ''}
+                      {correctExplanationText}
                     </p>
                     {correctAnswerText && (
                       <p className="text-[10px] text-zinc-400 font-mono mt-1">
@@ -707,6 +1184,18 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // ============================================================
 
 function getStepsForType(type: string, mission: any, learningStyle: string): string[] {
+  if (mission.isCuratedAI) {
+    if (learningStyle === 'visual') {
+      const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
+      return ['visual_lecture', ...qSteps];
+    } else if (learningStyle === 'interactive') {
+      return ['prompt_sandbox'];
+    } else {
+      // reading style ('text')
+      const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
+      return ['reading_chapter', ...qSteps];
+    }
+  }
   switch (type) {
     case 'flashcard':
       if (mission.recallQuestion || mission.recallOptions) {
