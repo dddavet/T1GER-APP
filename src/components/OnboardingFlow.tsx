@@ -434,13 +434,45 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
         <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full">
           {/* Mascot asking question */}
           <div className="flex items-start gap-4 mb-8">
-            <img 
-              src={selectedDiagnosticOpt !== null ? "/tiger_celebrating.png" : "/tiger_thinking.png"} 
-              alt={mentor.name} 
-              className="w-16 h-16 object-contain flex-shrink-0"
-              style={{ filter: `drop-shadow(0 0 10px ${mentor.glowColor})` }}
-            />
-            <div 
+            <motion.div
+              className="relative flex-shrink-0"
+              animate={selectedDiagnosticOpt !== null ? {
+                scale: 1.15,
+                y: -6,
+                rotate: [0, -5, 5, 0]
+              } : {
+                y: [0, -3, 0],
+                scaleY: [1, 1.02, 1],
+                scaleX: [1, 0.99, 1]
+              }}
+              transition={selectedDiagnosticOpt !== null ? {
+                type: "spring",
+                stiffness: 300,
+                damping: 10
+              } : {
+                repeat: Infinity,
+                duration: 2.8,
+                ease: "easeInOut"
+              }}
+            >
+              <img 
+                src={selectedDiagnosticOpt !== null ? "/tiger_celebrating.png" : "/tiger_thinking.png"} 
+                alt={mentor.name} 
+                className="w-16 h-16 object-contain"
+                style={{ filter: `drop-shadow(0 0 15px ${mentor.glowColor})` }}
+              />
+              {selectedDiagnosticOpt !== null && (
+                <div 
+                  className="absolute inset-0 rounded-full blur-md opacity-30 -z-10 animate-ping"
+                  style={{ backgroundColor: mentor.accentColor }}
+                />
+              )}
+            </motion.div>
+            
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0, x: -10 }}
+              animate={{ scale: 1, opacity: 1, x: 0 }}
+              transition={{ type: "spring", stiffness: 220, damping: 15 }}
               className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
               style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}
             >
@@ -450,7 +482,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               <p className="text-sm font-bold leading-snug text-white font-sans">
                 {activeDiagnosticQ.question}
               </p>
-            </div>
+            </motion.div>
           </div>
 
           {/* Options */}

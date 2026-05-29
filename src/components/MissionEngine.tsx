@@ -148,13 +148,21 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex flex-col items-center justify-center text-center py-6"
             >
               <div className="mb-6 relative">
-                <motion.img 
+                 <motion.img 
                   src={character.avatarImg} 
                   alt={character.name} 
-                  className="w-40 h-40 object-contain animate-pulse"
-                  style={{ filter: `drop-shadow(0 0 20px ${character.glowColor})` }}
-                  animate={{ y: [0, -12, 0] }}
-                  transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+                  className="w-40 h-40 object-contain"
+                  style={{ filter: `drop-shadow(0 0 24px ${character.glowColor})` }}
+                  animate={{ 
+                    y: [0, -18, 0],
+                    scale: [1, 1.08, 1],
+                    rotate: [0, 4, -4, 0]
+                  }}
+                  transition={{ 
+                    repeat: Infinity, 
+                    duration: 2.2, 
+                    ease: "easeInOut"
+                  }}
                 />
                 <div className="absolute -bottom-1 -right-1 bg-[var(--accent-main)] text-black p-2 rounded-full shadow-lg">
                   <CheckCircle2 size={24} className="stroke-[3]" />
@@ -214,10 +222,17 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex flex-col items-center justify-center text-center py-6"
             >
               <div className="mb-6 relative">
-                <img 
+                <motion.img 
                   src="/tiger_sad.png" 
                   alt="Sad T1GER Mascot" 
-                  className="w-40 h-40 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.2)]" 
+                  className="w-40 h-40 object-contain" 
+                  style={{ filter: `drop-shadow(0 0 20px rgba(239, 68, 68, 0.3))` }}
+                  animate={{ 
+                    y: [0, 4, 0],
+                    scaleY: [1, 0.95, 1],
+                    rotate: [-1, 1, -1]
+                  }}
+                  transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
                 />
                 <div className="absolute -bottom-1 -right-1 bg-red-500 text-white p-2 rounded-full shadow-lg">
                   <XCircle size={24} className="stroke-[3]" />
@@ -592,8 +607,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     src={character.avatarImg} 
                     alt={character.name} 
                     className="w-14 h-14 object-contain"
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
+                    animate={{ 
+                      y: [0, -16, 0],
+                      scale: [1, 1.15, 1],
+                      rotate: [0, 8, -8, 0]
+                    }}
+                    transition={{ type: "spring", stiffness: 260, damping: 10, repeat: Infinity, repeatDelay: 2 }}
+                    style={{ filter: `drop-shadow(0 0 10px ${character.glowColor})` }}
                   />
                   <div className="bg-green-500/10 border border-green-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#0a2717] after:border-l after:border-b after:border-green-500/20 after:rotate-45 after:-translate-y-1/2">
                     <h3 className="text-xs font-black text-green-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
@@ -626,7 +646,17 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 className="w-full bg-[#3b0f14] border-t border-red-500/25 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(239,68,68,0.15)] flex flex-col gap-4"
               >
                 <div className="flex items-start gap-4 max-w-md mx-auto w-full">
-                  <img src="/tiger_sad.png" alt={character.name} className="w-14 h-14 object-contain" />
+                  <motion.img 
+                    src="/tiger_sad.png" 
+                    alt={character.name} 
+                    className="w-14 h-14 object-contain"
+                    animate={{ 
+                      x: [0, -4, 4, -4, 4, 0],
+                      y: [0, 3, 0]
+                    }}
+                    transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2 }}
+                    style={{ filter: `drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))` }}
+                  />
                   <div className="bg-red-500/10 border border-red-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#3b0f14] after:border-l after:border-b after:border-red-500/20 after:rotate-45 after:-translate-y-1/2">
                     <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
                     <p className="text-[11px] text-red-300 font-semibold leading-normal mb-1">
