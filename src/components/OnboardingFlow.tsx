@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { type TrackType } from '../services/missionBank';
 import { Brain, Target, Zap, ChevronRight, PlaySquare, FileText, Blocks, Trophy, Sparkles, Check, ArrowRight, BookOpen } from 'lucide-react';
+import { OnboardingArchetypeReveal } from './OnboardingArchetypeReveal';
+import { OnboardingMicroLesson } from './OnboardingMicroLesson';
 
 interface DiagnosticQuestion {
   id: string;
@@ -184,6 +186,7 @@ export const OnboardingFlow: React.FC = () => {
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({});
   const [isFinishing, setIsFinishing] = useState(false);
+  const [onboardingStage, setOnboardingStage] = useState<'questions' | 'archetype' | 'microlesson'>('questions');
 
   // Diagnostic Test State Machine
   const [diagnosticActive, setDiagnosticActive] = useState(false);
@@ -224,12 +227,11 @@ export const OnboardingFlow: React.FC = () => {
     if (stepIndex < QUESTIONS.length - 1) {
       setStepIndex(stepIndex + 1);
     } else {
-      setIsFinishing(true);
-      submitAnswers();
+      setOnboardingStage('archetype');
     }
   };
 
-  const submitAnswers = (placedLevelOverride?: number) => {
+  const submitAnswers = (placedLevelOverride?: number, xpEarned = 0, coinsEarned = 0) => {
     let niche = 'none';
     const goal = answers.goal;
     if (goal === 'investing') niche = 'investing';
@@ -247,7 +249,10 @@ export const OnboardingFlow: React.FC = () => {
       niche,
       experienceLevel: placedLevel,
       onboardingStep: 'complete',
-      onboardingComplete: true
+      onboardingComplete: true,
+      xp: xpEarned,
+      coins: coinsEarned,
+      level: 1
     });
   };
 
@@ -412,7 +417,7 @@ export const OnboardingFlow: React.FC = () => {
           {/* Mascot asking question */}
           <div className="flex items-start gap-4 mb-8">
             <img 
-              src="/lion_happy.png" 
+              src={selectedDiagnosticOpt !== null ? "/lion_proud.png" : "/lion_happy.png"} 
               alt="Lion T1GER" 
               className="w-16 h-16 object-contain flex-shrink-0"
             />
@@ -467,6 +472,30 @@ export const OnboardingFlow: React.FC = () => {
           </button>
         </div>
       </div>
+    );
+  }
+
+  // Render Archetype Reveal screen
+  if (onboardingStage === 'archetype') {
+    return (
+      <OnboardingArchetypeReveal
+        track={resolvedTrackId}
+        score={correctAnswers}
+        onNext={() => setOnboardingStage('microlesson')}
+      />
+    );
+  }
+
+  // Render Fast Offline Micro-Lesson screen
+  if (onboardingStage === 'microlesson') {
+    return (
+      <OnboardingMicroLesson
+        track={resolvedTrackId}
+        onComplete={(xpEarned, coinsEarned) => {
+          setIsFinishing(true);
+          submitAnswers(answers.experienceLevel, xpEarned, coinsEarned);
+        }}
+      />
     );
   }
 
