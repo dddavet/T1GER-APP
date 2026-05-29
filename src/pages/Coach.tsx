@@ -18,9 +18,9 @@ const getMascotForText = (text: string) => {
   ];
   
   if (sadKeywords.some(keyword => lowercase.includes(keyword))) {
-    return '/lion_sad.png';
+    return '/tiger_sad.png';
   }
-  return '/lion_happy.png';
+  return '/tiger_thinking.png';
 };
 
 export const Coach = () => {

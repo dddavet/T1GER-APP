@@ -63,7 +63,7 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
     case 'PREDATOR':
       return {
         emotion,
-        avatarImg: '/lion_happy.png',
+        avatarImg: '/tiger_celebrating.png',
         glowColor: 'rgba(96, 165, 250, 0.4)', // Hologram Cyan Glow
         accentColor: '#60A5FA', // Cyan Accent
         bgTint: 'rgba(96, 165, 250, 0.05)',
@@ -74,7 +74,7 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
     case 'PROUD':
       return {
         emotion,
-        avatarImg: '/lion_happy.png',
+        avatarImg: '/tiger_celebrating.png',
         glowColor: 'rgba(255, 107, 0, 0.4)', // Amber Cyber Gold Glow
         accentColor: '#FF6B00', // Gold Accent
         bgTint: 'rgba(255, 107, 0, 0.05)',
@@ -85,7 +85,7 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
     case 'FERAL':
       return {
         emotion,
-        avatarImg: '/lion_sad.png', // Looking intense/concerned
+        avatarImg: '/tiger_sad.png', // Looking intense/concerned
         glowColor: 'rgba(239, 68, 68, 0.5)', // Carnivore Crimson Glow
         accentColor: '#EF4444', // Red Alert Accent
         bgTint: 'rgba(239, 68, 68, 0.08)',
@@ -96,7 +96,7 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
     case 'DISAPPOINTED':
       return {
         emotion,
-        avatarImg: '/lion_sad.png',
+        avatarImg: '/tiger_sad.png',
         glowColor: 'rgba(156, 163, 175, 0.2)', // Steel Gray Glow
         accentColor: '#9CA3AF', // Gray Accent
         bgTint: 'rgba(156, 163, 175, 0.03)',
@@ -108,7 +108,7 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
     default:
       return {
         emotion,
-        avatarImg: '/lion_happy.png',
+        avatarImg: '/tiger_thinking.png',
         glowColor: 'rgba(204, 255, 0, 0.2)', // Soft lime accent
         accentColor: '#CCFF00', // Lime Cyber
         bgTint: 'rgba(204, 255, 0, 0.02)',

@@ -141,8 +141,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               <div className="mb-6 relative">
                 <motion.img 
-                  src="/lion_happy.png" 
-                  alt="Happy Lion T1GER" 
+                  src="/tiger_celebrating.png" 
+                  alt="Happy T1GER Mascot" 
                   className="w-40 h-40 object-contain drop-shadow-[0_0_20px_rgba(204,255,0,0.3)]"
                   animate={{ y: [0, -12, 0] }}
                   transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
@@ -206,8 +206,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               <div className="mb-6 relative">
                 <img 
-                  src="/lion_sad.png" 
-                  alt="Sad Lion T1GER" 
+                  src="/tiger_sad.png" 
+                  alt="Sad T1GER Mascot" 
                   className="w-40 h-40 object-contain drop-shadow-[0_0_20px_rgba(239,68,68,0.2)]" 
                 />
                 <div className="absolute -bottom-1 -right-1 bg-red-500 text-white p-2 rounded-full shadow-lg">
@@ -259,9 +259,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/60 to-transparent">
                     {/* Mascot explains */}
                     <div className="flex items-center gap-3 mb-3">
-                      <img src="/lion_happy.png" alt="Lion T1GER" className="w-10 h-10 object-contain" />
+                      <img src="/tiger_thinking.png" alt="T1GER Mascot" className="w-10 h-10 object-contain" />
                       <div className="bg-[#121217] border border-white/10 rounded-2xl px-3 py-1.5 shadow-lg relative after:content-[''] after:absolute after:-left-1.5 after:top-1/2 after:-translate-y-1/2 after:w-3 after:h-3 after:bg-[#121217] after:border-l after:border-b after:border-white/10 after:rotate-45">
-                        <span className="text-[7px] font-mono text-[var(--accent-main)] uppercase tracking-widest block font-black">Lion T1GER</span>
+                        <span className="text-[7px] font-mono text-[var(--accent-main)] uppercase tracking-widest block font-black">T1GER Mascot</span>
                         <span className="text-[10px] text-zinc-300 font-semibold leading-none">¡Presta atención!</span>
                       </div>
                     </div>
@@ -287,8 +287,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   {/* Mascot explains speaking bubble */}
                   <div className="flex items-start gap-4 mb-2">
                     <motion.img 
-                      src="/lion_happy.png" 
-                      alt="Lion T1GER" 
+                      src="/tiger_thinking.png" 
+                      alt="T1GER Mascot" 
                       className="w-16 h-16 object-contain flex-shrink-0"
                       animate={{ y: [0, -4, 0] }}
                       transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
@@ -349,8 +349,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Mascot asking question */}
               <div className="flex items-start gap-4 mb-2">
                 <img 
-                  src="/lion_happy.png" 
-                  alt="Lion T1GER" 
+                  src="/tiger_thinking.png" 
+                  alt="T1GER Mascot" 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
@@ -418,8 +418,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Mascot asking question */}
               <div className="flex items-start gap-4 mb-2">
                 <img 
-                  src="/lion_happy.png" 
-                  alt="Lion T1GER" 
+                  src="/tiger_thinking.png" 
+                  alt="T1GER Mascot" 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
@@ -486,8 +486,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Mascot explaining */}
               <div className="flex items-start gap-4 mb-2">
                 <img 
-                  src="/lion_happy.png" 
-                  alt="Lion T1GER" 
+                  src="/tiger_thinking.png" 
+                  alt="T1GER Mascot" 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
@@ -533,8 +533,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               <div className="flex items-start gap-4 mb-2">
                 <img 
-                  src="/lion_happy.png" 
-                  alt="Lion T1GER" 
+                  src="/tiger_thinking.png" 
+                  alt="T1GER Mascot" 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
@@ -580,8 +580,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               >
                 <div className="flex items-start gap-4 max-w-md mx-auto w-full">
                   <motion.img 
-                    src="/lion_happy.png" 
-                    alt="Lion Happy" 
+                    src="/tiger_celebrating.png" 
+                    alt="T1GER Celebrating" 
                     className="w-14 h-14 object-contain"
                     animate={{ y: [0, -6, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
@@ -616,7 +616,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 className="w-full bg-[#3b0f14] border-t border-red-500/25 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(239,68,68,0.15)] flex flex-col gap-4"
               >
                 <div className="flex items-start gap-4 max-w-md mx-auto w-full">
-                  <img src="/lion_sad.png" alt="Lion Sad" className="w-14 h-14 object-contain" />
+                  <img src="/tiger_sad.png" alt="T1GER Sad" className="w-14 h-14 object-contain" />
                   <div className="bg-red-500/10 border border-red-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#3b0f14] after:border-l after:border-b after:border-red-500/20 after:rotate-45 after:-translate-y-1/2">
                     <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-0.5">Respuesta Incorrecta</h3>
                     <p className="text-[11px] text-red-300 font-semibold leading-normal mb-1">

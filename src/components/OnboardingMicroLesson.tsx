@@ -218,7 +218,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           {/* Mentor Mascot speech bubble */}
           <div className="flex items-end gap-3 my-6 max-w-md w-full">
             <img 
-              src="/lion_happy.png" 
+              src="/tiger_thinking.png" 
               alt="Mascot" 
               className="w-16 h-16 object-contain flex-shrink-0 animate-bounce"
             />
@@ -316,7 +316,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
                   }`}
                 >
                   <img 
-                    src={isAnswered ? "/lion_proud.png" : "/lion_sad.png"} 
+                    src={isAnswered ? "/tiger_celebrating.png" : "/tiger_sad.png"} 
                     alt="Mascot Feedback" 
                     className="w-12 h-12 object-contain flex-shrink-0"
                   />
@@ -354,7 +354,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           <div className="space-y-6">
             {/* Mascot Celebrating */}
             <motion.img 
-              src="/lion_proud.png" 
+              src="/tiger_celebrating.png" 
               alt="T1GER Mascot" 
               className="w-40 h-40 object-contain drop-shadow-[0_0_20px_var(--accent-glow)] mb-4"
               animate={{ y: [0, -8, 0], scale: [1, 1.03, 1] }}

@@ -39,6 +39,7 @@ const AppContent = () => {
   
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
+  const [onboardingBypassed, setOnboardingBypassed] = useState(false);
 
   useEffect(() => {
     if (!activeView) {
@@ -143,8 +144,8 @@ const AppContent = () => {
   const FORCE_ONBOARDING_TEST = true;
 
   // Intercept the entire app experience if onboarding isn't complete (or developer override is active)
-  if (FORCE_ONBOARDING_TEST || !appUser || !appUser.onboardingComplete) {
-    return <OnboardingFlow />;
+  if ((FORCE_ONBOARDING_TEST && !onboardingBypassed) || !appUser || !appUser.onboardingComplete) {
+    return <OnboardingFlow onComplete={() => setOnboardingBypassed(true)} />;
   }
 
   const isFullscreen = activeView === 'mission' || activeView === 'debrief';

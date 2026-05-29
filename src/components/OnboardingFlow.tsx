@@ -180,7 +180,7 @@ const QUESTIONS = [
   }
 ];
 
-export const OnboardingFlow: React.FC = () => {
+export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const { updateAppUser } = useAuth();
   const { skipDaysForPlacement } = useBrain();
   const [stepIndex, setStepIndex] = useState(0);
@@ -364,7 +364,7 @@ export const OnboardingFlow: React.FC = () => {
           <div className="flex-1 flex flex-col items-center justify-center text-center max-w-sm mx-auto">
             {/* Dynamic mascot celebrating */}
             <motion.img 
-              src={correctAnswers >= 2 ? "/lion_happy.png" : "/lion_sad.png"} 
+              src={correctAnswers >= 2 ? "/tiger_celebrating.png" : "/tiger_sad.png"} 
               alt="T1GER Mascot" 
               className="w-40 h-40 object-contain drop-shadow-[0_0_20px_var(--accent-glow)] mb-6"
               animate={{ y: [0, -8, 0] }}
@@ -417,7 +417,7 @@ export const OnboardingFlow: React.FC = () => {
           {/* Mascot asking question */}
           <div className="flex items-start gap-4 mb-8">
             <img 
-              src={selectedDiagnosticOpt !== null ? "/lion_proud.png" : "/lion_happy.png"} 
+              src={selectedDiagnosticOpt !== null ? "/tiger_celebrating.png" : "/tiger_thinking.png"} 
               alt="Lion T1GER" 
               className="w-16 h-16 object-contain flex-shrink-0"
             />
@@ -494,6 +494,9 @@ export const OnboardingFlow: React.FC = () => {
         onComplete={(xpEarned, coinsEarned) => {
           setIsFinishing(true);
           submitAnswers(answers.experienceLevel, xpEarned, coinsEarned);
+          if (onComplete) {
+            onComplete();
+          }
         }}
       />
     );
