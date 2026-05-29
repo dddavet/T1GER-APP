@@ -10,8 +10,9 @@ import { motion, AnimatePresence } from 'motion/react';
 
 export const Profile = () => {
   const { appUser, logout, updateAppUser } = useAuth();
-  const { stats, user, setActiveView } = useT1ger();
+  const { stats, user, setActiveView, spendCoins } = useT1ger();
   const { competencies, learnStreak, tacticalStreak, resetBrain } = useBrain();
+  const [showMarket, setShowMarket] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
 
   // Live competency scores from the Brain
@@ -96,6 +97,30 @@ export const Profile = () => {
           </div>
         ))}
       </div>
+
+      {/* Black Market Card */}
+      <section className="relative overflow-hidden p-6 rounded-3xl border border-yellow-500/20 bg-yellow-500/5 shadow-lg group">
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full blur-[60px] bg-yellow-500/10 pointer-events-none" />
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-[9px] font-black font-mono text-yellow-500 uppercase tracking-widest block mb-1">
+              🏦 T1GER BLACK MARKET
+            </span>
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-white flex items-center gap-2">
+              🪙 {stats.coins} <span className="text-xs text-zinc-500 font-bold lowercase tracking-normal">T1GER Coins</span>
+            </h3>
+            <p className="text-[10px] text-zinc-400 mt-2 font-medium leading-relaxed max-w-[240px]">
+              Gasta tus monedas en escudos de racha y boosters tácticos para proteger tu progreso.
+            </p>
+          </div>
+          <button 
+            onClick={() => setShowMarket(true)}
+            className="px-5 py-3 rounded-2xl bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-3d shadow-yellow-500/20 cursor-pointer active:scale-95 transition-all"
+          >
+            Entrar 🪙
+          </button>
+        </div>
+      </section>
 
       {/* Business Health Radar */}
       <section className="liquid-glass rounded-3xl p-6 relative overflow-hidden">
@@ -327,6 +352,113 @@ export const Profile = () => {
           <ChevronRight className="w-4 h-4 text-red-500/50 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
+
+      {/* Black Market Modal */}
+      <AnimatePresence>
+        {showMarket && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9999] bg-[#020204]/95 backdrop-blur-md flex items-center justify-center p-6"
+          >
+            <div className="relative w-full max-w-sm rounded-[2.5rem] border border-white/10 bg-[#0c0c10] p-6 shadow-2xl space-y-6">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center pb-4 border-b border-white/5">
+                <div>
+                  <span className="text-[9px] font-black font-mono text-yellow-500 uppercase tracking-widest block mb-1">
+                    🏦 T1GER BANKING
+                  </span>
+                  <h2 className="text-lg font-black italic uppercase tracking-tighter text-white">
+                    MERCADO NEGRO
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => setShowMarket(false)}
+                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Balance */}
+              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex justify-between items-center">
+                <span className="text-xs font-bold text-zinc-400 uppercase">Tu saldo disponible:</span>
+                <span className="text-sm font-black text-yellow-500 font-mono">🪙 {stats.coins} COINS</span>
+              </div>
+
+              {/* Items List */}
+              <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1 hide-scrollbar">
+                {[
+                  {
+                    id: 'streak_shield',
+                    title: '🛡️ ESCUDO DE RACHA',
+                    description: 'Te protege si olvidas tu lección. Se consume automáticamente.',
+                    cost: 150,
+                    badge: appUser?.streakShields ? `${appUser.streakShields} poseídos` : '0 poseídos',
+                    action: async () => {
+                      if (stats.coins < 150) {
+                        alert("Fondos insuficientes. ¡Caza más XP para ganar monedas!");
+                        return;
+                      }
+                      await spendCoins(150);
+                      await updateAppUser({
+                        streakShields: (appUser?.streakShields || 0) + 1
+                      });
+                      alert("¡Escudo de Racha adquirido con éxito! 🛡️");
+                    }
+                  },
+                  {
+                    id: 'double_xp',
+                    title: '🔥 BOOSTER DOBLE XP',
+                    description: 'Duplica las ganancias de XP durante las próximas 24 horas.',
+                    cost: 300,
+                    badge: 'Boost Activo: No',
+                    action: () => {
+                      alert("¡Artículo en desarrollo! Estará disponible en el próximo release.");
+                    }
+                  },
+                  {
+                    id: 'predator_mode',
+                    title: '⚡ ENERGÍA PREDATOR',
+                    description: 'Activa instantáneamente el Predator Mode sin requisitos.',
+                    cost: 600,
+                    badge: 'Premium',
+                    action: () => {
+                      alert("¡Artículo exclusivo de élite! Estará disponible próximamente.");
+                    }
+                  }
+                ].map(item => (
+                  <div key={item.id} className="p-4 rounded-[1.5rem] bg-white/[0.01] border border-white/5 flex flex-col justify-between gap-3 hover:bg-white/[0.03] transition-all">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <h4 className="text-xs font-black text-white uppercase tracking-tight">{item.title}</h4>
+                        <span className="text-[8px] font-black font-mono text-yellow-500/60 uppercase">{item.badge}</span>
+                      </div>
+                      <p className="text-[10px] text-zinc-500 leading-normal">{item.description}</p>
+                    </div>
+                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                      <span className="text-xs font-mono font-black text-yellow-500">🪙 {item.cost} COINS</span>
+                      <button
+                        onClick={item.action}
+                        disabled={stats.coins < item.cost && item.id === 'streak_shield'}
+                        className={`px-3 py-1.5 rounded-xl font-black uppercase text-[8px] tracking-wider transition-all duration-200 ${
+                          stats.coins >= item.cost 
+                            ? 'bg-yellow-500 text-black shadow-md hover:bg-yellow-400 active:scale-95' 
+                            : 'bg-zinc-800 text-zinc-500 cursor-not-allowed'
+                        }`}
+                      >
+                        Comprar
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

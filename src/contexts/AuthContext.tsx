@@ -22,6 +22,7 @@ export interface AppUser {
   streak: number;
   isPro?: boolean;
   isFlaggedForInterrogation?: boolean; // New: AI Auditor flagged this user
+  coins?: number;
   streakShields?: number;
   lastMissionDate?: any;
   lastActive?: any;
@@ -157,6 +158,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           xp: localData?.xp || 0,
           streak: localData?.streak || 0,
           isPro: true,
+          coins: 0,
           streakShields: 0,
           lastMissionDate: serverTimestamp(),
           createdAt: serverTimestamp(),

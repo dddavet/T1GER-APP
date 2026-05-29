@@ -41,6 +41,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
       setStats(prev => ({
         ...prev,
         xp: appUser.xp,
+        coins: appUser.coins || 0,
         streak: appUser.streak,
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
       }));
@@ -62,14 +63,20 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     setStats(prev => ({ ...prev, xp: newXP }));
     
     if (appUser) {
-      await updateAppUser({ xp: newXP, level: newLevel });
+      const earnedCoins = Math.floor(amount / 2);
+      const newCoins = (appUser.coins || 0) + earnedCoins;
+      setStats(prev => ({ ...prev, coins: newCoins }));
+      await updateAppUser({ xp: newXP, level: newLevel, coins: newCoins });
     }
   }, [stats.xp, appUser, updateAppUser]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
-    setStats(prev => ({ ...prev, coins: Math.max(0, prev.coins - amount) }));
-    // If we had coins in Firestore, we'd update there too
-  }, []);
+    const newCoins = Math.max(0, (appUser?.coins || 0) - amount);
+    setStats(prev => ({ ...prev, coins: newCoins }));
+    if (appUser) {
+      await updateAppUser({ coins: newCoins });
+    }
+  }, [appUser, updateAppUser]);
 
   const value = React.useMemo(() => ({
     user, stats, activeView, triggerAnimation, 
