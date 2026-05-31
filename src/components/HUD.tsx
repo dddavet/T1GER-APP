@@ -3,10 +3,13 @@ import { useT1ger } from '../contexts/T1gerContext';
 import { Flame, Coins, Brain, Zap, Target } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useBrain } from '../contexts/BrainContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export const HUD = React.memo(() => {
   const { stats } = useT1ger();
   const { dailyTacticalStatus, learnStreak, tacticalStreak, t1gerEmotion, t1gerVisualConfig } = useBrain();
+  const { appUser } = useAuth();
+  const isMinimalist = appUser?.minimalistMode || false;
 
   const totalTasks = (dailyTacticalStatus.committedHabitIds?.length || 0) +
                      (dailyTacticalStatus.committedWorkIds?.length || 0) +
@@ -17,6 +20,15 @@ export const HUD = React.memo(() => {
   
   // Predator Mode active when both streaks are >= 3
   const isPredatorMode = t1gerEmotion === 'PREDATOR';
+
+  if (isMinimalist) {
+    return (
+      <div className="flex-none z-40 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-3 px-5 flex items-center justify-between bg-transparent text-zinc-500 font-mono text-[9px] font-bold uppercase tracking-widest opacity-60">
+        <span>Zen Workspace</span>
+        <span>Tactical: {health}%</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-none z-40 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-3 px-5 flex items-center justify-between bg-transparent gap-2">

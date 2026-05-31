@@ -4,16 +4,63 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const Profile = () => {
   const { appUser, logout, updateAppUser } = useAuth();
-  const { stats, user, setActiveView, spendCoins } = useT1ger();
+  const { stats, user, setActiveView, spendCoins, addXP } = useT1ger();
   const { competencies, learnStreak, tacticalStreak, resetBrain } = useBrain();
   const [showMarket, setShowMarket] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
+
+  // Webhook Simulator States
+  const [activeService, setActiveService] = useState<'todoist' | 'notion'>('todoist');
+  const [simulating, setSimulating] = useState(false);
+  const [simLog, setSimLog] = useState<string[]>([]);
+
+  const handleSimulateWebhook = async () => {
+    if (simulating) return;
+    setSimulating(true);
+    setSimLog([`[${new Date().toLocaleTimeString()}] Sincronizando con webhook de ${activeService.toUpperCase()}...`]);
+    
+    await new Promise(r => setTimeout(r, 600));
+    setSimLog(prev => [...prev, `[${new Date().toLocaleTimeString()}] Petición POST recibida en /v1/webhooks/${appUser?.uid || 'anonymous'}/${activeService}`]);
+    
+    await new Promise(r => setTimeout(r, 800));
+    const mockPayload = activeService === 'todoist' 
+      ? JSON.stringify({
+          event_name: "item:completed",
+          user_id: appUser?.uid || "tiger_user_1",
+          event_data: {
+            content: "Lanzar landing page beta",
+            project_id: "operations",
+            completed_at: new Date().toISOString()
+          }
+        }, null, 2)
+      : JSON.stringify({
+          object: "page",
+          id: "notion-db-page-ops-1",
+          properties: {
+            Status: { select: { name: "Done" } },
+            Name: { title: [{ text: { content: "Auditar CAC orgánico" } }] }
+          }
+        }, null, 2);
+
+    setSimLog(prev => [...prev, `[PAYLOAD RECEIVED]:\n${mockPayload}`]);
+
+    await new Promise(r => setTimeout(r, 1000));
+    setSimLog(prev => [...prev, `[T1GER ENGINE] Auditoría aprobada. Prueba real verificada.`]);
+    setSimLog(prev => [...prev, `[RECOMPENSA] +50 XP y +10 Coins acreditados de forma automática.`]);
+    
+    await addXP(50);
+    if (updateAppUser && appUser) {
+      await updateAppUser({ coins: (appUser.coins || 0) + 10 });
+    }
+
+    setSimulating(false);
+  };
 
   // Live competency scores from the Brain
   const healthData = [
@@ -292,6 +339,90 @@ export const Profile = () => {
               Nuke Protocol (Factory Reset)
             </button>
           </div>
+        </div>
+      </section>
+
+      {/* WEBHOOK & AUTOMATIONS CONSOLE (APIS ABIERTAS) */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2 px-2">
+           <Terminal className="w-4 h-4 text-[#00E5FF]" />
+           <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E5FF]">APIs Abiertas & Integración</h3>
+        </div>
+
+        <div className="liquid-glass rounded-[2rem] p-6 border-white/5 space-y-5 shadow-3d relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 bg-blue-500/10 border-b border-l border-white/5 rounded-bl-xl text-[8px] font-mono text-cyan-400 font-black uppercase tracking-wider">
+            Webhooks Sandbox
+          </div>
+
+          <div className="space-y-1">
+             <h4 className="text-xs font-black uppercase text-white tracking-tight">Sincronizador Notion / Todoist</h4>
+             <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
+               Automatiza tu racha y misiones conectando tus herramientas diarias. Copia tu Webhook URL y simula pings reales de producción.
+             </p>
+          </div>
+
+          {/* Service Selector Tabs */}
+          <div className="flex bg-black/40 border border-white/5 rounded-2xl p-1 gap-1">
+            {['todoist', 'notion'].map((service) => (
+              <button
+                key={service}
+                onClick={() => { setActiveService(service as any); setSimLog([]); }}
+                className={`flex-1 py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                  activeService === service 
+                    ? 'bg-white/5 border border-white/10 text-white' 
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                {service === 'todoist' ? 'Todoist API' : 'Notion SDK'}
+              </button>
+            ))}
+          </div>
+
+          {/* Webhook URL Endpoint */}
+          <div className="bg-zinc-950 border border-white/5 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+            <div className="font-mono text-[9px] text-zinc-400 select-all truncate">
+              {`https://api.t1ger.app/v1/webhooks/${appUser?.uid || 'user_id'}/${activeService}`}
+            </div>
+            <span className="text-[7px] font-mono font-black text-accent bg-accent/10 border border-accent/20 rounded px-1 py-0.5 uppercase tracking-wide flex-shrink-0">
+              POST
+            </span>
+          </div>
+
+          {/* Webhook trigger button */}
+          <button
+            onClick={handleSimulateWebhook}
+            disabled={simulating}
+            className="w-full py-4.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-black font-black text-[10px] uppercase tracking-widest shadow-lg shadow-cyan-500/25 active:translate-y-[2px] transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            {simulating ? (
+              <>
+                <RefreshCcw className="w-3.5 h-3.5 animate-spin" /> Procesando Webhook...
+              </>
+            ) : (
+              <>
+                <Terminal className="w-3.5 h-3.5" /> Simular envío de Webhook
+              </>
+            )}
+          </button>
+
+          {/* Simulator Console Output */}
+          {(simLog.length > 0 || simulating) && (
+            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-inner">
+              <div className="bg-[#08080a] px-3.5 py-2 border-b border-white/5 flex items-center justify-between">
+                <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                  Live Console Log
+                </span>
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+              </div>
+              <div className="p-4 font-mono text-[10px] text-zinc-400 min-h-[80px] leading-relaxed max-h-[220px] overflow-y-auto whitespace-pre-wrap select-text">
+                {simLog.map((log, index) => (
+                  <div key={index} className={log.includes('RECOMPENSA') ? 'text-accent font-bold' : log.includes('T1GER ENGINE') ? 'text-green-400 font-bold' : ''}>
+                    {log}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

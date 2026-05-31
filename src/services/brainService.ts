@@ -80,6 +80,7 @@ export interface TacticalTask {
   label: string;
   type: 'habit' | 'work' | 'lesson';
   icon?: string; // Lucide icon name
+  createdAt?: number;
 }
 
 export type DayType = 'rest' | 'normal' | 'beast';
@@ -138,17 +139,17 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
   lastLearnDate: null,
   lastTacticalDate: null,
   customHabits: [
-    { id: 'h1', label: 'Go to the gym', type: 'habit', icon: 'Dumbbell' },
-    { id: 'h2', label: 'Make your bed', type: 'habit', icon: 'Bed' },
-    { id: 'h3', label: 'Brush your teeth', type: 'habit', icon: 'Droplets' },
+    { id: 'h1', label: 'Go to the gym', type: 'habit', icon: 'Dumbbell', createdAt: Date.now() },
+    { id: 'h2', label: 'Make your bed', type: 'habit', icon: 'Bed', createdAt: Date.now() },
+    { id: 'h3', label: 'Brush your teeth', type: 'habit', icon: 'Droplets', createdAt: Date.now() },
   ],
   customWorkTasks: [
-    { id: 'w1', label: 'Code feature', type: 'work', icon: 'Code' },
-    { id: 'w2', label: 'Marketing', type: 'work', icon: 'BarChart3' },
+    { id: 'w1', label: 'Code feature', type: 'work', icon: 'Code', createdAt: Date.now() },
+    { id: 'w2', label: 'Marketing', type: 'work', icon: 'BarChart3', createdAt: Date.now() },
   ],
   customLessonTasks: [
-    { id: 'l1', label: 'Business Strategy', type: 'lesson', icon: 'Book' },
-    { id: 'l2', label: 'Market Research', type: 'lesson', icon: 'Brain' },
+    { id: 'l1', label: 'Business Strategy', type: 'lesson', icon: 'Book', createdAt: Date.now() },
+    { id: 'l2', label: 'Market Research', type: 'lesson', icon: 'Brain', createdAt: Date.now() },
   ],
   dailyTacticalStatus: {},
 };
@@ -377,7 +378,8 @@ export function addTacticalTask(state: BrainState, label: string, type: 'habit' 
     id: Math.random().toString(36).substr(2, 9),
     label,
     type,
-    icon
+    icon,
+    createdAt: Date.now()
   };
   const keyMap = {
     habit: 'customHabits',

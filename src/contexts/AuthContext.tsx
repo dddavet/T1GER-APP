@@ -28,6 +28,8 @@ export interface AppUser {
   lastMissionDate?: any;
   lastActive?: any;
   createdAt?: any;
+  minimalistMode?: boolean;
+  unlockedDenItems?: string[];
 }
 
 interface AuthContextType {
