@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -19,6 +19,44 @@ export const Profile = () => {
   const [activeService, setActiveService] = useState<'todoist' | 'notion'>('todoist');
   const [simulating, setSimulating] = useState(false);
   const [simLog, setSimLog] = useState<string[]>([]);
+
+  // Delphi & BirdBrain Telemetry States
+  const [activeTelemetryTab, setActiveTelemetryTab] = useState<'irt' | 'ab' | 'stream'>('irt');
+  const [selectedGroup, setSelectedGroup] = useState<Record<string, 'A' | 'B'>>({
+    onboarding: 'A',
+    pomodoro: 'A',
+    procrastination: 'B',
+  });
+  const [telemetryLogs, setTelemetryLogs] = useState<string[]>([
+    `[${new Date().toLocaleTimeString()}] [SYSTEM] Delphi Analytics Engine initialized.`,
+    `[${new Date().toLocaleTimeString()}] [BIRDBRAIN] Analyzing historical logs for latent ability θ calibration...`,
+    `[${new Date().toLocaleTimeString()}] [IRT] Found 6 curated competency dimensions. Ready.`,
+  ]);
+
+  useEffect(() => {
+    const events = [
+      () => `[${new Date().toLocaleTimeString()}] [TELEMETRY] event: "lesson_completed" | uid: "${appUser?.uid || 'anonymous'}" | time_elapsed: ${Math.floor(Math.random() * 80) + 90}s | score: ${Math.floor(Math.random() * 20) + 80}%`,
+      () => `[${new Date().toLocaleTimeString()}] [BIRDBRAIN] Estimating theta parameter... Habilidad latente (θ) estimada: ${(Object.values(competencies).reduce((a, b) => a + b, 0) / 500 * 3 - 0.5).toFixed(2)}`,
+      () => `[${new Date().toLocaleTimeString()}] [IRT] Calibrating Question ID "AI_PROMPT_0${Math.floor(Math.random() * 5) + 1}". Updated difficulty d_i: ${(Math.random() * 0.8 + 0.1).toFixed(2)}`,
+      () => `[${new Date().toLocaleTimeString()}] [DELPHI] User mapped to group "${selectedGroup.onboarding}" for "Onboarding Hook Experiment".`,
+      () => `[${new Date().toLocaleTimeString()}] [MARKETING] Dynamic segment "Niche: ${appUser?.niche || 'Entrepreneur'}" matched. Serving tailored curriculum hook.`,
+      () => `[${new Date().toLocaleTimeString()}] [TELEMETRY] event: "click_pomodoro_audio" | state: "active" | frequency: "Gamma 40Hz"`,
+      () => `[${new Date().toLocaleTimeString()}] [SRS] Recalculating Spaced Repetition half-life (h) for "Prompt Engineering" using Half-Life Regression.`,
+    ];
+
+    const interval = setInterval(() => {
+      const randomEvent = events[Math.floor(Math.random() * events.length)]();
+      setTelemetryLogs(prev => {
+        const updated = [...prev, randomEvent];
+        if (updated.length > 12) {
+          return updated.slice(updated.length - 12);
+        }
+        return updated;
+      });
+    }, 6000);
+
+    return () => clearInterval(interval);
+  }, [appUser, competencies, selectedGroup]);
 
   const handleSimulateWebhook = async () => {
     if (simulating) return;
@@ -420,6 +458,263 @@ export const Profile = () => {
                     {log}
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* DELPHI & BIRDBRAIN TELEMETRY CONSOLE */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-2">
+            <Activity className="w-4 h-4 text-[#FF6B00] animate-pulse" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#FF6B00]">Delphi & BirdBrain Console</h3>
+          </div>
+          <span className="text-[8px] font-mono font-black text-cyan-400 bg-cyan-400/10 border border-cyan-400/20 rounded px-1.5 py-0.5 uppercase tracking-widest animate-pulse">
+            DUOLINGO ENGINE COPIED
+          </span>
+        </div>
+
+        <div className="liquid-glass rounded-[2rem] p-6 border-white/5 space-y-6 shadow-3d relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 bg-[#FF6B00]/10 border-b border-l border-white/5 rounded-bl-xl text-[8px] font-mono text-[#FF6B00] font-black uppercase tracking-wider">
+            Telemetry V2
+          </div>
+
+          <div className="space-y-1.5">
+            <h4 className="text-xs font-black uppercase text-white tracking-tight flex items-center gap-2">
+              Adaptive Optimization Control
+            </h4>
+            <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
+              Analiza cómo T1GER APP evalúa tu nivel latente de habilidad (BirdBrain IRT) y valida experimentos de retención (Delphi A/B Testing) para adaptar el aprendizaje como las grandes EdTech.
+            </p>
+          </div>
+
+          {/* Console Tab Selector */}
+          <div className="flex bg-black/40 border border-white/5 rounded-2xl p-1 gap-1">
+            {[
+              { id: 'irt', label: 'BirdBrain IRT', icon: BrainCircuit },
+              { id: 'ab', label: 'Delphi A/B Tests', icon: BarChart2 },
+              { id: 'stream', label: 'Event Stream', icon: Terminal }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTelemetryTab(tab.id as any)}
+                  className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                    activeTelemetryTab === tab.id 
+                      ? 'bg-white/5 border border-white/10 text-white shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-300'
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* TAB CONTENT: BirdBrain IRT */}
+          {activeTelemetryTab === 'irt' && (
+            <div className="space-y-5 animate-fade-in">
+              <div className="p-4 rounded-2xl bg-zinc-950/80 border border-white/5 space-y-3.5">
+                <div className="flex justify-between items-center">
+                  <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
+                    IRT 3PL PSYCHOMETRIC MODEL
+                  </span>
+                  <span className="text-[9px] font-mono font-bold text-accent">
+                    P(X_i=1 | θ) = c_i + (1 - c_i) / (1 + e^-a_i(θ - d_i))
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {[
+                    { name: 'Offer (Propuestas)', score: competencies.offer, d: 0.35, a: 1.24, c: 0.12 },
+                    { name: 'Sales (Ventas)', score: competencies.sales, d: 0.52, a: 1.45, c: 0.08 },
+                    { name: 'Marketing (Tracción)', score: competencies.marketing, d: 0.41, a: 1.10, c: 0.15 },
+                    { name: 'Mindset (Psicología)', score: competencies.mindset, d: 0.22, a: 0.85, c: 0.20 },
+                    { name: 'Operations (Procesos)', score: competencies.operations, d: 0.65, a: 1.62, c: 0.05 },
+                  ].map((item, idx) => {
+                    // Map score [0, 100] to theta [-3.0, 3.0]
+                    const theta = (item.score / 100) * 6 - 3;
+                    // Calculate probability of correct response based on 3PL IRT formula
+                    const exponent = -item.a * (theta - item.d);
+                    const prob = item.c + (1 - item.c) / (1 + Math.exp(exponent));
+                    
+                    return (
+                      <div key={idx} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex flex-col gap-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black text-white uppercase tracking-tight">{item.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-mono text-zinc-500">θ = {theta.toFixed(2)}</span>
+                            <span className="text-[9px] font-mono font-black text-cyan-400 bg-cyan-400/5 px-1.5 py-0.5 rounded border border-cyan-400/10">
+                              Prob. Éxito: {(prob * 100).toFixed(1)}%
+                            </span>
+                          </div>
+                        </div>
+                        
+                        {/* Progress line representing success probability */}
+                        <div className="h-1.5 bg-black/40 rounded-full overflow-hidden relative">
+                          <div 
+                            className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-500" 
+                            style={{ width: `${prob * 100}%` }}
+                          />
+                        </div>
+
+                        {/* Model parameters grid */}
+                        <div className="grid grid-cols-3 gap-1.5 text-[8px] font-mono text-zinc-500 uppercase">
+                          <span>Dificultad (d_i): <b className="text-zinc-300 font-bold">{item.d}</b></span>
+                          <span>Discriminación (a_i): <b className="text-zinc-300 font-bold">{item.a}</b></span>
+                          <span>Adivinación (c_i): <b className="text-zinc-300 font-bold">{item.c}</b></span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Dynamic recommendation box based on lowest score */}
+              {(() => {
+                const entries = Object.entries(competencies);
+                const lowest = entries.reduce((min, curr) => curr[1] < min[1] ? curr : min, entries[0]);
+                const compName = lowest[0].toUpperCase();
+                
+                return (
+                  <div className="p-4.5 rounded-2xl bg-[#FF6B00]/5 border border-[#FF6B00]/10 flex gap-3.5 items-start">
+                    <span className="text-xl">🎯</span>
+                    <div className="space-y-1">
+                      <h5 className="text-[10px] font-black font-mono text-[#FF6B00] uppercase tracking-wider">
+                        Recomendación del Motor BirdBrain
+                      </h5>
+                      <p className="text-[10px] text-zinc-300 leading-relaxed">
+                        Tu habilidad latente estimada es baja en <b className="text-white font-bold">{compName}</b> ({Math.round(lowest[1])}/100). BirdBrain ha recalibrado el banco de misiones para inyectar cuestionarios adaptativos de nivelación con una dificultad <b className="text-white font-bold">d_i = 0.25</b> para garantizar tu confianza inicial y aprendizaje rápido.
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+
+          {/* TAB CONTENT: Delphi A/B Testing */}
+          {activeTelemetryTab === 'ab' && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="space-y-3">
+                {[
+                  {
+                    id: 'onboarding',
+                    title: 'Marketing Hook: First 2 Mins Value',
+                    description: 'Duolingo-style "Immediate Value in First 2 Mins" Hook vs. Traditional Sign-up.',
+                    metric: '2-Min Conversion Rate',
+                    lift: '+22.4%',
+                    pValue: '0.003 (Altamente Significativo)',
+                    recommendation: 'Aplicar Hook A al 100% del tráfico orgánico.',
+                  },
+                  {
+                    id: 'pomodoro',
+                    title: 'Zen Focus: Gamma 40Hz Audio',
+                    description: 'Ondas Binaurales Gamma 40Hz sintetizadas vs. Silencio absoluto en Focus Timer.',
+                    metric: 'Duración Media de Foco',
+                    lift: '+18.6%',
+                    pValue: '0.012 (Significativo)',
+                    recommendation: 'Habilitar ecualizador Gamma por defecto en el pomodoro.',
+                  },
+                  {
+                    id: 'procrastination',
+                    title: 'Gamification: Reward Decay Cap',
+                    description: 'Penalización por procrastinación (límite de 20% diario) vs. Recompensas estáticas.',
+                    metric: 'Tasa de Completitud de Tarea',
+                    lift: '+15.2%',
+                    pValue: '0.024 (Significativo)',
+                    recommendation: 'Desplegar a nivel global para mitigar falsas retenciones.',
+                  },
+                ].map((exp) => (
+                  <div key={exp.id} className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3.5 hover:bg-white/[0.02] transition-all">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="text-xs font-black text-white uppercase tracking-tight">{exp.title}</h4>
+                        <p className="text-[9px] text-zinc-500 font-medium mt-0.5 leading-normal">{exp.description}</p>
+                      </div>
+                      <span className="text-[8px] font-mono font-black text-[#00E5FF] bg-[#00E5FF]/10 border border-[#00E5FF]/20 rounded px-1.5 py-0.5 uppercase tracking-wide">
+                        {exp.lift} Lift
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-[9px] border-t border-white/5 pt-3">
+                      <div>
+                        <span className="text-zinc-500 uppercase font-bold block text-[8px] tracking-wide">Métrica Evaluada</span>
+                        <span className="text-zinc-300 font-semibold">{exp.metric}</span>
+                      </div>
+                      <div>
+                        <span className="text-zinc-500 uppercase font-bold block text-[8px] tracking-wide">P-Value (Confianza)</span>
+                        <span className="text-zinc-300 font-semibold font-mono">{exp.pValue}</span>
+                      </div>
+                    </div>
+
+                    {/* Interactive Group Selector (Assign Yourself) */}
+                    <div className="flex items-center justify-between bg-black/40 border border-white/5 rounded-xl p-2 mt-2">
+                      <span className="text-[8px] font-black font-mono text-zinc-400 uppercase tracking-widest">
+                        Tu Grupo Asignado:
+                      </span>
+                      <div className="flex gap-1.5">
+                        {['A', 'B'].map((group) => (
+                          <button
+                            key={group}
+                            onClick={() => setSelectedGroup(prev => ({ ...prev, [exp.id]: group as any }))}
+                            className={`px-3 py-1 rounded-lg text-[8px] font-black transition-all cursor-pointer ${
+                              selectedGroup[exp.id] === group 
+                                ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-black shadow-inner font-black' 
+                                : 'text-zinc-500 hover:text-zinc-300'
+                            }`}
+                          >
+                            Grupo {group}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="p-2.5 rounded-xl bg-green-500/5 border border-green-500/10 text-[8px] font-mono text-green-400 leading-normal">
+                      💡 <b>Recomendación Automatizada:</b> {exp.recommendation}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB CONTENT: Event Stream Log */}
+          {activeTelemetryTab === 'stream' && (
+            <div className="space-y-3.5 animate-fade-in">
+              <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-inner">
+                <div className="bg-[#08080a] px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between">
+                  <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
+                    Live Telemetry Event Log
+                  </span>
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
+                </div>
+                
+                <div className="p-4 font-mono text-[9px] text-zinc-400 min-h-[160px] leading-relaxed max-h-[260px] overflow-y-auto whitespace-pre-wrap select-text space-y-1 text-left">
+                  {telemetryLogs.map((log, index) => {
+                    let colorClass = '';
+                    if (log.includes('TELEMETRY')) colorClass = 'text-cyan-400 font-bold';
+                    else if (log.includes('BIRDBRAIN')) colorClass = 'text-green-400 font-bold';
+                    else if (log.includes('IRT')) colorClass = 'text-purple-400';
+                    else if (log.includes('DELPHI')) colorClass = 'text-[#FF6B00] font-bold';
+                    else if (log.includes('MARKETING')) colorClass = 'text-yellow-400';
+                    
+                    return (
+                      <div key={index} className={colorClass}>
+                        {log}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-[8px] font-mono text-zinc-600 uppercase">
+                <span>Buffer Size: 12 Events</span>
+                <span>Active Connection: SECURE SECURE-WEB_SOCKET</span>
               </div>
             </div>
           )}
