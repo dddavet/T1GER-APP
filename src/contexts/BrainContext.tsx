@@ -57,9 +57,9 @@ interface BrainContextType {
   customLessonTasks: TacticalTask[];
   dailyTacticalStatus: DailyTacticalRecord;
   setDayType: (type: DayType) => void;
-  addHabit: (label: string, icon?: string) => void;
-  addWorkTask: (label: string, icon?: string) => void;
-  addLessonTask: (label: string, icon?: string) => void;
+  addHabit: (label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => void;
+  addWorkTask: (label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => void;
+  addLessonTask: (label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => void;
   removeTacticalTask: (id: string, type: 'habit' | 'work' | 'lesson') => void;
   submitTacticalProof: (id: string, proofUrl?: string, proofText?: string, verified?: boolean) => void;
   commitTactical: (habitIds: string[], workIds: string[], lessonIds: string[]) => void;
@@ -211,16 +211,16 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setBrainState(prev => setDayTypeHelper(prev, type));
   }, []);
 
-  const addHabit = useCallback((label: string, icon?: string) => {
-    setBrainState(prev => addTacticalTask(prev, label, 'habit', icon));
+  const addHabit = useCallback((label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => {
+    setBrainState(prev => addTacticalTask(prev, label, 'habit', icon, recurrence, recurrenceInterval, recurrenceDayOfWeek));
   }, []);
 
-  const addWorkTask = useCallback((label: string, icon?: string) => {
-    setBrainState(prev => addTacticalTask(prev, label, 'work', icon));
+  const addWorkTask = useCallback((label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => {
+    setBrainState(prev => addTacticalTask(prev, label, 'work', icon, recurrence, recurrenceInterval, recurrenceDayOfWeek));
   }, []);
 
-  const addLessonTask = useCallback((label: string, icon?: string) => {
-    setBrainState(prev => addTacticalTask(prev, label, 'lesson', icon));
+  const addLessonTask = useCallback((label: string, icon?: string, recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom', recurrenceInterval?: number, recurrenceDayOfWeek?: number) => {
+    setBrainState(prev => addTacticalTask(prev, label, 'lesson', icon, recurrence, recurrenceInterval, recurrenceDayOfWeek));
   }, []);
 
   const removeTacticalTask = useCallback((id: string, type: 'habit' | 'work' | 'lesson') => {

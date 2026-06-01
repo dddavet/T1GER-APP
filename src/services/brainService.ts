@@ -81,6 +81,9 @@ export interface TacticalTask {
   type: 'habit' | 'work' | 'lesson';
   icon?: string; // Lucide icon name
   createdAt?: number;
+  recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom';
+  recurrenceInterval?: number; // e.g. repeats every N days
+  recurrenceDayOfWeek?: number; // e.g. 0-6 for weekly
 }
 
 export type DayType = 'rest' | 'normal' | 'beast';
@@ -373,13 +376,24 @@ export interface TopicProgress {
   currentDifficulty: Difficulty;
 }
 
-export function addTacticalTask(state: BrainState, label: string, type: 'habit' | 'work' | 'lesson', icon?: string): BrainState {
+export function addTacticalTask(
+  state: BrainState, 
+  label: string, 
+  type: 'habit' | 'work' | 'lesson', 
+  icon?: string,
+  recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom',
+  recurrenceInterval?: number,
+  recurrenceDayOfWeek?: number
+): BrainState {
   const newTask: TacticalTask = {
     id: Math.random().toString(36).substr(2, 9),
     label,
     type,
     icon,
-    createdAt: Date.now()
+    createdAt: Date.now(),
+    recurrence: recurrence || 'daily',
+    recurrenceInterval,
+    recurrenceDayOfWeek
   };
   const keyMap = {
     habit: 'customHabits',
