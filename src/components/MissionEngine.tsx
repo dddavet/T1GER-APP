@@ -512,7 +512,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 onClick={advance}
                 className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                <Brain className="w-4 h-4 stroke-[3]" /> Got It, Take the Quiz
+                <Cpu className="w-4 h-4 stroke-[3]" /> Ir a la Acción Real
               </button>
             </motion.div>
           )}
@@ -614,10 +614,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     </div>
                   </div>
                   <button
-                    onClick={handleSuccess}
+                    onClick={advance}
                     className="w-full py-5 rounded-2xl bg-green-500 hover:bg-green-600 text-black font-black text-sm uppercase tracking-widest shadow-[0_4px_0_0_#15803d] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
                   >
-                    Got It, Continue <ArrowRight size={18} className="stroke-[3]" />
+                    Guardar Progreso & Continuar <ArrowRight size={18} className="stroke-[3]" />
                   </button>
                 </motion.div>
               ) : (
@@ -730,6 +730,66 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   );
                 })}
               </div>
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* DAILY QUOTE STEP — Quote + Context (New)      */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'daily_quote' && (
+            <motion.div
+              key="daily_quote"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-center gap-6 bg-transparent"
+            >
+              {/* Character Header speaking quote */}
+              <div className="flex items-start gap-4 mb-2">
+                <motion.img 
+                  src={character.avatarImg} 
+                  alt={character.name} 
+                  className="w-16 h-16 object-contain flex-shrink-0"
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>{character.name} ({character.title})</p>
+                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                    Predator, he seleccionado esta cita de alto nivel para centrar tu enfoque hoy.
+                  </p>
+                </div>
+              </div>
+
+              {/* Aristotle / Figure quote layout */}
+              <div className="liquid-glass rounded-3xl p-8 shadow-3xl border border-yellow-500/20 bg-yellow-500/5 relative overflow-hidden text-center space-y-6">
+                <span className="text-4xl text-yellow-500/20 font-serif absolute -top-2 left-4">“</span>
+                <p className="text-lg font-black italic uppercase tracking-tight text-white relative z-10 leading-snug">
+                  {mission.curatedData?.quote?.text || "Excellence is not an act, but a habit."}
+                </p>
+                <div className="h-[1px] w-12 bg-yellow-500/30 mx-auto" />
+                <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+                  — {mission.curatedData?.quote?.author || "Aristóteles"} · {mission.topic || "Discipline"}
+                </p>
+              </div>
+
+              {/* 2 Sentences contextualizing why it matters today */}
+              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-2">
+                <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-500 block">
+                  ¿Por qué importa hoy?
+                </span>
+                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                  {mission.curatedData?.quote?.context || "Tu cerebro busca sabotear nuevos hábitos para conservar energía. Conocer las reglas te da el control."}
+                </p>
+              </div>
+
+              {/* Start reading core lesson button */}
+              <button
+                onClick={advance}
+                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4"
+              >
+                <BookOpen className="w-4 h-4 stroke-[3]" /> Iniciar Lección (~3 min)
+              </button>
             </motion.div>
           )}
 
@@ -1185,16 +1245,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
 function getStepsForType(type: string, mission: any, learningStyle: string): string[] {
   if (mission.isCuratedAI) {
-    if (learningStyle === 'visual') {
-      const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
-      return ['visual_lecture', ...qSteps];
-    } else if (learningStyle === 'interactive') {
-      return ['prompt_sandbox'];
-    } else {
-      // reading style ('text')
-      const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
-      return ['reading_chapter', ...qSteps];
-    }
+    const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
+    // Unify all curated learning tracks to execute the optimal 5-stage daily session flow:
+    // 1. daily_quote
+    // 2. reading_chapter
+    // 3. prompt_sandbox (Real Action + Proof using Gemini)
+    // 4. visual_lecture (Optional deep-dive video)
+    // 5. curated_quiz questions
+    return ['daily_quote', 'reading_chapter', 'prompt_sandbox', 'visual_lecture', ...qSteps];
   }
   switch (type) {
     case 'flashcard':

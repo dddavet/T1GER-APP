@@ -41,6 +41,11 @@ export interface CuratedLesson {
   title: string;
   topic: string;
   competency: 'ai';
+  quote: {
+    text: string;
+    author: string;
+    context: string;
+  };
   youtube: YouTubeLecture;
   reading: ReadingChapter;
   interactive: PromptChallenge;
@@ -53,6 +58,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "Introducción a los LLMs",
     topic: "Cómo piensan las máquinas",
     competency: 'ai',
+    quote: {
+      text: "La pre-optimización es el origen de todos los males del código; el modelado probabilístico de tokens es la base del pensamiento artificial.",
+      author: "Andrej Karpathy",
+      context: "El legendario cofundador de OpenAI nos recuerda que las máquinas no razonan como humanos, sino que calculan probabilidades a velocidades absurdas."
+    },
     youtube: {
       youtubeId: "jgwUkEyF4_E",
       title: "Intro to Large Language Models",
@@ -109,6 +119,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "¿Qué es una Red Neuronal?",
     topic: "Pesos, sesgos y propagación",
     competency: 'ai',
+    quote: {
+      text: "Una red neuronal no es más que una función matemática multidimensional que ajusta sus pesos para corregir sus propios errores.",
+      author: "Grant Sanderson (3Blue1Brown)",
+      context: "El creador de la mejor serie visual de matemáticas desmitifica la IA, convirtiendo la inteligencia en un problema de optimización geométrica."
+    },
     youtube: {
       youtubeId: "airAruvnKcY",
       title: "But what is a neural network?",
@@ -165,6 +180,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "Transformers & Attention",
     topic: "El mecanismo de autoatención",
     competency: 'ai',
+    quote: {
+      text: "Attention is all you need.",
+      author: "Vaswani et al. (Google Brain)",
+      context: "La frase del paper de 2017 que cambió la historia del mundo. El mecanismo de atención permite a las máquinas procesar el contexto global al instante."
+    },
     youtube: {
       youtubeId: "h5sa40yYgUY",
       title: "Attention in Transformers, visually explained",
@@ -221,6 +241,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "Ingeniería de Prompts Avanzada",
     topic: "Few-shot prompting y delimitadores",
     competency: 'ai',
+    quote: {
+      text: "La ingeniería de prompts no se trata de adivinar palabras mágicas, sino de estructurar el contexto para guiar el razonamiento lógico del modelo.",
+      author: "Andrew Ng (Stanford)",
+      context: "El pionero del aprendizaje automático explica cómo el lenguaje natural se convierte en la nueva sintaxis de programación para sistemas inteligentes."
+    },
     youtube: {
       youtubeId: "_w18W939C_o",
       title: "Prompt Engineering for Developers",
@@ -277,6 +302,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "Arquitecturas RAG y Ajuste Fino",
     topic: "RAG vs Fine-Tuning",
     competency: 'ai',
+    quote: {
+      text: "RAG es como rendir un examen a libro abierto; el Fine-Tuning es memorizar el diccionario completo para cambiar la personalidad de la IA.",
+      author: "Andrej Karpathy",
+      context: "Una de las mejores analogías técnicas para entender cuándo suministrar datos externos y cuándo alterar los parámetros de la red neuronal."
+    },
     youtube: {
       youtubeId: "c3b-dex5Aqk",
       title: "State of GPT & Fine-Tuning",
@@ -333,6 +363,11 @@ export const AI_CURATED_CURRICULUM: Record<number, CuratedLesson> = {
     title: "El Futuro de la IA y AGIs",
     topic: "Agentes, leyes de escala y GPT-5",
     competency: 'ai',
+    quote: {
+      text: "El futuro de la tecnología no pertenece a chatbots que responden preguntas, sino a agentes autónomos que planifican, actúan y completan tareas en bucle.",
+      author: "Sam Altman (OpenAI)",
+      context: "El CEO de OpenAI anticipa la transición hacia una economía de agentes, donde la IA ejecuta workflows completos en lugar de simples interacciones."
+    },
     youtube: {
       youtubeId: "zjkBMFhNj_g",
       title: "The Future of GPT-5 & AGI",
