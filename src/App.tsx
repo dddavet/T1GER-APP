@@ -228,7 +228,10 @@ const AppContent = () => {
             )}
             {activeView === 'profile' && (
               <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <Profile />
+                <Profile onPlayMission={(m) => {
+                  setActiveMission(m);
+                  setActiveView('mission');
+                }} />
               </motion.div>
             )}
             {activeView === 'coach' && (
