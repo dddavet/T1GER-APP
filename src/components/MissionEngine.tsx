@@ -23,6 +23,140 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const { appUser } = useAuth();
   const learningStyle = appUser?.learningStyle || 'text';
 
+  const lessonQuote = useMemo(() => {
+    if (mission.quote?.text) return mission.quote;
+    if (mission.curatedData?.quote?.text) return mission.curatedData.quote;
+    
+    const comp = mission.competency || 'mindset';
+    if (comp === 'investing' || comp === 'accounting') {
+      return {
+        text: "The individual investor should act consistently as an investor and not as a speculator.",
+        author: "Benjamin Graham",
+        context: "El padre del Value Investing nos recuerda la diferencia entre apostar y construir valor sistemático."
+      };
+    }
+    if (comp === 'offer' || comp === 'sales' || comp === 'marketing') {
+      return {
+        text: "Make them an offer so good they feel stupid saying no.",
+        author: "Alex Hormozi",
+        context: "Enfócate en maximizar el valor percibido del cliente, no en rebajar tus precios."
+      };
+    }
+    if (comp === 'ai') {
+      return {
+        text: "AI will not replace you. A person using AI will replace you.",
+        author: "AI Proverb",
+        context: "La habilidad clave es dominar las herramientas y aprender a colaborar con los modelos inteligentes."
+      };
+    }
+    return {
+      text: "We are what we repeatedly do. Excellence is not an act, but a habit.",
+      author: "Aristóteles",
+      context: "La disciplina táctica diaria y la consistencia en el mundo real vencen al talento y a la motivación pasajera."
+    };
+  }, [mission.quote, mission.curatedData?.quote, mission.competency]);
+
+  const lessonReading = useMemo(() => {
+    if (mission.reading?.paragraphs) return mission.reading;
+    if (mission.curatedData?.reading?.paragraphs) return mission.curatedData.reading;
+    
+    const concept = mission.concept_flashcard || mission.concept || "Aprende el concepto principal de esta lección.";
+    const title = mission.title || "Concepto Clave";
+    const takeaway = mission.keyTakeaway || "Completa la acción de hoy para consolidar el hábito.";
+    
+    const paragraphs = concept.split('. ').filter(Boolean).map(p => p.trim() + (p.endsWith('.') ? '' : '.'));
+    
+    return {
+      title,
+      subtitle: `Entrenamiento de ${COMPETENCY_LABELS[mission.competency as keyof typeof COMPETENCY_LABELS] || mission.competency || 'Habilidad'}`,
+      paragraphs: paragraphs.length > 0 ? paragraphs : [concept],
+      takeaway
+    };
+  }, [mission.reading, mission.curatedData?.reading, mission.concept_flashcard, mission.concept, mission.title, mission.keyTakeaway, mission.competency]);
+
+  const lessonAction = useMemo(() => {
+    if (mission.action?.instruction) return mission.action;
+    if (mission.curatedData?.action?.instruction) return mission.curatedData.action;
+    
+    const taskBrief = mission.taskBrief || mission.mission_brief;
+    if (taskBrief) {
+      return {
+        title: "Acción en Campo",
+        instruction: taskBrief,
+        type: "photo",
+        successReward: 50
+      };
+    }
+    
+    return {
+      title: "Consistencia Diaria",
+      instruction: "Antes de abrir cualquier red social hoy, realiza 10 lagartijas (pushups). Describe cómo te sentiste o sube una foto.",
+      type: "tap",
+      successReward: 50
+    };
+  }, [mission.action, mission.curatedData?.action, mission.taskBrief, mission.mission_brief]);
+
+  const lessonYoutube = useMemo(() => {
+    if (mission.youtube?.youtubeId) return mission.youtube;
+    if (mission.curatedData?.youtube?.youtubeId) return mission.curatedData.youtube;
+    
+    const comp = mission.competency || 'mindset';
+    if (comp === 'investing' || comp === 'accounting') {
+      return {
+        youtubeId: "5pGvE7Hyl6Q",
+        title: "How to Invest in the Stock Market",
+        channelName: "Ali Abdaal",
+        duration: "15 min",
+        takeaway: "Entiende el interés compuesto y el index investing pasivo a largo plazo.",
+        notes: [
+          "Invertir en fondos indexados es superior a largo plazo.",
+          "El interés compuesto es la fuerza más poderosa del universo financiero.",
+          "Automatiza tus depósitos mensuales."
+        ]
+      };
+    }
+    if (comp === 'offer' || comp === 'sales' || comp === 'marketing') {
+      return {
+        youtubeId: "-m9k2WffQsk",
+        title: "How to Build a $100M Offer",
+        channelName: "Alex Hormozi",
+        duration: "20 min",
+        takeaway: "Aprende a estructurar garantías irrazonables y stackear bonos.",
+        notes: [
+          "Una oferta empaqueta la solución y el riesgo.",
+          "La garantía invierte el riesgo y rompe barreras.",
+          "Stackea bonos específicos para cada objeción."
+        ]
+      };
+    }
+    if (comp === 'ai') {
+      return {
+        youtubeId: "jgwUkEyF4_E",
+        title: "Intro to Large Language Models",
+        channelName: "Andrej Karpathy",
+        duration: "1 hour",
+        takeaway: "Los LLMs son redes de pesos predictivos.",
+        notes: [
+          "Los modelos predicen el siguiente token de texto.",
+          "El entrenamiento tiene dos fases clave: pre-entrenamiento y alineación.",
+          "Programar prompts es la interfaz principal."
+        ]
+      };
+    }
+    return {
+      youtubeId: "K-TwIM5W4CY",
+      title: "How to Build Unshakeable Discipline",
+      channelName: "Andrew Huberman",
+      duration: "10 min",
+      takeaway: "Aprende el circuito neurobiológico de la dopamina.",
+      notes: [
+        "La dopamina es la molécula del deseo y anticipación.",
+        "Completar tareas difíciles temprano equilibra la dopamina.",
+        "La resistencia es fricción límbica."
+      ]
+    };
+  }, [mission.youtube, mission.curatedData?.youtube, mission.competency]);
+
   const character = useMemo(() => getCharacterForTrack(mission.competency || 'general'), [mission.competency]);
 
   const [quizResult, setQuizResult] = useState<'idle' | 'correct' | 'wrong'>('idle');
@@ -32,11 +166,31 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const failPhrase = useMemo(() => getRandomPhrase(character.id, 'fail'), [character.id, quizResult]);
 
   // Determine steps based on mission type & learning style
-  const steps = useMemo(() => getStepsForType(mission.type || 'flashcard', mission, learningStyle), [mission, learningStyle]);
+  const steps = useMemo(() => getStepsForType(mission.type || 'flashcard', mission, learningStyle, appUser?.isPro ?? true), [mission, learningStyle, appUser?.isPro]);
   const [stepIndex, setStepIndex] = useState(0);
   const currentStep = steps[stepIndex];
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
+
+  // Proof of Action States
+  const [proofText, setProofText] = useState('');
+  const [proofPhoto, setProofPhoto] = useState<string | null>(null);
+  const [isSubmittingProof, setIsSubmittingProof] = useState(false);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const url = URL.createObjectURL(file);
+      setProofPhoto(url);
+    }
+  };
+
+  const handleSubmitProofOfAction = async () => {
+    setIsSubmittingProof(true);
+    await addXP(50);
+    setIsSubmittingProof(false);
+    advance();
+  };
 
   // Accordion Note States for visual lectures
   const [expandedNote, setExpandedNote] = useState<number | null>(null);
@@ -472,18 +626,18 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 </div>
               </div>
 
-              <div className="mt-2">
+              <div className="mt-2 text-left">
                 <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black block mb-1">
-                  {mission.curatedData?.reading.subtitle}
+                  {lessonReading.subtitle}
                 </span>
                 <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">
-                  {mission.curatedData?.reading.title}
+                  {lessonReading.title}
                 </h1>
               </div>
 
               {/* Translucent glass paragraphs */}
-              <div className="space-y-4 my-2">
-                {(mission.curatedData?.reading.paragraphs || []).map((paragraph: string, idx: number) => (
+              <div className="space-y-4 my-2 text-left">
+                {(lessonReading.paragraphs || []).map((paragraph: string, idx: number) => (
                   <div
                     key={idx}
                     className="liquid-glass rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors"
@@ -496,14 +650,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </div>
 
               {/* Takeaway */}
-              <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4 flex gap-3">
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4 flex gap-3 text-left">
                 <Lightbulb className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
                     Conclusión Táctica
                   </span>
                   <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
-                    {mission.curatedData?.reading.takeaway}
+                    {lessonReading.takeaway}
                   </p>
                 </div>
               </div>
@@ -514,6 +668,249 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               >
                 <Cpu className="w-4 h-4 stroke-[3]" /> Ir a la Acción Real
               </button>
+            </motion.div>
+          )}
+
+          {/* =================================================== */}
+          {/* CURATED AI STEP — Real-world Action                 */}
+          {/* =================================================== */}
+          {showMainUI && currentStep === 'real_world_action' && (
+            <motion.div
+              key="real_world_action"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto text-left"
+            >
+              {/* Mascot explaining real world task */}
+              <div className="flex items-start gap-4 mb-2 animate-fade-in">
+                <motion.img
+                  src={character.avatarImg}
+                  alt={character.name}
+                  className="w-16 h-16 object-contain flex-shrink-0"
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
+                    ACCIÓN EN EL MUNDO REAL ({character.name})
+                  </p>
+                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                    Predator, el aprendizaje sin ejecución no sirve de nada. Completa esta acción hoy mismo.
+                  </p>
+                </div>
+              </div>
+
+              {/* Title & Action Description */}
+              <div className="liquid-glass rounded-3xl p-6 shadow-xl border border-[var(--accent-main)]/10 text-center space-y-4">
+                <span className="text-[8px] font-black font-mono text-[var(--accent-main)] uppercase tracking-[0.2em] bg-[var(--accent-main)]/10 px-2.5 py-1 rounded-full border border-[var(--accent-main)]/20 inline-block">
+                  Objetivo de Hoy
+                </span>
+                <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
+                  {lessonAction.title}
+                </h2>
+                <p className="text-sm font-semibold text-zinc-300 leading-relaxed font-sans">
+                  {lessonAction.instruction}
+                </p>
+              </div>
+
+              {/* Start/Proceed button */}
+              <button
+                onClick={advance}
+                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+              >
+                Registrar Prueba de Acción <ArrowRight size={18} className="stroke-[3]" />
+              </button>
+            </motion.div>
+          )}
+
+          {/* =================================================== */}
+          {/* CURATED AI STEP — Proof of Action                   */}
+          {/* =================================================== */}
+          {showMainUI && currentStep === 'proof_of_action' && (
+            <motion.div
+              key="proof_of_action"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto text-left"
+            >
+              {/* Mascot header */}
+              <div className="flex items-start gap-4 mb-2">
+                <img
+                  src={character.avatarImg}
+                  alt={character.name}
+                  className="w-14 h-14 object-contain flex-shrink-0"
+                />
+                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
+                    REGISTRO DE EVIDENCIA
+                  </span>
+                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                    Sube una foto, escribe un reporte rápido, o confirma la ejecución para reclamar tus XP.
+                  </p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {/* Proof options */}
+                <div className="liquid-glass rounded-3xl p-6 border border-white/5 space-y-4">
+                  {/* File Upload Option */}
+                  {lessonAction.type === 'photo' && (
+                    <div className="space-y-2">
+                      <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest block">
+                        Subir Foto Evidencia
+                      </span>
+                      {proofPhoto ? (
+                        <div className="relative rounded-2xl overflow-hidden aspect-video border border-white/10">
+                          <img src={proofPhoto} className="w-full h-full object-cover" alt="Proof preview" />
+                          <button
+                            onClick={() => setProofPhoto(null)}
+                            className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white p-1.5 rounded-full hover:bg-black"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/15 rounded-2xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white/[0.01] transition-all duration-300">
+                          <Camera className="w-8 h-8 text-zinc-500 mb-2" />
+                          <span className="font-bold text-[9px] uppercase tracking-widest text-zinc-400">Subir foto de la acción</span>
+                          <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                        </label>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Text Check-in Option */}
+                  {lessonAction.type === 'text' && (
+                    <div className="space-y-2">
+                      <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest block">
+                        Reporte de Acción
+                      </span>
+                      <textarea
+                        value={proofText}
+                        onChange={(e) => setProofText(e.target.value)}
+                        placeholder="Ej: 'Realicé mis 10 lagartijas antes de abrir las redes sociales. ¡Foco mental!'"
+                        rows={4}
+                        className="w-full p-4 bg-black/40 border border-white/10 focus:border-[var(--accent-main)]/50 rounded-2xl text-xs text-zinc-200 placeholder-zinc-700 focus:outline-none resize-none font-medium leading-relaxed"
+                      />
+                    </div>
+                  )}
+
+                  {/* Tap Check-in Option */}
+                  {lessonAction.type === 'tap' && (
+                    <div className="space-y-2 text-center py-4">
+                      <CheckCircle2 className="w-12 h-12 text-accent mx-auto animate-pulse" />
+                      <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
+                        Completa la acción en el mundo real y toca el botón inferior para confirmar.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Submit button */}
+                <button
+                  onClick={handleSubmitProofOfAction}
+                  disabled={
+                    isSubmittingProof || 
+                    (lessonAction.type === 'photo' && !proofPhoto) || 
+                    (lessonAction.type === 'text' && !proofText.trim())
+                  }
+                  className="w-full py-5 rounded-2xl btn-gamified-3d border-green-800 bg-green-500/10 hover:bg-green-500/20 text-green-400 shadow-[0_4px_0_0_#15803d] border-green-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSubmittingProof ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" /> Registrando...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" /> Marcar como Completado (+50 XP)
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* CURATED AI STEP — Optional Deep Dive Pro     */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'optional_deep_dive' && (
+            <motion.div
+              key="optional_deep_dive"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto text-left"
+            >
+              {/* Header with Pro badge */}
+              <div className="flex items-center gap-3 bg-zinc-950/40 p-3 rounded-2xl border border-white/5 mb-1 animate-fade-in">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-black font-mono text-sm">
+                  Pro
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-xs font-black uppercase text-white leading-none">
+                      {lessonYoutube.channelName}
+                    </h3>
+                    <span className="text-[7px] font-black bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">Pro</span>
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-mono block mt-1">
+                    Duración: {lessonYoutube.duration} • Opcional Deep Dive
+                  </span>
+                </div>
+              </div>
+
+              {/* YouTube Player */}
+              {lessonYoutube.youtubeId ? (
+                <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${lessonYoutube.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
+                    title={lessonYoutube.title}
+                    className="absolute inset-0 w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                </div>
+              ) : (
+                <div className="w-full h-40 bg-zinc-900 border border-white/5 rounded-3xl flex items-center justify-center flex-col p-4 text-center">
+                  <PlaySquare className="w-10 h-10 text-purple-400 mb-2 opacity-50" />
+                  <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase">Material de Profundización no disponible</span>
+                </div>
+              )}
+
+              <h2 className="text-lg font-black uppercase italic tracking-tighter text-white mt-2">
+                {lessonYoutube.title}
+              </h2>
+
+              {/* Takeaway */}
+              <div className="bg-purple-500/5 border border-purple-500/20 rounded-2xl p-4 flex gap-3">
+                <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
+                <div>
+                  <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
+                    Concepto de Élite Pro
+                  </span>
+                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                    {lessonYoutube.takeaway}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action buttons (Skip or Proceed) */}
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={advance}
+                  className="flex-1 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                >
+                  Saltar
+                </button>
+                <button
+                  onClick={advance}
+                  className="flex-[2] py-4 bg-purple-500 hover:bg-purple-600 text-black rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_4px_0_0_#6b21a8] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Brain className="w-4 h-4 text-black" /> Iniciar Quick Quiz Pro
+                </button>
+              </div>
             </motion.div>
           )}
 
@@ -765,11 +1162,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <div className="liquid-glass rounded-3xl p-8 shadow-3xl border border-yellow-500/20 bg-yellow-500/5 relative overflow-hidden text-center space-y-6">
                 <span className="text-4xl text-yellow-500/20 font-serif absolute -top-2 left-4">“</span>
                 <p className="text-lg font-black italic uppercase tracking-tight text-white relative z-10 leading-snug">
-                  {mission.curatedData?.quote?.text || "Excellence is not an act, but a habit."}
+                  {lessonQuote.text}
                 </p>
                 <div className="h-[1px] w-12 bg-yellow-500/30 mx-auto" />
                 <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
-                  — {mission.curatedData?.quote?.author || "Aristóteles"} · {mission.topic || "Discipline"}
+                  — {lessonQuote.author} · {mission.topic || "Discipline"}
                 </p>
               </div>
 
@@ -779,7 +1176,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   ¿Por qué importa hoy?
                 </span>
                 <p className="text-xs text-zinc-300 font-medium leading-relaxed">
-                  {mission.curatedData?.quote?.context || "Tu cerebro busca sabotear nuevos hábitos para conservar energía. Conocer las reglas te da el control."}
+                  {lessonQuote.context}
                 </p>
               </div>
 
@@ -1243,33 +1640,22 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // STEP SEQUENCING
 // ============================================================
 
-function getStepsForType(type: string, mission: any, learningStyle: string): string[] {
-  if (mission.isCuratedAI) {
-    const qSteps = (mission.curatedData?.quizQuestions || []).map((_: any, idx: number) => `curated_quiz_${idx}`);
-    // Unify all curated learning tracks to execute the optimal 5-stage daily session flow:
-    // 1. daily_quote
-    // 2. reading_chapter
-    // 3. prompt_sandbox (Real Action + Proof using Gemini)
-    // 4. visual_lecture (Optional deep-dive video)
-    // 5. curated_quiz questions
-    return ['daily_quote', 'reading_chapter', 'prompt_sandbox', 'visual_lecture', ...qSteps];
+function getStepsForType(type: string, mission: any, learningStyle: string, isPro: boolean = true): string[] {
+  // All daily sessions (curated, AI-personalized or static) use the unified 6-stage daily session flow!
+  const steps = ['daily_quote', 'reading_chapter', 'real_world_action', 'proof_of_action'];
+  if (isPro) {
+    steps.push('optional_deep_dive');
+    
+    // Determine which quiz step to add
+    const qQuestions = mission.curatedData?.quizQuestions || mission.quizQuestions || [];
+    if (qQuestions.length > 0) {
+      const qSteps = qQuestions.map((_: any, idx: number) => `curated_quiz_${idx}`);
+      steps.push(...qSteps);
+    } else if (type === 'scenario_quiz' || mission.options) {
+      steps.push('quiz');
+    } else if (mission.recallQuestion || mission.recallOptions) {
+      steps.push('recall');
+    }
   }
-  switch (type) {
-    case 'flashcard':
-      if (mission.recallQuestion || mission.recallOptions) {
-        if (learningStyle === 'interactive') {
-          // Interactive learners skip the teach phase directly to testing their intuition
-          return ['recall'];
-        }
-        return ['teach', 'recall'];
-      }
-      return ['flashcard'];
-    case 'scenario_quiz':
-      return ['quiz'];
-    case 'real_world_task':
-      if (learningStyle === 'interactive') return ['artifact'];
-      return ['teach', 'artifact'];
-    default:
-      return ['flashcard'];
-  }
+  return steps;
 }

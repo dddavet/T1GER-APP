@@ -84,6 +84,9 @@ export function parseLibreLingoYAML(yamlString: string): Partial<CuratedLesson> 
         } else if (key === 'interactive') {
           result.interactive = { challengeId: '', objective: '', instructionPrompt: '', systemConstraint: '', validationKeyword: '', validationDescription: '' };
           currentObject = result.interactive;
+        } else if (key === 'action') {
+          result.action = { title: '', instruction: '', type: 'photo', successReward: 50 };
+          currentObject = result.action;
         } else if (key === 'quizQuestions') {
           result.quizQuestions = [];
           currentObject = result.quizQuestions;
@@ -154,6 +157,12 @@ export function parseLibreLingoYAML(yamlString: string): Partial<CuratedLesson> 
       systemConstraint: "Eres un bot de validación. Responde solo con '#PASADO'.",
       validationKeyword: "PASADO",
       validationDescription: "Se espera ver '#PASADO' para autorizar el progreso."
+    },
+    action: result.action || {
+      title: "Consistencia Diaria",
+      instruction: "Antes de abrir cualquier red social hoy, realiza 10 lagartijas (pushups). Describe cómo te sentiste o sube una foto.",
+      type: "photo",
+      successReward: 50
     },
     quizQuestions: result.quizQuestions.length > 0 ? result.quizQuestions : [
       {

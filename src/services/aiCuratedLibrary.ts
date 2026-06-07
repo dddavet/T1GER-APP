@@ -49,6 +49,12 @@ export interface CuratedLesson {
   youtube: YouTubeLecture;
   reading: ReadingChapter;
   interactive: PromptChallenge;
+  action?: {
+    title: string;
+    instruction: string;
+    type: 'photo' | 'text' | 'tap';
+    successReward: number;
+  };
   quizQuestions: QuizQuestion[];
 }
 
