@@ -93,6 +93,19 @@ export interface DailyTacticalRecord {
   proofs: Record<string, { url?: string; text?: string; verified?: boolean }>;
 }
 
+export interface RescueProtocolSelectionInput {
+  availableHabitIds: string[];
+  workTasks: TacticalTask[];
+  lessonTasks: TacticalTask[];
+}
+
+export interface RescueProtocolSelection {
+  dayType: 'rest';
+  habitIds: string[];
+  workIds: string[];
+  lessonIds: string[];
+}
+
 // ============================================================
 // DEFAULTS
 // ============================================================
@@ -152,6 +165,23 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
   ],
   dailyTacticalStatus: {},
 };
+
+export function buildRescueProtocolSelection({
+  availableHabitIds,
+  workTasks,
+  lessonTasks,
+}: RescueProtocolSelectionInput): RescueProtocolSelection {
+  const firstHabitId = availableHabitIds[0];
+  const firstWorkTask = workTasks.find(task => task.type === 'work');
+  const firstLessonTask = lessonTasks.find(task => task.type === 'lesson');
+
+  return {
+    dayType: 'rest',
+    habitIds: firstHabitId ? [firstHabitId] : [],
+    workIds: firstWorkTask ? [firstWorkTask.id] : [],
+    lessonIds: firstLessonTask ? [firstLessonTask.id] : [],
+  };
+}
 
 // ============================================================
 // CURRICULUM PATH HELPERS

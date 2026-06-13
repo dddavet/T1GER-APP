@@ -3,10 +3,12 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Check, Target, Zap, Flame, Coffee, 
   Dumbbell, Bed, Droplets, Brain, Rocket, 
-  Book, Plus, ArrowRight, ShieldCheck, Info
+  Book, ArrowRight, ShieldCheck, Info
 } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
+import { buildRescueProtocolSelection } from '../services/brainService';
 import { STANDARD_HABITS } from '../services/missionBank';
+import { GlassButton } from './ui/apple-tahoe-liquid-glass-button';
 
 const ICON_MAP: Record<string, any> = {
   Dumbbell, Bed, Droplets, Brain, Rocket, Book, Flame, Zap, Target, Coffee
@@ -66,6 +68,21 @@ export const DailyCommitment = () => {
     commitTactical(selectedHabits, selectedWork, selectedLessons);
   };
 
+  const handleRescueProtocol = () => {
+    haptic();
+    const rescue = buildRescueProtocolSelection({
+      availableHabitIds: STANDARD_HABITS.map(habit => habit.id),
+      workTasks: customWorkTasks,
+      lessonTasks: customLessonTasks,
+    });
+
+    setDayType(rescue.dayType);
+    setSelectedHabits(rescue.habitIds);
+    setSelectedWork(rescue.workIds);
+    setSelectedLessons(rescue.lessonIds);
+    commitTactical(rescue.habitIds, rescue.workIds, rescue.lessonIds);
+  };
+
   return (
     <div className="fixed inset-0 z-[150] bg-[#050505] overflow-y-auto">
       <div className="max-w-md mx-auto p-6 pb-40 space-y-10">
@@ -108,6 +125,31 @@ export const DailyCommitment = () => {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* RESCUE PROTOCOL */}
+        <div className="liquid-glass-heavy rounded-[2rem] p-5 border border-blue-400/15 shadow-3d space-y-4">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-[1.25rem] bg-blue-400/10 border border-blue-400/20 text-blue-400 flex items-center justify-center shadow-inner">
+              <Coffee className="w-6 h-6" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-3">
+                <h2 className="text-sm font-black uppercase tracking-tight text-white">Rescue Protocol</h2>
+                <span className="text-[8px] font-black text-blue-300 uppercase tracking-widest bg-blue-400/10 px-2 py-1 rounded-full border border-blue-400/10">Low load</span>
+              </div>
+              <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-wider font-black mt-2">
+                One clean rep in each pillar. No dashboard guilt.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleRescueProtocol}
+            className="w-full rounded-full border border-blue-400/20 bg-blue-400/10 py-3.5 text-[10px] font-black uppercase tracking-[0.2em] text-blue-200 transition-all hover:bg-blue-400/15 active:scale-95"
+          >
+            Deploy Rescue Day
+          </button>
         </div>
 
         {/* HABITS COLUMN */}
@@ -233,14 +275,17 @@ export const DailyCommitment = () => {
       {/* COMMIT BUTTON */}
       <div className="fixed bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-black via-black/80 to-transparent z-10">
         <div className="max-w-md mx-auto">
-          <button
+          <GlassButton
             onClick={handleCommit}
             disabled={selectedHabits.length === 0 && selectedWork.length === 0 && selectedLessons.length === 0}
-            className="w-full bg-accent text-black py-6 rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-3d-accent flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale"
+            className="w-full"
+            tone="dark"
+            intensity="strong"
+            glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
           >
             Deploy 3-Pillar Protocol
             <ArrowRight className="w-5 h-5" strokeWidth={3} />
-          </button>
+          </GlassButton>
         </div>
       </div>
     </div>
