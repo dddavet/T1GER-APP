@@ -26,9 +26,9 @@
 
 .theme-beast {
   --accent-main: #FF6B00;
-  --accent-glow: rgba(255, 107, 0, 0.5);
-  --bg-glow-1: rgba(255, 107, 0, 0.2);
-  --bg-glow-2: rgba(204, 255, 0, 0.1);
+  --accent-glow: rgba(255, 107, 0, 0.2);
+  --bg-glow-1: rgba(255, 107, 0, 0.03);
+  --bg-glow-2: rgba(255, 107, 0, 0.01);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -232,23 +232,19 @@
   /* Refined glass morphism with consistent depth layers */
 
   .liquid-glass {
-    @apply bg-white/[0.06] backdrop-blur-[20px] border border-white/12;
+    @apply bg-[#0C0C0E] border border-white/[0.04];
     box-shadow:
-      0 8px 32px rgba(0, 0, 0, 0.4),
-      inset 0 1px 0 rgba(255, 255, 255, 0.12),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.15);
+      0 8px 32px rgba(0, 0, 0, 0.8),
+      inset 0 1px 0 rgba(255, 255, 255, 0.02);
     transform: translateZ(0);
-    will-change: transform, backdrop-filter;
   }
 
   .liquid-glass-heavy {
-    @apply bg-black/50 backdrop-blur-[28px] border border-white/10;
+    @apply bg-black border border-white/[0.05];
     box-shadow:
-      0 12px 40px rgba(0, 0, 0, 0.5),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+      0 12px 40px rgba(0, 0, 0, 0.9),
+      inset 0 1px 0 rgba(255, 255, 255, 0.03);
     transform: translateZ(0);
-    will-change: transform, backdrop-filter;
   }
 
   .liquid-glass-accent {

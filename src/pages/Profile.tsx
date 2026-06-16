@@ -16,6 +16,10 @@ export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => v
   const [showMarket, setShowMarket] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
 
+  // Developer Mode Toggle
+  const [isDevMode, setIsDevMode] = useState(false);
+  const [devClicks, setDevClicks] = useState(0);
+
   // Webhook Simulator States
   const [activeService, setActiveService] = useState<'todoist' | 'notion'>('todoist');
   const [simulating, setSimulating] = useState(false);
@@ -257,7 +261,14 @@ quizQuestions:
         <motion.div 
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="w-28 h-28 rounded-full flex items-center justify-center mb-6 border-[4px] border-accent shadow-3d-strong overflow-hidden relative group cursor-pointer"
+          onClick={() => {
+            setDevClicks(prev => prev + 1);
+            if (devClicks >= 4) {
+              setIsDevMode(prev => !prev);
+              setDevClicks(0);
+            }
+          }}
+          className="w-28 h-28 rounded-full flex items-center justify-center mb-6 border-[3px] border-white/10 shadow-float overflow-hidden relative group cursor-pointer bg-zinc-900"
         >
           {appUser?.photoURL ? (
             <img src={appUser.photoURL} alt={appUser.displayName || 'User'} className="w-full h-full object-cover" />
@@ -266,8 +277,8 @@ quizQuestions:
               {appUser?.displayName?.charAt(0) || '🐅'}
             </div>
           )}
-          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
-             <Settings className="w-6 h-6 text-white" />
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+             <span className="text-white font-black text-[10px] uppercase">{isDevMode ? 'Dev Mode On' : 'Tap 5x Dev'}</span>
           </div>
         </motion.div>
         
@@ -302,17 +313,31 @@ quizQuestions:
         </div>
       </header>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-3 gap-3">
+      {/* STREAK ALTAR (Duolingo Style Focus) */}
+      <section className="relative flex flex-col items-center justify-center py-8">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-[#FF6B00]/10 rounded-full blur-[60px] pointer-events-none" />
+        <motion.div 
+          animate={{ scale: [1, 1.05, 1] }} 
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          className="text-7xl mb-2 drop-shadow-[0_0_30px_rgba(255,107,0,0.4)]"
+        >
+          🔥
+        </motion.div>
+        <h2 className="text-6xl font-black italic tracking-tighter text-white drop-shadow-md">
+          {learnStreak}
+        </h2>
+        <span className="text-[12px] font-black uppercase text-zinc-500 tracking-[0.2em] mt-1">Días de Racha</span>
+      </section>
+
+      {/* Stats Grid Minimal */}
+      <div className="grid grid-cols-2 gap-3 px-2">
         {[
-          { label: 'Learn Streak', value: learnStreak, color: '#00E5FF', shadow: 'rgba(0,229,255,0.3)' },
-          { label: 'Tactical Streak', value: tacticalStreak, color: 'var(--accent-main)', shadow: 'rgba(255,107,0,0.3)' },
-          { label: 'Total XP', value: stats.xp, color: 'var(--accent-main)', shadow: 'rgba(204,255,0,0.3)' },
+          { label: 'Tactical Score', value: tacticalStreak, color: '#fff' },
+          { label: 'Total XP', value: stats.xp, color: '#fff' },
         ].map((stat, i) => (
-          <div key={i} className="liquid-glass p-4 rounded-2xl flex flex-col items-center justify-center text-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-            <p className="text-[10px] font-black uppercase text-zinc-500 mb-1 z-10 leading-none">{stat.label}</p>
-            <p className="font-black text-2xl z-10" style={{ color: stat.color, textShadow: `0 0 15px ${stat.shadow}` }}>
+          <div key={i} className="liquid-glass p-5 rounded-3xl flex flex-col items-center justify-center text-center relative">
+            <p className="text-[10px] font-bold uppercase text-zinc-500 mb-1 leading-none tracking-widest">{stat.label}</p>
+            <p className="font-black text-3xl text-white">
               {stat.value}
             </p>
           </div>
@@ -681,6 +706,15 @@ quizQuestions:
           </div>
         </div>
       </section>
+
+      {/* --- DEV MODE ONLY CONTENT --- */}
+      {isDevMode && (
+        <div className="space-y-8 border-t border-red-500/20 pt-8 mt-8">
+          <div className="flex items-center justify-center gap-2">
+            <span className="px-3 py-1 bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-widest rounded-md border border-red-500/20">
+              Developer Consoles Active
+            </span>
+          </div>
 
       {/* WEBHOOK & AUTOMATIONS CONSOLE (APIS ABIERTAS) */}
       <section className="space-y-4">
@@ -1096,6 +1130,8 @@ quizQuestions:
           )}
         </div>
       </section>
+        </div>
+      )}
 
       {/* Public Profile Preview */}
       <section className="space-y-4">
