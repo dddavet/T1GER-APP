@@ -8,3 +8,4 @@ coverage/
 !.env.example
 .agents/
 .claude/
+.firebase-emulator-data/
