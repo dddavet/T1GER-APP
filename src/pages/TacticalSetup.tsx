@@ -9,6 +9,7 @@ import {
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { requestNotificationPermission } from '../services/notificationService';
+import { GlassButton } from '../components/ui/apple-tahoe-liquid-glass-button';
 
 const ICON_OPTIONS = [
   { name: 'Dumbbell', icon: Dumbbell },
@@ -163,14 +164,17 @@ export const TacticalSetup = () => {
                   </div>
                 </div>
 
-                <button 
+                <GlassButton 
                   onClick={handleAdd}
                   disabled={!label.trim()}
-                  className="w-full bg-white text-black py-5 rounded-full font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-3d hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20 disabled:grayscale"
+                  className="w-full"
+                  tone="dark"
+                  intensity="strong"
+                  glassColor="rgba(245,245,240,0.82)"
                 >
                   <Plus className="w-4 h-4" strokeWidth={4} />
                   Deploy To Protocol
-                </button>
+                </GlassButton>
              </div>
           </div>
         </div>
@@ -215,15 +219,21 @@ export const TacticalSetup = () => {
         </div>
 
         {/* LOCK IN BUTTON */}
-        <motion.button 
+        <motion.div
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
+          className="fixed bottom-10 left-6 right-6 z-50"
+        >
+          <GlassButton
           onClick={() => { haptic(); setActiveView('home'); }}
-          className="fixed bottom-10 left-6 right-6 z-50 liquid-glass-heavy border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-3d-accent flex items-center justify-center gap-3 transition-all"
+          className="w-full"
+          tone="accent"
+          intensity="strong"
         >
           <Check className="w-5 h-5" strokeWidth={4} />
           Lock Tactical Baseline
-        </motion.button>
+          </GlassButton>
+        </motion.div>
       </div>
     </div>
   );

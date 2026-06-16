@@ -65,7 +65,7 @@ export const Profile = () => {
           </div>
           <div className="flex items-center justify-center gap-2">
             <div className="px-2 py-0.5 bg-accent text-black rounded text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 shadow-3d shadow-accent/20">
-              <Crown className="w-2.5 h-2.5" /> APEX
+              <Crown className="w-2.5 h-2.5" /> {appUser?.isFounder ? 'FOUNDER' : 'APEX'}
             </div>
             <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">•</span>
             <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{appUser?.email}</span>
@@ -275,7 +275,7 @@ export const Profile = () => {
               <div className="flex-1">
                  <div className="flex items-center gap-1.5">
                     <span className="font-black text-sm uppercase tracking-tight text-white">{appUser?.displayName || 'Founder'}</span>
-                    <Crown className="w-3 h-3 text-amber-400" />
+                    {appUser?.isFounder && <Crown className="w-3 h-3 text-amber-400" />}
                  </div>
                  <div className="flex items-center gap-3 mt-1">
                     <div className="flex items-center gap-1">

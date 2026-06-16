@@ -114,7 +114,6 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setBrainState(loaded);
 
     if (appUser?.uid && appUser.uid !== 'anonymous') {
-      // Sync from Firestore if logged in
       const fetchFromFirestore = async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
@@ -125,7 +124,6 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               setBrainState(prev => ({
                 ...prev,
                 ...cloudData,
-                // Preserve critical local-only or newer session data if needed
               }));
             }
           }
@@ -150,7 +148,6 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           console.error("Failed to sync to Firestore", err);
         }
       };
-      // Debounce this in a real app, but for now we'll do it on change
       syncToFirestore();
     }
   }, [brainState, appUser?.uid]);

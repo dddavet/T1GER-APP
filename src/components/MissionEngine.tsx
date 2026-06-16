@@ -5,6 +5,7 @@ import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { COMPETENCY_LABELS } from '../services/missionBank';
+import { GlassButton } from './ui/apple-tahoe-liquid-glass-button';
 
 interface MissionEngineProps {
   mission: any;
@@ -143,12 +144,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </div>
             </div>
 
-            <button
-              onClick={onComplete}
-              className="mt-8 text-xs font-bold w-full bg-white/10 hover:bg-white/20 py-4 rounded-full text-zinc-300 uppercase tracking-widest transition-colors"
-            >
-              Continue →
-            </button>
+            <GlassButton onClick={onComplete} className="mt-8 w-full" intensity="quiet">
+              Continue
+              <ArrowRight className="w-4 h-4" />
+            </GlassButton>
           </div>
         )}
 
@@ -164,9 +163,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             <p className="text-sm font-mono text-zinc-400 text-center mb-6 px-4">
               Review the concept and try again. Every mistake is a lesson.
             </p>
-            <button onClick={onComplete} className="text-xs font-bold w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 py-4 rounded-full uppercase tracking-widest transition-colors">
-              Continue →
-            </button>
+            <GlassButton onClick={onComplete} className="w-full" tone="danger" intensity="quiet">
+              Continue
+              <ArrowRight className="w-4 h-4" />
+            </GlassButton>
           </div>
         )}
 
@@ -203,12 +203,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     {mission.concept_flashcard || mission.concept || 'Learn this concept.'}
                   </p>
                   
-                  <button
+                  <GlassButton
                     onClick={advance}
-                    className="mt-6 w-full bg-accent/90 backdrop-blur-md py-4 rounded-xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.97] transition-transform text-black"
+                    className="mt-6 w-full"
+                    tone="dark"
+                    intensity="strong"
+                    glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
                   >
                     <Brain className="w-4 h-4" /> Got It
-                  </button>
+                  </GlassButton>
                 </div>
               </div>
             ) : (
@@ -242,12 +245,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 )}
 
                 {/* CTA */}
-                <button
+                <GlassButton
                   onClick={advance}
-                  className="w-full bg-accent text-black py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2 active:scale-[0.97] transition-transform mt-4"
+                  className="mt-4 w-full"
+                  tone="dark"
+                  intensity="strong"
+                  glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
                 >
                   <Brain className="w-4 h-4" /> Test Me
-                </button>
+                </GlassButton>
               </div>
             )}
           </motion.div>
@@ -315,19 +321,25 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   </div>
 
                   {quizResult === 'correct' ? (
-                    <button
+                    <GlassButton
                       onClick={steps.length > stepIndex + 1 ? advance : handleSuccess}
-                      className="w-full bg-accent text-black py-4 rounded-2xl font-black text-sm uppercase tracking-widest active:scale-[0.97] transition-transform"
+                      className="w-full"
+                      tone="dark"
+                      intensity="strong"
+                      glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
                     >
                       {steps.length > stepIndex + 1 ? 'Continue' : 'Complete Mission'}
-                    </button>
+                    </GlassButton>
                   ) : (
-                    <button
+                    <GlassButton
                       onClick={handleFail}
-                      className="w-full bg-red-500/10 border border-red-500/20 text-red-400 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                      className="w-full"
+                      tone="danger"
+                      intensity="quiet"
+                      size="sm"
                     >
                       <XCircle className="w-4 h-4" /> Accept & Review Later
-                    </button>
+                    </GlassButton>
                   )}
                 </motion.div>
               )}
@@ -381,13 +393,19 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     </p>
                   </div>
                   {quizResult === 'correct' ? (
-                    <button onClick={handleSuccess} className="w-full bg-accent text-black py-4 rounded-2xl font-black text-sm uppercase tracking-widest">
+                    <GlassButton
+                      onClick={handleSuccess}
+                      className="w-full"
+                      tone="dark"
+                      intensity="strong"
+                      glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
+                    >
                       Complete Mission
-                    </button>
+                    </GlassButton>
                   ) : (
-                    <button onClick={handleFail} className="w-full bg-red-500/10 border border-red-500/20 text-red-400 py-3 rounded-2xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2">
+                    <GlassButton onClick={handleFail} className="w-full" tone="danger" intensity="quiet" size="sm">
                       <XCircle className="w-4 h-4" /> Accept & Move On
-                    </button>
+                    </GlassButton>
                   )}
                 </motion.div>
               )}
@@ -414,9 +432,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <span className="font-bold text-xs uppercase tracking-widest">Tap to Upload Proof</span>
               <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleArtifactUpload} />
             </label>
-            <button onClick={handleSuccess} className="w-full liquid-glass py-3 rounded-2xl font-bold text-xs uppercase tracking-widest text-zinc-400">
+            <GlassButton onClick={handleSuccess} className="w-full" intensity="quiet" size="sm">
               Skip for now
-            </button>
+            </GlassButton>
           </motion.div>
         )}
 
@@ -434,12 +452,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             <p className="text-sm font-mono text-zinc-300 leading-relaxed">
               {mission.concept_flashcard || mission.concept || 'Learn this concept and advance.'}
             </p>
-            <button
+            <GlassButton
               onClick={advance}
-              className="w-full bg-accent text-black py-4 rounded-2xl font-black text-sm uppercase tracking-widest flex items-center justify-center gap-2"
+              className="w-full"
+              tone="dark"
+              intensity="strong"
+              glassColor="color-mix(in srgb, var(--accent-main) 72%, rgba(255,255,255,0.16))"
             >
               Got It <ArrowRight className="w-4 h-4" />
-            </button>
+            </GlassButton>
           </motion.div>
         )}
       </div>

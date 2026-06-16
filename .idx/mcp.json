@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "firebase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "firebase-tools@latest",
+        "mcp",
+        "--dir",
+        "C:/Users/david/Desktop/T1GER APP",
+        "--only",
+        "auth,firestore"
+      ]
+    }
+  }
+}

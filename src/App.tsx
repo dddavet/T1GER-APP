@@ -34,7 +34,7 @@ const LoadingSpinner = () => (
 const AppContent = () => {
   const { activeView, setActiveView } = useT1ger();
   const { dailyTacticalStatus } = useBrain();
-  const { appUser, loading } = useAuth();
+  const { user, appUser, loading } = useAuth();
   const [activeMission, setActiveMission] = useState<any>(null);
 
   useEffect(() => {
@@ -80,8 +80,16 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
+  if (!user) {
+    return <AuthGate />;
+  }
+
   // Intercept the entire app experience if onboarding isn't complete
-  if (!appUser || !appUser.onboardingComplete) {
+  if (!appUser) {
+    return <LoadingSpinner />;
+  }
+
+  if (!appUser.onboardingComplete) {
     return <OnboardingFlow />;
   }
 

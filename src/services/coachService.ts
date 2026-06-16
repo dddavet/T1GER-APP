@@ -1,8 +1,6 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { db } from "../firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
-
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+import { getAi } from "./gemini";
 
 const COACH_SYSTEM_PROMPT = `
 You are a world-class business coach inside a learning app for entrepreneurs and founders. You are not a chatbot. You are not an assistant. You are a mentor who has seen hundreds of founders succeed and fail, and you know the difference between the two.
@@ -57,7 +55,7 @@ export const getCoachResponse = async (userId: string, userMessage: string, hist
   `;
 
   // 4. Call Gemini
-  const model = ai.getGenerativeModel({ 
+  const model = getAi().getGenerativeModel({ 
     model: "gemini-1.5-flash",
     systemInstruction: COACH_SYSTEM_PROMPT + context
   });

@@ -2,11 +2,9 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# T1GER
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/e5f8cf04-f410-4936-8bf6-44d99511e734
+React + TypeScript productivity app for entrepreneurs.
 
 ## Run Locally
 
@@ -15,6 +13,21 @@ View your app in AI Studio: https://ai.studio/apps/e5f8cf04-f410-4936-8bf6-44d99
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Create `.env.local` from `.env.example` and set `VITE_GEMINI_API_KEY`.
 3. Run the app:
    `npm run dev`
+
+## Firebase
+
+The app uses Firebase Auth and Cloud Firestore for account state and progress sync. Make sure `firebase-applet-config.json` points to the Firebase project you want to use.
+
+## iOS
+
+The app is prepared for Capacitor. Build the web bundle before syncing native projects:
+
+```bash
+npm run build
+npx cap sync ios
+```
+
+Opening and archiving the iOS project requires macOS with Xcode.
