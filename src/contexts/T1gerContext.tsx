@@ -3,7 +3,7 @@ import { useAuth } from './AuthContext';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
 type Stats = { xp: number; coins: number; streak: number; health: number; rank: string };
-type View = 'onboarding' | 'home' | 'learn' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
+type View = 'onboarding' | 'home' | 'proof' | 'learn' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
 type Animation = 'none' | 'level-up' | 'streak-death';
 
 interface T1gerContextType {
@@ -25,7 +25,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   const { appUser, updateAppUser } = useAuth();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
   const [stats, setStats] = useState<Stats>({ xp: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
-  const [activeView, setActiveView] = useState<View>('home');
+  const [activeView, setActiveView] = useState<View>('learn');
   const [triggerAnimation, setTriggerAnimation] = useState<Animation>('none');
 
   // Sync with AuthContext
@@ -41,11 +41,12 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
       setStats(prev => ({
         ...prev,
         xp: appUser.xp,
+        coins: appUser.coins || 0,
         streak: appUser.streak,
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
       }));
       if (activeView === 'onboarding') {
-        setActiveView('home');
+        setActiveView('learn');
       }
     }
   }, [appUser]);
@@ -62,14 +63,20 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     setStats(prev => ({ ...prev, xp: newXP }));
     
     if (appUser) {
-      await updateAppUser({ xp: newXP, level: newLevel });
+      const earnedCoins = Math.floor(amount / 2);
+      const newCoins = (appUser.coins || 0) + earnedCoins;
+      setStats(prev => ({ ...prev, coins: newCoins }));
+      await updateAppUser({ xp: newXP, level: newLevel, coins: newCoins });
     }
   }, [stats.xp, appUser, updateAppUser]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
-    setStats(prev => ({ ...prev, coins: Math.max(0, prev.coins - amount) }));
-    // If we had coins in Firestore, we'd update there too
-  }, []);
+    const newCoins = Math.max(0, (appUser?.coins || 0) - amount);
+    setStats(prev => ({ ...prev, coins: newCoins }));
+    if (appUser) {
+      await updateAppUser({ coins: newCoins });
+    }
+  }, [appUser, updateAppUser]);
 
   const value = React.useMemo(() => ({
     user, stats, activeView, triggerAnimation, 

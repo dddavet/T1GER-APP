@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
-import { Zap, Lock, Crown, Star, BookOpen, Target, Lightbulb, Check, Building2, TrendingUp, Cpu } from 'lucide-react';
+import { Zap, Lock, Crown, Star, BookOpen, Target, Lightbulb, Check, Building2, TrendingUp, Cpu, Play, Terminal } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
+import { useAuth } from '../contexts/AuthContext';
 import { type TrackType } from '../services/missionBank';
+import { AI_CURATED_CURRICULUM } from '../services/aiCuratedLibrary';
 
 // ============================================================
 // UI STYLING PER NICHE TRACK
@@ -13,7 +15,9 @@ interface TrackStyle {
 }
 
 const TRACK_STYLES: Record<TrackType, TrackStyle> = {
-  apex: { icon: <Target className="w-4 h-4" />, color: 'var(--accent-main)' },
+  investing: { icon: <TrendingUp className="w-4 h-4" />, color: '#10B981' },
+  business: { icon: <Building2 className="w-4 h-4" />, color: '#3B82F6' },
+  ai: { icon: <Cpu className="w-4 h-4" />, color: '#8B5CF6' },
 };
 
 // Zigzag pattern
@@ -24,9 +28,11 @@ const getNodePosition = (index: number): { xOffset: number } => {
 
 export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) => {
   const { pathData, brainState, getSessionMissions, dailyProgress } = useBrain();
+  const { appUser } = useAuth();
+  const learningStyle = appUser?.learningStyle || 'text';
 
   const activeLevel = pathData.track?.levels?.[pathData.currentLevelIndex] || pathData.track?.levels?.[0];
-  const trackStyle = TRACK_STYLES[pathData.track?.trackId as TrackType] || TRACK_STYLES.apex;
+  const trackStyle = TRACK_STYLES[pathData.track?.trackId as TrackType] || TRACK_STYLES.investing;
 
   if (!activeLevel || !trackStyle) return null;
 
@@ -174,6 +180,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                   if (isActive && nextMission) {
                     onStart({
                       ...nextMission,
+                      dayNumber: day.dayNumber,
                       concept_flashcard: nextMission.concept,
                       business_scenario: nextMission.scenario,
                       mission_brief: nextMission.taskBrief,
@@ -201,9 +208,19 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                 }}
               >
                 {isDone ? (
-                  <BookOpen className="w-6 h-6" style={{ color: trackStyle.color }} />
+                  <Check className="w-6 h-6 stroke-[3]" style={{ color: trackStyle.color }} />
                 ) : isActive ? (
-                  <Zap className="w-8 h-8 text-white relative z-10" fill="white" />
+                  pathData.track.trackId === 'ai' ? (
+                    learningStyle === 'visual' ? (
+                      <Play className="w-8 h-8 text-white relative z-10 fill-white ml-0.5" />
+                    ) : learningStyle === 'interactive' ? (
+                      <Terminal className="w-8 h-8 text-white relative z-10" />
+                    ) : (
+                      <BookOpen className="w-8 h-8 text-white relative z-10" />
+                    )
+                  ) : (
+                    <Zap className="w-8 h-8 text-white relative z-10" fill="white" />
+                  )
                 ) : (
                   <Lock className="w-4 h-4 text-white/10" />
                 )}
@@ -231,9 +248,12 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                 <p className={`text-[11px] font-black uppercase tracking-tight leading-loose ${isActive ? 'text-white' : 'text-zinc-500'}`}>
                   DAY {day.dayNumber}
                 </p>
-                {isActive && nextMission && (
+                {isActive && (
                   <p className="text-[9px] font-bold line-clamp-2 mt-1 px-2" style={{ color: trackStyle.color }}>
-                    {nextMission.title}
+                    {pathData.track.trackId === 'ai'
+                      ? (AI_CURATED_CURRICULUM[day.dayNumber]?.title || nextMission?.title)
+                      : (nextMission?.title || '')
+                    }
                   </p>
                 )}
               </div>

@@ -80,6 +80,10 @@ export interface TacticalTask {
   label: string;
   type: 'habit' | 'work' | 'lesson';
   icon?: string; // Lucide icon name
+  createdAt?: number;
+  recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom';
+  recurrenceInterval?: number; // e.g. repeats every N days
+  recurrenceDayOfWeek?: number; // e.g. 0-6 for weekly
 }
 
 export type DayType = 'rest' | 'normal' | 'beast';
@@ -144,24 +148,24 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
   },
   dailySession: null,
   niche: 'general',
-  currentTrackId: 'apex',
+  currentTrackId: 'investing',
   completedDayIds: [],
   learnStreak: 0,
   tacticalStreak: 0,
   lastLearnDate: null,
   lastTacticalDate: null,
   customHabits: [
-    { id: 'h1', label: 'Go to the gym', type: 'habit', icon: 'Dumbbell' },
-    { id: 'h2', label: 'Make your bed', type: 'habit', icon: 'Bed' },
-    { id: 'h3', label: 'Brush your teeth', type: 'habit', icon: 'Droplets' },
+    { id: 'h1', label: 'Go to the gym', type: 'habit', icon: 'Dumbbell', createdAt: Date.now() },
+    { id: 'h2', label: 'Make your bed', type: 'habit', icon: 'Bed', createdAt: Date.now() },
+    { id: 'h3', label: 'Brush your teeth', type: 'habit', icon: 'Droplets', createdAt: Date.now() },
   ],
   customWorkTasks: [
-    { id: 'w1', label: 'Code feature', type: 'work', icon: 'Code' },
-    { id: 'w2', label: 'Marketing', type: 'work', icon: 'BarChart3' },
+    { id: 'w1', label: 'Code feature', type: 'work', icon: 'Code', createdAt: Date.now() },
+    { id: 'w2', label: 'Marketing', type: 'work', icon: 'BarChart3', createdAt: Date.now() },
   ],
   customLessonTasks: [
-    { id: 'l1', label: 'Business Strategy', type: 'lesson', icon: 'Book' },
-    { id: 'l2', label: 'Market Research', type: 'lesson', icon: 'Brain' },
+    { id: 'l1', label: 'Business Strategy', type: 'lesson', icon: 'Book', createdAt: Date.now() },
+    { id: 'l2', label: 'Market Research', type: 'lesson', icon: 'Brain', createdAt: Date.now() },
   ],
   dailyTacticalStatus: {},
 };
@@ -192,7 +196,7 @@ export function buildRescueProtocolSelection({
  * and calculates the user's progress through it.
  */
 export function getCurrentPathData(state: BrainState) {
-  const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['apex'];
+  const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['investing'];
   let currentLevelIndex = 0;
   let currentDayIndex = 0;
   
@@ -402,12 +406,24 @@ export interface TopicProgress {
   currentDifficulty: Difficulty;
 }
 
-export function addTacticalTask(state: BrainState, label: string, type: 'habit' | 'work' | 'lesson', icon?: string): BrainState {
+export function addTacticalTask(
+  state: BrainState, 
+  label: string, 
+  type: 'habit' | 'work' | 'lesson', 
+  icon?: string,
+  recurrence?: 'daily' | 'weekdays' | 'weekly' | 'custom',
+  recurrenceInterval?: number,
+  recurrenceDayOfWeek?: number
+): BrainState {
   const newTask: TacticalTask = {
     id: Math.random().toString(36).substr(2, 9),
     label,
     type,
-    icon
+    icon,
+    createdAt: Date.now(),
+    recurrence: recurrence || 'daily',
+    recurrenceInterval,
+    recurrenceDayOfWeek
   };
   const keyMap = {
     habit: 'customHabits',
@@ -538,4 +554,33 @@ export function getTopicProgress(state: BrainState): TopicProgress[] {
       currentDifficulty: state.currentDifficulty[comp],
     };
   });
+}
+
+export interface UserWeaknesses {
+  weakCompetencies: { competency: string; score: number }[];
+  recentFailedMissions: string[];
+}
+
+export function getUserWeaknesses(state: BrainState): UserWeaknesses {
+  const decayedScores = applyDecay(state);
+  
+  const weakCompetencies = Object.entries(decayedScores)
+    .map(([competency, score]) => ({ competency, score }))
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 3);
+
+  const recentFailedMissions = Array.from(new Set(
+    state.missionHistory
+      .filter(record => !record.completed)
+      .map(record => {
+        const mission = MISSION_BANK.find(m => m.id === record.missionId);
+        return mission ? `${mission.title} (${mission.concept || ''})` : '';
+      })
+      .filter(Boolean)
+  )).slice(-3);
+
+  return {
+    weakCompetencies,
+    recentFailedMissions
+  };
 }

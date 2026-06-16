@@ -9,7 +9,6 @@ import {
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { requestNotificationPermission } from '../services/notificationService';
-import { GlassButton } from '../components/ui/apple-tahoe-liquid-glass-button';
 
 const ICON_OPTIONS = [
   { name: 'Dumbbell', icon: Dumbbell },
@@ -41,6 +40,11 @@ export const TacticalSetup = () => {
   const [type, setType] = useState<'habit' | 'work' | 'lesson'>('habit');
   const [selectedIcon, setSelectedIcon] = useState('Target');
 
+  // Recurrence states
+  const [recurrence, setRecurrence] = useState<'daily' | 'weekdays' | 'weekly' | 'custom'>('daily');
+  const [recurrenceInterval, setRecurrenceInterval] = useState<number>(3);
+  const [recurrenceDayOfWeek, setRecurrenceDayOfWeek] = useState<number>(1);
+
   const haptic = () => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(10);
@@ -51,13 +55,27 @@ export const TacticalSetup = () => {
     if (!label.trim()) return;
     haptic();
     if (type === 'habit') {
-      addHabit(label, selectedIcon);
+      addHabit(label, selectedIcon, recurrence, recurrenceInterval, recurrenceDayOfWeek);
     } else if (type === 'work') {
-      addWorkTask(label, selectedIcon);
+      addWorkTask(label, selectedIcon, recurrence, recurrenceInterval, recurrenceDayOfWeek);
     } else {
-      addLessonTask(label, selectedIcon);
+      addLessonTask(label, selectedIcon, recurrence, recurrenceInterval, recurrenceDayOfWeek);
     }
     setLabel('');
+    setRecurrence('daily');
+  };
+
+  const getRecurrenceLabel = (task: any) => {
+    if (!task.recurrence || task.recurrence === 'daily') return '🔄 Diario';
+    if (task.recurrence === 'weekdays') return '💼 Lun a Vie';
+    if (task.recurrence === 'weekly') {
+      const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+      return `📅 Sem (${days[task.recurrenceDayOfWeek ?? 1]})`;
+    }
+    if (task.recurrence === 'custom') {
+      return `⚡ Cada ${task.recurrenceInterval ?? 3}d`;
+    }
+    return '🔄 Diario';
   };
 
   const TaskCard = ({ task, type }: { task: any, type: 'habit' | 'work' | 'lesson' }) => {
@@ -78,8 +96,12 @@ export const TacticalSetup = () => {
           <div className={`w-12 h-12 rounded-2xl ${bgColor} flex items-center justify-center border ${borderColor} shadow-inner`}>
             <IconComponent className={`w-6 h-6 ${accentColor}`} />
           </div>
-          <div className="flex flex-col">
-            <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600 mb-0.5">{type === 'lesson' ? 'Learning' : 'Operational'}</span>
+          <div className="flex flex-col text-left">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">{type === 'lesson' ? 'Learning' : 'Operational'}</span>
+              <span className="text-zinc-700 text-[6px]">•</span>
+              <span className="text-[8px] font-black text-cyan-400 tracking-wider uppercase font-mono">{getRecurrenceLabel(task)}</span>
+            </div>
             <span className="font-black text-sm uppercase tracking-tight text-white">{task.label}</span>
           </div>
         </div>
@@ -164,17 +186,89 @@ export const TacticalSetup = () => {
                   </div>
                 </div>
 
-                <GlassButton 
+                {/* Recurrence Strategy Picker */}
+                <div className="space-y-3 pt-2">
+                  <label className="block text-[8px] font-black uppercase text-zinc-500 tracking-widest text-left">
+                    Recurrence Strategy
+                  </label>
+                  <div className="grid grid-cols-4 gap-2 bg-black/40 border border-white/5 rounded-2xl p-1">
+                    {[
+                      { id: 'daily', label: 'Diario' },
+                      { id: 'weekdays', label: 'Lun-Vie' },
+                      { id: 'weekly', label: 'Semanal' },
+                      { id: 'custom', label: 'Personalizado' }
+                    ].map((r) => (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => { haptic(); setRecurrence(r.id as any); }}
+                        className={`py-2.5 rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          recurrence === r.id 
+                            ? 'bg-white/5 border border-white/10 text-white shadow-sm' 
+                            : 'text-zinc-500 hover:text-zinc-300'
+                        }`}
+                      >
+                        {r.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Recurrence Specific Detail Selectors */}
+                  <AnimatePresence mode="wait">
+                    {recurrence === 'weekly' && (
+                      <motion.div
+                        key="weekly-select"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5 mt-2"
+                      >
+                        <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Día de ejecución:</span>
+                        <select
+                          value={recurrenceDayOfWeek}
+                          onChange={(e) => setRecurrenceDayOfWeek(parseInt(e.target.value))}
+                          className="bg-black/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accent"
+                        >
+                          {['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((day, idx) => (
+                            <option key={idx} value={idx} className="bg-zinc-950 text-white">{day}</option>
+                          ))}
+                        </select>
+                      </motion.div>
+                    )}
+
+                    {recurrence === 'custom' && (
+                      <motion.div
+                        key="custom-select"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="space-y-2 p-3 rounded-2xl bg-white/[0.02] border border-white/5 mt-2 text-left"
+                      >
+                        <div className="flex justify-between items-center">
+                          <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Intervalo de Repetición:</span>
+                          <span className="text-xs font-black text-cyan-400 font-mono">Cada {recurrenceInterval} días</span>
+                        </div>
+                        <input
+                          type="range"
+                          min="2"
+                          max="14"
+                          value={recurrenceInterval}
+                          onChange={(e) => setRecurrenceInterval(parseInt(e.target.value))}
+                          className="w-full accent-cyan-400"
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <button 
                   onClick={handleAdd}
                   disabled={!label.trim()}
-                  className="w-full"
-                  tone="dark"
-                  intensity="strong"
-                  glassColor="rgba(245,245,240,0.82)"
+                  className="w-full bg-white text-black py-5 rounded-full font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-3d hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20 disabled:grayscale"
                 >
                   <Plus className="w-4 h-4" strokeWidth={4} />
                   Deploy To Protocol
-                </GlassButton>
+                </button>
              </div>
           </div>
         </div>
@@ -219,21 +313,15 @@ export const TacticalSetup = () => {
         </div>
 
         {/* LOCK IN BUTTON */}
-        <motion.div
+        <motion.button 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          className="fixed bottom-10 left-6 right-6 z-50"
-        >
-          <GlassButton
           onClick={() => { haptic(); setActiveView('home'); }}
-          className="w-full"
-          tone="accent"
-          intensity="strong"
+          className="fixed bottom-10 left-6 right-6 z-50 liquid-glass-heavy border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-3d-accent flex items-center justify-center gap-3 transition-all"
         >
           <Check className="w-5 h-5" strokeWidth={4} />
           Lock Tactical Baseline
-          </GlassButton>
-        </motion.div>
+        </motion.button>
       </div>
     </div>
   );

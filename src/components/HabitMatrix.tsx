@@ -35,11 +35,24 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
   const handleVerify = (id: string, proofUrl?: string, proofText?: string, verified: boolean = true) => {
     submitTacticalProof(id, proofUrl, proofText, verified);
     
+    const task = tasks.find(t => t.id === id);
+    const createdTime = (task as any)?.createdAt || Date.now();
+    const hoursElapsed = (Date.now() - createdTime) / (1000 * 60 * 60);
+
     // Reward XP based on Day Type
-    let xpAmount = 20;
-    if (dailyTacticalStatus.dayType === 'beast') xpAmount = 40;
-    if (dailyTacticalStatus.dayType === 'rest') xpAmount = 10;
+    let baseXP = 20;
+    if (dailyTacticalStatus.dayType === 'beast') baseXP = 40;
+    if (dailyTacticalStatus.dayType === 'rest') baseXP = 10;
     
+    let multiplier = 1.0;
+    if (hoursElapsed <= 24) {
+      multiplier = 1.5; // Velocity Speed Bonus
+    } else {
+      const daysLate = Math.floor(hoursElapsed / 24);
+      multiplier = Math.max(0.2, 1.0 - (daysLate * 0.2)); // 20% decay per day
+    }
+
+    const xpAmount = Math.round(baseXP * multiplier);
     addXP(xpAmount);
     
     setSelectedTask(null);

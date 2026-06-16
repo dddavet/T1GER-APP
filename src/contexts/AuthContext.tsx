@@ -35,10 +35,14 @@ export interface AppUser {
   streak: number;
   isPro?: boolean;
   isFlaggedForInterrogation?: boolean;
+  coins?: number;
   streakShields?: number;
+  activeCoachId?: string;
   lastMissionDate?: any;
   lastActive?: any;
   createdAt?: any;
+  minimalistMode?: boolean;
+  unlockedDenItems?: string[];
 }
 
 interface AuthContextType {
