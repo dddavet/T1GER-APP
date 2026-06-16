@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, ArrowRight, Check, Award, BookOpen, Star } from 'lucide-react';
 import { CHARACTER_CAST } from '../services/characterStateEngine';
+import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
 
 interface LessonData {
   trackName: string;
@@ -226,11 +227,11 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
 
           {/* Mentor Mascot speech bubble */}
           <div className="flex items-end gap-3 my-6 max-w-md w-full">
-            <img 
-              src="/tiger_thinking.png" 
-              alt={mentor.name} 
-              className="w-16 h-16 object-contain flex-shrink-0 animate-bounce"
-              style={{ filter: `drop-shadow(0 0 10px ${mentor.glowColor})` }}
+            <T1gerInteractiveAvatar 
+              characterId={mentor.id} 
+              emotion="RESTING" 
+              size={64} 
+              className="flex-shrink-0"
             />
             <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:bottom-4 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
                  style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}>
@@ -344,11 +345,11 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
                       : 'bg-rose-950/20 border-rose-900/40 text-rose-400'
                   }`}
                 >
-                  <img 
-                    src={isAnswered ? "/tiger_celebrating.png" : "/tiger_sad.png"} 
-                    alt={mentor.name} 
-                    className="w-12 h-12 object-contain flex-shrink-0"
-                    style={{ filter: `drop-shadow(0 0 10px ${isAnswered ? mentor.glowColor : 'rgba(239, 68, 68, 0.4)'})` }}
+                  <T1gerInteractiveAvatar 
+                    characterId={mentor.id} 
+                    emotion={isAnswered ? 'PROUD' : 'DISAPPOINTED'} 
+                    size={48} 
+                    className="flex-shrink-0"
                   />
                   <div className="flex-1 text-left font-sans">
                     <span className="text-[8px] font-black uppercase tracking-wider block mb-0.5" style={{ color: isAnswered ? mentor.accentColor : '#f43f5e' }}>
@@ -387,15 +388,13 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
           <div />
 
           <div className="space-y-6">
-            {/* Mascot Celebrating */}
-            <motion.img 
-              src="/tiger_celebrating.png" 
-              alt={mentor.name} 
-              className="w-40 h-40 object-contain mb-4"
-              style={{ filter: `drop-shadow(0 0 20px ${mentor.glowColor})` }}
-              animate={{ y: [0, -8, 0], scale: [1, 1.03, 1] }}
-              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-            />
+            <div className="mb-4 flex justify-center">
+              <T1gerInteractiveAvatar 
+                characterId={mentor.id} 
+                emotion="PROUD" 
+                size={160} 
+              />
+            </div>
 
             <span className="text-[10px] font-black font-mono bg-white/[0.04] border px-3 py-1 rounded-full uppercase tracking-widest"
                   style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>

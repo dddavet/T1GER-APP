@@ -11,6 +11,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { COMPETENCY_LABELS } from '../services/missionBank';
 import { getCharacterForTrack, getRandomPhrase } from '../services/characterStateEngine';
 import { executePromptChallenge } from '../services/gemini';
+import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
 
 interface MissionEngineProps {
   mission: any;
@@ -161,14 +162,21 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
   const [quizResult, setQuizResult] = useState<'idle' | 'correct' | 'wrong'>('idle');
 
+  const steps = useMemo(() => getStepsForType(mission.type || 'flashcard', mission, learningStyle, appUser?.isPro ?? true), [mission, learningStyle, appUser?.isPro]);
+  const [stepIndex, setStepIndex] = useState(0);
+  const currentStep = steps[stepIndex];
+
+  const avatarEmotion = useMemo(() => {
+    if (quizResult === 'correct') return 'PROUD';
+    if (quizResult === 'wrong') return 'DISAPPOINTED';
+    if (currentStep === 'action' || currentStep === 'proof') return 'PREDATOR';
+    return 'RESTING';
+  }, [quizResult, currentStep]);
+
   const welcomePhrase = useMemo(() => getRandomPhrase(character.id, 'welcome'), [character.id]);
   const successPhrase = useMemo(() => getRandomPhrase(character.id, 'success'), [character.id, quizResult]);
   const failPhrase = useMemo(() => getRandomPhrase(character.id, 'fail'), [character.id, quizResult]);
 
-  // Determine steps based on mission type & learning style
-  const steps = useMemo(() => getStepsForType(mission.type || 'flashcard', mission, learningStyle, appUser?.isPro ?? true), [mission, learningStyle, appUser?.isPro]);
-  const [stepIndex, setStepIndex] = useState(0);
-  const currentStep = steps[stepIndex];
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [showExplanation, setShowExplanation] = useState(false);
 
@@ -384,22 +392,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex flex-col items-center justify-center text-center py-6"
             >
               <div className="mb-6 relative">
-                 <motion.img 
-                  src={character.avatarImg} 
-                  alt={character.name} 
-                  className="w-40 h-40 object-contain"
-                  style={{ filter: `drop-shadow(0 0 24px ${character.glowColor})` }}
-                  animate={{ 
-                    y: [0, -18, 0],
-                    scale: [1, 1.08, 1],
-                    rotate: [0, 4, -4, 0]
-                  }}
-                  transition={{ 
-                    repeat: Infinity, 
-                    duration: 2.2, 
-                    ease: "easeInOut"
-                  }}
-                />
+                 <T1gerInteractiveAvatar 
+                   characterId={character.id} 
+                   emotion="PROUD" 
+                   size={160} 
+                 />
                 <div className="absolute -bottom-1 -right-1 bg-[var(--accent-main)] text-black p-2 rounded-full shadow-lg">
                   <CheckCircle2 size={24} className="stroke-[3]" />
                 </div>
@@ -458,17 +455,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex flex-col items-center justify-center text-center py-6"
             >
               <div className="mb-6 relative">
-                <motion.img 
-                  src="/tiger_sad.png" 
-                  alt="Sad T1GER Mascot" 
-                  className="w-40 h-40 object-contain" 
-                  style={{ filter: `drop-shadow(0 0 20px rgba(239, 68, 68, 0.3))` }}
-                  animate={{ 
-                    y: [0, 4, 0],
-                    scaleY: [1, 0.95, 1],
-                    rotate: [-1, 1, -1]
-                  }}
-                  transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                <T1gerInteractiveAvatar 
+                  characterId={character.id} 
+                  emotion="DISAPPOINTED" 
+                  size={160} 
                 />
                 <div className="absolute -bottom-1 -right-1 bg-red-500 text-white p-2 rounded-full shadow-lg">
                   <XCircle size={24} className="stroke-[3]" />
@@ -609,12 +599,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               {/* Header */}
               <div className="flex items-start gap-4 mb-2">
-                <motion.img
-                  src={character.avatarImg}
-                  alt={character.name}
-                  className="w-14 h-14 object-contain flex-shrink-0"
-                  animate={{ y: [0, -3, 0] }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                <T1gerInteractiveAvatar
+                  characterId={character.id}
+                  emotion={avatarEmotion}
+                  size={56}
+                  className="flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
                   <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
@@ -684,12 +673,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               {/* Mascot explaining real world task */}
               <div className="flex items-start gap-4 mb-2 animate-fade-in">
-                <motion.img
-                  src={character.avatarImg}
-                  alt={character.name}
-                  className="w-16 h-16 object-contain flex-shrink-0"
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                <T1gerInteractiveAvatar
+                  characterId={character.id}
+                  emotion={avatarEmotion}
+                  size={64}
+                  className="flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
                   <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
@@ -737,10 +725,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             >
               {/* Mascot header */}
               <div className="flex items-start gap-4 mb-2">
-                <img
-                  src={character.avatarImg}
-                  alt={character.name}
-                  className="w-14 h-14 object-contain flex-shrink-0"
+                <T1gerInteractiveAvatar
+                  characterId={character.id}
+                  emotion={avatarEmotion}
+                  size={56}
+                  className="flex-shrink-0"
                 />
                 <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>

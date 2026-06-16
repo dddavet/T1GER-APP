@@ -159,8 +159,8 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
-  // DEVELOPER TESTING OVERRIDE: Set in console (localStorage.setItem('t1ger_force_onboarding', 'true')) to force test onboarding
-  const FORCE_ONBOARDING_TEST = localStorage.getItem('t1ger_force_onboarding') === 'true';
+  // DEVELOPER TESTING OVERRIDE: Activado por defecto para que el usuario pueda probarlo en localhost
+  const FORCE_ONBOARDING_TEST = true;
 
   // Intercept the entire app experience if onboarding isn't complete (or developer override is active)
   if ((FORCE_ONBOARDING_TEST && !onboardingBypassed) || !appUser || !appUser.onboardingComplete) {
