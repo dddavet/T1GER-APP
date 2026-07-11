@@ -58,6 +58,41 @@ export const generateDailyLesson = async (niche: string, level: number) => {
   return JSON.parse(text.replace(/```json|```/g, '').trim());
 };
 
+export const generateLearningPath = async (userProfile: any) => {
+  const model = getModel('gemini-1.5-flash');
+  const prompt = `You are a world-class AI mentor. Generate a highly personalized Curriculum Track (Topic Tree) for a user with the following profile:
+  ${JSON.stringify(userProfile)}
+  
+  The curriculum should consist of 3 "Levels" (e.g. Beginner, Intermediate, Advanced).
+  Each Level should have 3 "Days" (Topics).
+  Each Day should have 2 specific "Mission Ids" (just generate short string identifiers like 'topic-1-a').
+  
+  Return ONLY a strict JSON object matching this structure:
+  {
+    "trackId": "personalized_path",
+    "name": "Custom Path",
+    "description": "...",
+    "levels": [
+      {
+        "levelId": "l1",
+        "name": "Level 1: Foundation",
+        "days": [
+          {
+            "dayId": "l1_d1",
+            "name": "Day 1: Intro",
+            "missionIds": ["l1_d1_m1", "l1_d1_m2"]
+          }
+        ]
+      }
+    ]
+  }`;
+
+  const result = await withRetry(() => model.generateContent(prompt));
+  const text = result.response.text();
+  return JSON.parse(text.replace(/```json|```/g, '').trim());
+};
+
+
 export const generateMissionType = async (keyword: string) => {
   const model = getModel('gemini-1.5-flash');
   const prompt = `Generate a new mission type based on the keyword/goal: "${keyword}".

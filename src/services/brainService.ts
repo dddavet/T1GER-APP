@@ -17,6 +17,10 @@ import {
   MISSION_BANK,
   CURRICULUM_TRACKS,
 } from './missionBank';
+import { fsrs, createEmptyCard, Rating, type Card, type FSRS } from 'ts-fsrs';
+
+// Global FSRS Instance
+export const fsrsEngine = fsrs();
 
 // ============================================================
 // TYPES
@@ -73,6 +77,9 @@ export interface BrainState {
   customWorkTasks: TacticalTask[];
   customLessonTasks: TacticalTask[];
   dailyTacticalStatus: Record<string, DailyTacticalRecord>; // ISO Date -> Status
+
+  // FSRS (Free Spaced Repetition Scheduler)
+  fsrsCards: Record<string, Card>; // missionId -> FSRS Card
 }
 
 export interface TacticalTask {
@@ -168,6 +175,7 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
     { id: 'l2', label: 'Market Research', type: 'lesson', icon: 'Brain', createdAt: Date.now() },
   ],
   dailyTacticalStatus: {},
+  fsrsCards: {},
 };
 
 export function buildRescueProtocolSelection({
@@ -244,16 +252,26 @@ export function buildCurriculumSession(state: BrainState): DailySession {
 
   const activeLevel = pathData.track.levels[pathData.currentLevelIndex];
   const activeDay = activeLevel.days[pathData.currentDayIndex];
+
+  // FSRS: Find missions due for review
+  const now = new Date();
+  const dueMissions = Object.keys(state.fsrsCards || {}).filter(missionId => {
+      const card = state.fsrsCards[missionId];
+      // Card state: 0=New, 1=Learning, 2=Review, 3=Relearning
+      return card.state !== 0 && new Date(card.due) <= now;
+  }).slice(0, 2); // Inject max 2 reviews per day
+  
+  const finalMissionIds = Array.from(new Set([...dueMissions, ...activeDay.missionIds]));
   
   // For the active day, what missions has the user completed?
   // We check history against the current Day's missionIds
-  const completedInDay = activeDay.missionIds.filter(id => 
+  const completedInDay = finalMissionIds.filter(id => 
     state.missionHistory.some(r => r.missionId === id && r.completed)
   );
 
   return {
     date: today,
-    missionIds: activeDay.missionIds,
+    missionIds: finalMissionIds,
     completedIds: completedInDay,
   };
 }
@@ -287,7 +305,8 @@ export function processMissionResult(
   state: BrainState,
   missionId: string,
   completed: boolean,
-  score: number = 100
+  score: number = 100,
+  rating?: Rating
 ): BrainState {
   const mission = MISSION_BANK.find(m => m.id === missionId);
   if (!mission) return state;
@@ -312,8 +331,25 @@ export function processMissionResult(
 
   const newHistory = [...state.missionHistory, record];
   let newCompletedDayIds = [...state.completedDayIds];
+  let newFsrsCards = { ...state.fsrsCards };
+
+  if (completed || !completed) { // Always track attempts
+    let finalRating = rating;
+    if (!finalRating) {
+        if (!completed || score < 50) finalRating = Rating.Again;
+        else if (score >= 90) finalRating = Rating.Easy;
+        else if (score >= 75) finalRating = Rating.Good;
+        else finalRating = Rating.Hard;
+    }
+    const card = newFsrsCards[missionId] || createEmptyCard();
+    const scheduled = fsrsEngine.repeat(card, new Date());
+    const nextCard = scheduled[finalRating].card;
+    newFsrsCards[missionId] = nextCard;
+  }
 
   // Curriculum logic: check if this completion finishes the current CurriculumDay
+  let newCustomWorkTasks = [...state.customWorkTasks];
+  
   if (completed) {
     const pathData = getCurrentPathData(state);
     if (!pathData.isFullyCompleted) {
@@ -326,11 +362,33 @@ export function processMissionResult(
 
       if (allDone && !newCompletedDayIds.includes(activeDay.dayId)) {
         newCompletedDayIds.push(activeDay.dayId);
+        
+        // System 4: Apply Phase - Unlock action items as Tactical Tasks
+        if (activeDay.actionItems && activeDay.actionItems.length > 0) {
+          activeDay.actionItems.forEach((action, idx) => {
+            if (!newCustomWorkTasks.some(t => t.label === action)) {
+              newCustomWorkTasks.push({
+                id: `action-${activeDay.dayId}-${idx}-${Date.now()}`,
+                label: action,
+                type: 'work',
+                icon: 'Zap',
+                createdAt: Date.now(),
+                recurrence: 'custom',
+                recurrenceInterval: 1
+              });
+            }
+          });
+        }
       }
     }
   }
 
-  const session = buildCurriculumSession({...state, missionHistory: newHistory, completedDayIds: newCompletedDayIds});
+  const session = buildCurriculumSession({
+    ...state, 
+    missionHistory: newHistory, 
+    completedDayIds: newCompletedDayIds,
+    fsrsCards: newFsrsCards
+  });
 
   // Handle Learn Streak
   const today = new Date().toISOString().split('T')[0];
@@ -370,6 +428,8 @@ export function processMissionResult(
     dailySession: session,
     learnStreak: newLearnStreak,
     lastLearnDate: newLastLearnDate,
+    fsrsCards: newFsrsCards,
+    customWorkTasks: newCustomWorkTasks
   };
 }
 

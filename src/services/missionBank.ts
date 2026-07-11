@@ -17,6 +17,7 @@ export interface CurriculumDay {
   dayId: string;
   dayNumber: number;
   missionIds: string[]; // typically 1-3 missions per "day"
+  actionItems?: string[]; // Phase 2: Real-world tasks unlocked after completing this day
 }
 
 export interface CurriculumLevel {
@@ -800,10 +801,10 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
       {
         levelId: 'inv-level-1', levelNumber: 1, title: 'FOUNDATIONS', subtitle: 'Understand ownership, compounding, and risk',
         days: [
-          { dayId: 'inv-d1', dayNumber: 1, missionIds: ['inv-e1'] },
-          { dayId: 'inv-d2', dayNumber: 2, missionIds: ['inv-e2'] },
+          { dayId: 'inv-d1', dayNumber: 1, missionIds: ['inv-e1'], actionItems: ['Abrir cuenta en un Broker (ej. Robinhood, eToro)'] },
+          { dayId: 'inv-d2', dayNumber: 2, missionIds: ['inv-e2'], actionItems: ['Fijar una meta mensual de ahorro'] },
           { dayId: 'inv-d3', dayNumber: 3, missionIds: ['inv-e3'] },
-          { dayId: 'inv-d4', dayNumber: 4, missionIds: ['inv-e4'] },
+          { dayId: 'inv-d4', dayNumber: 4, missionIds: ['inv-e4'], actionItems: ['Identificar tu perfil de riesgo'] },
         ]
       },
       {

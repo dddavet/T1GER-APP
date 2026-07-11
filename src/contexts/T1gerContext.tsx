@@ -15,7 +15,7 @@ interface T1gerContextType {
   setStats: React.Dispatch<React.SetStateAction<Stats>>;
   setActiveView: React.Dispatch<React.SetStateAction<View>>;
   setTriggerAnimation: React.Dispatch<React.SetStateAction<Animation>>;
-  addXP: (amount: number) => Promise<void>;
+  addXP: (amount: number, isMissionComplete?: boolean) => Promise<void>;
   spendCoins: (amount: number) => Promise<void>;
 }
 
@@ -51,11 +51,14 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [appUser]);
 
-  const addXP = React.useCallback(async (amount: number) => {
+  const addXP = React.useCallback(async (amount: number, isMissionComplete = false) => {
     const newXP = stats.xp + amount;
+    // Nivel basado en un tracker de misiones (10 misiones = 1 nivel)
+    // Para no romper la DB actual, usamos XP como proxy si no hay `isMissionComplete`, pero lo ideal es pasar stats.completedMissions.
+    // Simplificación: Asumimos que la XP principal viene de misiones (10 XP por misión).
     const newLevel = Math.floor(newXP / 100) + 1;
     
-    if (newXP >= 1000 && stats.xp < 1000) {
+    if (newLevel > (appUser?.level || 1)) {
       setTriggerAnimation('level-up');
       setTimeout(() => setTriggerAnimation('none'), 3000);
     }

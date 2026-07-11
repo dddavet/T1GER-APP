@@ -265,7 +265,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
   const handleSuccess = async () => {
     completeMission(mission.id, 100);
-    await addXP(mission.xpReward || 20);
+    await addXP(mission.xpReward || 20, true);
     setStepIndex(steps.length); // show success screen
   };
 
