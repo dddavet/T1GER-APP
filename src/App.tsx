@@ -20,7 +20,7 @@ import { MissionEngine } from './components/MissionEngine';
 import { SquadTab } from './components/social/SquadTab';
 import { EveningInterrogation } from './components/EveningInterrogation';
 
-import { OnboardingFlow } from './components/OnboardingFlow';
+import { InvestmentOnboarding } from './components/InvestmentOnboarding';
 import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
 import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
@@ -41,6 +41,7 @@ const AppContent = () => {
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
   const [onboardingBypassed, setOnboardingBypassed] = useState(false);
+  const forceOnboardingFromUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('forceOnboarding') === '1';
 
   useEffect(() => {
     if (!activeView) {
@@ -85,6 +86,21 @@ const AppContent = () => {
           setLoadingMission(false);
           return;
         }
+      }
+
+      // Curated investing and business lessons are the source of truth for the MVP.
+      // They should open instantly and must not depend on an AI model being available.
+      if (baseMission.competency !== 'ai') {
+        setActiveMission({
+          ...baseMission,
+          concept_flashcard: baseMission.concept,
+          business_scenario: baseMission.scenario,
+          mission_brief: baseMission.taskBrief,
+        });
+        setActiveView('mission');
+        clearInterval(phraseInterval);
+        setLoadingMission(false);
+        return;
       }
 
       // Compile user weaknesses from state
@@ -159,7 +175,7 @@ const AppContent = () => {
     return <LoadingSpinner />;
   }
 
-  if (!user) {
+  if (!user && !appUser) {
     return <AuthGate />;
   }
 
@@ -171,8 +187,8 @@ const AppContent = () => {
   }
 
   // Intercept the app experience if onboarding isn't complete or if local testing asks for it.
-  if ((FORCE_ONBOARDING_TEST && !onboardingBypassed) || !appUser.onboardingComplete) {
-    return <OnboardingFlow onComplete={() => setOnboardingBypassed(true)} />;
+  if (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser.onboardingComplete) {
+    return <InvestmentOnboarding onComplete={() => setOnboardingBypassed(true)} />;
   }
 
   const isFullscreen = activeView === 'mission' || activeView === 'debrief';

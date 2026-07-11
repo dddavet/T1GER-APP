@@ -13,6 +13,16 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { AUTH_BYPASS_ENABLED } from '../config/appMode';
+
+export interface InvestmentProfile {
+  goal: 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement';
+  experience: 'new' | 'basic' | 'active';
+  riskComfort: 'protect' | 'balanced' | 'growth';
+  weeklyCommitment: number;
+  contentFormat: 'read' | 'watch' | 'practice';
+  learnWithFriends: boolean;
+}
 
 export interface AppUser {
   uid: string;
@@ -43,6 +53,14 @@ export interface AppUser {
   createdAt?: any;
   minimalistMode?: boolean;
   unlockedDenItems?: string[];
+  primaryTrack?: 'investing' | 'business' | 'ai';
+  investmentProfile?: InvestmentProfile;
+  personalizedPlan?: {
+    title: string;
+    firstLessonId: string;
+    weeklyMinutes: number;
+    focusAreas: string[];
+  };
 }
 
 interface AuthContextType {
@@ -78,6 +96,7 @@ export const useAuth = () => useContext(AuthContext);
 const LOCAL_USER_KEY = 't1ger_local_app_user';
 const EMAIL_LINK_KEY = 't1ger_email_link_sign_in';
 const USE_AUTH_EMULATOR = import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true';
+const AUTH_DISABLED_FOR_PROTOTYPE = AUTH_BYPASS_ENABLED;
 const FOUNDER_EMAILS = (import.meta.env.VITE_FOUNDER_EMAILS || '')
   .split(',')
   .map((email: string) => email.trim().toLowerCase())
@@ -114,6 +133,39 @@ function buildLocalSignedInUser(firebaseUser: User): AppUser {
     lastMissionDate: localData?.lastMissionDate,
     createdAt: localData?.createdAt,
     lastActive: localData?.lastActive,
+  };
+}
+
+function buildPrototypeUser(): AppUser {
+  const localData = getLocalAppUser();
+  return {
+    uid: localData?.uid || 'prototype-founder',
+    email: localData?.email || 'founder@t1ger.local',
+    displayName: localData?.displayName || 'Founder',
+    photoURL: localData?.photoURL || '',
+    role: 'founder',
+    isFounder: true,
+    niche: localData?.niche || 'saas',
+    goal: localData?.goal || 'Build T1GER MVP',
+    businessStage: localData?.businessStage || 'prototype',
+    dailyTime: localData?.dailyTime || 20,
+    onboardingStep: localData?.onboardingStep || 'complete',
+    onboardingComplete: localData?.onboardingComplete ?? true,
+    learningStyle: localData?.learningStyle || 'text',
+    experienceLevel: localData?.experienceLevel || 22,
+    ageRange: localData?.ageRange || '18-25',
+    level: localData?.level || 1,
+    xp: localData?.xp || 0,
+    streak: localData?.streak || 0,
+    isPro: localData?.isPro ?? false,
+    coins: localData?.coins || 0,
+    streakShields: localData?.streakShields || 0,
+    activeCoachId: localData?.activeCoachId,
+    lastMissionDate: localData?.lastMissionDate,
+    createdAt: localData?.createdAt || Date.now(),
+    lastActive: Date.now(),
+    minimalistMode: localData?.minimalistMode || false,
+    unlockedDenItems: localData?.unlockedDenItems || [],
   };
 }
 
@@ -172,6 +224,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
+    if (AUTH_DISABLED_FOR_PROTOTYPE) {
+      const prototypeUser = buildPrototypeUser();
+      saveLocalAppUser(prototypeUser);
+      setAppUser(prototypeUser);
+      return;
+    }
     await auth.signOut();
     setAppUser(getLocalAppUser());
   }, []);
@@ -298,6 +356,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user, fetchAppUser]);
 
   useEffect(() => {
+    if (AUTH_DISABLED_FOR_PROTOTYPE) {
+      const prototypeUser = buildPrototypeUser();
+      saveLocalAppUser(prototypeUser);
+      setUser(null);
+      setAppUser(prototypeUser);
+      setLoading(false);
+      return;
+    }
+
     const localUser = getLocalAppUser();
     if (localUser && !user) {
       setAppUser(localUser);

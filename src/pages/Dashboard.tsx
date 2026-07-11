@@ -24,6 +24,79 @@ const DAILY_QUOTES = [
   "Innovation distinguishes between a leader and a follower."
 ];
 
+const MementoMoriWidget = ({ age }: { age?: number | null }) => {
+  const currentAge = Math.max(18, Math.min(90, age || 22));
+  const totalMonths = 90 * 12;
+  const livedMonths = Math.min(totalMonths, Math.round(currentAge * 12));
+  const weeksLeft = Math.max(0, Math.round((90 - currentAge) * 52));
+
+  return (
+    <section className="mx-5 liquid-glass-heavy rounded-[2rem] p-5 border border-white/10 shadow-3d relative overflow-hidden">
+      <div className="absolute -top-10 -right-8 w-28 h-28 rounded-full bg-red-500/10 blur-[48px] pointer-events-none" />
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <span className="text-[8px] font-black font-mono uppercase tracking-[0.25em] text-red-400">
+            Memento Mori
+          </span>
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none mt-1">
+            Your life in months
+          </h2>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-black text-red-400 leading-none">{weeksLeft.toLocaleString()}</p>
+          <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">weeks left</span>
+        </div>
+      </div>
+
+      <div className="grid gap-[3px] max-h-36 overflow-hidden" style={{ gridTemplateColumns: 'repeat(36, minmax(0, 1fr))' }}>
+        {Array.from({ length: totalMonths }).map((_, index) => {
+          const isLived = index < livedMonths;
+          const isCurrentYear = index >= livedMonths && index < livedMonths + 12;
+          return (
+            <span
+              key={index}
+              className={`aspect-square rounded-[2px] ${
+                isLived
+                  ? 'bg-red-400/70 shadow-[0_0_6px_rgba(248,113,113,0.25)]'
+                  : isCurrentYear
+                    ? 'bg-[#CCFF00]/60'
+                    : 'bg-white/[0.06]'
+              }`}
+            />
+          );
+        })}
+      </div>
+
+      <p className="mt-4 text-[10px] font-semibold text-zinc-500 leading-relaxed">
+        Every dot is one month. T1GER exists to turn consumed content into executed proof before those dots run out.
+      </p>
+    </section>
+  );
+};
+
+const PhaseSystem = ({ isPro }: { isPro?: boolean }) => (
+  <section className="px-5 grid grid-cols-3 gap-2">
+    {[
+      { label: 'Learn', sub: 'Micro-lessons', state: 'Free' },
+      { label: 'Apply', sub: 'Photo proof', state: isPro ? 'Unlocked' : 'Premium' },
+      { label: 'Repeat', sub: '7-day hunt', state: 'Active' },
+    ].map((phase, index) => (
+      <div key={phase.label} className="rounded-2xl border border-white/5 bg-white/[0.025] p-3 min-h-[96px]">
+        <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-600">
+          Phase 0{index + 1}
+        </span>
+        <h3 className="text-sm font-black uppercase tracking-tight text-white mt-2">{phase.label}</h3>
+        <p className="text-[9px] font-bold text-zinc-500 mt-1 leading-tight">{phase.sub}</p>
+        <span className={`mt-3 inline-flex rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
+          phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'
+        }`}>
+          {phase.state}
+        </span>
+      </div>
+    ))}
+  </section>
+);
+
 const ModeSelectorTop = ({ current, onSelect }: { current: string, onSelect: (id: any) => void }) => {
   const haptic = () => {
     if (window.navigator && window.navigator.vibrate) {
@@ -111,7 +184,7 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
 };
 
 export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) => void }) => {
-  const { setActiveView } = useT1ger();
+  const { setActiveView, user } = useT1ger();
   const { stats } = useT1ger();
   const { 
     totalCompleted, 
@@ -174,6 +247,9 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
       <AnimatePresence>
         {!isCommitted && <DailyCommitment />}
       </AnimatePresence>
+
+      <MementoMoriWidget age={user.age || appUser?.experienceLevel || null} />
+      <PhaseSystem isPro={appUser?.isPro} />
 
       {/* Mode Selector - hidden in Minimalist Zen mode */}
       {!isMinimalist && (

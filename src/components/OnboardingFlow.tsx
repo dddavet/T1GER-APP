@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { type TrackType } from '../services/missionBank';
@@ -27,7 +27,6 @@ import { PaywallIntro } from './PaywallIntro';
 
 import { CHARACTER_CAST } from '../services/characterStateEngine';
 import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
-import { AuthGate } from './AuthGate';
 
 interface DiagnosticQuestion {
   id: string;
@@ -296,23 +295,6 @@ const QUESTIONS: any[] = [
   }
 ];
 
-const slideVariants = {
-  enter: (direction: number) => ({
-    x: direction > 0 ? '100%' : '-100%',
-    opacity: 0
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1
-  },
-  exit: (direction: number) => ({
-    zIndex: 0,
-    x: direction < 0 ? '100%' : '-100%',
-    opacity: 0
-  })
-};
-
 export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
   const { skipDaysForPlacement } = useBrain();
   const { updateAppUser, googleSignIn } = useAuth();
@@ -325,8 +307,6 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   });
   const [isFinishing, setIsFinishing] = useState(false);
   const [onboardingStage, setOnboardingStage] = useState<'landing' | 'questions' | 'archetype' | 'microlesson'>('landing');
-  const [showAuth, setShowAuth] = useState(false);
-  const [direction, setDirection] = useState(1);
 
   // Diagnostic Test State Machine
   const [diagnosticActive, setDiagnosticActive] = useState(false);
@@ -364,11 +344,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   };
 
   const advanceStep = () => {
-    if (stepIndex < QUESTIONS.length - 1) {
-      setStepIndex(stepIndex + 1);
-    } else {
+    setStepIndex(currentStep => {
+      if (currentStep < QUESTIONS.length - 1) return currentStep + 1;
       setOnboardingStage('archetype');
-    }
+      return currentStep;
+    });
   };
 
   const submitAnswers = (placedLevelOverride?: number, xpEarned = 0, coinsEarned = 0) => {
@@ -401,7 +381,6 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
     setAnswers(prev => ({ ...prev, [currentQuestion.id]: optionId }));
     
     setTimeout(() => {
-      setDirection(1);
       if (currentQuestion.id === 'placementChoice') {
         if (optionId === 'test') {
           // Launch placement challenge flow!
@@ -484,10 +463,6 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
     );
   }
 
-  if (showAuth) {
-    return <AuthGate />;
-  }
-
   if (onboardingStage === 'landing') {
     return (
       <div className="w-full h-full bg-[#050505] text-white flex flex-col px-6 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(2.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] relative z-50 overflow-hidden">
@@ -545,11 +520,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
           <button
             onClick={() => {
               haptic();
-              setShowAuth(true);
+              onComplete?.();
             }}
             className="w-full bg-transparent text-white border-2 border-white/10 py-5 rounded-[2rem] font-bold text-sm active:scale-[0.98] transition-all hover:bg-white/5"
           >
-            Ya tengo una cuenta
+            Entrar al prototipo
           </button>
         </motion.div>
       </div>
@@ -759,11 +734,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   // STANDARD QUESTIONS SCREEN
   // ============================================================
   return (
-    <div className="w-full h-full bg-[#050505] text-white flex flex-col pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+    <div className="w-full h-full bg-[#050505] text-white flex flex-col pt-[calc(2.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
       {/* Back Button & Progress Bar */}
       <div className="flex items-center gap-4 mb-8 z-20 relative shrink-0">
         <button 
-          onClick={() => { haptic(); if(stepIndex > 0) { setDirection(-1); setStepIndex(stepIndex - 1); } else setOnboardingStage('landing'); }}
+          onClick={() => { haptic(); if(stepIndex > 0) { setStepIndex(currentStep => currentStep - 1); } else setOnboardingStage('landing'); }}
           className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 active:scale-95"
         >
           <ArrowRight className="w-5 h-5 text-white rotate-180" />
@@ -777,24 +752,14 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
         </div>
       </div>
 
-      <div className="flex-1 relative w-full">
-        <AnimatePresence initial={false} custom={direction}>
-          <motion.div
-            key={stepIndex}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 }
-            }}
-            className="absolute inset-0 flex flex-col w-full h-full"
-          >
+      <div className="flex-1 relative w-full min-h-0 overflow-hidden">
+        <div
+          key={stepIndex}
+          className="relative flex flex-col w-full h-full overflow-y-auto hide-scrollbar pr-0.5"
+        >
             {!['graph', 'scurve', 'interstitial', 'barchart', 'socialProofReviews', 'privacyTrust', 'connectNotifications', 'hardcoreMode', 'rollover', 'generatePlanIntro', 'loadingSimulation', 'planReady', 'saveProgress', 'paywallIntro', 'referralCode'].includes(currentQuestion.type) && (
               <>
-                <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none mb-3 text-white shrink-0">
+                <h1 className="font-black italic uppercase tracking-tight leading-[0.9] mb-3 text-white shrink-0 break-words" style={{ fontSize: 'clamp(1.8rem, 8vw, 3rem)' }}>
                   {currentQuestion.title}
                 </h1>
                 <p className="text-xs font-medium text-zinc-400 mb-8 leading-relaxed uppercase tracking-wider shrink-0">
@@ -803,7 +768,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               </>
             )}
 
-            <div className="space-y-4 flex-1 overflow-y-auto pb-4 hide-scrollbar flex flex-col justify-center">
+            <div className="space-y-4 flex-1 min-h-fit pb-4 flex flex-col justify-start sm:justify-center">
               
               {/* OPTIONS RENDER */}
               {(!currentQuestion.type || currentQuestion.type === 'options') && currentQuestion.options?.map((opt: any) => {
@@ -818,20 +783,20 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                         : 'bg-white/5 text-white border-white/10 hover:border-white/30 hover:bg-white/10'
                       }`}
                   >
-                    <div className="flex items-center gap-4">
+                    <div className="flex min-w-0 flex-1 items-center gap-4">
                       {opt.icon && (
                         <div className={`w-12 h-12 rounded-[1.5rem] flex items-center justify-center border ${isSelected ? 'bg-black/20 border-black/10' : 'bg-black/40 border-white/10'}`}>
                           {React.cloneElement(opt.icon as React.ReactElement<any>, { className: `w-5 h-5 ${isSelected ? 'text-[#050505]' : 'text-white'}` })}
                         </div>
                       )}
-                      <div>
-                        <h3 className="font-black text-sm tracking-tight uppercase">{opt.label}</h3>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="break-words font-black text-sm tracking-tight uppercase">{opt.label}</h3>
                         {'description' in opt && (
                           <p className={`text-[10px] font-bold mt-1 uppercase tracking-tight ${isSelected ? 'text-[#050505]/70' : 'text-zinc-500'}`}>{opt.description}</p>
                         )}
                       </div>
                     </div>
-                    <ChevronRight className={`w-5 h-5 transition-transform ${isSelected ? 'translate-x-1 text-[#050505]' : 'group-hover:translate-x-1 text-zinc-600'}`} />
+                    <ChevronRight className={`ml-3 h-5 w-5 shrink-0 transition-transform ${isSelected ? 'translate-x-1 text-[#050505]' : 'group-hover:translate-x-1 text-zinc-600'}`} />
                   </button>
                 );
               })}
@@ -992,8 +957,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               )}
               
             </div>
-          </motion.div>
-        </AnimatePresence>
+        </div>
       </div>
     </div>
   );

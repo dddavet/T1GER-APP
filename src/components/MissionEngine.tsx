@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Camera, CheckCircle2, AlertTriangle, ArrowRight, XCircle, Lightbulb, Brain, 
   TrendingUp, PlaySquare, X, BookOpen, Terminal, Play, Sparkles, Cpu, 
-  ChevronDown, ChevronUp, RefreshCw, FileText 
+  ChevronDown, ChevronUp, RefreshCw, FileText, Lock, Crown
 } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
@@ -21,7 +21,7 @@ interface MissionEngineProps {
 export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplete }) => {
   const { addXP } = useT1ger();
   const { completeMission, failMission, competencies } = useBrain();
-  const { appUser } = useAuth();
+  const { appUser, updateAppUser } = useAuth();
   const learningStyle = appUser?.learningStyle || 'text';
 
   const lessonQuote = useMemo(() => {
@@ -624,6 +624,20 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 </h1>
               </div>
 
+              {mission.sources?.length > 0 && (
+                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-left">
+                  <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-main)]" />
+                  <div className="min-w-0">
+                    <span className="mb-1 block text-[10px] font-bold uppercase text-zinc-500">Fuente de la lección</span>
+                    {mission.sources.map((source: { title: string; author: string; type: string }) => (
+                      <p key={`${source.title}-${source.author}`} className="text-xs leading-5 text-zinc-300">
+                        <strong>{source.title}</strong> · {source.author} · {source.type}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Translucent glass paragraphs */}
               <div className="space-y-4 my-2 text-left">
                 {(lessonReading.paragraphs || []).map((paragraph: string, idx: number) => (
@@ -663,6 +677,61 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           {/* =================================================== */}
           {/* CURATED AI STEP — Real-world Action                 */}
           {/* =================================================== */}
+          {showMainUI && currentStep === 'apply_paywall' && (
+            <motion.div
+              key="apply_paywall"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-center gap-5 text-center"
+            >
+              <div className="mx-auto w-20 h-20 rounded-[2rem] bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-yellow-400 shadow-[0_0_40px_rgba(234,179,8,0.12)]">
+                <Lock className="w-9 h-9" />
+              </div>
+
+              <div className="space-y-3">
+                <span className="inline-flex items-center gap-2 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-yellow-400">
+                  <Crown className="w-3 h-3" /> Premium Apply
+                </span>
+                <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white">
+                  Learn is free. Execution is premium.
+                </h1>
+                <p className="text-sm font-semibold text-zinc-400 leading-relaxed">
+                  You completed the lesson layer. Upgrade to unlock field missions, camera proof, advanced roadmaps, and XP from real-world execution.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 text-left">
+                {[
+                  ['Apply', 'Field missions'],
+                  ['Proof', 'Photo evidence'],
+                  ['Repeat', 'Hunting streaks'],
+                ].map(([title, body]) => (
+                  <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.025] p-3">
+                    <h3 className="text-[10px] font-black uppercase text-white">{title}</h3>
+                    <p className="mt-1 text-[9px] font-semibold text-zinc-500 leading-tight">{body}</p>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={async () => {
+                  await updateAppUser({ isPro: true });
+                  setStepIndex(prev => prev);
+                }}
+                className="w-full py-5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-black font-black text-xs uppercase tracking-widest shadow-[0_4px_0_0_#a16207] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                Unlock Apply Mode <ArrowRight size={18} className="stroke-[3]" />
+              </button>
+              <button
+                onClick={onComplete}
+                className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-300 transition-colors"
+              >
+                Stay on free Learn
+              </button>
+            </motion.div>
+          )}
+
           {showMainUI && currentStep === 'real_world_action' && (
             <motion.div
               key="real_world_action"
@@ -764,7 +833,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                         <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/15 rounded-2xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white/[0.01] transition-all duration-300">
                           <Camera className="w-8 h-8 text-zinc-500 mb-2" />
                           <span className="font-bold text-[9px] uppercase tracking-widest text-zinc-400">Subir foto de la acción</span>
-                          <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
+                          <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" />
                         </label>
                       )}
                     </div>
@@ -1630,21 +1699,22 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // ============================================================
 
 function getStepsForType(type: string, mission: any, learningStyle: string, isPro: boolean = true): string[] {
-  // All daily sessions (curated, AI-personalized or static) use the unified 6-stage daily session flow!
-  const steps = ['daily_quote', 'reading_chapter', 'real_world_action', 'proof_of_action'];
-  if (isPro) {
-    steps.push('optional_deep_dive');
-    
-    // Determine which quiz step to add
-    const qQuestions = mission.curatedData?.quizQuestions || mission.quizQuestions || [];
-    if (qQuestions.length > 0) {
-      const qSteps = qQuestions.map((_: any, idx: number) => `curated_quiz_${idx}`);
-      steps.push(...qSteps);
-    } else if (type === 'scenario_quiz' || mission.options) {
-      steps.push('quiz');
-    } else if (mission.recallQuestion || mission.recallOptions) {
-      steps.push('recall');
-    }
+  const steps = ['daily_quote', 'reading_chapter'];
+  const qQuestions = mission.curatedData?.quizQuestions || mission.quizQuestions || [];
+
+  if (qQuestions.length > 0) {
+    steps.push(...qQuestions.map((_: any, idx: number) => `curated_quiz_${idx}`));
+  } else if (type === 'scenario_quiz' || mission.options) {
+    steps.push('quiz');
+  } else if (mission.recallQuestion || mission.recallOptions) {
+    steps.push('recall');
   }
+
+  if (isPro) {
+    steps.push('real_world_action', 'proof_of_action', 'optional_deep_dive');
+  } else {
+    steps.push('apply_paywall');
+  }
+
   return steps;
 }

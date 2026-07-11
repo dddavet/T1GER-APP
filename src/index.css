@@ -58,7 +58,8 @@
 }
 
 @theme {
-  --font-sans: "Kanit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Kanit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-accent: var(--accent-main);
   --color-accent-glow: var(--accent-glow);

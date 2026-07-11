@@ -4,10 +4,11 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { parseLibreLingoYAML } from '../services/libreLingoParser';
+import { downloadT1gerDataExport, readT1gerDataExport, restoreT1gerDataExport } from '../services/dataPortability';
 
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
   const { appUser, logout, updateAppUser } = useAuth();
@@ -15,6 +16,7 @@ export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => v
   const { competencies, learnStreak, tacticalStreak, resetBrain, brainState } = useBrain();
   const [showMarket, setShowMarket] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
+  const importInputId = 't1ger-data-import';
 
   // Developer Mode Toggle
   const [isDevMode, setIsDevMode] = useState(false);
@@ -100,6 +102,22 @@ quizQuestions:
         concept: parsedLesson.reading?.takeaway || "Concepto importado",
         xpReward: 30
       });
+    }
+  };
+
+  const handleImportT1gerData = async (file?: File) => {
+    if (!file) return;
+
+    try {
+      const payload = await readT1gerDataExport(file);
+      if (!window.confirm(`Restore T1GER progress exported on ${new Date(payload.exportedAt).toLocaleString()}? This overwrites local T1GER data on this device.`)) {
+        return;
+      }
+      restoreT1gerDataExport(payload);
+      window.location.reload();
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : 'Could not import this T1GER data file.');
     }
   };
   const [selectedGroup, setSelectedGroup] = useState<Record<string, 'A' | 'B'>>({
@@ -663,6 +681,42 @@ quizQuestions:
                   className={`absolute top-1 w-4 h-4 rounded-full shadow-md ${appUser?.isPro ? 'bg-black' : 'bg-zinc-500'}`} 
                 />
              </button>
+          </div>
+
+          {/* Local-First Data Controls */}
+          <div className="space-y-3 pt-4 border-t border-white/5">
+            <div className="space-y-1">
+              <p className="text-xs font-black uppercase tracking-tight text-white">Data Sovereignty</p>
+              <p className="text-[9px] font-medium text-zinc-500 uppercase leading-relaxed">
+                Export or restore your T1GER progress as portable JSON. Cloud sync stays optional.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => downloadT1gerDataExport(appUser || null, brainState)}
+                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-300 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-2"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Export JSON
+              </button>
+              <label
+                htmlFor={importInputId}
+                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-300 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Import JSON
+              </label>
+              <input
+                id={importInputId}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(event) => {
+                  handleImportT1gerData(event.target.files?.[0]);
+                  event.currentTarget.value = '';
+                }}
+              />
+            </div>
           </div>
 
           {/* Path Controls */}

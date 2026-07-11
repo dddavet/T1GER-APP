@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion, useAnimation } from 'motion/react';
+import { motion } from 'motion/react';
 import { CharacterId, CHARACTER_CAST } from '../services/characterStateEngine';
 
 interface T1gerInteractiveAvatarProps {
@@ -31,6 +31,11 @@ export const T1gerInteractiveAvatar: React.FC<T1gerInteractiveAvatarProps> = ({
   // Determinar colores y estilos según el personaje
   const accentColor = character?.accentColor || '#CCFF00';
   const glowColor = character?.glowColor || 'rgba(204, 255, 0, 0.4)';
+  const mouthPath = emotion === 'DISAPPOINTED'
+    ? 'M 44 68 Q 50 63, 56 68'
+    : emotion === 'PREDATOR' || emotion === 'PROUD'
+      ? 'M 42 63 Q 50 72, 58 63'
+      : 'M 45 64 Q 50 67, 55 64';
 
   return (
     <div
@@ -184,20 +189,12 @@ export const T1gerInteractiveAvatar: React.FC<T1gerInteractiveAvatarProps> = ({
         <polygon points="46,56 54,56 50,61" fill={accentColor} />
 
         {/* BOCA (Expresiones sutiles) */}
-        <motion.path
+        <path
+          d={mouthPath}
           stroke={accentColor}
           strokeWidth="2"
           fill="none"
           strokeLinecap="round"
-          animate={{
-            d:
-              emotion === 'DISAPPOINTED'
-                ? 'M 44 68 Q 50 63, 56 68' // Triste
-                : emotion === 'PREDATOR' || emotion === 'PROUD'
-                ? 'M 42 63 Q 50 72, 58 63' // Sonrisa amplia
-                : 'M 45 64 Q 50 67, 55 64', // Neutro / Leve
-          }}
-          transition={{ duration: 0.2 }}
         />
 
         {/* DETALLES DE PERSONAJES ESPECÍFICOS */}

@@ -39,12 +39,20 @@ export interface QuizOption {
   correct: boolean;
 }
 
+export interface LearningSource {
+  type: 'book' | 'article' | 'video' | 'research';
+  title: string;
+  author: string;
+  url?: string;
+}
+
 export interface BankMission {
   id: string;
   competency: Competency;
   difficulty: Difficulty;
   type: MissionType;
   title: string;
+  sources?: LearningSource[];
   // Flashcard
   concept?: string;
   keyTakeaway?: string;          // One-liner the user must remember
@@ -557,6 +565,7 @@ export const MISSION_BANK: BankMission[] = [
   {
     id: 'inv-e1', competency: 'investing', difficulty: 'easy', type: 'flashcard',
     title: 'HOW THE STOCK MARKET WORKS',
+    sources: [{ type: 'article', title: 'Stocks: What They Are', author: 'Investor.gov' }],
     concept: 'The stock market is a place where buyers and sellers trade shares of public companies. When you buy a stock, you own a tiny slice of that business.',
     keyTakeaway: 'You are buying a piece of a real business, not just a ticker symbol.',
     recallQuestion: 'When you buy a stock, what are you actually buying?',
@@ -571,6 +580,7 @@ export const MISSION_BANK: BankMission[] = [
   {
     id: 'inv-e2', competency: 'investing', difficulty: 'easy', type: 'scenario_quiz',
     title: 'HOW STOCKS ARE DIFFERENT',
+    sources: [{ type: 'book', title: 'The Little Book of Common Sense Investing', author: 'John C. Bogle' }],
     scenario: 'You are deciding between buying a Growth stock (like a new tech company) and a Dividend stock (like a large utility). What is the main difference?',
     options: [
       { text: 'Growth stocks pay you cash every quarter; Dividend stocks don\'t.', correct: false },
@@ -579,6 +589,104 @@ export const MISSION_BANK: BankMission[] = [
     ],
     failureCritique: 'Growth companies need cash to expand. Dividend companies are mature and distribute overflow cash to shareholders. Know what you are buying.',
     xpReward: 60,
+  },
+  {
+    id: 'inv-e3', competency: 'investing', difficulty: 'easy', type: 'flashcard',
+    title: 'COMPOUNDING: THE TIME ADVANTAGE',
+    sources: [{ type: 'book', title: 'The Psychology of Money', author: 'Morgan Housel' }],
+    concept: 'Compound growth means your returns can generate their own returns. Time matters more than finding a perfect entry: at 8% annual growth, money roughly doubles every nine years.',
+    keyTakeaway: 'Starting early can matter more than starting with a large amount.',
+    recallQuestion: 'What makes compound growth powerful over long periods?',
+    recallOptions: [
+      { text: 'Returns begin generating additional returns', correct: true },
+      { text: 'The market guarantees the same return every year', correct: false },
+      { text: 'Inflation stops affecting invested money', correct: false },
+    ],
+    recallExplanation: 'Compounding accelerates because growth is calculated on both the original capital and prior returns. Returns are never guaranteed.',
+    xpReward: 50,
+  },
+  {
+    id: 'inv-e4', competency: 'investing', difficulty: 'easy', type: 'scenario_quiz',
+    title: 'RISK IS NOT JUST VOLATILITY',
+    sources: [{ type: 'book', title: 'The Intelligent Investor', author: 'Benjamin Graham' }],
+    scenario: 'An investment falls 15% this month, but the underlying business and your ten-year thesis have not changed. What is the most useful first response?',
+    options: [
+      { text: 'Sell immediately because every price decline means permanent loss', correct: false },
+      { text: 'Review whether the thesis changed before making a decision', correct: true },
+      { text: 'Buy more automatically without checking anything', correct: false },
+    ],
+    failureCritique: 'Price movement is information, not a complete decision. Permanent loss usually comes from a broken thesis, excessive concentration, leverage, fraud, or paying an unreasonable price.',
+    xpReward: 65,
+  },
+  {
+    id: 'inv-m1', competency: 'investing', difficulty: 'medium', type: 'flashcard',
+    title: 'DIVERSIFICATION WITH A PURPOSE',
+    sources: [{ type: 'book', title: 'A Random Walk Down Wall Street', author: 'Burton G. Malkiel' }],
+    concept: 'Diversification reduces the damage caused by being wrong about one company, sector, or country. It does not mean owning random assets; each holding needs a role in the portfolio.',
+    keyTakeaway: 'Diversify independent risks, not ticker symbols.',
+    recallQuestion: 'Which portfolio is more meaningfully diversified?',
+    recallOptions: [
+      { text: 'Ten technology companies that earn money in similar ways', correct: false },
+      { text: 'Assets spread across companies, sectors, geographies, and risk drivers', correct: true },
+      { text: 'One company plus cash in the same brokerage account', correct: false },
+    ],
+    recallExplanation: 'A larger number of holdings is not enough when all holdings respond to the same economic risk.',
+    xpReward: 90,
+  },
+  {
+    id: 'inv-m2', competency: 'investing', difficulty: 'medium', type: 'flashcard',
+    title: 'WHY INDEX FUNDS WORK',
+    sources: [{ type: 'book', title: 'The Little Book of Common Sense Investing', author: 'John C. Bogle' }],
+    concept: 'A broad, low-cost index fund owns many companies according to a transparent rule. It offers diversification, low maintenance, and usually lower fees than frequent active trading.',
+    keyTakeaway: 'A simple diversified system often beats constant decision-making.',
+    recallQuestion: 'What is the main structural advantage of a broad low-cost index fund?',
+    recallOptions: [
+      { text: 'It guarantees positive returns every year', correct: false },
+      { text: 'It combines diversification with low fees and low maintenance', correct: true },
+      { text: 'It only invests in the safest companies', correct: false },
+    ],
+    recallExplanation: 'Index funds can still decline. Their advantage is efficient, rules-based exposure to many securities at low cost.',
+    xpReward: 90,
+  },
+  {
+    id: 'inv-m3', competency: 'investing', difficulty: 'medium', type: 'scenario_quiz',
+    title: 'FEES COMPOUND TOO',
+    sources: [{ type: 'research', title: 'Investor Bulletin: Mutual Fund Fees and Expenses', author: 'U.S. SEC' }],
+    scenario: 'Two funds track similar markets. One charges 0.10% annually and the other 1.20%. Their gross performance is equal. Which statement is correct?',
+    options: [
+      { text: 'The difference is too small to matter over decades', correct: false },
+      { text: 'The higher fee compounds into a large loss of ending wealth', correct: true },
+      { text: 'The expensive fund must be safer because it costs more', correct: false },
+    ],
+    failureCritique: 'Fees are negative compounding. Compare total cost, diversification, tracking quality, taxes, and suitability before choosing a fund.',
+    xpReward: 100,
+  },
+  {
+    id: 'inv-m4', competency: 'investing', difficulty: 'medium', type: 'flashcard',
+    title: 'DOLLAR-COST AVERAGING',
+    sources: [{ type: 'book', title: 'The Simple Path to Wealth', author: 'J. L. Collins' }],
+    concept: 'Dollar-cost averaging means investing a fixed amount on a regular schedule. It reduces the pressure to predict short-term prices and turns investing into a repeatable behavior.',
+    keyTakeaway: 'A repeatable contribution system removes timing anxiety.',
+    recallQuestion: 'What problem does dollar-cost averaging primarily solve?',
+    recallOptions: [
+      { text: 'It guarantees you buy at the lowest possible price', correct: false },
+      { text: 'It reduces dependence on short-term market timing', correct: true },
+      { text: 'It eliminates all portfolio volatility', correct: false },
+    ],
+    recallExplanation: 'Regular investing cannot guarantee profit, but it makes the process consistent and avoids relying on a perfect entry date.',
+    xpReward: 90,
+  },
+  {
+    id: 'inv-h1', competency: 'investing', difficulty: 'hard', type: 'real_world_task',
+    title: 'BUILD YOUR INVESTMENT POLICY',
+    taskBrief: 'Write a one-page investment policy: your goal, time horizon, emergency-fund requirement, contribution amount, target allocation, maximum acceptable decline, and the conditions that would make you change the plan. Upload a photo as evidence.',
+    xpReward: 220,
+  },
+  {
+    id: 'inv-h2', competency: 'investing', difficulty: 'hard', type: 'real_world_task',
+    title: 'ANALYZE ONE REAL FUND',
+    taskBrief: 'Choose one broad-market fund available in your country. Record its index, expense ratio, number of holdings, top concentrations, geographic exposure, and main risks. Compare it with one alternative and upload your notes.',
+    xpReward: 250,
   },
   {
     id: 'acc-e1', competency: 'accounting', difficulty: 'easy', type: 'flashcard',
@@ -690,11 +798,28 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
     title: 'INVESTING & WEALTH',
     levels: [
       {
-        levelId: 'inv-level-1', levelNumber: 1, title: 'PHASE 1: FOUNDATIONS', subtitle: 'Understanding the market',
+        levelId: 'inv-level-1', levelNumber: 1, title: 'FOUNDATIONS', subtitle: 'Understand ownership, compounding, and risk',
         days: [
           { dayId: 'inv-d1', dayNumber: 1, missionIds: ['inv-e1'] },
           { dayId: 'inv-d2', dayNumber: 2, missionIds: ['inv-e2'] },
-          { dayId: 'inv-d3', dayNumber: 3, missionIds: ['acc-e1'] },
+          { dayId: 'inv-d3', dayNumber: 3, missionIds: ['inv-e3'] },
+          { dayId: 'inv-d4', dayNumber: 4, missionIds: ['inv-e4'] },
+        ]
+      },
+      {
+        levelId: 'inv-level-2', levelNumber: 2, title: 'BUILD A PORTFOLIO', subtitle: 'Diversify, control costs, and automate behavior',
+        days: [
+          { dayId: 'inv-d5', dayNumber: 5, missionIds: ['inv-m1'] },
+          { dayId: 'inv-d6', dayNumber: 6, missionIds: ['inv-m2'] },
+          { dayId: 'inv-d7', dayNumber: 7, missionIds: ['inv-m3'] },
+          { dayId: 'inv-d8', dayNumber: 8, missionIds: ['inv-m4'] },
+        ]
+      },
+      {
+        levelId: 'inv-level-3', levelNumber: 3, title: 'APPLY IN REAL LIFE', subtitle: 'Turn knowledge into a written investment system',
+        days: [
+          { dayId: 'inv-d9', dayNumber: 9, missionIds: ['inv-h1'] },
+          { dayId: 'inv-d10', dayNumber: 10, missionIds: ['inv-h2'] },
         ]
       }
     ]
@@ -785,4 +910,3 @@ export const STANDARD_HABITS: StandardHabit[] = [
 ];
 
 export const ALL_COMPETENCIES: Competency[] = ['offer', 'sales', 'marketing', 'mindset', 'operations', 'investing', 'accounting', 'ai'];
-

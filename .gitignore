@@ -4,6 +4,8 @@ dist/
 coverage/
 .DS_Store
 *.log
+audit-*.png
+tmp-*.png
 .env*
 !.env.example
 .agents/

@@ -174,6 +174,8 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                  />
               )}
               <motion.button
+                aria-label={isActive ? `Empezar día ${day.dayNumber}: ${nextMission?.title || 'lección'}` : isDone ? `Día ${day.dayNumber} completado` : `Día ${day.dayNumber} bloqueado`}
+                disabled={!isActive || !nextMission}
                 whileTap={isActive ? { scale: 0.9 } : {}}
                 whileHover={isActive ? { scale: 1.05 } : {}}
                 onClick={() => {
