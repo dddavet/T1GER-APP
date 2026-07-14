@@ -21,7 +21,7 @@ export const CoachFAB = React.memo(() => {
         whileHover={{ scale: 1.08, rotate: 0 }}
         whileTap={{ scale: 0.92 }}
         transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-        className="pointer-events-auto relative w-14 h-14 rounded-[1.75rem] flex items-center justify-center text-white shadow-3d-strong overflow-hidden"
+        className="pointer-events-auto relative w-14 h-14 rounded-[1.75rem] flex items-center justify-center text-zinc-800 shadow-sm-strong overflow-hidden"
         style={{
           background: 'linear-gradient(135deg, #FF8C33 0%, #FF6B00 50%, #FF4500 100%)',
         }}

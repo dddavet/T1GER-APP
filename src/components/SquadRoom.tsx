@@ -34,12 +34,12 @@ export const SquadRoom = () => {
   return (
     <div className="w-full space-y-10">
       <header className="space-y-4 pt-4">
-        <h1 className="text-4xl font-black italic uppercase tracking-tighter text-white">SQUAD <span className="text-accent">COMMAND</span></h1>
+        <h1 className="text-4xl font-black italic uppercase tracking-tighter text-zinc-800">SQUAD <span className="text-accent">COMMAND</span></h1>
         
-        <div className="liquid-glass-heavy rounded-full p-1.5 shadow-3d border-white/10">
-          <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
+        <div className="bg-white shadow-sm rounded-full p-1.5 shadow-sm border-zinc-200">
+          <div className="h-4 w-full bg-white rounded-full overflow-hidden border border-zinc-200 shadow-inner">
             <motion.div 
-              className={`h-full ${squadHealth > 50 ? 'bg-accent shadow-3d-accent' : 'bg-[#FF0000]'}`}
+              className={`h-full ${squadHealth > 50 ? 'bg-accent shadow-sm' : 'bg-[#FF0000]'}`}
               initial={{ width: 0 }}
               animate={{ width: `${squadHealth}%` }}
               transition={{ duration: 1, ease: "easeOut" }}
@@ -59,11 +59,11 @@ export const SquadRoom = () => {
         {members.map((member) => (
           <motion.div 
             key={member.id}
-            className="liquid-glass p-5 rounded-[2rem] border-white/10 shadow-3d flex items-center justify-between group"
+            className="bg-white shadow-sm p-5 rounded-[2rem] border-zinc-200 shadow-sm flex items-center justify-between group"
             whileHover={{ y: -2 }}
           >
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-2xl shadow-inner border border-white/5">{member.avatar}</div>
+              <div className="w-14 h-14 rounded-[1.5rem] bg-white flex items-center justify-center text-2xl shadow-inner border border-zinc-200">{member.avatar}</div>
               <div className="flex flex-col">
                 <span className="font-black text-sm uppercase tracking-tight">{member.name}</span>
                 <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest mt-0.5">Tactical Operative</span>
@@ -72,13 +72,13 @@ export const SquadRoom = () => {
             
             <div className="flex items-center gap-3">
               {member.status === 'completed' ? (
-                <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shadow-3d-accent">
+                <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent shadow-sm">
                   <ShieldCheck size={18} />
                 </div>
               ) : (
                 <button 
                   onClick={() => triggerRoar(member.name)}
-                  className="px-5 py-2.5 bg-white/5 text-zinc-400 rounded-full border border-white/10 font-black text-[9px] uppercase tracking-widest hover:bg-accent hover:text-black hover:border-accent transition-all shadow-3d group-active:scale-95"
+                  className="px-5 py-2.5 bg-zinc-50 text-zinc-500 rounded-full border border-zinc-200 font-black text-[9px] uppercase tracking-widest hover:bg-accent hover:text-black hover:border-accent transition-all shadow-sm group-active:scale-95"
                 >
                   SEND ROAR
                 </button>
@@ -87,7 +87,7 @@ export const SquadRoom = () => {
           </motion.div>
         ))}
         
-        <button className="py-8 liquid-glass-heavy rounded-[2rem] border-2 border-dashed border-white/10 flex flex-col items-center justify-center gap-2 text-accent/40 hover:text-accent hover:border-accent/40 transition-all shadow-3d active:scale-95">
+        <button className="py-8 bg-white shadow-sm rounded-[2rem] border-2 border-dashed border-zinc-200 flex flex-col items-center justify-center gap-2 text-accent/40 hover:text-accent hover:border-accent/40 transition-all shadow-sm active:scale-95">
           <Plus size={24} />
           <span className="font-black text-[10px] uppercase tracking-[0.2em]">Recruit Predator</span>
         </button>
@@ -99,7 +99,7 @@ export const SquadRoom = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="fixed bottom-28 left-6 right-6 liquid-glass-accent text-accent p-4 rounded-2xl border-accent/30 shadow-3d-accent font-mono text-[10px] font-black text-center z-[100] uppercase tracking-widest"
+            className="fixed bottom-28 left-6 right-6 bg-white shadow-sm-accent text-accent p-4 rounded-2xl border-accent/30 shadow-sm font-mono text-[10px] font-black text-center z-[100] uppercase tracking-widest"
           >
             {alert}
           </motion.div>

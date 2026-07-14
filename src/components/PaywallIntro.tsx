@@ -12,7 +12,7 @@ export const PaywallIntro: React.FC = () => {
         className="text-center px-4 space-y-2"
       >
         <span className="text-zinc-500 font-medium text-xs uppercase tracking-widest">T1GER PRO</span>
-        <h2 className="text-3xl sm:text-4xl font-black italic tracking-tighter uppercase leading-tight text-white drop-shadow-md">
+        <h2 className="text-3xl sm:text-4xl font-black italic tracking-tighter uppercase leading-tight text-zinc-800 drop-shadow-md">
           Desbloquea T1GER para lograrlo más rápido.
         </h2>
       </motion.div>
@@ -34,11 +34,11 @@ export const PaywallIntro: React.FC = () => {
             <div className="w-6 h-6 rounded-full bg-white flex items-center justify-center">
                <span className="text-black font-black text-[10px] italic">T1</span>
             </div>
-            <span className="text-white font-bold text-sm tracking-tight">T1GER APP</span>
+            <span className="text-zinc-800 font-bold text-sm tracking-tight">T1GER APP</span>
           </div>
 
-          <div className="flex gap-4 border-b border-white/10 pb-2">
-            <span className="text-white font-bold text-xs">Hoy</span>
+          <div className="flex gap-4 border-b border-zinc-200 pb-2">
+            <span className="text-zinc-800 font-bold text-xs">Hoy</span>
             <span className="text-zinc-500 font-medium text-xs">Ayer</span>
           </div>
 
@@ -88,8 +88,8 @@ export const PaywallIntro: React.FC = () => {
         transition={{ delay: 0.5 }}
         className="flex items-center justify-center gap-2"
       >
-        <Check size={20} className="text-white" />
-        <span className="text-white font-bold text-[15px]">No Payment Due Now</span>
+        <Check size={20} className="text-zinc-800" />
+        <span className="text-zinc-800 font-bold text-[15px]">No Payment Due Now</span>
       </motion.div>
 
     </div>

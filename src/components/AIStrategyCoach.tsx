@@ -125,15 +125,15 @@ export const AIStrategyCoach = () => {
   if (!appUser) return null;
 
   return (
-    <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 h-[500px] flex flex-col">
+    <div className="bg-white border border-zinc-800 rounded-3xl p-6 h-[500px] flex flex-col">
       <div className="flex items-center gap-3 mb-6 border-b border-zinc-800 pb-4">
         <Bot className="w-8 h-8 text-[#FF6B00]" />
-        <h2 className="text-xl font-black text-white font-sans uppercase">AI Strategy Coach</h2>
+        <h2 className="text-xl font-black text-zinc-800 font-sans uppercase">AI Strategy Coach</h2>
       </div>
 
-      <div className="flex items-center gap-4 bg-zinc-900 p-4 rounded-xl mb-4">
+      <div className="flex items-center gap-4 bg-white p-4 rounded-xl mb-4">
         <div className="flex-1">
-          <div className="flex justify-between text-xs text-zinc-400 mb-1">
+          <div className="flex justify-between text-xs text-zinc-500 mb-1">
             <span>Level {appUser.level}</span>
             <span>{appUser.xp % 100} / 100 XP</span>
           </div>
@@ -145,26 +145,26 @@ export const AIStrategyCoach = () => {
           </div>
         </div>
         <div className="text-center pl-4 border-l border-zinc-800">
-          <div className="text-2xl font-black text-white">{appUser.streak}</div>
+          <div className="text-2xl font-black text-zinc-800">{appUser.streak}</div>
           <div className="text-[10px] text-zinc-500 uppercase">Day Streak</div>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4">
         {messages.map((msg) => (
-          <div key={msg.id} className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-zinc-800 ml-auto' : 'bg-zinc-900'} max-w-[80%]`}>
-            <p className="text-sm text-white font-sans">{msg.content}</p>
+          <div key={msg.id} className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-zinc-800 ml-auto' : 'bg-white'} max-w-[80%]`}>
+            <p className="text-sm text-zinc-800 font-sans">{msg.content}</p>
             {msg.role === 'assistant' && (
               <div className="flex gap-2 mt-2">
                 <button 
                   onClick={() => handleRateMessage(msg.id, 'up')}
-                  className={`p-1 rounded ${msg.rating === 'up' ? 'text-[#FF6B00]' : 'text-zinc-600 hover:text-zinc-400'}`}
+                  className={`p-1 rounded ${msg.rating === 'up' ? 'text-[#FF6B00]' : 'text-zinc-600 hover:text-zinc-500'}`}
                 >
                   <ThumbsUp className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => handleRateMessage(msg.id, 'down')}
-                  className={`p-1 rounded ${msg.rating === 'down' ? 'text-[#FF6B00]' : 'text-zinc-600 hover:text-zinc-400'}`}
+                  className={`p-1 rounded ${msg.rating === 'down' ? 'text-[#FF6B00]' : 'text-zinc-600 hover:text-zinc-500'}`}
                 >
                   <ThumbsDown className="w-4 h-4" />
                 </button>
@@ -180,17 +180,17 @@ export const AIStrategyCoach = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && sendMessage(input)}
-          className="flex-1 bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white font-mono text-sm"
+          className="flex-1 bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800 font-mono text-sm"
           placeholder="Ask for strategy..."
         />
         <button 
           onClick={isRecording ? stopRecording : startRecording}
           className={`p-3 rounded-xl ${isRecording ? 'bg-red-500' : 'bg-zinc-800'} hover:bg-zinc-700`}
         >
-          {isRecording ? <MicOff className="w-5 h-5 text-white" /> : <Mic className="w-5 h-5 text-white" />}
+          {isRecording ? <MicOff className="w-5 h-5 text-zinc-800" /> : <Mic className="w-5 h-5 text-zinc-800" />}
         </button>
         <button onClick={() => sendMessage(input)} className="bg-[#FF6B00] p-3 rounded-xl hover:bg-[#e66000]">
-          <Send className="w-5 h-5 text-white" />
+          <Send className="w-5 h-5 text-zinc-800" />
         </button>
       </div>
     </div>

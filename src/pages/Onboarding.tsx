@@ -62,11 +62,11 @@ export const Onboarding = () => {
         return (
           <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -100, opacity: 0 }}>
             <h1 className="text-3xl font-black mb-2 font-sans">The Identity</h1>
-            <p className="text-zinc-400 mb-8">Select your primary focus.</p>
+            <p className="text-zinc-500 mb-8">Select your primary focus.</p>
             <div className="grid gap-4 mb-8">
               {NICHES.map((n) => (
-                <button key={n.id} onClick={() => setNiche(n.id)} className={`p-4 rounded-2xl border-2 text-left transition-all ${niche === n.id ? 'border-orange-500 bg-orange-500/10' : 'border-zinc-800 bg-zinc-900/50'}`}>
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white mb-2 ${n.color}`}><n.icon /></div>
+                <button key={n.id} onClick={() => setNiche(n.id)} className={`p-4 rounded-2xl border-2 text-left transition-all ${niche === n.id ? 'border-orange-500 bg-orange-500/10' : 'border-zinc-800 bg-white'}`}>
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-zinc-800 mb-2 ${n.color}`}><n.icon /></div>
                   <h3 className="font-bold text-lg">{n.title}</h3>
                 </button>
               ))}
@@ -78,10 +78,10 @@ export const Onboarding = () => {
         return (
           <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -100, opacity: 0 }}>
             <h1 className="text-3xl font-black mb-2 font-sans">The Ambition</h1>
-            <p className="text-zinc-400 mb-8">What is your primary target for the next 90 days?</p>
+            <p className="text-zinc-500 mb-8">What is your primary target for the next 90 days?</p>
             <div className="grid gap-4 mb-8">
               {GOALS.map((g) => (
-                <button key={g.id} onClick={() => setGoal(g.id)} className={`p-4 rounded-2xl border-2 text-left transition-all ${goal === g.id ? 'border-orange-500 bg-orange-500/10' : 'border-zinc-800 bg-zinc-900/50'}`}>
+                <button key={g.id} onClick={() => setGoal(g.id)} className={`p-4 rounded-2xl border-2 text-left transition-all ${goal === g.id ? 'border-orange-500 bg-orange-500/10' : 'border-zinc-800 bg-white'}`}>
                   <h3 className="font-bold text-lg">{g.title}</h3>
                 </button>
               ))}
@@ -93,7 +93,7 @@ export const Onboarding = () => {
         return (
           <motion.div initial={{ x: 100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -100, opacity: 0 }}>
             <h1 className="text-3xl font-black mb-2 font-sans">The Contract</h1>
-            <p className="text-zinc-400 mb-8">Commit to the hunt.</p>
+            <p className="text-zinc-500 mb-8">Commit to the hunt.</p>
             <button onClick={() => updateOnboarding({ xp: (appUser?.xp || 0) + 100 }, 'completed')} disabled={loading} className="w-full bg-orange-500 py-4 rounded-2xl font-bold">I Commit to the Hunt</button>
           </motion.div>
         );
@@ -101,8 +101,8 @@ export const Onboarding = () => {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-50 p-6 font-mono">
-      <div className="h-2 w-full bg-zinc-800 rounded-full mb-8"><div className={`h-full bg-[#CCFF00] rounded-full transition-all ${step === 'identity' ? 'w-1/3' : step === 'ambition' ? 'w-2/3' : 'w-full'}`} /></div>
+    <div className="min-h-screen bg-white text-zinc-50 p-6 font-mono">
+      <div className="h-2 w-full bg-zinc-800 rounded-full mb-8"><div className={`h-full bg-[#FF7300] rounded-full transition-all ${step === 'identity' ? 'w-1/3' : step === 'ambition' ? 'w-2/3' : 'w-full'}`} /></div>
       <div className="max-w-md mx-auto">{renderStep()}</div>
     </div>
   );

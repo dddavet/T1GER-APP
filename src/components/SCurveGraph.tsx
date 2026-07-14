@@ -4,7 +4,7 @@ import { Trophy } from 'lucide-react';
 
 export const SCurveGraph: React.FC = () => {
   return (
-    <div className="w-full bg-[#0a0a0c] border border-white/5 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center">
+    <div className="w-full bg-[#0a0a0c] border border-zinc-200 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center">
       
       <div className="relative w-full h-48 mt-4">
         <svg viewBox="0 0 300 150" className="w-full h-full overflow-visible">
@@ -62,9 +62,9 @@ export const SCurveGraph: React.FC = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.0 }}
-        className="mt-10 p-5 rounded-2xl bg-white/[0.02] border border-white/5"
+        className="mt-10 p-5 rounded-2xl bg-zinc-50 border border-zinc-200"
       >
-        <p className="text-center text-xs font-medium text-zinc-300 leading-relaxed">
+        <p className="text-center text-xs font-medium text-zinc-500 leading-relaxed">
           Based on T1GER's data, the "click" happens at <span className="text-[#FF6B00] font-black uppercase tracking-wide">Day 7</span>. Once you cross it, compound growth takes over.
         </p>
       </motion.div>

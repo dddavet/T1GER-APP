@@ -168,7 +168,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
     <motion.div 
       animate={isShaking ? { x: [-10, 10, -10, 10, 0] } : {}}
       transition={{ duration: 0.4 }}
-      className="relative w-full max-w-[430px] mx-auto bg-[#050505] border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
+      className="relative w-full max-w-[430px] mx-auto bg-white border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl"
     >
       {/* Loading Overlay */}
       <AnimatePresence>
@@ -177,14 +177,14 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-10 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6"
+            className="absolute inset-0 z-10 bg-zinc-50 backdrop-blur-md flex flex-col items-center justify-center p-6"
           >
             <div className="relative w-24 h-24 mb-6">
               <div className="absolute inset-0 border-4 border-[#FF6B00] rounded-full animate-ping opacity-20"></div>
               <div className="absolute inset-2 border-4 border-[#FF6B00] rounded-full animate-pulse"></div>
               <Target className="absolute inset-0 m-auto w-10 h-10 text-[#FF6B00]" />
             </div>
-            <h3 className="font-sans font-black text-2xl text-white tracking-wider mb-2 text-center uppercase">
+            <h3 className="font-sans font-black text-2xl text-zinc-800 tracking-wider mb-2 text-center uppercase">
               {reviewing ? 'Senior Auditor Reviewing' : 'AI Auditor Active'}
             </h3>
             <p className="font-mono text-[#FF6B00] text-sm text-center">
@@ -199,7 +199,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#FF6B00] rounded-full animate-pulse"></div>
-            <span className="font-mono text-xs font-bold text-zinc-400 uppercase tracking-widest">
+            <span className="font-mono text-xs font-bold text-zinc-500 uppercase tracking-widest">
               Mission Protocol
             </span>
           </div>
@@ -208,11 +208,11 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
           </span>
         </div>
 
-        <h2 className="font-sans font-black text-3xl text-white leading-tight mb-4 uppercase">
+        <h2 className="font-sans font-black text-3xl text-zinc-800 leading-tight mb-4 uppercase">
           {mission.title}
         </h2>
         
-        <p className="font-mono text-zinc-400 text-sm mb-8 leading-relaxed">
+        <p className="font-mono text-zinc-500 text-sm mb-8 leading-relaxed">
           {mission.description}
         </p>
 
@@ -243,7 +243,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
                   <h4 className={`font-sans font-black uppercase text-lg mb-1 ${result.status === 'APPROVED' ? 'text-green-500' : 'text-red-500'}`}>
                     {result.status === 'APPROVED' ? 'MISSION COMPLETE. HUNGER FEED.' : 'Faking your hunt? STREAK BROKEN.'}
                   </h4>
-                  <p className="font-mono text-sm text-zinc-300">
+                  <p className="font-mono text-sm text-zinc-500">
                     {result.message}
                   </p>
                   
@@ -253,7 +253,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
                       {result.analysis.strengths.length > 0 && (
                         <div>
                           <p className="text-[10px] font-black uppercase text-green-500">Strengths:</p>
-                          <ul className="list-disc list-inside text-xs text-zinc-400 font-mono">
+                          <ul className="list-disc list-inside text-xs text-zinc-500 font-mono">
                             {result.analysis.strengths.map((s: string, i: number) => <li key={i}>{s}</li>)}
                           </ul>
                         </div>
@@ -261,7 +261,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
                       {result.analysis.weaknesses.length > 0 && (
                         <div>
                           <p className="text-[10px] font-black uppercase text-red-500">Weaknesses:</p>
-                          <ul className="list-disc list-inside text-xs text-zinc-400 font-mono">
+                          <ul className="list-disc list-inside text-xs text-zinc-500 font-mono">
                             {result.analysis.weaknesses.map((w: string, i: number) => <li key={i}>{w}</li>)}
                           </ul>
                         </div>
@@ -269,7 +269,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
                       {result.analysis.suggestions.length > 0 && (
                         <div>
                           <p className="text-[10px] font-black uppercase text-[#FF6B00]">Suggestions:</p>
-                          <ul className="list-disc list-inside text-xs text-zinc-400 font-mono">
+                          <ul className="list-disc list-inside text-xs text-zinc-500 font-mono">
                             {result.analysis.suggestions.map((s: string, i: number) => <li key={i}>{s}</li>)}
                           </ul>
                         </div>
@@ -310,7 +310,7 @@ export const T1gerMission: React.FC<T1gerMissionProps> = ({ mission, onComplete 
                 triggerHaptic(10);
                 fileInputRef.current?.click();
               }}
-              className="relative w-full bg-[#050505] border border-white/10 hover:border-[#FF6B00]/50 text-white p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all backdrop-blur-xl"
+              className="relative w-full bg-white border border-zinc-200 hover:border-[#FF6B00]/50 text-zinc-800 p-4 rounded-2xl flex flex-col items-center justify-center gap-3 transition-all backdrop-blur-xl"
             >
               <div className="w-12 h-12 rounded-full bg-[#FF6B00]/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                 <Camera className="w-6 h-6 text-[#FF6B00]" />

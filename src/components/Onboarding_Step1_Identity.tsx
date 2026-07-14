@@ -29,7 +29,7 @@ export const Onboarding_Step1_Identity: React.FC<IdentitySelectorProps> = ({ onC
       initial={{ x: 0, opacity: 1 }}
       animate={{ x: isExiting ? -500 : 0, opacity: isExiting ? 0 : 1 }}
       transition={{ duration: 0.3 }}
-      className="min-h-screen bg-[#050505] text-white p-6 flex flex-col justify-between"
+      className="min-h-screen bg-white text-zinc-800 p-6 flex flex-col justify-between"
     >
       <div className="pt-12 space-y-2">
         <h1 className="text-4xl font-black italic uppercase tracking-tighter">IDENTIFY YOUR HUNTING GROUND.</h1>
@@ -46,7 +46,7 @@ export const Onboarding_Step1_Identity: React.FC<IdentitySelectorProps> = ({ onC
               whileTap={{ scale: 0.95 }}
               onClick={() => setSelectedNiche(niche.id)}
               className={`glass p-6 rounded-3xl border-2 flex flex-col items-center justify-center gap-4 transition-all duration-300 ${
-                isSelected ? 'border-[#FF6B00] shadow-[0_0_15px_#FF6B00]' : 'border-white/10'
+                isSelected ? 'border-[#FF6B00] shadow-[0_0_15px_#FF6B00]' : 'border-zinc-200'
               }`}
             >
               <Icon className={`w-10 h-10 ${isSelected ? 'text-[#FF6B00]' : 'text-zinc-500'}`} />
@@ -60,7 +60,7 @@ export const Onboarding_Step1_Identity: React.FC<IdentitySelectorProps> = ({ onC
         disabled={!selectedNiche}
         onClick={handleConfirm}
         className={`w-full py-6 rounded-3xl font-black text-lg uppercase tracking-widest transition-colors ${
-          selectedNiche ? 'bg-[#CCFF00] text-black' : 'bg-zinc-800 text-zinc-500'
+          selectedNiche ? 'bg-[#FF7300] text-black' : 'bg-zinc-800 text-zinc-500'
         }`}
       >
         CONFIRM SELECTION

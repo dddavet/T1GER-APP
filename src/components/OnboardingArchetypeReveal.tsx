@@ -15,13 +15,13 @@ export const ARCHETYPES: Record<'business' | 'investing' | 'ai', { advanced: Arc
       title: 'Apex AI Architect',
       rank: 'Apex Predator (Lvl 3)',
       description: 'Dominas la lógica de sistemas neuronales y comprendes el comportamiento predictivo de los LLMs. Estás listo para automatizar imperios.',
-      badgeColor: 'text-[#CCFF00] bg-[#CCFF00]/10 border-[#CCFF00]/30',
+      badgeColor: 'text-[#FF7300] bg-[#FF7300]/10 border-[#FF7300]/30',
     },
     beginner: {
       title: 'AI Sentinel',
       rank: 'Hunter Cub (Lvl 1)',
       description: 'Posees un fuerte instinto estratégico para identificar herramientas automatizables. Aprenderás a dominar la ingeniería de prompts y flujos inteligentes.',
-      badgeColor: 'text-[#60A5FA] bg-[#60A5FA]/10 border-[#60A5FA]/30',
+      badgeColor: 'text-[#FF7300] bg-[#FF7300]/10 border-[#FF7300]/30',
     }
   },
   business: {
@@ -35,7 +35,7 @@ export const ARCHETYPES: Record<'business' | 'investing' | 'ai', { advanced: Arc
       title: 'Bootstrap Lynx',
       rank: 'Hunter Cub (Lvl 1)',
       description: 'Tienes la agilidad y determinación para encontrar nichos comerciales de alta demanda. Sentarás las bases para tu primer modelo de negocio.',
-      badgeColor: 'text-[#60A5FA] bg-[#60A5FA]/10 border-[#60A5FA]/30',
+      badgeColor: 'text-[#FF7300] bg-[#FF7300]/10 border-[#FF7300]/30',
     }
   },
   investing: {
@@ -43,13 +43,13 @@ export const ARCHETYPES: Record<'business' | 'investing' | 'ai', { advanced: Arc
       title: 'Quantitative Tiger',
       rank: 'Apex Predator (Lvl 3)',
       description: 'Calculas el interés compuesto con frialdad y sabes cómo mitigar riesgos usando Dollar-Cost Averaging. Eres un asignador de capital de élite.',
-      badgeColor: 'text-[#CCFF00] bg-[#CCFF00]/10 border-[#CCFF00]/30',
+      badgeColor: 'text-[#FF7300] bg-[#FF7300]/10 border-[#FF7300]/30',
     },
     beginner: {
       title: 'Compound Cub',
       rank: 'Hunter Cub (Lvl 1)',
       description: 'Entiendes cómo la inflación devora el capital estático. Estás listo para estructurar tus primeros cimientos en fondos indexados.',
-      badgeColor: 'text-[#60A5FA] bg-[#60A5FA]/10 border-[#60A5FA]/30',
+      badgeColor: 'text-[#FF7300] bg-[#FF7300]/10 border-[#FF7300]/30',
     }
   }
 };
@@ -138,7 +138,7 @@ export const OnboardingArchetypeReveal: React.FC<OnboardingArchetypeRevealProps>
   }).join(' ') + ' z';
 
   return (
-    <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+    <div className="w-full h-full bg-[#020204] text-zinc-800 flex flex-col justify-between pt-[calc(1rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
       {/* Neon Atmosphere Glows */}
       <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[120px] bg-[var(--accent-glow)] opacity-10 pointer-events-none" />
       
@@ -154,7 +154,7 @@ export const OnboardingArchetypeReveal: React.FC<OnboardingArchetypeRevealProps>
         </div>
 
         {/* Dynamic SVG Radar Chart */}
-        <div className="relative w-[220px] h-[220px] mb-6 flex items-center justify-center bg-black/20 rounded-full border border-white/[0.03] p-4 shadow-inner">
+        <div className="relative w-[220px] h-[220px] mb-6 flex items-center justify-center bg-zinc-50 rounded-full border border-white/[0.03] p-4 shadow-inner">
           <svg width="220" height="220" className="overflow-visible">
             <defs>
               <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
@@ -271,7 +271,7 @@ export const OnboardingArchetypeReveal: React.FC<OnboardingArchetypeRevealProps>
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.4, duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
-          className="w-full bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 text-left relative overflow-hidden shadow-2xl"
+          className="w-full bg-zinc-50 border border-zinc-200 rounded-[2rem] p-5 text-left relative overflow-hidden shadow-2xl"
         >
           {/* Neon side border indicator */}
           <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[var(--accent-main)]" />
@@ -279,14 +279,14 @@ export const OnboardingArchetypeReveal: React.FC<OnboardingArchetypeRevealProps>
           <div className="flex justify-between items-start mb-2">
             <div>
               <span className="text-[7px] font-black font-mono text-zinc-500 uppercase tracking-wider block mb-0.5">Arquetipo Asignado</span>
-              <h3 className="text-lg font-black uppercase text-white tracking-tight leading-none">{archetype.title}</h3>
+              <h3 className="text-lg font-black uppercase text-zinc-800 tracking-tight leading-none">{archetype.title}</h3>
             </div>
             <span className={`text-[8px] font-mono font-black border px-2 py-0.5 rounded-full uppercase tracking-widest ${archetype.badgeColor}`}>
               {archetype.rank}
             </span>
           </div>
 
-          <p className="text-xs text-zinc-400 font-medium leading-relaxed font-sans mt-3">
+          <p className="text-xs text-zinc-500 font-medium leading-relaxed font-sans mt-3">
             {archetype.description}
           </p>
         </motion.div>

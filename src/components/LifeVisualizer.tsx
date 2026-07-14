@@ -3,8 +3,8 @@ import { motion } from 'motion/react';
 
 export const LifeVisualizer = ({ livedMonths, totalMonths = 960 }: { livedMonths: number, totalMonths?: number }) => {
   return (
-    <div className="glass p-6 rounded-3xl border border-white/5">
-      <h3 className="text-lg font-black italic mb-4 text-zinc-400">LIFE VISUALIZER</h3>
+    <div className="glass p-6 rounded-3xl border border-zinc-200">
+      <h3 className="text-lg font-black italic mb-4 text-zinc-500">LIFE VISUALIZER</h3>
       <div className="grid grid-cols-20 gap-1">
         {Array.from({ length: totalMonths }).map((_, i) => (
           <motion.div

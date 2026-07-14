@@ -38,9 +38,9 @@ export const HUD = React.memo(() => {
         <div 
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-[#050508]/40 shadow-sm transition-all duration-300"
           style={{
-            borderColor: learnStreak >= 3 ? '#CCFF00' : 'rgba(255,255,255,0.05)',
+            borderColor: learnStreak >= 3 ? '#FF7300' : 'rgba(255,255,255,0.05)',
             boxShadow: learnStreak >= 3 ? '0 0 10px rgba(204,255,0,0.1)' : 'none',
-            color: learnStreak >= 3 ? '#CCFF00' : '#8a8a9e',
+            color: learnStreak >= 3 ? '#FF7300' : '#8a8a9e',
           }}
         >
           <Brain className="w-3 h-3 flex-shrink-0" />
@@ -51,9 +51,9 @@ export const HUD = React.memo(() => {
         <div 
           className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-[#050508]/40 shadow-sm transition-all duration-300"
           style={{
-            borderColor: tacticalStreak >= 3 ? '#60A5FA' : 'rgba(255,255,255,0.05)',
+            borderColor: tacticalStreak >= 3 ? '#FF7300' : 'rgba(255,255,255,0.05)',
             boxShadow: tacticalStreak >= 3 ? '0 0 10px rgba(96,165,250,0.1)' : 'none',
-            color: tacticalStreak >= 3 ? '#60A5FA' : '#8a8a9e',
+            color: tacticalStreak >= 3 ? '#FF7300' : '#8a8a9e',
           }}
         >
           <Zap className="w-3 h-3 flex-shrink-0" />
@@ -86,8 +86,8 @@ export const HUD = React.memo(() => {
       )}
 
       {/* Right: HP Bar representing Tactical completion */}
-      <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full liquid-glass shadow-3d">
-        <div className="w-14 h-1.5 bg-black/60 rounded-full shadow-inner overflow-hidden border border-white/5 relative">
+      <div className="flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-white shadow-sm shadow-sm">
+        <div className="w-14 h-1.5 bg-white rounded-full shadow-inner overflow-hidden border border-zinc-200 relative">
           <motion.div
             className="h-full bg-[var(--accent-main)] rounded-full transition-all duration-300"
             initial={{ width: 0 }}

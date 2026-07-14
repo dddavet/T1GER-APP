@@ -44,7 +44,7 @@ export const Onboarding = ({ onComplete }: { onComplete: (data: OnboardingData) 
       case 3:
         return (
           <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} className="p-6">
-            <h2 className="text-4xl font-black italic text-white mb-8">HOW HARD SHOULD WE BITE?</h2>
+            <h2 className="text-4xl font-black italic text-zinc-800 mb-8">HOW HARD SHOULD WE BITE?</h2>
             <div className="space-y-4">
               {MODES.map(mode => (
                 <motion.button
@@ -55,10 +55,10 @@ export const Onboarding = ({ onComplete }: { onComplete: (data: OnboardingData) 
                     transition: { duration: 0.2 }
                   }}
                   onClick={() => { setData({ ...data, mode: mode.name }); nextStep(); }}
-                  className="w-full p-6 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 text-left"
+                  className="w-full p-6 rounded-2xl border border-zinc-200 bg-zinc-50 hover:bg-zinc-50 text-left"
                 >
                   <div className="text-2xl font-black italic text-[#FF6B00]">{mode.name}</div>
-                  <div className="text-zinc-400 font-mono">{mode.desc}</div>
+                  <div className="text-zinc-500 font-mono">{mode.desc}</div>
                 </motion.button>
               ))}
             </div>
@@ -67,13 +67,13 @@ export const Onboarding = ({ onComplete }: { onComplete: (data: OnboardingData) 
       case 4:
         return (
           <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -60, opacity: 0 }} className="p-6">
-            <h2 className="text-3xl font-black italic text-white mb-6">DAILY PREDATION TIME</h2>
+            <h2 className="text-3xl font-black italic text-zinc-800 mb-6">DAILY PREDATION TIME</h2>
             <div className="space-y-4">
               {[5, 10, 20].map(time => (
                 <button
                   key={time}
                   onClick={() => { setData({ ...data, dailyTime: time }); nextStep(); }}
-                  className="w-full p-4 rounded-xl border border-white/10 bg-white/5 hover:bg-[#FF6B00]/20 transition-all font-mono"
+                  className="w-full p-4 rounded-xl border border-zinc-200 bg-zinc-50 hover:bg-[#FF6B00]/20 transition-all font-mono"
                 >
                   {time} MINUTES / DAY
                 </button>
@@ -84,16 +84,16 @@ export const Onboarding = ({ onComplete }: { onComplete: (data: OnboardingData) 
       case 5:
         return (
           <motion.div initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -60, opacity: 0 }} className="p-6">
-            <h2 className="text-3xl font-black italic text-white mb-6">PRIMARY OBJECTIVE</h2>
+            <h2 className="text-3xl font-black italic text-zinc-800 mb-6">PRIMARY OBJECTIVE</h2>
             <input 
               type="text" 
               placeholder="e.g. Raise $1M, Scale to 10k users..."
-              className="w-full p-4 rounded-xl bg-white/5 border border-white/10 text-white placeholder-zinc-500 font-mono mb-6"
+              className="w-full p-4 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-800 placeholder-zinc-500 font-mono mb-6"
               onChange={(e) => setData({ ...data, goal: e.target.value })}
             />
             <button
               onClick={() => { if(data.goal) nextStep(); }}
-              className="w-full p-4 rounded-xl bg-[#FF6B00] text-white font-black uppercase"
+              className="w-full p-4 rounded-xl bg-[#FF6B00] text-zinc-800 font-black uppercase"
             >
               Confirm Mission
             </button>
@@ -117,7 +117,7 @@ export const Onboarding = ({ onComplete }: { onComplete: (data: OnboardingData) 
   };
 
   return (
-    <div className="fixed inset-0 bg-[#050505] flex items-center justify-center">
+    <div className="fixed inset-0 bg-white flex items-center justify-center">
       <div className="max-w-xl w-full">
         <AnimatePresence mode="wait">
           {renderStep()}

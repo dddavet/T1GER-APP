@@ -25,53 +25,53 @@ export const SaveProgressAuth: React.FC<SaveProgressAuthProps> = ({ onSignIn, on
         animate={{ opacity: 1, y: 0 }}
         className="text-center px-4 space-y-4"
       >
-        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-white drop-shadow-md">
+        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-zinc-800 drop-shadow-md">
           Guarda tu arsenal
         </h2>
-        <p className="text-sm font-medium text-zinc-400">
+        <p className="text-sm font-medium text-zinc-500">
           Crea una cuenta para no perder tu progreso ni tu plan estratégico.
         </p>
       </motion.div>
 
       {/* Background visual to make it look like there's content behind the popup */}
       <div className="w-full max-w-sm mt-8 opacity-20 pointer-events-none">
-        <div className="h-14 w-full rounded-[2rem] bg-white/10 mb-4" />
-        <div className="h-14 w-full rounded-[2rem] bg-white/10" />
+        <div className="h-14 w-full rounded-[2rem] bg-zinc-50 mb-4" />
+        <div className="h-14 w-full rounded-[2rem] bg-zinc-50" />
       </div>
 
       {/* Fake iOS Native Popup Overlay */}
       <AnimatePresence>
         {showNativePrompt && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[2px] px-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white backdrop-blur-[2px] px-8">
             <motion.div 
               initial={{ scale: 1.1, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="bg-[#1c1c1e]/90 backdrop-blur-xl w-full max-w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-white/10 flex flex-col items-center"
+              className="bg-[#1c1c1e]/90 backdrop-blur-xl w-full max-w-[280px] rounded-2xl overflow-hidden shadow-2xl border border-zinc-200 flex flex-col items-center"
             >
               <div className="p-5 text-center space-y-1">
-                <h3 className="text-white font-semibold text-[17px] leading-tight tracking-tight">
+                <h3 className="text-zinc-800 font-semibold text-[17px] leading-tight tracking-tight">
                   "T1GER" Wants to Use "google.com" to Sign In
                 </h3>
-                <p className="text-zinc-400 text-[13px] leading-tight px-2">
+                <p className="text-zinc-500 text-[13px] leading-tight px-2">
                   This allows the app and website to share information about you.
                 </p>
               </div>
               
-              <div className="w-full flex border-t border-white/10">
+              <div className="w-full flex border-t border-zinc-200">
                 <button 
                   onClick={() => {
                     setShowNativePrompt(false);
                     // allow them to press the skip button
                   }}
-                  className="flex-1 py-3 text-[#0A84FF] font-normal text-[17px] border-r border-white/10 active:bg-white/5"
+                  className="flex-1 py-3 text-[#0A84FF] font-normal text-[17px] border-r border-zinc-200 active:bg-zinc-50"
                 >
                   Cancel
                 </button>
                 <button 
                   onClick={onSignIn}
-                  className="flex-1 py-3 text-[#0A84FF] font-semibold text-[17px] active:bg-white/5"
+                  className="flex-1 py-3 text-[#0A84FF] font-semibold text-[17px] active:bg-zinc-50"
                 >
                   Continue
                 </button>
@@ -89,7 +89,7 @@ export const SaveProgressAuth: React.FC<SaveProgressAuthProps> = ({ onSignIn, on
         className="absolute bottom-[-60px] text-center w-full"
       >
         <span className="text-zinc-500 font-medium text-sm mr-2">Would you like to sign in later?</span>
-        <button onClick={onSkip} className="font-bold text-white underline underline-offset-4">Skip</button>
+        <button onClick={onSkip} className="font-bold text-zinc-800 underline underline-offset-4">Skip</button>
       </motion.div>
     </div>
   );

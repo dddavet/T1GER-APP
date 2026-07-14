@@ -47,7 +47,7 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
   };
 
   return (
-    <div className="w-full h-full bg-[#050505] text-white p-6 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="w-full h-full bg-white text-zinc-800 p-6 flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-tr from-[#FF0000]/10 via-transparent to-transparent animate-pulse" />
       
       <header className="text-center space-y-2 z-10 mb-12">
@@ -60,7 +60,7 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
           <motion.button 
             whileTap={{ scale: 0.9 }}
             onClick={startRecording}
-            className="w-32 h-32 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center"
+            className="w-32 h-32 rounded-full bg-zinc-50 backdrop-blur-md border border-zinc-200 flex items-center justify-center"
           >
             <Mic size={48} />
           </motion.button>
@@ -90,7 +90,7 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
         {status === 'verdict' && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className={`p-6 rounded-2xl border ${verdict?.includes('+') ? 'bg-[#CCFF00]/10 border-[#CCFF00]/20' : 'bg-[#FF0000]/10 border-[#FF0000]/20'}`}
+            className={`p-6 rounded-2xl border ${verdict?.includes('+') ? 'bg-[#FF7300]/10 border-[#FF7300]/20' : 'bg-[#FF0000]/10 border-[#FF0000]/20'}`}
           >
             <p className="font-mono text-sm leading-relaxed">{verdict}</p>
           </motion.div>

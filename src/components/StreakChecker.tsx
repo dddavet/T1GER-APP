@@ -48,7 +48,7 @@ export const StreakChecker = () => {
       {appUser && (appUser.streakShields || 0) > 0 && (
         <motion.div 
           animate={activating ? { scale: 0.8, opacity: 0.5 } : { scale: 1, opacity: 1 }}
-          className="fixed bottom-4 right-4 z-50 bg-zinc-900 border border-orange-500/50 p-3 rounded-2xl shadow-xl flex items-center gap-3"
+          className="fixed bottom-4 right-4 z-50 bg-white border border-orange-500/50 p-3 rounded-2xl shadow-xl flex items-center gap-3"
         >
           <div className="text-orange-500 font-bold">
             🛡️ {appUser.streakShields}
@@ -62,7 +62,7 @@ export const StreakChecker = () => {
               });
               setTimeout(() => setActivating(false), 500);
             }}
-            className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full hover:bg-orange-600 transition-colors"
+            className="bg-orange-500 text-zinc-800 text-xs font-bold px-3 py-1 rounded-full hover:bg-orange-600 transition-colors"
           >
             Activate
           </button>

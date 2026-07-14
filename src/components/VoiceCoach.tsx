@@ -92,7 +92,7 @@ export const VoiceCoach = () => {
   return (
     <button
       onClick={isListening ? stopVoiceSession : startVoiceSession}
-      className={`p-4 rounded-full ${isListening ? 'bg-red-500' : 'bg-[#FF6B00]'} text-white`}
+      className={`p-4 rounded-full ${isListening ? 'bg-red-500' : 'bg-[#FF6B00]'} text-zinc-800`}
     >
       {isListening ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
     </button>

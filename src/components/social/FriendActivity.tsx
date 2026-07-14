@@ -26,7 +26,7 @@ export const FriendActivity = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className="flex-shrink-0 w-32 liquid-glass rounded-[2rem] p-4 flex flex-col items-center gap-3 border-white/5 snap-center relative group"
+            className="flex-shrink-0 w-32 bg-white shadow-sm rounded-[2rem] p-4 flex flex-col items-center gap-3 border-zinc-200 snap-center relative group"
           >
             {/* Status Indicator */}
             {friend.active && (
@@ -34,13 +34,13 @@ export const FriendActivity = () => {
             )}
 
             {/* Avatar */}
-            <div className="w-14 h-14 rounded-full bg-zinc-900 border border-white/10 flex items-center justify-center text-2xl shadow-3d group-hover:scale-105 transition-transform">
+            <div className="w-14 h-14 rounded-full bg-white border border-zinc-200 flex items-center justify-center text-2xl shadow-sm group-hover:scale-105 transition-transform">
               {friend.avatar}
             </div>
 
             {/* Name + Streak */}
             <div className="text-center">
-              <p className="text-[10px] font-black uppercase text-zinc-300 truncate w-24">{friend.name}</p>
+              <p className="text-[10px] font-black uppercase text-zinc-500 truncate w-24">{friend.name}</p>
               <div className="flex items-center justify-center gap-1 mt-0.5">
                 <Flame className="w-2.5 h-2.5 text-orange-500" />
                 <span className="text-[9px] font-black text-zinc-600">{friend.streak}D</span>

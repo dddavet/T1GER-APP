@@ -84,7 +84,7 @@ export const DailyCommitment = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-[150] bg-[#050505] overflow-y-auto">
+    <div className="fixed inset-0 z-[150] bg-white overflow-y-auto">
       <div className="max-w-md mx-auto p-6 pb-40 space-y-10">
         
         {/* HEADER */}
@@ -93,7 +93,7 @@ export const DailyCommitment = () => {
             <ShieldCheck className="w-5 h-5 shadow-accent" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em]">Operational Readiness</span>
           </div>
-          <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-white">
+          <h1 className="text-4xl font-black italic uppercase tracking-tighter leading-none text-zinc-800">
             MORNING <br/>
             <span className="text-accent">BRIEFING</span>
           </h1>
@@ -114,10 +114,10 @@ export const DailyCommitment = () => {
               <button 
                 key={d.id}
                 onClick={() => { haptic(); setDayType(d.id as any); }}
-                className={`flex flex-col items-center gap-3 p-5 rounded-[2rem] border transition-all shadow-3d active:scale-95 ${
+                className={`flex flex-col items-center gap-3 p-5 rounded-[2rem] border transition-all shadow-sm active:scale-95 ${
                   dailyTacticalStatus.dayType === d.id 
-                    ? `liquid-glass-accent border-accent/20 shadow-3d-accent` 
-                    : 'bg-white/5 border-white/5 opacity-60 hover:opacity-100'
+                    ? `bg-white shadow-sm-accent border-accent/20 shadow-sm` 
+                    : 'bg-zinc-50 border-zinc-200 opacity-60 hover:opacity-100'
                 }`}
               >
                 <d.icon className={`w-6 h-6 ${d.color} ${dailyTacticalStatus.dayType === d.id ? 'drop-shadow-[0_0_8px_var(--accent-glow)]' : ''}`} />
@@ -128,14 +128,14 @@ export const DailyCommitment = () => {
         </div>
 
         {/* RESCUE PROTOCOL */}
-        <div className="liquid-glass-heavy rounded-[2rem] p-5 border border-blue-400/15 shadow-3d space-y-4">
+        <div className="bg-white shadow-sm rounded-[2rem] p-5 border border-blue-400/15 shadow-sm space-y-4">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-[1.25rem] bg-blue-400/10 border border-blue-400/20 text-blue-400 flex items-center justify-center shadow-inner">
               <Coffee className="w-6 h-6" />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="text-sm font-black uppercase tracking-tight text-white">Rescue Protocol</h2>
+                <h2 className="text-sm font-black uppercase tracking-tight text-zinc-800">Rescue Protocol</h2>
                 <span className="text-[8px] font-black text-blue-300 uppercase tracking-widest bg-blue-400/10 px-2 py-1 rounded-full border border-blue-400/10">Low load</span>
               </div>
               <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-wider font-black mt-2">
@@ -166,17 +166,17 @@ export const DailyCommitment = () => {
                   <button
                     key={habit.id}
                     onClick={() => toggleHabit(habit.id)}
-                    className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-3d active:scale-[0.98] ${
-                      isSelected ? 'liquid-glass border-white/20' : 'bg-white/5 border-transparent opacity-60'
+                    className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-sm active:scale-[0.98] ${
+                      isSelected ? 'bg-white shadow-sm border-zinc-200' : 'bg-zinc-50 border-transparent opacity-60'
                     }`}
                   >
                     <div className="flex items-center gap-4 text-left">
-                      <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${isSelected ? 'bg-accent/10 text-accent border-accent/20' : 'bg-zinc-900 text-zinc-600 border-white/5'}`}>
+                      <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${isSelected ? 'bg-accent/10 text-accent border-accent/20' : 'bg-white text-zinc-600 border-zinc-200'}`}>
                         <Icon className="w-6 h-6" />
                       </div>
-                      <span className={`text-sm font-black uppercase tracking-tight ${isSelected ? 'text-white' : 'text-zinc-600'}`}>{habit.label}</span>
+                      <span className={`text-sm font-black uppercase tracking-tight ${isSelected ? 'text-zinc-800' : 'text-zinc-600'}`}>{habit.label}</span>
                     </div>
-                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-3d ${isSelected ? 'bg-accent border-accent text-black shadow-3d-accent' : 'border-zinc-800'}`}>
+                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${isSelected ? 'bg-accent border-accent text-black shadow-sm' : 'border-zinc-800'}`}>
                       {isSelected && <Check className="w-4 h-4" strokeWidth={4} />}
                     </div>
                   </button>
@@ -186,17 +186,17 @@ export const DailyCommitment = () => {
                 <button
                   key={habit.id}
                   onClick={() => toggleHabit(habit.id)}
-                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-3d active:scale-[0.98] ${
-                    selectedHabits.includes(habit.id) ? 'liquid-glass border-white/20' : 'bg-white/5 border-transparent opacity-60'
+                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-sm active:scale-[0.98] ${
+                    selectedHabits.includes(habit.id) ? 'bg-white shadow-sm border-zinc-200' : 'bg-zinc-50 border-transparent opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-4 text-left">
-                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedHabits.includes(habit.id) ? 'bg-accent/10 text-accent border-accent/20' : 'bg-zinc-900 text-zinc-600 border-white/5'}`}>
+                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedHabits.includes(habit.id) ? 'bg-accent/10 text-accent border-accent/20' : 'bg-white text-zinc-600 border-zinc-200'}`}>
                       <Target className="w-6 h-6" />
                     </div>
-                    <span className={`text-sm font-black uppercase tracking-tight ${selectedHabits.includes(habit.id) ? 'text-white' : 'text-zinc-600'}`}>{habit.label}</span>
+                    <span className={`text-sm font-black uppercase tracking-tight ${selectedHabits.includes(habit.id) ? 'text-zinc-800' : 'text-zinc-600'}`}>{habit.label}</span>
                   </div>
-                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-3d ${selectedHabits.includes(habit.id) ? 'bg-accent border-accent text-black shadow-3d-accent' : 'border-zinc-800'}`}>
+                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${selectedHabits.includes(habit.id) ? 'bg-accent border-accent text-black shadow-sm' : 'border-zinc-800'}`}>
                     {selectedHabits.includes(habit.id) && <Check className="w-4 h-4" strokeWidth={4} />}
                   </div>
                 </button>
@@ -215,17 +215,17 @@ export const DailyCommitment = () => {
                 <button
                   key={lesson.id}
                   onClick={() => toggleLesson(lesson.id)}
-                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-3d active:scale-[0.98] ${
-                    selectedLessons.includes(lesson.id) ? 'liquid-glass border-purple-400/20' : 'bg-white/5 border-transparent opacity-60'
+                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-sm active:scale-[0.98] ${
+                    selectedLessons.includes(lesson.id) ? 'bg-white shadow-sm border-purple-400/20' : 'bg-zinc-50 border-transparent opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-4 text-left">
-                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedLessons.includes(lesson.id) ? 'bg-purple-400/10 text-purple-400 border-purple-400/20' : 'bg-zinc-900 text-zinc-600 border-white/5'}`}>
+                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedLessons.includes(lesson.id) ? 'bg-purple-400/10 text-purple-400 border-purple-400/20' : 'bg-white text-zinc-600 border-zinc-200'}`}>
                       <Book className="w-6 h-6" />
                     </div>
-                    <span className={`text-sm font-black uppercase tracking-tight ${selectedLessons.includes(lesson.id) ? 'text-white' : 'text-zinc-600'}`}>{lesson.label}</span>
+                    <span className={`text-sm font-black uppercase tracking-tight ${selectedLessons.includes(lesson.id) ? 'text-zinc-800' : 'text-zinc-600'}`}>{lesson.label}</span>
                   </div>
-                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-3d ${selectedLessons.includes(lesson.id) ? 'bg-purple-400 border-purple-400 text-black shadow-3d-accent' : 'border-zinc-800'}`}>
+                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${selectedLessons.includes(lesson.id) ? 'bg-purple-400 border-purple-400 text-black shadow-sm' : 'border-zinc-800'}`}>
                     {selectedLessons.includes(lesson.id) && <Check className="w-4 h-4" strokeWidth={4} />}
                   </div>
                 </button>
@@ -244,17 +244,17 @@ export const DailyCommitment = () => {
                 <button
                   key={task.id}
                   onClick={() => toggleWork(task.id)}
-                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-3d active:scale-[0.98] ${
-                    selectedWork.includes(task.id) ? 'liquid-glass border-blue-400/20' : 'bg-white/5 border-transparent opacity-60'
+                  className={`flex items-center justify-between p-5 rounded-[2rem] border transition-all shadow-sm active:scale-[0.98] ${
+                    selectedWork.includes(task.id) ? 'bg-white shadow-sm border-blue-400/20' : 'bg-zinc-50 border-transparent opacity-60'
                   }`}
                 >
                   <div className="flex items-center gap-4 text-left">
-                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedWork.includes(task.id) ? 'bg-blue-400/10 text-blue-400 border-blue-400/20' : 'bg-zinc-900 text-zinc-600 border-white/5'}`}>
+                    <div className={`w-12 h-12 rounded-[1.2rem] flex items-center justify-center shadow-inner border ${selectedWork.includes(task.id) ? 'bg-blue-400/10 text-blue-400 border-blue-400/20' : 'bg-white text-zinc-600 border-zinc-200'}`}>
                       <Rocket className="w-6 h-6" />
                     </div>
-                    <span className={`text-sm font-black uppercase tracking-tight ${selectedWork.includes(task.id) ? 'text-white' : 'text-zinc-600'}`}>{task.label}</span>
+                    <span className={`text-sm font-black uppercase tracking-tight ${selectedWork.includes(task.id) ? 'text-zinc-800' : 'text-zinc-600'}`}>{task.label}</span>
                   </div>
-                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-3d ${selectedWork.includes(task.id) ? 'bg-blue-400 border-blue-400 text-black shadow-3d-accent' : 'border-zinc-800'}`}>
+                  <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shadow-sm ${selectedWork.includes(task.id) ? 'bg-blue-400 border-blue-400 text-black shadow-sm' : 'border-zinc-800'}`}>
                     {selectedWork.includes(task.id) && <Check className="w-4 h-4" strokeWidth={4} />}
                   </div>
                 </button>
@@ -263,7 +263,7 @@ export const DailyCommitment = () => {
         </div>
 
         {/* FOOTER INFO */}
-        <div className="p-6 liquid-glass-heavy rounded-[2.5rem] border border-white/5 flex items-start gap-4 shadow-3d">
+        <div className="p-6 bg-white shadow-sm rounded-[2.5rem] border border-zinc-200 flex items-start gap-4 shadow-sm">
           <Info className="w-5 h-5 text-zinc-600 shrink-0 mt-0.5" />
           <p className="text-[10px] text-zinc-500 leading-relaxed uppercase tracking-wider font-black">
             The three-pillar protocol is absolute. You are defining your daily output. T1GER rewards consistency, not intentions.

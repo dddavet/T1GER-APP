@@ -26,7 +26,7 @@ const MOCK_LEADERBOARD: LeaderboardUser[] = [
 
 const RANK_STYLES = [
   { bg: 'bg-amber-500/10', border: 'border-amber-500/30', crown: 'text-amber-400', label: '1st' },
-  { bg: 'bg-zinc-300/10', border: 'border-zinc-400/20', crown: 'text-zinc-300', label: '2nd' },
+  { bg: 'bg-zinc-300/10', border: 'border-zinc-400/20', crown: 'text-zinc-500', label: '2nd' },
   { bg: 'bg-orange-700/10', border: 'border-orange-600/20', crown: 'text-orange-500', label: '3rd' },
 ];
 
@@ -59,7 +59,7 @@ export const WeeklyBoard = () => {
         </span>
       </div>
 
-      <div className="liquid-glass border-white/10 rounded-[2.5rem] overflow-hidden shadow-3d">
+      <div className="bg-white shadow-sm border-zinc-200 rounded-[2.5rem] overflow-hidden shadow-sm">
         {board.map((user, i) => {
           const rankStyle = i < 3 ? RANK_STYLES[i] : null;
           const isYou = user.isYou;
@@ -88,8 +88,8 @@ export const WeeklyBoard = () => {
                 } ${isYou ? 'bg-accent/5' : ''}`}
               >
                 {/* Rank Indicator */}
-                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-3d border transition-all ${
-                  rankStyle ? `${rankStyle.bg} ${rankStyle.border} scale-110` : 'bg-black/40 border-white/5'
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border transition-all ${
+                  rankStyle ? `${rankStyle.bg} ${rankStyle.border} scale-110` : 'bg-white border-zinc-200'
                 }`}>
                   {i < 3 ? (
                     <Crown className={`w-4 h-4 ${rankStyle?.crown}`} />
@@ -100,7 +100,7 @@ export const WeeklyBoard = () => {
 
                 {/* Avatar */}
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg flex-shrink-0 shadow-inner relative ${
-                  isYou ? 'bg-accent/20 border-accent/30 border shadow-3d-accent' : 'bg-zinc-900 border border-white/5'
+                  isYou ? 'bg-accent/20 border-accent/30 border shadow-sm' : 'bg-white border border-zinc-200'
                 }`}>
                   {user.avatar}
                   {isPromotionZone && (
@@ -114,7 +114,7 @@ export const WeeklyBoard = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className={`font-black text-xs tracking-tight uppercase truncate block ${
-                      isYou ? 'text-accent' : 'text-zinc-300'
+                      isYou ? 'text-accent' : 'text-zinc-500'
                     }`}>
                       {user.name}
                     </span>
@@ -131,7 +131,7 @@ export const WeeklyBoard = () => {
                 {/* Weekly XP */}
                 <div className="text-right flex-shrink-0">
                   <span className={`text-sm font-black ${
-                    i === 0 ? 'text-amber-400' : isYou ? 'text-accent' : 'text-white'
+                    i === 0 ? 'text-amber-400' : isYou ? 'text-accent' : 'text-zinc-800'
                   }`}>
                     {user.weeklyXP.toLocaleString()}
                   </span>

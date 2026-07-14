@@ -11,7 +11,7 @@ export const HardcoreModeToggle: React.FC = () => {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
-        className="relative w-full aspect-[4/5] max-h-[45vh] rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl"
+        className="relative w-full aspect-[4/5] max-h-[45vh] rounded-[2.5rem] overflow-hidden border border-zinc-200 shadow-2xl"
       >
         {/* Dark aggressive gradient replacing the photo for now */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#1a0b00] via-[#050505] to-[#0a0a0c]" />
@@ -28,14 +28,14 @@ export const HardcoreModeToggle: React.FC = () => {
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-3xl flex items-center gap-4 shadow-xl"
+            className="bg-zinc-50 backdrop-blur-md border border-zinc-200 p-4 rounded-3xl flex items-center gap-4 shadow-xl"
           >
             <div className="w-10 h-10 rounded-full bg-[#FF6B00] flex items-center justify-center flex-shrink-0">
               <Flame size={20} className="text-[#050505]" />
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300 block mb-0.5">Si mantienes la racha</span>
-              <span className="text-sm font-bold text-white">+500 XP Bonos</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-0.5">Si mantienes la racha</span>
+              <span className="text-sm font-bold text-zinc-800">+500 XP Bonos</span>
             </div>
           </motion.div>
 
@@ -43,13 +43,13 @@ export const HardcoreModeToggle: React.FC = () => {
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className="bg-[#050505]/80 backdrop-blur-md border border-red-500/30 p-4 rounded-3xl flex items-center gap-4 shadow-xl"
+            className="bg-white backdrop-blur-md border border-red-500/30 p-4 rounded-3xl flex items-center gap-4 shadow-xl"
           >
             <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center flex-shrink-0 border border-red-500/50">
               <Skull size={18} className="text-red-500" />
             </div>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 block mb-0.5">Si fallas un día</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500 block mb-0.5">Si fallas un día</span>
               <span className="text-sm font-bold text-red-500">-2X Penalización</span>
             </div>
           </motion.div>
@@ -63,10 +63,10 @@ export const HardcoreModeToggle: React.FC = () => {
         transition={{ delay: 1 }}
         className="text-center px-2 space-y-4"
       >
-        <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-tight text-white drop-shadow-md">
+        <h2 className="text-3xl font-black italic tracking-tighter uppercase leading-tight text-zinc-800 drop-shadow-md">
           ¿Activar el Modo Castigo?
         </h2>
-        <p className="text-xs font-medium text-zinc-400 leading-relaxed">
+        <p className="text-xs font-medium text-zinc-500 leading-relaxed">
           T1GER no es una app amable. Te castigaremos si no cumples, pero te premiaremos en grande si demuestras disciplina.
         </p>
       </motion.div>

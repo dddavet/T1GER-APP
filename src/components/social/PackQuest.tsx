@@ -38,15 +38,15 @@ export const PackQuest = () => {
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="liquid-glass border-white/10 rounded-[2.5rem] p-6 space-y-6 shadow-3d"
+        className="bg-white shadow-sm border-zinc-200 rounded-[2.5rem] p-6 space-y-6 shadow-sm"
       >
         {/* Quest header */}
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h4 className="font-black text-lg italic uppercase tracking-tighter text-white">{quest.title}</h4>
+            <h4 className="font-black text-lg italic uppercase tracking-tighter text-zinc-800">{quest.title}</h4>
             <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-tight">{quest.description}</p>
           </div>
-          <div className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-full shadow-3d">
+          <div className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 rounded-full shadow-sm">
             <Zap className="w-3 h-3 text-purple-400" strokeWidth={3} />
             <span className="text-[9px] font-black text-purple-400 uppercase">+{quest.reward} XP</span>
           </div>
@@ -58,9 +58,9 @@ export const PackQuest = () => {
             <span className="text-[9px] font-black text-zinc-600 uppercase tracking-widest">Global Progress</span>
             <span className="text-[10px] font-black text-accent drop-shadow-[0_0_8px_var(--accent-glow)]">{totalProgress}/{totalGoal}</span>
           </div>
-          <div className="h-4 liquid-glass rounded-full p-1 border-white/5 shadow-inner">
+          <div className="h-4 bg-white shadow-sm rounded-full p-1 border-zinc-200 shadow-inner">
             <motion.div
-              className="h-full bg-gradient-to-r from-purple-500 to-accent rounded-full shadow-3d"
+              className="h-full bg-gradient-to-r from-purple-500 to-accent rounded-full shadow-sm"
               initial={{ width: 0 }}
               animate={{ width: `${progressPct}%` }}
               transition={{ duration: 1, ease: 'easeOut' }}
@@ -71,12 +71,12 @@ export const PackQuest = () => {
         {/* Individual progress bars */}
         <div className="grid grid-cols-2 gap-4">
           {/* You */}
-          <div className="liquid-glass-heavy rounded-[1.5rem] p-4 border-white/5 shadow-inner">
+          <div className="bg-white shadow-sm rounded-[1.5rem] p-4 border-zinc-200 shadow-inner">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-sm shadow-3d-accent border border-accent/20">🐅</div>
-              <span className="text-[9px] font-black uppercase text-zinc-400">You</span>
+              <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center text-sm shadow-sm border border-accent/20">🐅</div>
+              <span className="text-[9px] font-black uppercase text-zinc-500">You</span>
             </div>
-            <div className="h-1.5 bg-black/40 rounded-full overflow-hidden mb-2 border border-white/5">
+            <div className="h-1.5 bg-white rounded-full overflow-hidden mb-2 border border-zinc-200">
               <motion.div
                 className="h-full bg-accent rounded-full shadow-accent"
                 initial={{ width: 0 }}
@@ -88,12 +88,12 @@ export const PackQuest = () => {
           </div>
 
           {/* Partner */}
-          <div className="liquid-glass-heavy rounded-[1.5rem] p-4 border-white/5 shadow-inner">
+          <div className="bg-white shadow-sm rounded-[1.5rem] p-4 border-zinc-200 shadow-inner">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 rounded-full bg-zinc-900 flex items-center justify-center text-sm shadow-3d border border-white/10">{quest.partner.avatar}</div>
-              <span className="text-[9px] font-black uppercase text-zinc-400 truncate">{quest.partner.name}</span>
+              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-sm shadow-sm border border-zinc-200">{quest.partner.avatar}</div>
+              <span className="text-[9px] font-black uppercase text-zinc-500 truncate">{quest.partner.name}</span>
             </div>
-            <div className="h-1.5 bg-black/40 rounded-full overflow-hidden mb-2 border border-white/5">
+            <div className="h-1.5 bg-white rounded-full overflow-hidden mb-2 border border-zinc-200">
               <motion.div
                 className="h-full bg-accent rounded-full shadow-accent"
                 initial={{ width: 0 }}

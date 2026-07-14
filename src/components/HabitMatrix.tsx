@@ -70,7 +70,7 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
       {/* SECTION HEADER */}
       <div className="flex items-center justify-between mb-2">
          <div className="flex flex-col">
-            <h2 className="text-lg font-black italic uppercase tracking-tighter text-white">TACTICAL OBJECTIVES</h2>
+            <h2 className="text-lg font-black italic uppercase tracking-tighter text-zinc-800">TACTICAL OBJECTIVES</h2>
             <p className="text-[9px] font-mono text-accent/60 uppercase tracking-[0.2em]">
               {dailyTacticalStatus.dayType.toUpperCase()} PROTOCOL ACTIVE
             </p>
@@ -90,8 +90,8 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
               whileHover={{ scale: 1.01, y: -2 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => { if (!task.completed) { haptic(); setSelectedTask(task); } }}
-              className={`liquid-glass rounded-[2rem] p-4 flex items-center justify-between border-white/10 transition-all cursor-pointer shadow-3d ${
-                task.completed ? 'opacity-40 grayscale-[0.8] cursor-default' : 'hover:bg-white/[0.06]'
+              className={`bg-white shadow-sm rounded-[2rem] p-4 flex items-center justify-between border-zinc-200 transition-all cursor-pointer shadow-sm ${
+                task.completed ? 'opacity-40 grayscale-[0.8] cursor-default' : 'hover:bg-zinc-50'
               }`}
             >
               <div className="flex items-center gap-3">
@@ -100,7 +100,7 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
                  </div>
                  <div className="flex flex-col">
                     <span className="text-[8px] font-black uppercase tracking-widest text-zinc-500 mb-0.5">{task.type}</span>
-                    <span className="text-sm font-bold text-white tracking-tight">{task.label}</span>
+                    <span className="text-sm font-bold text-zinc-800 tracking-tight">{task.label}</span>
                  </div>
               </div>
 
@@ -112,7 +112,7 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
                     </div>
                  </div>
               ) : (
-                 <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-500 border border-white/5 group-hover:text-accent group-hover:border-accent/30 transition-all">
+                 <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-500 border border-zinc-200 group-hover:text-accent group-hover:border-accent/30 transition-all">
                     <Camera className="w-3.5 h-3.5" />
                  </div>
               )}
@@ -132,13 +132,13 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
       </AnimatePresence>
 
       {/* EDGE CASE GUIDANCE */}
-      <div className="bg-white/5 border border-white/10 rounded-3xl p-5 flex items-start gap-4">
+      <div className="bg-zinc-50 border border-zinc-200 rounded-3xl p-5 flex items-start gap-4">
         <div className="w-10 h-10 rounded-2xl bg-accent/10 flex items-center justify-center border border-accent/20 shrink-0">
           <AlertCircle className="w-5 h-5 text-accent" />
         </div>
         <div className="space-y-1">
            <p className="text-[10px] font-black uppercase tracking-widest text-accent">Guidance: Verification Protocol</p>
-           <p className="text-xs text-zinc-400 leading-relaxed font-medium">
+           <p className="text-xs text-zinc-500 leading-relaxed font-medium">
              The AI Auditor expects metadata. If you can't snap it, log the grind in detail. Remember: {dailyTacticalStatus.dayType === 'beast' ? 'BEAST MODE double rewards active. Failure is not an option.' : 'Integrity is the only metric that matters when you are your own boss.'}
            </p>
         </div>

@@ -65,56 +65,56 @@ export const TacticalProofModal = ({ task, onClose, onVerify }: TacticalProofMod
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/90 backdrop-blur-xl">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-zinc-50 backdrop-blur-xl">
 
       <motion.div 
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
-        className="w-full max-w-md liquid-glass-heavy border-white/15 rounded-[3rem] overflow-hidden shadow-3d"
+        className="w-full max-w-md bg-white shadow-sm border-zinc-200 rounded-[3rem] overflow-hidden shadow-sm"
       >
         <div className="p-8 space-y-8">
           <div className="flex items-center justify-between">
             <div className="flex flex-col">
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-zinc-500 mb-1">{task.type}</span>
-              <h2 className="text-2xl font-black uppercase italic tracking-tighter text-white">TACTICAL <span className="text-accent">PROOF</span></h2>
+              <h2 className="text-2xl font-black uppercase italic tracking-tighter text-zinc-800">TACTICAL <span className="text-accent">PROOF</span></h2>
             </div>
-            <button onClick={() => { haptic(); onClose(); }} className="w-10 h-10 liquid-glass rounded-full flex items-center justify-center border-white/10 shadow-3d active:scale-90">
+            <button onClick={() => { haptic(); onClose(); }} className="w-10 h-10 bg-white shadow-sm rounded-full flex items-center justify-center border-zinc-200 shadow-sm active:scale-90">
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex gap-2 p-1.5 liquid-glass rounded-full border-white/5 shadow-inner">
+          <div className="flex gap-2 p-1.5 bg-white shadow-sm rounded-full border-zinc-200 shadow-inner">
             <button 
               onClick={() => { haptic(); setMode('photo'); }}
-              className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${mode === 'photo' ? 'bg-white text-black shadow-3d' : 'text-zinc-600'}`}
+              className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${mode === 'photo' ? 'bg-white text-black shadow-sm' : 'text-zinc-600'}`}
             >
               <Camera className="w-4 h-4" strokeWidth={3} /> Visual Intel
             </button>
             <button 
               onClick={() => { haptic(); setMode('text'); }}
-              className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${mode === 'text' ? 'bg-white text-black shadow-3d' : 'text-zinc-600'}`}
+              className={`flex-1 py-3.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${mode === 'text' ? 'bg-white text-black shadow-sm' : 'text-zinc-600'}`}
             >
               <Type className="w-4 h-4" strokeWidth={3} /> Field Report
             </button>
           </div>
 
-          <div className="min-h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-white/5 rounded-[2.5rem] bg-black/40 p-6 shadow-inner relative overflow-hidden group">
+          <div className="min-h-[220px] flex flex-col items-center justify-center border-2 border-dashed border-zinc-200 rounded-[2.5rem] bg-white p-6 shadow-inner relative overflow-hidden group">
             {mode === 'photo' ? (
               <div className="w-full h-full flex flex-col items-center justify-center">
                 {image ? (
                   <div className="relative w-full group">
-                    <img src={image} alt="Proof" className="w-full h-52 object-cover rounded-[2rem] border border-white/10 shadow-3d" />
-                    <button onClick={() => setImage(null)} className="absolute top-3 right-3 w-8 h-8 bg-black/60 backdrop-blur-md rounded-full flex items-center justify-center border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                       <X className="w-4 h-4 text-white" />
+                    <img src={image} alt="Proof" className="w-full h-52 object-cover rounded-[2rem] border border-zinc-200 shadow-sm" />
+                    <button onClick={() => setImage(null)} className="absolute top-3 right-3 w-8 h-8 bg-white backdrop-blur-md rounded-full flex items-center justify-center border border-zinc-200 opacity-0 group-hover:opacity-100 transition-opacity">
+                       <X className="w-4 h-4 text-zinc-800" />
                     </button>
                   </div>
                 ) : (
                   <label className="cursor-pointer flex flex-col items-center gap-4 py-8">
-                    <div className="w-20 h-20 rounded-full liquid-glass flex items-center justify-center border border-white/10 shadow-3d group-hover:scale-110 transition-transform relative">
+                    <div className="w-20 h-20 rounded-full bg-white shadow-sm flex items-center justify-center border border-zinc-200 shadow-sm group-hover:scale-110 transition-transform relative">
                       <Camera className="w-8 h-8 text-accent" />
                     </div>
                     <div className="text-center">
-                       <span className="text-xs font-black text-white uppercase tracking-widest block mb-1">
+                       <span className="text-xs font-black text-zinc-800 uppercase tracking-widest block mb-1">
                          Capture Evidence
                        </span>
                        <span className="text-[9px] font-bold text-zinc-500 uppercase">
@@ -149,7 +149,7 @@ export const TacticalProofModal = ({ task, onClose, onVerify }: TacticalProofMod
           <button 
             onClick={handleVerify}
             disabled={verifying || (mode === 'photo' ? !image : text.length < 20)}
-            className="w-full bg-accent text-black py-6 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3 shadow-3d-accent"
+            className="w-full bg-accent text-black py-6 rounded-full font-black uppercase tracking-[0.2em] text-xs hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-30 disabled:grayscale flex items-center justify-center gap-3 shadow-sm"
           >
             {verifying ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" strokeWidth={3} />}
             {verifying ? 'Auditing Intel...' : 'Upload Tactical Proof'}

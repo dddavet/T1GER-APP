@@ -87,7 +87,7 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
         <motion.div
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
-          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-[1.25rem] bg-white/5 border border-white/8 shadow-inner`}
+          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-[1.25rem] bg-zinc-50 border border-zinc-200 shadow-inner`}
         >
           <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${color} bg-current/12 border border-current/20`}>
             <HeaderIcon className="w-4 h-4" />
@@ -95,7 +95,7 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
           <h3 className={`text-[10px] font-black uppercase tracking-[0.25em] ${color}`}>{title}</h3>
           <div className="ml-auto flex items-center gap-2.5">
             <span className="text-[9px] font-mono text-zinc-500">{completedCount}/{totalCount}</span>
-            <div className="w-14 h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
+            <div className="w-14 h-1.5 bg-white rounded-full overflow-hidden border border-zinc-200 shadow-inner">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress * 100}%` }}
@@ -119,19 +119,19 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
                   transition={{ delay: index * 0.05 }}
                   whileTap={!task.completed ? { scale: 0.98 } : {}}
                   onClick={() => { if (!task.completed) { haptic(); setSelectedTask(task); } }}
-                  className={`liquid-glass rounded-[1.25rem] p-3.5 flex items-center justify-between border-white/8 transition-all shadow-3d cursor-pointer ${
-                    task.completed ? 'opacity-25 grayscale' : 'hover:bg-white/[0.06] hover:border-white/15'
+                  className={`bg-white shadow-sm rounded-[1.25rem] p-3.5 flex items-center justify-between border-zinc-200 transition-all shadow-sm cursor-pointer ${
+                    task.completed ? 'opacity-25 grayscale' : 'hover:bg-zinc-50 hover:border-zinc-200'
                   }`}
                 >
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
                       task.completed
-                        ? 'bg-zinc-900/50 border-zinc-800 text-zinc-600'
-                        : 'bg-white/5 border-white/12 text-white hover:border-accent/30'
+                        ? 'bg-white border-zinc-800 text-zinc-600'
+                        : 'bg-zinc-50 border-zinc-200 text-zinc-800 hover:border-accent/30'
                     }`}>
                       <Icon className="w-4 h-4" />
                     </div>
-                    <span className="text-xs font-bold text-white tracking-tight uppercase">{task.label}</span>
+                    <span className="text-xs font-bold text-zinc-800 tracking-tight uppercase">{task.label}</span>
                   </div>
 
                   {task.completed ? (
@@ -144,7 +144,7 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
                       <span className="text-[7px] font-black uppercase tracking-tighter">Secured</span>
                     </motion.div>
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-zinc-600 border border-white/8 group-hover:border-accent/30 group-hover:text-accent transition-all">
+                    <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-600 border border-zinc-200 group-hover:border-accent/30 group-hover:text-accent transition-all">
                       <Camera className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -155,7 +155,7 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="py-5 text-center border-2 border-dashed border-white/5 rounded-[1.25rem] opacity-20"
+              className="py-5 text-center border-2 border-dashed border-zinc-200 rounded-[1.25rem] opacity-20"
             >
               <p className="text-[8px] font-black uppercase tracking-widest">No protocol active</p>
             </motion.div>

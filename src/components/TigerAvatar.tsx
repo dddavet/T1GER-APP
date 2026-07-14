@@ -12,7 +12,7 @@ export const TigerAvatar = ({ state }: TigerAvatarProps) => {
     switch (state) {
       case 'IDLE': return { color: '#FF6B00', scale: 1 };
       case 'HUNGRY': return { color: '#FF6B00', scale: 0.9, filter: 'grayscale(50%)' };
-      case 'APEX': return { color: '#CCFF00', scale: 1.2, filter: 'drop-shadow(0 0 10px #CCFF00)' };
+      case 'APEX': return { color: '#FF7300', scale: 1.2, filter: 'drop-shadow(0 0 10px #FF7300)' };
       case 'INJURED': return { color: '#888888', scale: 0.8, filter: 'grayscale(100%)' };
     }
   };

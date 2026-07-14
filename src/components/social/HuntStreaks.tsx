@@ -55,17 +55,17 @@ export const HuntStreaks = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: i * 0.08 }}
-            className="flex items-center gap-4 liquid-glass border-white/10 rounded-[2rem] p-4 shadow-3d"
+            className="flex items-center gap-4 bg-white shadow-sm border-zinc-200 rounded-[2rem] p-4 shadow-sm"
           >
             {/* Avatar */}
-            <div className="w-12 h-12 rounded-[1.2rem] bg-black/40 flex items-center justify-center text-xl flex-shrink-0 shadow-inner border border-white/5">
+            <div className="w-12 h-12 rounded-[1.2rem] bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-inner border border-zinc-200">
               {friend.avatar}
             </div>
 
             {/* Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="font-black text-sm tracking-tight uppercase truncate text-white">{friend.name}</span>
+                <span className="font-black text-sm tracking-tight uppercase truncate text-zinc-800">{friend.name}</span>
               </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <Flame className="w-3 h-3 text-accent" />
@@ -77,18 +77,18 @@ export const HuntStreaks = () => {
 
             {/* Status / Action */}
             {friend.completedToday ? (
-              <div className="flex items-center gap-1.5 liquid-glass-accent border-accent/20 px-3 py-2 rounded-full shadow-3d-accent">
+              <div className="flex items-center gap-1.5 bg-white shadow-sm-accent border-accent/20 px-3 py-2 rounded-full shadow-sm">
                 <Check className="w-3.5 h-3.5 text-accent" strokeWidth={3} />
                 <span className="text-[9px] font-black uppercase text-accent">Active</span>
               </div>
             ) : roared.has(friend.id) ? (
-              <div className="flex items-center gap-1 bg-white/5 border border-white/10 px-3 py-2 rounded-full">
+              <div className="flex items-center gap-1 bg-zinc-50 border border-zinc-200 px-3 py-2 rounded-full">
                 <span className="text-[9px] font-black uppercase text-zinc-600">Signal Sent</span>
               </div>
             ) : (
               <button
                 onClick={() => sendRoar(friend)}
-                className="flex items-center gap-1.5 bg-white text-black px-4 py-2.5 rounded-full active:scale-95 transition-all shadow-3d"
+                className="flex items-center gap-1.5 bg-white text-black px-4 py-2.5 rounded-full active:scale-95 transition-all shadow-sm"
               >
                 <Send className="w-3 h-3" strokeWidth={3} />
                 <span className="text-[9px] font-black uppercase">Roar</span>
@@ -105,7 +105,7 @@ export const HuntStreaks = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
-            className="fixed bottom-28 left-6 right-6 liquid-glass-accent text-accent p-4 rounded-2xl border-accent/30 shadow-3d-accent font-mono text-[10px] font-black text-center z-[100] uppercase tracking-widest"
+            className="fixed bottom-28 left-6 right-6 bg-white shadow-sm-accent text-accent p-4 rounded-2xl border-accent/30 shadow-sm font-mono text-[10px] font-black text-center z-[100] uppercase tracking-widest"
           >
             {showToast}
           </motion.div>

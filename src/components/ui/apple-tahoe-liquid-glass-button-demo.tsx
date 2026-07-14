@@ -12,7 +12,7 @@ export default function GlassButtonDemo() {
           "url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=1600&q=80')",
       }}
     >
-      <div className="absolute inset-0 bg-zinc-950/45" />
+      <div className="absolute inset-0 bg-white" />
       <motion.div
         className="relative z-10"
         animate={{ y: [0, -8, 0] }}

@@ -23,13 +23,13 @@ export const GeneratePlanIntro: React.FC = () => {
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', damping: 15 }}
-          className="w-48 h-48 rounded-full border-2 border-[#FF6B00]/30 bg-[#050505] flex items-center justify-center relative z-10 shadow-[0_0_50px_rgba(255,107,0,0.2)]"
+          className="w-48 h-48 rounded-full border-2 border-[#FF6B00]/30 bg-white flex items-center justify-center relative z-10 shadow-[0_0_50px_rgba(255,107,0,0.2)]"
         >
           {/* Inner ring spinning */}
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-            className="absolute inset-2 rounded-full border border-dashed border-white/20"
+            className="absolute inset-2 rounded-full border border-dashed border-zinc-200"
           />
           
           <BrainCircuit size={64} className="text-[#FF6B00]" strokeWidth={1.5} />
@@ -40,10 +40,10 @@ export const GeneratePlanIntro: React.FC = () => {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.5, type: 'spring' }}
-          className="absolute -bottom-4 bg-[#1a1a1c] border border-white/10 px-4 py-2 rounded-full flex items-center gap-2 shadow-xl z-20"
+          className="absolute -bottom-4 bg-[#1a1a1c] border border-zinc-200 px-4 py-2 rounded-full flex items-center gap-2 shadow-xl z-20"
         >
           <CheckCircle2 size={16} className="text-[#FF6B00]" />
-          <span className="text-xs font-bold text-white uppercase tracking-widest">Calibrado</span>
+          <span className="text-xs font-bold text-zinc-800 uppercase tracking-widest">Calibrado</span>
         </motion.div>
       </div>
 
@@ -53,10 +53,10 @@ export const GeneratePlanIntro: React.FC = () => {
         transition={{ delay: 0.3 }}
         className="text-center px-4 space-y-4"
       >
-        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-white drop-shadow-md">
+        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-zinc-800 drop-shadow-md">
           ¡Todo listo!
         </h2>
-        <p className="text-lg font-medium text-zinc-400">
+        <p className="text-lg font-medium text-zinc-500">
           Es hora de generar tu Currículum de Guerra.
         </p>
       </motion.div>

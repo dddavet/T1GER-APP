@@ -134,7 +134,7 @@ quizQuestions:
   useEffect(() => {
     const events = [
       () => `[${new Date().toLocaleTimeString()}] [TELEMETRY] event: "lesson_completed" | uid: "${appUser?.uid || 'anonymous'}" | time_elapsed: ${Math.floor(Math.random() * 80) + 90}s | score: ${Math.floor(Math.random() * 20) + 80}%`,
-      () => `[${new Date().toLocaleTimeString()}] [BIRDBRAIN] Estimating theta parameter... Habilidad latente (θ) estimada: ${(Object.values(competencies).reduce((a, b) => a + b, 0) / 500 * 3 - 0.5).toFixed(2)}`,
+      () => `[${new Date().toLocaleTimeString()}] [BIRDBRAIN] Estimating theta parameter... Latent ability (θ) estimated: ${(Object.values(competencies).reduce((a, b) => a + b, 0) / 500 * 3 - 0.5).toFixed(2)}`,
       () => `[${new Date().toLocaleTimeString()}] [IRT] Calibrating Question ID "AI_PROMPT_0${Math.floor(Math.random() * 5) + 1}". Updated difficulty d_i: ${(Math.random() * 0.8 + 0.1).toFixed(2)}`,
       () => `[${new Date().toLocaleTimeString()}] [DELPHI] User mapped to group "${selectedGroup.onboarding}" for "Onboarding Hook Experiment".`,
       () => `[${new Date().toLocaleTimeString()}] [MARKETING] Dynamic segment "Niche: ${appUser?.niche || 'Entrepreneur'}" matched. Serving tailored curriculum hook.`,
@@ -169,7 +169,7 @@ quizQuestions:
     const nextReflections = { ...reflections, [selectedAuditDate]: reflectionText };
     setReflections(nextReflections);
     localStorage.setItem('t1ger_day_reflections', JSON.stringify(nextReflections));
-    alert("¡Auditoría de consistencia guardada con éxito! 🐯");
+    alert("Consistency audit saved successfully! 🐯");
   };
 
   useEffect(() => {
@@ -214,10 +214,10 @@ quizQuestions:
   const handleSimulateWebhook = async () => {
     if (simulating) return;
     setSimulating(true);
-    setSimLog([`[${new Date().toLocaleTimeString()}] Sincronizando con webhook de ${activeService.toUpperCase()}...`]);
+    setSimLog([`[${new Date().toLocaleTimeString()}] Syncing with ${activeService.toUpperCase()} webhook...`]);
     
     await new Promise(r => setTimeout(r, 600));
-    setSimLog(prev => [...prev, `[${new Date().toLocaleTimeString()}] Petición POST recibida en /v1/webhooks/${appUser?.uid || 'anonymous'}/${activeService}`]);
+    setSimLog(prev => [...prev, `[${new Date().toLocaleTimeString()}] POST request received at /v1/webhooks/${appUser?.uid || 'anonymous'}/${activeService}`]);
     
     await new Promise(r => setTimeout(r, 800));
     const mockPayload = activeService === 'todoist' 
@@ -225,7 +225,7 @@ quizQuestions:
           event_name: "item:completed",
           user_id: appUser?.uid || "tiger_user_1",
           event_data: {
-            content: "Lanzar landing page beta",
+            content: "Launch beta landing page",
             project_id: "operations",
             completed_at: new Date().toISOString()
           }
@@ -235,15 +235,15 @@ quizQuestions:
           id: "notion-db-page-ops-1",
           properties: {
             Status: { select: { name: "Done" } },
-            Name: { title: [{ text: { content: "Auditar CAC orgánico" } }] }
+            Name: { title: [{ text: { content: "Audit organic CAC" } }] }
           }
         }, null, 2);
 
     setSimLog(prev => [...prev, `[PAYLOAD RECEIVED]:\n${mockPayload}`]);
 
     await new Promise(r => setTimeout(r, 1000));
-    setSimLog(prev => [...prev, `[T1GER ENGINE] Auditoría aprobada. Prueba real verificada.`]);
-    setSimLog(prev => [...prev, `[RECOMPENSA] +50 XP y +10 Coins acreditados de forma automática.`]);
+    setSimLog(prev => [...prev, `[T1GER ENGINE] Audit approved. Real-world proof verified.`]);
+    setSimLog(prev => [...prev, `[REWARD] +50 XP and +10 Coins automatically credited.`]);
     
     await addXP(50);
     if (updateAppUser && appUser) {
@@ -286,17 +286,17 @@ quizQuestions:
               setDevClicks(0);
             }
           }}
-          className="w-28 h-28 rounded-full flex items-center justify-center mb-6 border-[3px] border-white/10 shadow-float overflow-hidden relative group cursor-pointer bg-zinc-900"
+          className="w-28 h-28 rounded-full flex items-center justify-center mb-6 border-[3px] border-zinc-200 shadow-float overflow-hidden relative group cursor-pointer bg-white"
         >
           {appUser?.photoURL ? (
             <img src={appUser.photoURL} alt={appUser.displayName || 'User'} className="w-full h-full object-cover" />
           ) : (
-            <div className="w-full h-full bg-zinc-900 flex items-center justify-center text-4xl">
+            <div className="w-full h-full bg-white flex items-center justify-center text-4xl">
               {appUser?.displayName?.charAt(0) || '🐅'}
             </div>
           )}
-          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
-             <span className="text-white font-black text-[10px] uppercase">{isDevMode ? 'Dev Mode On' : 'Tap 5x Dev'}</span>
+          <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-sm">
+             <span className="text-zinc-800 font-black text-[10px] uppercase">{isDevMode ? 'Dev Mode On' : 'Tap 5x Dev'}</span>
           </div>
         </motion.div>
         
@@ -315,7 +315,7 @@ quizQuestions:
             />
           </div>
           <div className="flex items-center justify-center gap-2">
-            <div className="px-2 py-0.5 bg-accent text-black rounded text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 shadow-3d shadow-accent/20">
+            <div className="px-2 py-0.5 bg-accent text-black rounded text-[8px] font-black uppercase tracking-tighter flex items-center gap-1 shadow-sm shadow-accent/20">
               <Crown className="w-2.5 h-2.5" /> {appUser?.isFounder ? 'FOUNDER' : 'APEX'}
             </div>
             <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">•</span>
@@ -323,7 +323,7 @@ quizQuestions:
           </div>
         </div>
         
-        <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 liquid-glass rounded-full border-white/5">
+        <div className="mt-4 inline-flex items-center gap-2 px-4 py-1.5 bg-white shadow-sm rounded-full border-zinc-200">
            <div className="w-1.5 h-1.5 rounded-full bg-[#00E5FF] animate-pulse shadow-[0_0_8px_#00E5FF]" />
            <p className="text-[#00E5FF] font-black uppercase text-[9px] tracking-widest drop-shadow-[0_0_5px_rgba(0,229,255,0.4)]">
              {appUser?.niche || 'Ambitious Entrepreneur'}
@@ -341,7 +341,7 @@ quizQuestions:
         >
           🔥
         </motion.div>
-        <h2 className="text-6xl font-black italic tracking-tighter text-white drop-shadow-md">
+        <h2 className="text-6xl font-black italic tracking-tighter text-zinc-800 drop-shadow-md">
           {learnStreak}
         </h2>
         <span className="text-[12px] font-black uppercase text-zinc-500 tracking-[0.2em] mt-1">Días de Racha</span>
@@ -353,9 +353,9 @@ quizQuestions:
           { label: 'Tactical Score', value: tacticalStreak, color: '#fff' },
           { label: 'Total XP', value: stats.xp, color: '#fff' },
         ].map((stat, i) => (
-          <div key={i} className="liquid-glass p-5 rounded-3xl flex flex-col items-center justify-center text-center relative">
+          <div key={i} className="bg-white shadow-sm p-5 rounded-3xl flex flex-col items-center justify-center text-center relative">
             <p className="text-[10px] font-bold uppercase text-zinc-500 mb-1 leading-none tracking-widest">{stat.label}</p>
-            <p className="font-black text-3xl text-white">
+            <p className="font-black text-3xl text-zinc-800">
               {stat.value}
             </p>
           </div>
@@ -370,16 +370,16 @@ quizQuestions:
             <span className="text-[9px] font-black font-mono text-yellow-500 uppercase tracking-widest block mb-1">
               🏦 T1GER BLACK MARKET
             </span>
-            <h3 className="text-xl font-black italic uppercase tracking-tighter text-white flex items-center gap-2">
+            <h3 className="text-xl font-black italic uppercase tracking-tighter text-zinc-800 flex items-center gap-2">
               🪙 {stats.coins} <span className="text-xs text-zinc-500 font-bold lowercase tracking-normal">T1GER Coins</span>
             </h3>
-            <p className="text-[10px] text-zinc-400 mt-2 font-medium leading-relaxed max-w-[240px]">
+            <p className="text-[10px] text-zinc-500 mt-2 font-medium leading-relaxed max-w-[240px]">
               Gasta tus monedas en escudos de racha y boosters tácticos para proteger tu progreso.
             </p>
           </div>
           <button 
             onClick={() => setShowMarket(true)}
-            className="px-5 py-3 rounded-2xl bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-3d shadow-yellow-500/20 cursor-pointer active:scale-95 transition-all"
+            className="px-5 py-3 rounded-2xl bg-yellow-500 hover:bg-yellow-400 text-black font-black uppercase text-[10px] tracking-widest shadow-sm shadow-yellow-500/20 cursor-pointer active:scale-95 transition-all"
           >
             Entrar 🪙
           </button>
@@ -387,8 +387,8 @@ quizQuestions:
       </section>
 
       {/* Business Health Radar */}
-      <section className="liquid-glass rounded-3xl p-6 relative overflow-hidden">
-        <h3 className="text-sm font-black uppercase tracking-widest text-white/50 mb-6 flex items-center gap-2">
+      <section className="bg-white shadow-sm rounded-3xl p-6 relative overflow-hidden">
+        <h3 className="text-sm font-black uppercase tracking-widest text-zinc-800/50 mb-6 flex items-center gap-2">
           <BrainCircuit className="w-4 h-4 text-[#00E5FF]" />
           Vector Analysis
         </h3>
@@ -401,7 +401,7 @@ quizQuestions:
             </RadarChart>
           </ResponsiveContainer>
           {healthData.every(d => d.A === 0) && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm rounded-3xl">
+            <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 backdrop-blur-sm rounded-3xl">
               <p className="text-[10px] font-black uppercase text-zinc-500 tracking-[0.2em]">Awaiting Tactical Data...</p>
             </div>
           )}
@@ -418,20 +418,20 @@ quizQuestions:
             { icon: '💎', label: 'Offer Master' },
             { icon: '🤝', label: 'Networker' },
           ].map((badge, i) => (
-            <div key={i} className="flex-shrink-0 w-24 h-24 liquid-glass rounded-3xl flex flex-col items-center justify-center text-center p-2 snap-center relative before:absolute before:inset-0 before:bg-white/[0.02] before:rounded-3xl hover:-translate-y-1 transition-transform">
+            <div key={i} className="flex-shrink-0 w-24 h-24 bg-white shadow-sm rounded-3xl flex flex-col items-center justify-center text-center p-2 snap-center relative before:absolute before:inset-0 before:bg-zinc-50 before:rounded-3xl hover:-translate-y-1 transition-transform">
               <span className="text-3xl mb-2 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">{badge.icon}</span>
-              <span className="text-[9px] font-black uppercase leading-tight text-zinc-300">{badge.label}</span>
+              <span className="text-[9px] font-black uppercase leading-tight text-zinc-500">{badge.label}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* TIGER CONSISTENCY MATRIX & CALENDAR AUDITOR */}
-      <section className="liquid-glass rounded-3xl p-6 relative overflow-hidden text-center">
+      <section className="bg-white shadow-sm rounded-3xl p-6 relative overflow-hidden text-center">
         <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full blur-[60px] bg-cyan-500/5 pointer-events-none" />
         
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-300 flex items-center gap-2">
+          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-cyan-400" />
             Consistencia Espacial
           </h3>
@@ -459,12 +459,12 @@ quizQuestions:
             }
             return list.map((dateStr) => {
               const comp = getDayCompletions(dateStr);
-              let styleClass = 'bg-white/[0.02] border-white/5 text-zinc-600 hover:border-white/20';
+              let styleClass = 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:border-zinc-200';
               
               if (comp.both) {
                 styleClass = 'border-cyan-400/30 text-cyan-400 shadow-[0_0_10px_rgba(0,229,255,0.2)] bg-cyan-500/10';
               } else if (comp.learn) {
-                styleClass = 'border-[#CCFF00]/30 text-[#CCFF00] shadow-[0_0_8px_rgba(204,255,0,0.15)] bg-[#CCFF00]/5';
+                styleClass = 'border-[#FF7300]/30 text-[#FF7300] shadow-[0_0_8px_rgba(204,255,0,0.15)] bg-[#FF7300]/5';
               } else if (comp.tactical) {
                 styleClass = 'border-[#FF6B00]/30 text-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.15)] bg-[#FF6B00]/5';
               } else if (comp.rest) {
@@ -488,7 +488,7 @@ quizQuestions:
                   </span>
                   {/* Miniature Dots Indicators */}
                   <div className="flex gap-0.5 mt-1">
-                    {comp.learn && <span className="w-1.5 h-1.5 rounded-full bg-[#CCFF00]" />}
+                    {comp.learn && <span className="w-1.5 h-1.5 rounded-full bg-[#FF7300]" />}
                     {comp.tactical && <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B00]" />}
                     {comp.both && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />}
                     {comp.rest && <span className="w-1.5 h-1.5 rounded-full bg-blue-400" />}
@@ -506,7 +506,7 @@ quizQuestions:
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-6 border-t border-white/5 pt-5 space-y-4 text-left overflow-hidden"
+              className="mt-6 border-t border-zinc-200 pt-5 space-y-4 text-left overflow-hidden"
             >
               {(() => {
                 const comp = getDayCompletions(selectedAuditDate);
@@ -517,7 +517,7 @@ quizQuestions:
                 return (
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
-                      <h4 className="text-xs font-black uppercase text-white tracking-tight">
+                      <h4 className="text-xs font-black uppercase text-zinc-800 tracking-tight">
                         Auditoría: {prettyDate}
                       </h4>
                       <span className="text-[7px] font-mono font-bold text-zinc-500 uppercase">
@@ -526,14 +526,14 @@ quizQuestions:
                     </div>
 
                     {/* Quick Stats list */}
-                    <div className="grid grid-cols-2 gap-3 text-[9px] font-mono text-zinc-400">
-                      <div className="p-3 rounded-xl bg-white/[0.01] border border-white/5 space-y-1">
+                    <div className="grid grid-cols-2 gap-3 text-[9px] font-mono text-zinc-500">
+                      <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
                         <span className="text-zinc-600 block uppercase font-bold text-[8px]">Mascota T1GER</span>
-                        <span className="text-white font-bold">
+                        <span className="text-zinc-800 font-bold">
                           {comp.both ? '🦁 PREDATOR MODE (Activo)' : comp.rest ? '💤 Descansando' : '🐾 Entrenando'}
                         </span>
                       </div>
-                      <div className="p-3 rounded-xl bg-white/[0.01] border border-white/5 space-y-1">
+                      <div className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 space-y-1">
                         <span className="text-zinc-600 block uppercase font-bold text-[8px]">Completitud</span>
                         <span className="text-[#00E5FF] font-bold">
                           {comp.both ? '100% Excelente' : comp.completed ? '50% En Proceso' : '0% Fallado'}
@@ -546,10 +546,10 @@ quizQuestions:
                       <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600 ml-1">
                         Tareas Completadas
                       </span>
-                      <div className="p-3 rounded-xl bg-zinc-950/80 border border-white/5 space-y-1.5 text-[10px]">
+                      <div className="p-3 rounded-xl bg-white border border-zinc-200 space-y-1.5 text-[10px]">
                         {comp.tasks && comp.tasks.length > 0 ? (
                           comp.tasks.map((taskName: string, idx: number) => (
-                            <div key={idx} className="flex items-center gap-2 text-zinc-300">
+                            <div key={idx} className="flex items-center gap-2 text-zinc-500">
                               <span className="h-1.5 w-1.5 rounded-full bg-cyan-400" />
                               <span className="uppercase font-bold tracking-tight">{taskName}</span>
                             </div>
@@ -569,7 +569,7 @@ quizQuestions:
                         value={reflectionText}
                         onChange={(e) => setReflectionText(e.target.value)}
                         placeholder="Escribe por qué fallaste o qué lograste hoy en tu negocio. Esta bitácora te mantendrá honesto consigo mismo..."
-                        className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-xs font-semibold focus:outline-none focus:border-cyan-400 focus:bg-cyan-950/5 min-h-[90px] transition-all text-white placeholder-zinc-700 leading-relaxed"
+                        className="w-full bg-white border border-zinc-200 rounded-2xl p-4 text-xs font-semibold focus:outline-none focus:border-cyan-400 focus:bg-cyan-950/5 min-h-[90px] transition-all text-zinc-800 placeholder-zinc-700 leading-relaxed"
                       />
                     </div>
 
@@ -588,19 +588,19 @@ quizQuestions:
       </section>
 
       {/* Coaching History */}
-      <section className="liquid-glass rounded-3xl p-6">
+      <section className="bg-white shadow-sm rounded-3xl p-6">
         <div className="flex items-center gap-2 mb-6">
           <History className="w-5 h-5 text-[var(--accent-main)]" />
-          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-300">Mission Logs</h3>
+          <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500">Mission Logs</h3>
         </div>
         <div className="space-y-4">
           {sessions.length > 0 ? sessions.map((session, i) => (
-            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] border border-transparent hover:border-white/10 transition-all cursor-pointer group">
+            <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 hover:bg-zinc-50 border border-transparent hover:border-zinc-200 transition-all cursor-pointer group">
               <div>
                 <p className="text-sm font-bold text-zinc-200">{session.summary || 'Coaching Session'}</p>
                 <p className="text-[10px] text-[var(--accent-main)] font-bold uppercase tracking-widest">{new Date(session.timestamp?.seconds * 1000).toLocaleDateString()}</p>
               </div>
-              <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-white transition-colors group-hover:translate-x-1" />
+              <ChevronRight className="w-4 h-4 text-zinc-600 group-hover:text-zinc-800 transition-colors group-hover:translate-x-1" />
             </div>
           )) : (
             <p className="text-xs text-zinc-500 font-bold italic">No logs detected in the T1GER Engine.</p>
@@ -615,7 +615,7 @@ quizQuestions:
            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">System Preferences</h3>
         </div>
 
-        <div className="liquid-glass rounded-[2rem] p-6 space-y-8 shadow-3d">
+        <div className="bg-white shadow-sm rounded-[2rem] p-6 space-y-8 shadow-sm">
           {/* Goal Setting */}
           <div className="space-y-3">
             <label className="block text-[9px] font-black uppercase text-zinc-600 tracking-widest ml-1">Current Directive (90D Goal)</label>
@@ -629,7 +629,7 @@ quizQuestions:
                     e.currentTarget.blur();
                   }
                 }}
-                className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:border-accent/40 focus:bg-accent/[0.03] transition-all text-white placeholder-zinc-800"
+                className="w-full bg-white border border-zinc-200 rounded-2xl p-4 text-sm font-medium focus:outline-none focus:border-accent/40 focus:bg-accent/[0.03] transition-all text-zinc-800 placeholder-zinc-800"
                 placeholder="What is your primary objective?"
               />
               <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -653,12 +653,12 @@ quizQuestions:
                   onClick={() => updateAppUser({ niche: item.id })}
                   className={`p-4 rounded-2xl border flex flex-col gap-2 transition-all active:scale-95 ${
                     appUser?.niche === item.id 
-                      ? 'liquid-glass-accent border-accent/30 shadow-3d-accent' 
-                      : 'bg-black/20 border-white/5 text-zinc-600 hover:border-white/10 hover:bg-white/[0.02]'
+                      ? 'bg-white shadow-sm-accent border-accent/30 shadow-sm' 
+                      : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50'
                   }`}
                 >
                   <span className="text-lg">{item.icon}</span>
-                  <span className={`font-black text-[10px] uppercase tracking-tight ${appUser?.niche === item.id ? 'text-white' : ''}`}>
+                  <span className={`font-black text-[10px] uppercase tracking-tight ${appUser?.niche === item.id ? 'text-zinc-800' : ''}`}>
                     {item.label}
                   </span>
                 </button>
@@ -667,26 +667,26 @@ quizQuestions:
           </div>
 
           {/* Predator Profile Visibility */}
-          <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+          <div className="pt-4 border-t border-zinc-200 flex items-center justify-between">
              <div className="space-y-1">
-                <p className="text-xs font-black uppercase tracking-tight text-white">Predator Profile</p>
+                <p className="text-xs font-black uppercase tracking-tight text-zinc-800">Predator Profile</p>
                 <p className="text-[9px] font-medium text-zinc-500 uppercase">Visible on Global Leaderboards</p>
              </div>
              <button 
                onClick={() => updateAppUser({ isPro: !appUser?.isPro })} // Reusing isPro as a mock for public toggle if needed
-               className={`w-12 h-6 rounded-full transition-all relative ${appUser?.isPro ? 'bg-accent shadow-3d-accent' : 'bg-zinc-800'}`}
+               className={`w-12 h-6 rounded-full transition-all relative ${appUser?.isPro ? 'bg-accent shadow-sm' : 'bg-zinc-800'}`}
              >
                 <motion.div 
                   animate={{ x: appUser?.isPro ? 26 : 2 }}
-                  className={`absolute top-1 w-4 h-4 rounded-full shadow-md ${appUser?.isPro ? 'bg-black' : 'bg-zinc-500'}`} 
+                  className={`absolute top-1 w-4 h-4 rounded-full shadow-md ${appUser?.isPro ? 'bg-white' : 'bg-zinc-500'}`} 
                 />
              </button>
           </div>
 
           {/* Local-First Data Controls */}
-          <div className="space-y-3 pt-4 border-t border-white/5">
+          <div className="space-y-3 pt-4 border-t border-zinc-200">
             <div className="space-y-1">
-              <p className="text-xs font-black uppercase tracking-tight text-white">Data Sovereignty</p>
+              <p className="text-xs font-black uppercase tracking-tight text-zinc-800">Data Sovereignty</p>
               <p className="text-[9px] font-medium text-zinc-500 uppercase leading-relaxed">
                 Export or restore your T1GER progress as portable JSON. Cloud sync stays optional.
               </p>
@@ -694,14 +694,14 @@ quizQuestions:
             <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => downloadT1gerDataExport(appUser || null, brainState)}
-                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-300 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-2"
+                className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 text-zinc-500 font-black text-[10px] uppercase tracking-widest hover:bg-zinc-50 hover:text-zinc-800 transition-all flex items-center justify-center gap-2"
               >
                 <Download className="w-3.5 h-3.5" />
                 Export JSON
               </button>
               <label
                 htmlFor={importInputId}
-                className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-300 font-black text-[10px] uppercase tracking-widest hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 text-zinc-500 font-black text-[10px] uppercase tracking-widest hover:bg-zinc-50 hover:text-zinc-800 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Upload className="w-3.5 h-3.5" />
                 Import JSON
@@ -720,7 +720,7 @@ quizQuestions:
           </div>
 
           {/* Path Controls */}
-          <div className="space-y-3 pt-4 border-t border-white/5">
+          <div className="space-y-3 pt-4 border-t border-zinc-200">
             <button
               onClick={() => {
                 if (window.confirm("¿Estás seguro de que deseas reiniciar tu cuenta a CERO? Esto borrará tu historial de lecciones, competencias, rachas y monedas en la nube para que puedas experimentar el onboarding de Duolingo desde el principio.")) {
@@ -740,7 +740,7 @@ quizQuestions:
                   setActiveView('onboarding');
                 }
               }}
-              className="w-full p-5 rounded-2xl bg-white/[0.02] border border-white/5 text-zinc-400 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/[0.05] hover:text-white transition-all flex items-center justify-center gap-3"
+              className="w-full p-5 rounded-2xl bg-zinc-50 border border-zinc-200 text-zinc-500 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-zinc-50 hover:text-zinc-800 transition-all flex items-center justify-center gap-3"
             >
               <RefreshCcw className="w-3.5 h-3.5" />
               Recalibrate Learning Path (Reset Complete)
@@ -777,28 +777,28 @@ quizQuestions:
            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-[#00E5FF]">APIs Abiertas & Integración</h3>
         </div>
 
-        <div className="liquid-glass rounded-[2rem] p-6 border-white/5 space-y-5 shadow-3d relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 bg-blue-500/10 border-b border-l border-white/5 rounded-bl-xl text-[8px] font-mono text-cyan-400 font-black uppercase tracking-wider">
+        <div className="bg-white shadow-sm rounded-[2rem] p-6 border-zinc-200 space-y-5 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 bg-blue-500/10 border-b border-l border-zinc-200 rounded-bl-xl text-[8px] font-mono text-cyan-400 font-black uppercase tracking-wider">
             Webhooks Sandbox
           </div>
 
           <div className="space-y-1">
-             <h4 className="text-xs font-black uppercase text-white tracking-tight">Sincronizador Notion / Todoist</h4>
+             <h4 className="text-xs font-black uppercase text-zinc-800 tracking-tight">Sincronizador Notion / Todoist</h4>
              <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
                Automatiza tu racha y misiones conectando tus herramientas diarias. Copia tu Webhook URL y simula pings reales de producción.
              </p>
           </div>
 
           {/* Service Selector Tabs */}
-          <div className="flex bg-black/40 border border-white/5 rounded-2xl p-1 gap-1">
+          <div className="flex bg-white border border-zinc-200 rounded-2xl p-1 gap-1">
             {['todoist', 'notion'].map((service) => (
               <button
                 key={service}
                 onClick={() => { setActiveService(service as any); setSimLog([]); }}
                 className={`flex-1 py-2 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                   activeService === service 
-                    ? 'bg-white/5 border border-white/10 text-white' 
-                    : 'text-zinc-500 hover:text-zinc-300'
+                    ? 'bg-zinc-50 border border-zinc-200 text-zinc-800' 
+                    : 'text-zinc-500 hover:text-zinc-500'
                 }`}
               >
                 {service === 'todoist' ? 'Todoist API' : 'Notion SDK'}
@@ -807,8 +807,8 @@ quizQuestions:
           </div>
 
           {/* Webhook URL Endpoint */}
-          <div className="bg-zinc-950 border border-white/5 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
-            <div className="font-mono text-[9px] text-zinc-400 select-all truncate">
+          <div className="bg-white border border-zinc-200 rounded-2xl p-3.5 flex items-center justify-between gap-3 shadow-inner">
+            <div className="font-mono text-[9px] text-zinc-500 select-all truncate">
               {`https://api.t1ger.app/v1/webhooks/${appUser?.uid || 'user_id'}/${activeService}`}
             </div>
             <span className="text-[7px] font-mono font-black text-accent bg-accent/10 border border-accent/20 rounded px-1 py-0.5 uppercase tracking-wide flex-shrink-0">
@@ -835,14 +835,14 @@ quizQuestions:
 
           {/* Simulator Console Output */}
           {(simLog.length > 0 || simulating) && (
-            <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-inner">
-              <div className="bg-[#08080a] px-3.5 py-2 border-b border-white/5 flex items-center justify-between">
+            <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-inner">
+              <div className="bg-[#08080a] px-3.5 py-2 border-b border-zinc-200 flex items-center justify-between">
                 <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
                   Live Console Log
                 </span>
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
               </div>
-              <div className="p-4 font-mono text-[10px] text-zinc-400 min-h-[80px] leading-relaxed max-h-[220px] overflow-y-auto whitespace-pre-wrap select-text">
+              <div className="p-4 font-mono text-[10px] text-zinc-500 min-h-[80px] leading-relaxed max-h-[220px] overflow-y-auto whitespace-pre-wrap select-text">
                 {simLog.map((log, index) => (
                   <div key={index} className={log.includes('RECOMPENSA') ? 'text-accent font-bold' : log.includes('T1GER ENGINE') ? 'text-green-400 font-bold' : ''}>
                     {log}
@@ -866,13 +866,13 @@ quizQuestions:
           </span>
         </div>
 
-        <div className="liquid-glass rounded-[2rem] p-6 border-white/5 space-y-6 shadow-3d relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 bg-[#FF6B00]/10 border-b border-l border-white/5 rounded-bl-xl text-[8px] font-mono text-[#FF6B00] font-black uppercase tracking-wider">
+        <div className="bg-white shadow-sm rounded-[2rem] p-6 border-zinc-200 space-y-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-3 bg-[#FF6B00]/10 border-b border-l border-zinc-200 rounded-bl-xl text-[8px] font-mono text-[#FF6B00] font-black uppercase tracking-wider">
             Telemetry V2
           </div>
 
           <div className="space-y-1.5">
-            <h4 className="text-xs font-black uppercase text-white tracking-tight flex items-center gap-2">
+            <h4 className="text-xs font-black uppercase text-zinc-800 tracking-tight flex items-center gap-2">
               Adaptive Optimization Control
             </h4>
             <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
@@ -881,7 +881,7 @@ quizQuestions:
           </div>
 
           {/* Console Tab Selector */}
-          <div className="flex bg-black/40 border border-white/5 rounded-2xl p-1 gap-1">
+          <div className="flex bg-white border border-zinc-200 rounded-2xl p-1 gap-1">
             {[
               { id: 'irt', label: 'BirdBrain IRT', icon: BrainCircuit },
               { id: 'ab', label: 'Delphi A/B Tests', icon: BarChart2 },
@@ -895,8 +895,8 @@ quizQuestions:
                   onClick={() => setActiveTelemetryTab(tab.id as any)}
                   className={`flex-1 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     activeTelemetryTab === tab.id 
-                      ? 'bg-white/5 border border-white/10 text-white shadow-sm' 
-                      : 'text-zinc-500 hover:text-zinc-300'
+                      ? 'bg-zinc-50 border border-zinc-200 text-zinc-800 shadow-sm' 
+                      : 'text-zinc-500 hover:text-zinc-500'
                   }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
@@ -909,7 +909,7 @@ quizQuestions:
           {/* TAB CONTENT: BirdBrain IRT */}
           {activeTelemetryTab === 'irt' && (
             <div className="space-y-5 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-zinc-950/80 border border-white/5 space-y-3.5">
+              <div className="p-4 rounded-2xl bg-white border border-zinc-200 space-y-3.5">
                 <div className="flex justify-between items-center">
                   <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest">
                     IRT 3PL PSYCHOMETRIC MODEL
@@ -934,9 +934,9 @@ quizQuestions:
                     const prob = item.c + (1 - item.c) / (1 + Math.exp(exponent));
                     
                     return (
-                      <div key={idx} className="p-3 rounded-xl bg-white/[0.01] border border-white/5 flex flex-col gap-2">
+                      <div key={idx} className="p-3 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col gap-2">
                         <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-black text-white uppercase tracking-tight">{item.name}</span>
+                          <span className="text-[10px] font-black text-zinc-800 uppercase tracking-tight">{item.name}</span>
                           <div className="flex items-center gap-2">
                             <span className="text-[8px] font-mono text-zinc-500">θ = {theta.toFixed(2)}</span>
                             <span className="text-[9px] font-mono font-black text-cyan-400 bg-cyan-400/5 px-1.5 py-0.5 rounded border border-cyan-400/10">
@@ -946,7 +946,7 @@ quizQuestions:
                         </div>
                         
                         {/* Progress line representing success probability */}
-                        <div className="h-1.5 bg-black/40 rounded-full overflow-hidden relative">
+                        <div className="h-1.5 bg-white rounded-full overflow-hidden relative">
                           <div 
                             className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full transition-all duration-500" 
                             style={{ width: `${prob * 100}%` }}
@@ -955,9 +955,9 @@ quizQuestions:
 
                         {/* Model parameters grid */}
                         <div className="grid grid-cols-3 gap-1.5 text-[8px] font-mono text-zinc-500 uppercase">
-                          <span>Dificultad (d_i): <b className="text-zinc-300 font-bold">{item.d}</b></span>
-                          <span>Discriminación (a_i): <b className="text-zinc-300 font-bold">{item.a}</b></span>
-                          <span>Adivinación (c_i): <b className="text-zinc-300 font-bold">{item.c}</b></span>
+                          <span>Dificultad (d_i): <b className="text-zinc-500 font-bold">{item.d}</b></span>
+                          <span>Discriminación (a_i): <b className="text-zinc-500 font-bold">{item.a}</b></span>
+                          <span>Adivinación (c_i): <b className="text-zinc-500 font-bold">{item.c}</b></span>
                         </div>
                       </div>
                     );
@@ -978,8 +978,8 @@ quizQuestions:
                       <h5 className="text-[10px] font-black font-mono text-[#FF6B00] uppercase tracking-wider">
                         Recomendación del Motor BirdBrain
                       </h5>
-                      <p className="text-[10px] text-zinc-300 leading-relaxed">
-                        Tu habilidad latente estimada es baja en <b className="text-white font-bold">{compName}</b> ({Math.round(lowest[1])}/100). BirdBrain ha recalibrado el banco de misiones para inyectar cuestionarios adaptativos de nivelación con una dificultad <b className="text-white font-bold">d_i = 0.25</b> para garantizar tu confianza inicial y aprendizaje rápido.
+                      <p className="text-[10px] text-zinc-500 leading-relaxed">
+                        Tu habilidad latente estimada es baja en <b className="text-zinc-800 font-bold">{compName}</b> ({Math.round(lowest[1])}/100). BirdBrain ha recalibrado el banco de misiones para inyectar cuestionarios adaptativos de nivelación con una dificultad <b className="text-zinc-800 font-bold">d_i = 0.25</b> para garantizar tu confianza inicial y aprendizaje rápido.
                       </p>
                     </div>
                   </div>
@@ -1021,10 +1021,10 @@ quizQuestions:
                     recommendation: 'Desplegar a nivel global para mitigar falsas retenciones.',
                   },
                 ].map((exp) => (
-                  <div key={exp.id} className="p-4 rounded-2xl bg-white/[0.01] border border-white/5 space-y-3.5 hover:bg-white/[0.02] transition-all">
+                  <div key={exp.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3.5 hover:bg-zinc-50 transition-all">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="text-xs font-black text-white uppercase tracking-tight">{exp.title}</h4>
+                        <h4 className="text-xs font-black text-zinc-800 uppercase tracking-tight">{exp.title}</h4>
                         <p className="text-[9px] text-zinc-500 font-medium mt-0.5 leading-normal">{exp.description}</p>
                       </div>
                       <span className="text-[8px] font-mono font-black text-[#00E5FF] bg-[#00E5FF]/10 border border-[#00E5FF]/20 rounded px-1.5 py-0.5 uppercase tracking-wide">
@@ -1032,20 +1032,20 @@ quizQuestions:
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3 text-[9px] border-t border-white/5 pt-3">
+                    <div className="grid grid-cols-2 gap-3 text-[9px] border-t border-zinc-200 pt-3">
                       <div>
                         <span className="text-zinc-500 uppercase font-bold block text-[8px] tracking-wide">Métrica Evaluada</span>
-                        <span className="text-zinc-300 font-semibold">{exp.metric}</span>
+                        <span className="text-zinc-500 font-semibold">{exp.metric}</span>
                       </div>
                       <div>
                         <span className="text-zinc-500 uppercase font-bold block text-[8px] tracking-wide">P-Value (Confianza)</span>
-                        <span className="text-zinc-300 font-semibold font-mono">{exp.pValue}</span>
+                        <span className="text-zinc-500 font-semibold font-mono">{exp.pValue}</span>
                       </div>
                     </div>
 
                     {/* Interactive Group Selector (Assign Yourself) */}
-                    <div className="flex items-center justify-between bg-black/40 border border-white/5 rounded-xl p-2 mt-2">
-                      <span className="text-[8px] font-black font-mono text-zinc-400 uppercase tracking-widest">
+                    <div className="flex items-center justify-between bg-white border border-zinc-200 rounded-xl p-2 mt-2">
+                      <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest">
                         Tu Grupo Asignado:
                       </span>
                       <div className="flex gap-1.5">
@@ -1056,7 +1056,7 @@ quizQuestions:
                             className={`px-3 py-1 rounded-lg text-[8px] font-black transition-all cursor-pointer ${
                               selectedGroup[exp.id] === group 
                                 ? 'bg-gradient-to-r from-cyan-500 to-blue-500 text-black shadow-inner font-black' 
-                                : 'text-zinc-500 hover:text-zinc-300'
+                                : 'text-zinc-500 hover:text-zinc-500'
                             }`}
                           >
                             Grupo {group}
@@ -1077,15 +1077,15 @@ quizQuestions:
           {/* TAB CONTENT: Event Stream Log */}
           {activeTelemetryTab === 'stream' && (
             <div className="space-y-3.5 animate-fade-in">
-              <div className="bg-black border border-white/10 rounded-2xl overflow-hidden shadow-inner">
-                <div className="bg-[#08080a] px-3.5 py-2.5 border-b border-white/5 flex items-center justify-between">
+              <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden shadow-inner">
+                <div className="bg-[#08080a] px-3.5 py-2.5 border-b border-zinc-200 flex items-center justify-between">
                   <span className="text-[8px] font-mono text-zinc-500 font-bold uppercase tracking-wider">
                     Live Telemetry Event Log
                   </span>
                   <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
                 </div>
                 
-                <div className="p-4 font-mono text-[9px] text-zinc-400 min-h-[160px] leading-relaxed max-h-[260px] overflow-y-auto whitespace-pre-wrap select-text space-y-1 text-left">
+                <div className="p-4 font-mono text-[9px] text-zinc-500 min-h-[160px] leading-relaxed max-h-[260px] overflow-y-auto whitespace-pre-wrap select-text space-y-1 text-left">
                   {telemetryLogs.map((log, index) => {
                     let colorClass = '';
                     if (log.includes('TELEMETRY')) colorClass = 'text-cyan-400 font-bold';
@@ -1114,7 +1114,7 @@ quizQuestions:
           {activeTelemetryTab === 'yaml' && (
             <div className="space-y-4 animate-fade-in text-left">
               <div className="space-y-1">
-                <h4 className="text-xs font-black uppercase text-white tracking-tight flex items-center gap-2">
+                <h4 className="text-xs font-black uppercase text-zinc-800 tracking-tight flex items-center gap-2">
                   LibreLingo Course Studio
                 </h4>
                 <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">
@@ -1123,8 +1123,8 @@ quizQuestions:
               </div>
 
               {/* Textarea code editor */}
-              <div className="relative rounded-2xl border border-white/10 bg-black overflow-hidden shadow-inner flex flex-col focus-within:border-[var(--accent-main)] transition-colors">
-                <div className="bg-[#0c0c0e] px-4 py-2 border-b border-white/5 flex items-center justify-between">
+              <div className="relative rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-inner flex flex-col focus-within:border-[var(--accent-main)] transition-colors">
+                <div className="bg-[#0c0c0e] px-4 py-2 border-b border-zinc-200 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-[var(--accent-main)] animate-pulse" />
                     <span className="text-[8px] font-mono text-zinc-500 font-black uppercase tracking-wider">
@@ -1165,7 +1165,7 @@ quizQuestions:
                     <span className="text-[8px] font-black uppercase tracking-wider block">
                       Sintaxis Compilada con Éxito
                     </span>
-                    <p className="text-[10px] text-zinc-400 font-semibold mt-0.5">
+                    <p className="text-[10px] text-zinc-500 font-semibold mt-0.5">
                       Estructura compatible cargada: {parsedLesson?.title || 'Sin título'} ({parsedLesson?.quizQuestions?.length || 0} preguntas).
                     </p>
                   </div>
@@ -1194,28 +1194,28 @@ quizQuestions:
            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Public Reputation</h3>
         </div>
         
-        <div className="liquid-glass rounded-[2rem] p-6 border-accent/10 relative overflow-hidden">
-           <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 border-b border-l border-white/5 rounded-bl-xl">
+        <div className="bg-white shadow-sm rounded-[2rem] p-6 border-accent/10 relative overflow-hidden">
+           <div className="absolute top-0 right-0 px-3 py-1 bg-accent/10 border-b border-l border-zinc-200 rounded-bl-xl">
               <span className="text-[8px] font-black uppercase text-accent tracking-widest">Live Preview</span>
            </div>
            
            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-zinc-900 border border-accent/30 flex items-center justify-center text-2xl shadow-3d-accent shadow-accent/10">
+              <div className="w-14 h-14 rounded-full bg-white border border-accent/30 flex items-center justify-center text-2xl shadow-sm shadow-accent/10">
                  {appUser?.displayName?.charAt(0) || '🐅'}
               </div>
               <div className="flex-1">
                  <div className="flex items-center gap-1.5">
-                    <span className="font-black text-sm uppercase tracking-tight text-white">{appUser?.displayName || 'Founder'}</span>
+                    <span className="font-black text-sm uppercase tracking-tight text-zinc-800">{appUser?.displayName || 'Founder'}</span>
                     {appUser?.isFounder && <Crown className="w-3 h-3 text-amber-400" />}
                  </div>
                  <div className="flex items-center gap-3 mt-1">
                     <div className="flex items-center gap-1">
                        <Sparkles className="w-2.5 h-2.5 text-accent" />
-                       <span className="text-[9px] font-black text-zinc-400 uppercase">LVL {appUser?.level || 1}</span>
+                       <span className="text-[9px] font-black text-zinc-500 uppercase">LVL {appUser?.level || 1}</span>
                     </div>
                     <div className="flex items-center gap-1">
                        <Flame className="w-2.5 h-2.5 text-orange-500" />
-                       <span className="text-[9px] font-black text-zinc-400 uppercase">{appUser?.streak || 0}D STREAK</span>
+                       <span className="text-[9px] font-black text-zinc-500 uppercase">{appUser?.streak || 0}D STREAK</span>
                     </div>
                  </div>
               </div>
@@ -1225,7 +1225,7 @@ quizQuestions:
               </div>
            </div>
            
-           <p className="mt-4 text-[10px] text-zinc-500 italic font-medium leading-relaxed border-t border-white/5 pt-4">
+           <p className="mt-4 text-[10px] text-zinc-500 italic font-medium leading-relaxed border-t border-zinc-200 pt-4">
               "Tactical objective: {appUser?.goal || 'Establishing dominant market position.'}"
            </p>
         </div>
@@ -1235,7 +1235,7 @@ quizQuestions:
       <div className="pt-4">
         <button 
           onClick={logout}
-          className="w-full liquid-glass p-5 rounded-3xl border-red-500/20 hover:bg-red-500/10 flex items-center justify-between group transition-all"
+          className="w-full bg-white shadow-sm p-5 rounded-3xl border-red-500/20 hover:bg-red-500/10 flex items-center justify-between group transition-all"
         >
           <div className="flex items-center gap-4 text-red-500">
             <LogOut className="w-5 h-5 flex-shrink-0" />
@@ -1254,29 +1254,29 @@ quizQuestions:
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[9999] bg-[#020204]/95 backdrop-blur-md flex items-center justify-center p-6"
           >
-            <div className="relative w-full max-w-sm rounded-[2.5rem] border border-white/10 bg-[#0c0c10] p-6 shadow-2xl space-y-6">
+            <div className="relative w-full max-w-sm rounded-[2.5rem] border border-zinc-200 bg-[#0c0c10] p-6 shadow-2xl space-y-6">
               
               {/* Header */}
-              <div className="flex justify-between items-center pb-4 border-b border-white/5">
+              <div className="flex justify-between items-center pb-4 border-b border-zinc-200">
                 <div>
                   <span className="text-[9px] font-black font-mono text-yellow-500 uppercase tracking-widest block mb-1">
                     🏦 T1GER BANKING
                   </span>
-                  <h2 className="text-lg font-black italic uppercase tracking-tighter text-white">
+                  <h2 className="text-lg font-black italic uppercase tracking-tighter text-zinc-800">
                     MERCADO NEGRO
                   </h2>
                 </div>
                 <button 
                   onClick={() => setShowMarket(false)}
-                  className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white"
+                  className="w-8 h-8 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-800"
                 >
                   ✕
                 </button>
               </div>
 
               {/* Balance */}
-              <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/5 flex justify-between items-center">
-                <span className="text-xs font-bold text-zinc-400 uppercase">Tu saldo disponible:</span>
+              <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 flex justify-between items-center">
+                <span className="text-xs font-bold text-zinc-500 uppercase">Tu saldo disponible:</span>
                 <span className="text-sm font-black text-yellow-500 font-mono">🪙 {stats.coins} COINS</span>
               </div>
 
@@ -1322,15 +1322,15 @@ quizQuestions:
                     }
                   }
                 ].map(item => (
-                  <div key={item.id} className="p-4 rounded-[1.5rem] bg-white/[0.01] border border-white/5 flex flex-col justify-between gap-3 hover:bg-white/[0.03] transition-all">
+                  <div key={item.id} className="p-4 rounded-[1.5rem] bg-zinc-50 border border-zinc-200 flex flex-col justify-between gap-3 hover:bg-zinc-50 transition-all">
                     <div>
                       <div className="flex justify-between items-center mb-1">
-                        <h4 className="text-xs font-black text-white uppercase tracking-tight">{item.title}</h4>
+                        <h4 className="text-xs font-black text-zinc-800 uppercase tracking-tight">{item.title}</h4>
                         <span className="text-[8px] font-black font-mono text-yellow-500/60 uppercase">{item.badge}</span>
                       </div>
                       <p className="text-[10px] text-zinc-500 leading-normal">{item.description}</p>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-white/5">
+                    <div className="flex justify-between items-center pt-2 border-t border-zinc-200">
                       <span className="text-xs font-mono font-black text-yellow-500">🪙 {item.cost} COINS</span>
                       <button
                         onClick={item.action}

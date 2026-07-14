@@ -29,7 +29,7 @@ export const T1gerInteractiveAvatar: React.FC<T1gerInteractiveAvatarProps> = ({
   }, []);
 
   // Determinar colores y estilos según el personaje
-  const accentColor = character?.accentColor || '#CCFF00';
+  const accentColor = character?.accentColor || '#FF7300';
   const glowColor = character?.glowColor || 'rgba(204, 255, 0, 0.4)';
   const mouthPath = emotion === 'DISAPPOINTED'
     ? 'M 44 68 Q 50 63, 56 68'

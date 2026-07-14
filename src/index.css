@@ -2,59 +2,71 @@
 @import "tailwindcss";
 
 :root {
-  --accent-main: #CCFF00;
-  --accent-glow: rgba(204, 255, 0, 0.4);
-  --bg-glow-1: rgba(255, 107, 0, 0.08);
-  --bg-glow-2: rgba(204, 255, 0, 0.05);
+  --accent-main: #FF7300; /* Vibrant Orange */
+  --accent-glow: rgba(255, 115, 0, 0.4);
+  --bg-glow-1: rgba(255, 115, 0, 0.08);
+  --bg-glow-2: rgba(255, 115, 0, 0.05); 
 }
 
-.theme-relaxed {
-  --accent-main: #60A5FA;
-  --accent-glow: rgba(96, 165, 250, 0.4);
-  --bg-glow-1: rgba(96, 165, 250, 0.15);
-  --bg-glow-2: rgba(0, 229, 255, 0.08);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+/* Gamified 3D Button Style */
+.btn-gamified {
+  background-color: #FF7300;
+  color: white;
+  border-bottom: 4px solid #E06500;
+  border-radius: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease-in-out;
+  transform: translateY(0);
 }
 
-.theme-focus {
-  --accent-main: #CCFF00;
-  --accent-glow: rgba(204, 255, 0, 0.4);
-  --bg-glow-1: rgba(204, 255, 0, 0.15);
-  --bg-glow-2: rgba(255, 255, 255, 0.05);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+.btn-gamified:active {
+  transform: translateY(4px);
+  border-bottom: 0px solid #E06500;
+  margin-bottom: 4px; /* Compensate for lost border to keep layout stable */
 }
 
-.theme-beast {
-  --accent-main: #FF6B00;
-  --accent-glow: rgba(255, 107, 0, 0.2);
-  --bg-glow-1: rgba(255, 107, 0, 0.03);
-  --bg-glow-2: rgba(255, 107, 0, 0.01);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+.btn-gamified-blue {
+  background-color: #FF7300;
+  color: white;
+  border-bottom: 4px solid #E06500;
+  border-radius: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease-in-out;
+  transform: translateY(0);
 }
 
-.theme-beast .bg-scanline {
-  animation: scanline 4s linear infinite, beast-pulse 2s infinite alternate;
+.btn-gamified-blue:active {
+  transform: translateY(4px);
+  border-bottom: 0px solid #E06500;
+  margin-bottom: 4px;
 }
 
-@keyframes beast-pulse {
-  0% { opacity: 0.1; }
-  100% { opacity: 0.4; }
+.btn-gamified-secondary {
+  background-color: #ffffff;
+  color: #AFAFAF;
+  border: 2px solid #E5E5E5;
+  border-bottom: 4px solid #E5E5E5;
+  border-radius: 16px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease-in-out;
+  transform: translateY(0);
 }
 
-.theme-relaxed .bg-scanline {
-  opacity: 0.05;
-  animation: scanline 12s linear infinite;
+.btn-gamified-secondary:active {
+  transform: translateY(4px);
+  border-bottom: 0px solid #E5E5E5;
+  margin-bottom: 4px;
 }
 
 .bg-scanline {
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 1px,
-    rgba(255, 255, 255, 0.05) 1px,
-    rgba(255, 255, 255, 0.05) 2px
-  );
-  background-size: 100% 4px;
+  /* Removed aggressive scanline for a cleaner look, kept class for compatibility */
+  background: transparent;
 }
 
 @theme {
@@ -98,7 +110,7 @@
   }
 
   body {
-    @apply text-zinc-100 font-sans antialiased bg-[#020203];
+    @apply text-zinc-800 font-sans antialiased bg-[#F7F7F7];
     background-image: 
       radial-gradient(circle at 15% 50%, var(--bg-glow-1) 0%, transparent 50%),
       radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%);

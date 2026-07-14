@@ -449,11 +449,11 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
 
   if (isFinishing) {
     return (
-      <div className="w-full h-full bg-[#050505] text-white flex flex-col items-center justify-center p-6 space-y-8">
+      <div className="w-full h-full bg-white text-zinc-800 flex flex-col items-center justify-center p-6 space-y-8">
         <motion.div
            animate={{ rotate: 360 }}
            transition={{ repeat: Infinity, duration: 2, ease: 'linear' }}
-           className="w-24 h-24 rounded-full border-[2px] border-t-accent border-r-transparent border-b-accent border-l-transparent shadow-3d-accent"
+           className="w-24 h-24 rounded-full border-[2px] border-t-accent border-r-transparent border-b-accent border-l-transparent shadow-sm"
         />
         <div className="text-center space-y-2">
           <h2 className="text-2xl font-black italic tracking-tighter uppercase">Analyzing Responses</h2>
@@ -465,7 +465,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
 
   if (onboardingStage === 'landing') {
     return (
-      <div className="w-full h-full bg-[#050505] text-white flex flex-col px-6 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(2.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] relative z-50 overflow-hidden">
+      <div className="w-full h-full bg-white text-zinc-800 flex flex-col px-6 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(2.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] relative z-50 overflow-hidden">
         
         <div className="flex-1 flex flex-col justify-center items-center text-center max-w-sm mx-auto w-full mt-4">
           
@@ -488,10 +488,10 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
             transition={{ duration: 1, delay: 0.2 }}
             className="space-y-3"
           >
-            <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none text-white">
+            <h1 className="text-4xl font-black italic tracking-tighter uppercase leading-none text-zinc-800">
               T1GER APP
             </h1>
-            <h2 className="text-2xl font-bold tracking-tight leading-snug text-zinc-300">
+            <h2 className="text-2xl font-bold tracking-tight leading-snug text-zinc-500">
               Aprende Negocios,<br />IA e Inversiones.
             </h2>
             <p className="text-sm font-semibold text-[#FF6B00] uppercase tracking-widest mt-2">
@@ -522,7 +522,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               haptic();
               onComplete?.();
             }}
-            className="w-full bg-transparent text-white border-2 border-white/10 py-5 rounded-[2rem] font-bold text-sm active:scale-[0.98] transition-all hover:bg-white/5"
+            className="w-full bg-transparent text-zinc-800 border-2 border-zinc-200 py-5 rounded-[2rem] font-bold text-sm active:scale-[0.98] transition-all hover:bg-zinc-50"
           >
             Entrar al prototipo
           </button>
@@ -553,7 +553,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
       const assignedRank = correctAnswers === 3 ? 'Apex Hunter' : correctAnswers === 2 ? 'Hunter Cub' : 'New Predator';
 
       return (
-        <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+        <div className="w-full h-full bg-[#020204] text-zinc-800 flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
           {/* Neon Atmosphere */}
           <div 
             className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-10 pointer-events-none" 
@@ -569,7 +569,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               />
             </div>
 
-            <span className="text-[10px] font-black font-mono bg-white/[0.04] border px-3 py-1 rounded-full uppercase tracking-widest mb-3" style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>
+            <span className="text-[10px] font-black font-mono bg-zinc-50 border px-3 py-1 rounded-full uppercase tracking-widest mb-3" style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>
               Cuestionario Completado
             </span>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2 leading-none">
@@ -577,12 +577,12 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
             </h1>
             <p className="text-lg font-bold font-mono mb-6" style={{ color: mentor.accentColor }}>{correctAnswers}/3 ACIERTOS</p>
 
-            <div className="w-full bg-white/[0.02] border border-white/10 rounded-3xl p-5 text-left space-y-3 shadow-xl mb-6">
+            <div className="w-full bg-zinc-50 border border-zinc-200 rounded-3xl p-5 text-left space-y-3 shadow-xl mb-6">
               <div>
                 <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider block">Rango Asignado</span>
-                <span className="text-sm font-black uppercase text-white tracking-tight">{assignedRank}</span>
+                <span className="text-sm font-black uppercase text-zinc-800 tracking-tight">{assignedRank}</span>
               </div>
-              <div className="h-[1px] bg-white/5" />
+              <div className="h-[1px] bg-zinc-50" />
               <div>
                 <span className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider block">Módulos Omitidos</span>
                 <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: mentor.accentColor }}>{skippedLevelsText}</span>
@@ -606,9 +606,9 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
     }
 
     return (
-      <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+      <div className="w-full h-full bg-[#020204] text-zinc-800 flex flex-col justify-between pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
         {/* Progress bar */}
-        <div className="w-full h-2 liquid-glass rounded-full mb-10 overflow-hidden shadow-3d border-white/10 p-0.5">
+        <div className="w-full h-2 bg-white shadow-sm rounded-full mb-10 overflow-hidden shadow-sm border-zinc-200 p-0.5">
           <motion.div 
             className="h-full rounded-full"
             style={{ backgroundColor: mentor.accentColor, boxShadow: `0 0 12px ${mentor.glowColor}` }}
@@ -632,13 +632,13 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
               initial={{ scale: 0.9, opacity: 0, x: -10 }}
               animate={{ scale: 1, opacity: 1, x: 0 }}
               transition={{ type: "spring", stiffness: 220, damping: 15 }}
-              className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
+              className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2"
               style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}
             >
               <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: mentor.accentColor }}>
                 {mentor.name} ({mentor.title}) — {diagnosticStep.toUpperCase()}
               </span>
-              <p className="text-sm font-bold leading-snug text-white font-sans">
+              <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
                 {activeDiagnosticQ.question}
               </p>
             </motion.div>
@@ -654,7 +654,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                   key={i}
                   onClick={() => handleSelectDiagnosticOpt(i)}
                   className={`w-full p-4 rounded-[1.5rem] border text-left font-bold text-xs transition-all duration-300 flex items-center justify-between active:scale-[0.98] ${
-                    isSelected ? '' : 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300'
+                    isSelected ? '' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-200 hover:bg-zinc-50 text-zinc-500'
                   }`}
                   style={isSelected ? {
                     backgroundColor: `${mentor.accentColor}0d`,
@@ -734,16 +734,16 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   // STANDARD QUESTIONS SCREEN
   // ============================================================
   return (
-    <div className="w-full h-full bg-[#050505] text-white flex flex-col pt-[calc(2.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+    <div className="w-full h-full bg-white text-zinc-800 flex flex-col pt-[calc(2.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
       {/* Back Button & Progress Bar */}
       <div className="flex items-center gap-4 mb-8 z-20 relative shrink-0">
         <button 
           onClick={() => { haptic(); if(stepIndex > 0) { setStepIndex(currentStep => currentStep - 1); } else setOnboardingStage('landing'); }}
-          className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center border border-white/10 active:scale-95"
+          className="w-10 h-10 rounded-full bg-zinc-50 flex items-center justify-center border border-zinc-200 active:scale-95"
         >
-          <ArrowRight className="w-5 h-5 text-white rotate-180" />
+          <ArrowRight className="w-5 h-5 text-zinc-800 rotate-180" />
         </button>
-        <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
+        <div className="flex-1 h-1.5 bg-zinc-50 rounded-full overflow-hidden">
           <motion.div 
             className="h-full bg-[#FF6B00] rounded-full shadow-[0_0_10px_#FF6B00]"
             animate={{ width: `${((stepIndex + 1) / QUESTIONS.length) * 100}%` }}
@@ -759,10 +759,10 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
         >
             {!['graph', 'scurve', 'interstitial', 'barchart', 'socialProofReviews', 'privacyTrust', 'connectNotifications', 'hardcoreMode', 'rollover', 'generatePlanIntro', 'loadingSimulation', 'planReady', 'saveProgress', 'paywallIntro', 'referralCode'].includes(currentQuestion.type) && (
               <>
-                <h1 className="font-black italic uppercase tracking-tight leading-[0.9] mb-3 text-white shrink-0 break-words" style={{ fontSize: 'clamp(1.8rem, 8vw, 3rem)' }}>
+                <h1 className="font-black italic uppercase tracking-tight leading-[0.9] mb-3 text-zinc-800 shrink-0 break-words" style={{ fontSize: 'clamp(1.8rem, 8vw, 3rem)' }}>
                   {currentQuestion.title}
                 </h1>
-                <p className="text-xs font-medium text-zinc-400 mb-8 leading-relaxed uppercase tracking-wider shrink-0">
+                <p className="text-xs font-medium text-zinc-500 mb-8 leading-relaxed uppercase tracking-wider shrink-0">
                   {currentQuestion.subtitle}
                 </p>
               </>
@@ -780,13 +780,13 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                     className={`w-full text-left p-5 rounded-[2rem] transition-all duration-300 flex items-center justify-between group active:scale-[0.98] border-2
                       ${isSelected 
                         ? 'bg-[#FF6B00] text-[#050505] border-[#FF6B00] shadow-[0_8px_20px_rgba(255,107,0,0.3)]' 
-                        : 'bg-white/5 text-white border-white/10 hover:border-white/30 hover:bg-white/10'
+                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-200 hover:bg-zinc-50'
                       }`}
                   >
                     <div className="flex min-w-0 flex-1 items-center gap-4">
                       {opt.icon && (
-                        <div className={`w-12 h-12 rounded-[1.5rem] flex items-center justify-center border ${isSelected ? 'bg-black/20 border-black/10' : 'bg-black/40 border-white/10'}`}>
-                          {React.cloneElement(opt.icon as React.ReactElement<any>, { className: `w-5 h-5 ${isSelected ? 'text-[#050505]' : 'text-white'}` })}
+                        <div className={`w-12 h-12 rounded-[1.5rem] flex items-center justify-center border ${isSelected ? 'bg-zinc-50 border-black/10' : 'bg-white border-zinc-200'}`}>
+                          {React.cloneElement(opt.icon as React.ReactElement<any>, { className: `w-5 h-5 ${isSelected ? 'text-[#050505]' : 'text-zinc-800'}` })}
                         </div>
                       )}
                       <div className="min-w-0 flex-1">
@@ -883,7 +883,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                   <ConnectNotifications />
                   <div className="mt-8 flex flex-col gap-3">
                     <button onClick={() => { haptic(); advanceStep(); }} className="w-full py-5 rounded-[2rem] bg-white text-black font-black uppercase tracking-wide active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]">Continue</button>
-                    <button onClick={() => { haptic(); advanceStep(); }} className="w-full py-5 rounded-[2rem] bg-transparent border border-white/20 text-white font-bold uppercase tracking-wide active:scale-95 transition-transform">Not now</button>
+                    <button onClick={() => { haptic(); advanceStep(); }} className="w-full py-5 rounded-[2rem] bg-transparent border border-zinc-200 text-zinc-800 font-bold uppercase tracking-wide active:scale-95 transition-transform">Not now</button>
                   </div>
                 </div>
               )}
@@ -892,7 +892,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                 <div className="w-full flex-1 flex flex-col justify-center animate-in fade-in zoom-in duration-500">
                   <HardcoreModeToggle />
                   <div className="mt-8 flex gap-3">
-                    <button onClick={() => { haptic(); setAnswers(prev => ({...prev, hardcore: false})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-zinc-900 border border-white/10 text-white font-bold uppercase tracking-wide active:scale-95 transition-transform">No</button>
+                    <button onClick={() => { haptic(); setAnswers(prev => ({...prev, hardcore: false})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-white border border-zinc-200 text-zinc-800 font-bold uppercase tracking-wide active:scale-95 transition-transform">No</button>
                     <button onClick={() => { haptic(); setAnswers(prev => ({...prev, hardcore: true})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-[#FF6B00] text-black font-black uppercase tracking-wide active:scale-95 transition-transform shadow-[0_8px_0_0_#CC5500]">Yes</button>
                   </div>
                 </div>
@@ -902,7 +902,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                 <div className="w-full flex-1 flex flex-col justify-center animate-in fade-in zoom-in duration-500">
                   <RolloverMissions />
                   <div className="mt-8 flex gap-3">
-                    <button onClick={() => { haptic(); setAnswers(prev => ({...prev, rollover: false})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-zinc-900 border border-white/10 text-white font-bold uppercase tracking-wide active:scale-95 transition-transform">No</button>
+                    <button onClick={() => { haptic(); setAnswers(prev => ({...prev, rollover: false})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-white border border-zinc-200 text-zinc-800 font-bold uppercase tracking-wide active:scale-95 transition-transform">No</button>
                     <button onClick={() => { haptic(); setAnswers(prev => ({...prev, rollover: true})); advanceStep(); }} className="flex-1 py-5 rounded-[2rem] bg-white text-black font-black uppercase tracking-wide active:scale-95 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.2)]">Yes</button>
                   </div>
                 </div>

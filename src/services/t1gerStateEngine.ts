@@ -64,34 +64,34 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
       return {
         emotion,
         avatarImg: '/tiger_celebrating.png',
-        glowColor: 'rgba(96, 165, 250, 0.4)', // Hologram Cyan Glow
-        accentColor: '#60A5FA', // Cyan Accent
-        bgTint: 'rgba(96, 165, 250, 0.05)',
-        statusIcon: '⚡',
-        statusLabel: 'PREDATOR ACTIVE',
-        speechBubbleText: '¡Estado de flujo completo detectado! Tienes tus rachas de aprendizaje y ejecución alineadas. Estás en la cima de la cadena alimenticia hoy, Predator.',
+        glowColor: 'rgba(255, 115, 0, 0.4)', // Gamified Orange Glow
+        accentColor: '#FF7300', // Gamified Orange
+        bgTint: 'rgba(255, 115, 0, 0.05)',
+        statusIcon: '🔥',
+        statusLabel: 'PERFECT FLOW',
+        speechBubbleText: 'You are on fire! Your learning and execution streaks are aligned. Keep up this amazing momentum!',
       };
     case 'PROUD':
       return {
         emotion,
-        avatarImg: '/tiger_celebrating.png',
-        glowColor: 'rgba(255, 107, 0, 0.4)', // Amber Cyber Gold Glow
-        accentColor: '#FF6B00', // Gold Accent
-        bgTint: 'rgba(255, 107, 0, 0.05)',
-        statusIcon: '👑',
-        statusLabel: 'APEX PRIDE',
-        speechBubbleText: 'Excelente caza. Tu racha de estudio es admirable; estás devorando la competencia. Continúa tallando tu monopolio mental.',
+        avatarImg: '/tiger_resting.png',
+        glowColor: 'rgba(255, 115, 0, 0.2)', // Soft Orange
+        accentColor: '#FF7300',
+        bgTint: 'rgba(255, 115, 0, 0.02)',
+        statusIcon: '📖',
+        statusLabel: 'READY TO LEARN',
+        speechBubbleText: 'Let us build some healthy habits today! A small step every day creates massive results over time.',
       };
     case 'FERAL':
       return {
         emotion,
-        avatarImg: '/tiger_sad.png', // Looking intense/concerned
-        glowColor: 'rgba(239, 68, 68, 0.5)', // Carnivore Crimson Glow
-        accentColor: '#EF4444', // Red Alert Accent
-        bgTint: 'rgba(239, 68, 68, 0.08)',
-        statusIcon: '🚨',
-        statusLabel: 'STREAK DANGER',
-        speechBubbleText: 'Tu racha se está desangrando, Predator. Es de noche y aún no has completado tus lecciones conceptuales de hoy. ¡Aliméntate del conocimiento antes de que acabe el tiempo!',
+        avatarImg: '/tiger_sad.png', 
+        glowColor: 'rgba(255, 75, 75, 0.5)', // Duolingo Red Glow
+        accentColor: '#FF4B4B', // Red Alert Accent
+        bgTint: 'rgba(255, 75, 75, 0.08)',
+        statusIcon: '⏰',
+        statusLabel: 'STREAK AT RISK',
+        speechBubbleText: 'Oh no! Your streak is at risk today. It is getting late, let us complete a quick lesson to keep the flame alive!',
       };
     case 'DISAPPOINTED':
       return {
@@ -99,22 +99,22 @@ export const getT1gerVisualConfig = (emotion: T1gerEmotion): T1gerVisualConfig =
         avatarImg: '/tiger_sad.png',
         glowColor: 'rgba(156, 163, 175, 0.2)', // Steel Gray Glow
         accentColor: '#9CA3AF', // Gray Accent
-        bgTint: 'rgba(156, 163, 175, 0.03)',
-        statusIcon: '💀',
-        statusLabel: 'SYSTEM ANOMALY',
-        speechBubbleText: 'Has tenido un tropiezo conceptual hoy. En el mercado real, los descuidos cuestan miles de dólares. Estudia la crítica y afila tus garras para el siguiente intento.',
+        bgTint: 'rgba(156, 163, 175, 0.05)',
+        statusIcon: '💔',
+        statusLabel: 'STUMBLE',
+        speechBubbleText: 'Mistakes happen! Do not worry about failing a mission today. Tomorrow is a brand new day to learn and grow.',
       };
     case 'RESTING':
     default:
       return {
-        emotion,
-        avatarImg: '/tiger_thinking.png',
-        glowColor: 'rgba(204, 255, 0, 0.2)', // Soft lime accent
-        accentColor: '#CCFF00', // Lime Cyber
-        bgTint: 'rgba(204, 255, 0, 0.02)',
-        statusIcon: '💤',
-        statusLabel: 'STEADY PACING',
-        speechBubbleText: 'Afilando las garras de forma estratégica. Mantener un ritmo constante es mejor que un sprint insostenible. ¿Listo para tu siguiente lección?',
+        emotion: 'RESTING',
+        avatarImg: '/tiger_idle.png',
+        glowColor: 'rgba(255, 255, 255, 0.1)', // Subtle White/Silver Glow
+        accentColor: '#FFFFFF',
+        bgTint: 'transparent',
+        statusIcon: '👀',
+        statusLabel: 'WATCHFUL',
+        speechBubbleText: 'Patience is a weapon. You are maintaining a steady pace. Keep consuming data and wait for the perfect moment to strike.',
       };
   }
 };

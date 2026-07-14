@@ -140,24 +140,24 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
 
   if (showPlan) {
     return (
-      <div className="flex h-full w-full flex-col overflow-y-auto bg-[#060806] px-6 pb-8 pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-white">
+      <div className="flex h-full w-full flex-col overflow-y-auto bg-[#F7F7F7] px-6 pb-8 pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-zinc-800">
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col">
-          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#b8f500]/30 bg-[#b8f500]/10 text-[#b8f500]">
+          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF7300]">
             <Check className="h-6 w-6" strokeWidth={3} />
           </div>
-          <p className="mb-2 text-xs font-bold uppercase text-[#b8f500]">Tu ruta está lista</p>
+          <p className="mb-2 text-xs font-bold uppercase text-[#FF7300]">Tu ruta está lista</p>
           <h1 className="mb-3 text-3xl font-black leading-tight">{plan.title}</h1>
-          <p className="mb-8 text-sm leading-6 text-zinc-400">Empezaremos con una lección útil hoy y ajustaremos la dificultad según tus respuestas.</p>
+          <p className="mb-8 text-sm leading-6 text-zinc-500">Empezaremos con una lección útil hoy y ajustaremos la dificultad según tus respuestas.</p>
 
-          <div className="mb-6 border-y border-white/10 py-5">
+          <div className="mb-6 border-y border-zinc-200 py-5">
             <div className="mb-5 flex items-center justify-between">
-              <span className="text-sm text-zinc-400">Ritmo semanal</span>
-              <strong className="text-sm text-white">{plan.weeklyMinutes} min</strong>
+              <span className="text-sm text-zinc-500">Ritmo semanal</span>
+              <strong className="text-sm text-zinc-800">{plan.weeklyMinutes} min</strong>
             </div>
             <div className="space-y-4">
               {plan.focusAreas.map((area, index) => (
                 <div key={area} className="flex items-center gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 text-xs font-bold text-[#b8f500]">{index + 1}</span>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-xs font-bold text-[#FF7300]">{index + 1}</span>
                   <span className="text-sm font-semibold text-zinc-200">{area}</span>
                 </div>
               ))}
@@ -167,18 +167,18 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
           <button
             type="button"
             onClick={() => setAnswers(current => ({ ...current, learnWithFriends: !current.learnWithFriends }))}
-            className="mb-8 flex w-full items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left"
+            className="mb-8 flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white shadow-sm p-4 text-left"
           >
             <span className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-zinc-400" />
+              <Users className="h-5 w-5 text-zinc-500" />
               <span><strong className="block text-sm">Aprender con amigos</strong><small className="text-xs text-zinc-500">Retos y progreso compartido</small></span>
             </span>
-            <span className={`h-6 w-11 rounded-full p-1 transition-colors ${answers.learnWithFriends ? 'bg-[#b8f500]' : 'bg-zinc-700'}`}>
-              <span className={`block h-4 w-4 rounded-full bg-black transition-transform ${answers.learnWithFriends ? 'translate-x-5' : ''}`} />
+            <span className={`h-6 w-11 rounded-full p-1 transition-colors ${answers.learnWithFriends ? 'bg-[#FF7300]' : 'bg-zinc-700'}`}>
+              <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${answers.learnWithFriends ? 'translate-x-5' : ''}`} />
             </span>
           </button>
 
-          <button type="button" disabled={saving} onClick={finish} className="mt-auto flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#b8f500] px-5 font-black text-black disabled:opacity-60">
+          <button type="button" disabled={saving} onClick={finish} className="mt-auto flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FF7300] px-5 font-black text-black disabled:opacity-60">
             {saving ? 'Guardando ruta…' : 'Empezar primera lección'} <ArrowRight className="h-5 w-5" />
           </button>
         </div>
@@ -187,32 +187,32 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#060806] px-6 pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-white">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-[#F7F7F7] px-6 pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-zinc-800">
       <div className="mx-auto flex w-full max-w-sm items-center gap-4">
-        <button type="button" aria-label="Volver" onClick={() => stepIndex === 0 ? undefined : setStepIndex(current => current - 1)} disabled={stepIndex === 0} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] disabled:opacity-30">
+        <button type="button" aria-label="Volver" onClick={() => stepIndex === 0 ? undefined : setStepIndex(current => current - 1)} disabled={stepIndex === 0} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-sm disabled:opacity-30">
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full rounded-full bg-[#b8f500] transition-[width] duration-300" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} />
+        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200">
+          <div className="h-full rounded-full bg-[#FF7300] transition-[width] duration-300" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} />
         </div>
         <span className="w-8 text-right text-xs font-semibold text-zinc-500">{stepIndex + 1}/{steps.length}</span>
       </div>
 
       <div className="mx-auto flex w-full max-w-sm flex-1 flex-col overflow-y-auto pb-2 pt-10">
-        <p className="mb-2 text-xs font-bold uppercase text-[#b8f500]">{step.eyebrow}</p>
+        <p className="mb-2 text-xs font-bold uppercase text-[#FF7300]">{step.eyebrow}</p>
         <h1 className="mb-3 text-[2rem] font-black leading-[1.08]">{step.title}</h1>
-        <p className="mb-7 text-sm leading-6 text-zinc-400">{step.subtitle}</p>
+        <p className="mb-7 text-sm leading-6 text-zinc-500">{step.subtitle}</p>
 
         <div className="space-y-3">
           {step.choices.map(choice => {
             const selected = String(answers[step.key]) === choice.id;
             return (
-              <button key={choice.id} type="button" onClick={() => choose(choice)} className={`flex min-h-[76px] w-full items-center gap-4 rounded-2xl border p-4 text-left transition-colors ${selected ? 'border-[#b8f500] bg-[#b8f500]/10' : 'border-white/10 bg-white/[0.025] hover:border-white/20'}`}>
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${selected ? 'bg-[#b8f500] text-black' : 'bg-white/[0.05] text-zinc-300'}`}>
+              <button key={choice.id} type="button" onClick={() => choose(choice)} className={`flex min-h-[76px] w-full items-center gap-4 rounded-2xl border p-4 text-left transition-colors ${selected ? 'border-[#FF7300] bg-[#FF7300]/10' : 'border-zinc-200 bg-white shadow-sm hover:border-zinc-200'}`}>
+                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${selected ? 'bg-[#FF7300] text-black' : 'bg-white shadow-sm text-zinc-500'}`}>
                   {React.isValidElement(choice.icon) ? React.cloneElement(choice.icon as React.ReactElement<{ className?: string }>, { className: 'h-5 w-5' }) : choice.icon}
                 </span>
                 <span className="min-w-0 flex-1">
-                  <strong className="block text-[15px] font-bold leading-5 text-white">{choice.label}</strong>
+                  <strong className="block text-[15px] font-bold leading-5 text-zinc-800">{choice.label}</strong>
                   <small className="mt-1 block text-xs leading-4 text-zinc-500">{choice.description}</small>
                 </span>
                 <ArrowRight className="h-4 w-4 shrink-0 text-zinc-600" />

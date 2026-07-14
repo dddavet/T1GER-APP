@@ -7,6 +7,6 @@ export const CubAvatar = () => (
     transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
     className="fixed bottom-24 right-6 z-30"
   >
-    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#CCFF00] flex items-center justify-center text-4xl shadow-lg border-2 border-white/20">🐅</div>
+    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF7300] flex items-center justify-center text-4xl shadow-lg border-2 border-zinc-200">🐅</div>
   </motion.div>
 );

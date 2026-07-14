@@ -14,9 +14,9 @@ const generateMockUsers = () => {
 const LEAGUE_TIERS = [
   { name: 'Stray', color: 'text-zinc-500' },
   { name: 'Cub', color: 'text-amber-700' },
-  { name: 'Hunter', color: 'text-zinc-300' },
+  { name: 'Hunter', color: 'text-zinc-500' },
   { name: 'Apex', color: 'text-yellow-500' },
-  { name: 'Predator', color: 'text-[#CCFF00]' },
+  { name: 'Predator', color: 'text-[#FF7300]' },
 ];
 
 export const PrideLeagues = () => {
@@ -36,9 +36,9 @@ export const PrideLeagues = () => {
   }, []);
 
   return (
-    <div className="bg-[#050505] text-white p-8 rounded-3xl border border-white/5 font-sans">
+    <div className="bg-white text-zinc-800 p-8 rounded-3xl border border-zinc-200 font-sans">
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-black italic text-[#CCFF00]">PREDATOR LEAGUE</h2>
+        <h2 className="text-3xl font-black italic text-[#FF7300]">PREDATOR LEAGUE</h2>
         <div className="font-mono text-xl text-[#FF6B00]">
           LEAGUE ENDS IN: 2D 14H 32M
         </div>
@@ -59,10 +59,10 @@ export const PrideLeagues = () => {
                 exit={{ opacity: 0 }}
                 className={`flex items-center gap-4 p-4 rounded-xl border backdrop-blur-md ${
                   isPromotion 
-                    ? 'border-[#CCFF00] shadow-[0_0_15px_rgba(204,255,0,0.3)]' 
+                    ? 'border-[#FF7300] shadow-[0_0_15px_rgba(204,255,0,0.3)]' 
                     : isDemotion 
                       ? 'border-[#FF6B00] animate-pulse' 
-                      : 'border-white/5 bg-white/5'
+                      : 'border-zinc-200 bg-zinc-50'
                 }`}
               >
                 <span className="font-mono text-lg w-8">{user.rank}</span>
@@ -70,9 +70,9 @@ export const PrideLeagues = () => {
                   {isDemotion ? '🤕' : '🐅'}
                 </div>
                 <span className="font-bold text-lg flex-grow">{user.name}</span>
-                <span className="font-mono text-[#CCFF00]">{user.xp} XP</span>
+                <span className="font-mono text-[#FF7300]">{user.xp} XP</span>
                 
-                {isPromotion && <span className="text-[10px] font-bold text-[#CCFF00]">PROMOTION ZONE</span>}
+                {isPromotion && <span className="text-[10px] font-bold text-[#FF7300]">PROMOTION ZONE</span>}
                 {isDemotion && <span className="text-[10px] font-bold text-[#FF6B00]">DEMOTION ZONE</span>}
               </motion.div>
             );

@@ -113,10 +113,10 @@ export const Coach = () => {
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] -mx-6 -mt-20">
       {/* Header */}
-      <div className="p-6 border-b border-white/5 bg-[#020204]/90 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
+      <div className="p-6 border-b border-zinc-200 bg-[#020204]/90 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <div 
-            className="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500 bg-white/[0.02]"
+            className="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500 bg-zinc-50"
             style={{ 
               borderColor: `${coachConfig.accentColor}33`, 
               boxShadow: `0 0 12px ${coachConfig.glowColor}` 
@@ -125,19 +125,19 @@ export const Coach = () => {
             <BrainCircuit className="w-6 h-6" style={{ color: coachConfig.accentColor }} />
           </div>
           <div>
-            <h1 className="text-lg font-black italic uppercase tracking-tight text-white">Squad Mentors</h1>
+            <h1 className="text-lg font-black italic uppercase tracking-tight text-zinc-800">Squad Mentors</h1>
             <p className="text-[10px] font-black uppercase tracking-widest font-mono" style={{ color: coachConfig.accentColor }}>
               {coachConfig.name} Activated
             </p>
           </div>
         </div>
-        <button onClick={() => setActiveView('home')} className="p-2 hover:bg-white/5 rounded-xl transition-colors">
+        <button onClick={() => setActiveView('home')} className="p-2 hover:bg-zinc-50 rounded-xl transition-colors">
           <ArrowLeft className="w-5 h-5 text-zinc-500" />
         </button>
       </div>
 
       {/* Horizontal Mentor Selector tab */}
-      <div className="px-6 py-4 bg-[#07070a]/90 border-b border-white/5 flex gap-3 overflow-x-auto hide-scrollbar z-10">
+      <div className="px-6 py-4 bg-[#07070a]/90 border-b border-zinc-200 flex gap-3 overflow-x-auto hide-scrollbar z-10">
         {Object.values(CHARACTER_CAST).map(coach => {
           const isSelected = coach.id === activeCoachId;
           const specialty = 
@@ -154,8 +154,8 @@ export const Coach = () => {
               whileTap={{ scale: 0.98 }}
               className={`flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition-all duration-300 ${
                 isSelected 
-                  ? 'bg-white/[0.03] text-white font-bold' 
-                  : 'bg-black/20 border-white/5 text-zinc-500 hover:border-white/10'
+                  ? 'bg-zinc-50 text-zinc-800 font-bold' 
+                  : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:border-zinc-200'
               }`}
               style={isSelected ? {
                 borderColor: coach.accentColor,
@@ -163,7 +163,7 @@ export const Coach = () => {
               } : {}}
             >
               <div 
-                className="w-8 h-8 rounded-full border flex items-center justify-center overflow-hidden bg-black/40"
+                className="w-8 h-8 rounded-full border flex items-center justify-center overflow-hidden bg-white"
                 style={{ borderColor: isSelected ? coach.accentColor : 'rgba(255,255,255,0.1)' }}
               >
                 <img src={coach.avatarImg} alt={coach.name} className="w-6 h-6 object-contain" />
@@ -182,7 +182,7 @@ export const Coach = () => {
       </div>
 
       {/* Dynamic Coach Status Card */}
-      <div className="px-6 py-4 bg-zinc-950/40 border-b border-white/5 relative overflow-hidden flex items-center gap-4">
+      <div className="px-6 py-4 bg-white border-b border-zinc-200 relative overflow-hidden flex items-center gap-4">
         {/* Glow behind mascot */}
         <div 
           className="absolute -left-10 top-0 w-32 h-32 rounded-full blur-[40px] opacity-10 transition-all duration-500"
@@ -212,7 +212,7 @@ export const Coach = () => {
           >
             {coachConfig.name} — {coachConfig.title}
           </span>
-          <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed line-clamp-2 italic">
+          <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed line-clamp-2 italic">
             "{coachConfig.speechBubbleText.welcome[0]}"
           </p>
         </div>
@@ -235,7 +235,7 @@ export const Coach = () => {
                 <img 
                   src={mascotImg} 
                   alt={coachConfig.name} 
-                  className="w-10 h-10 object-contain rounded-full bg-white/5 border border-white/10 p-1 flex-shrink-0 shadow-lg"
+                  className="w-10 h-10 object-contain rounded-full bg-zinc-50 border border-zinc-200 p-1 flex-shrink-0 shadow-lg"
                   style={{ filter: `drop-shadow(0 0 6px ${coachConfig.glowColor})` }}
                 />
               )}
@@ -264,9 +264,9 @@ export const Coach = () => {
             <img 
               src={coachConfig.avatarImg} 
               alt="Thinking Mascot" 
-              className="w-10 h-10 object-contain rounded-full bg-white/5 border border-white/10 p-1 flex-shrink-0 animate-pulse"
+              className="w-10 h-10 object-contain rounded-full bg-zinc-50 border border-zinc-200 p-1 flex-shrink-0 animate-pulse"
             />
-            <div className="glass border border-white/5 p-4 rounded-3xl rounded-tl-none flex items-center justify-center">
+            <div className="glass border border-zinc-200 p-4 rounded-3xl rounded-tl-none flex items-center justify-center">
               <Loader2 className="w-5 h-5 animate-spin" style={{ color: coachConfig.accentColor }} />
             </div>
           </div>
@@ -275,13 +275,13 @@ export const Coach = () => {
       </div>
 
       {/* Input */}
-      <div className="p-6 bg-[#020204]/90 backdrop-blur-xl border-t border-white/5 sticky bottom-0">
+      <div className="p-6 bg-[#020204]/90 backdrop-blur-xl border-t border-zinc-200 sticky bottom-0">
         <div className="relative flex items-center">
           <input 
             value={input} 
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            className="w-full bg-zinc-900/50 border border-white/5 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none text-white transition-colors"
+            className="w-full bg-white border border-zinc-200 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none text-zinc-800 transition-colors"
             placeholder={`Ask ${coachConfig.name}...`}
             style={{ 
               borderColor: 'rgba(255, 255, 255, 0.05)'

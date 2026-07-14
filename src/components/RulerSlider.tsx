@@ -37,15 +37,15 @@ export const RulerSlider: React.FC<RulerSliderProps> = ({ min, max, step, value,
     <div className="w-full flex flex-col items-center">
       <div className="mb-12 text-center h-20 flex flex-col justify-end">
         <span className="text-sm font-bold text-zinc-500 uppercase tracking-widest mb-2">Compromiso Diario</span>
-        <span className="text-5xl font-black text-white italic tracking-tighter">
+        <span className="text-5xl font-black text-zinc-800 italic tracking-tighter">
           {formatValue ? formatValue(value) : value}
         </span>
       </div>
 
       <div className="relative w-full h-[120px] overflow-hidden">
         {/* Top/Bottom Borders */}
-        <div className="absolute top-0 w-full h-[1px] bg-white/10 z-10" />
-        <div className="absolute bottom-0 w-full h-[1px] bg-white/10 z-10" />
+        <div className="absolute top-0 w-full h-[1px] bg-zinc-50 z-10" />
+        <div className="absolute bottom-0 w-full h-[1px] bg-zinc-50 z-10" />
 
         {/* Fades */}
         <div className="absolute left-0 top-0 h-full w-16 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />

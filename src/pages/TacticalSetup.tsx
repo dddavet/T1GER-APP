@@ -90,7 +90,7 @@ export const TacticalSetup = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className="liquid-glass p-5 rounded-[2rem] flex items-center justify-between border-white/10 group shadow-3d"
+        className="bg-white shadow-sm p-5 rounded-[2rem] flex items-center justify-between border-zinc-200 group shadow-sm"
       >
         <div className="flex items-center gap-4">
           <div className={`w-12 h-12 rounded-2xl ${bgColor} flex items-center justify-center border ${borderColor} shadow-inner`}>
@@ -102,7 +102,7 @@ export const TacticalSetup = () => {
               <span className="text-zinc-700 text-[6px]">•</span>
               <span className="text-[8px] font-black text-cyan-400 tracking-wider uppercase font-mono">{getRecurrenceLabel(task)}</span>
             </div>
-            <span className="font-black text-sm uppercase tracking-tight text-white">{task.label}</span>
+            <span className="font-black text-sm uppercase tracking-tight text-zinc-800">{task.label}</span>
           </div>
         </div>
         <button 
@@ -116,7 +116,7 @@ export const TacticalSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-6 pb-32">
+    <div className="min-h-screen bg-white text-zinc-800 p-6 pb-32">
       <div className="max-w-md mx-auto space-y-10">
         
         {/* HEADER */}
@@ -129,19 +129,19 @@ export const TacticalSetup = () => {
           </div>
           <button 
             onClick={() => { haptic(); setActiveView('home'); }}
-            className="w-12 h-12 rounded-2xl liquid-glass flex items-center justify-center border-white/10 hover:border-accent/30 transition-all active:scale-90"
+            className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border-zinc-200 hover:border-accent/30 transition-all active:scale-90"
           >
-            <ArrowLeft className="w-5 h-5 text-zinc-400" />
+            <ArrowLeft className="w-5 h-5 text-zinc-500" />
           </button>
         </header>
 
         {/* QUICK ADD / BUILDER */}
         <div className="space-y-6">
-          <div className="liquid-glass-heavy rounded-[2.5rem] p-8 border-accent/10 shadow-accent relative overflow-hidden">
+          <div className="bg-white shadow-sm rounded-[2.5rem] p-8 border-accent/10 shadow-accent relative overflow-hidden">
              <div className="absolute -top-10 -right-10 w-32 h-32 bg-accent/5 rounded-full blur-[60px]" />
              
              <div className="relative z-10 space-y-6">
-                <div className="flex gap-2 p-1.5 bg-black/40 rounded-2xl border border-white/5 overflow-x-auto no-scrollbar">
+                <div className="flex gap-2 p-1.5 bg-white rounded-2xl border border-zinc-200 overflow-x-auto no-scrollbar">
                   {[
                     { id: 'habit', label: 'Habit', icon: Target },
                     { id: 'lesson', label: 'Lesson', icon: Book },
@@ -151,7 +151,7 @@ export const TacticalSetup = () => {
                       key={btn.id}
                       onClick={() => { haptic(); setType(btn.id as any); }}
                       className={`flex-1 min-w-[80px] py-3 rounded-xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 transition-all ${
-                        type === btn.id ? 'bg-accent text-black shadow-accent scale-[0.98]' : 'text-zinc-500 hover:text-zinc-300'
+                        type === btn.id ? 'bg-accent text-black shadow-accent scale-[0.98]' : 'text-zinc-500 hover:text-zinc-500'
                       }`}
                     >
                       <btn.icon className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export const TacticalSetup = () => {
                     placeholder={`New ${type}...`}
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    className="w-full bg-white/5 border-b-2 border-white/10 p-4 text-lg font-black uppercase tracking-tighter placeholder:text-zinc-800 focus:outline-none focus:border-accent transition-all"
+                    className="w-full bg-zinc-50 border-b-2 border-zinc-200 p-4 text-lg font-black uppercase tracking-tighter placeholder:text-zinc-800 focus:outline-none focus:border-accent transition-all"
                   />
 
                   <div className="grid grid-cols-6 gap-3 pt-2">
@@ -177,7 +177,7 @@ export const TacticalSetup = () => {
                         className={`w-11 h-11 rounded-2xl flex items-center justify-center border transition-all ${
                           selectedIcon === item.name 
                             ? 'bg-accent/20 border-accent text-accent shadow-[0_0_15px_rgba(204,255,0,0.2)]' 
-                            : 'bg-white/5 border-white/5 text-zinc-600 hover:text-zinc-400'
+                            : 'bg-zinc-50 border-zinc-200 text-zinc-600 hover:text-zinc-500'
                         }`}
                       >
                         <item.icon className="w-5 h-5" />
@@ -191,7 +191,7 @@ export const TacticalSetup = () => {
                   <label className="block text-[8px] font-black uppercase text-zinc-500 tracking-widest text-left">
                     Recurrence Strategy
                   </label>
-                  <div className="grid grid-cols-4 gap-2 bg-black/40 border border-white/5 rounded-2xl p-1">
+                  <div className="grid grid-cols-4 gap-2 bg-white border border-zinc-200 rounded-2xl p-1">
                     {[
                       { id: 'daily', label: 'Diario' },
                       { id: 'weekdays', label: 'Lun-Vie' },
@@ -204,8 +204,8 @@ export const TacticalSetup = () => {
                         onClick={() => { haptic(); setRecurrence(r.id as any); }}
                         className={`py-2.5 rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
                           recurrence === r.id 
-                            ? 'bg-white/5 border border-white/10 text-white shadow-sm' 
-                            : 'text-zinc-500 hover:text-zinc-300'
+                            ? 'bg-zinc-50 border border-zinc-200 text-zinc-800 shadow-sm' 
+                            : 'text-zinc-500 hover:text-zinc-500'
                         }`}
                       >
                         {r.label}
@@ -221,16 +221,16 @@ export const TacticalSetup = () => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-white/[0.02] border border-white/5 mt-2"
+                        className="flex items-center justify-between p-3 rounded-2xl bg-zinc-50 border border-zinc-200 mt-2"
                       >
-                        <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Día de ejecución:</span>
+                        <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Día de ejecución:</span>
                         <select
                           value={recurrenceDayOfWeek}
                           onChange={(e) => setRecurrenceDayOfWeek(parseInt(e.target.value))}
-                          className="bg-black/60 border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accent"
+                          className="bg-white border border-zinc-200 rounded-xl px-3 py-1.5 text-xs text-zinc-800 focus:outline-none focus:border-accent"
                         >
                           {['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((day, idx) => (
-                            <option key={idx} value={idx} className="bg-zinc-950 text-white">{day}</option>
+                            <option key={idx} value={idx} className="bg-white text-zinc-800">{day}</option>
                           ))}
                         </select>
                       </motion.div>
@@ -242,10 +242,10 @@ export const TacticalSetup = () => {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
-                        className="space-y-2 p-3 rounded-2xl bg-white/[0.02] border border-white/5 mt-2 text-left"
+                        className="space-y-2 p-3 rounded-2xl bg-zinc-50 border border-zinc-200 mt-2 text-left"
                       >
                         <div className="flex justify-between items-center">
-                          <span className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">Intervalo de Repetición:</span>
+                          <span className="text-[8px] font-black text-zinc-500 uppercase tracking-widest">Intervalo de Repetición:</span>
                           <span className="text-xs font-black text-cyan-400 font-mono">Cada {recurrenceInterval} días</span>
                         </div>
                         <input
@@ -264,7 +264,7 @@ export const TacticalSetup = () => {
                 <button 
                   onClick={handleAdd}
                   disabled={!label.trim()}
-                  className="w-full bg-white text-black py-5 rounded-full font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-3d hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20 disabled:grayscale"
+                  className="w-full bg-white text-black py-5 rounded-full font-black uppercase tracking-widest text-xs flex items-center justify-center gap-3 shadow-sm hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-20 disabled:grayscale"
                 >
                   <Plus className="w-4 h-4" strokeWidth={4} />
                   Deploy To Protocol
@@ -317,7 +317,7 @@ export const TacticalSetup = () => {
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           onClick={() => { haptic(); setActiveView('home'); }}
-          className="fixed bottom-10 left-6 right-6 z-50 liquid-glass-heavy border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-3d-accent flex items-center justify-center gap-3 transition-all"
+          className="fixed bottom-10 left-6 right-6 z-50 bg-white shadow-sm border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-sm flex items-center justify-center gap-3 transition-all"
         >
           <Check className="w-5 h-5" strokeWidth={4} />
           Lock Tactical Baseline

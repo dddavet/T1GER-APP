@@ -63,7 +63,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
         animate={{ opacity: 1, scale: 1 }}
         className="w-full text-center px-4 mb-8"
       >
-        <h2 className="text-xl font-black uppercase tracking-tight text-white mb-1">
+        <h2 className="text-xl font-black uppercase tracking-tight text-zinc-800 mb-1">
           {pathData.track.title}
         </h2>
         <div className="flex items-center justify-center gap-2">
@@ -92,7 +92,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
           {trackStyle.icon}
           <span className="text-xs font-black uppercase tracking-[0.2em]">{activeLevel.title}</span>
         </div>
-        <p className="text-xs text-zinc-400 max-w-[200px] mx-auto leading-relaxed">{activeLevel.subtitle}</p>
+        <p className="text-xs text-zinc-500 max-w-[200px] mx-auto leading-relaxed">{activeLevel.subtitle}</p>
       </motion.div>
 
       {/* All done celebration */}
@@ -105,7 +105,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
         >
           <p className="text-2xl mb-1">🎓</p>
           <h3 className="font-black text-lg" style={{ color: trackStyle.color }}>TRACK COMPLETED</h3>
-          <p className="text-xs text-zinc-400 mt-1">You survived all levels in {pathData.track.title}.</p>
+          <p className="text-xs text-zinc-500 mt-1">You survived all levels in {pathData.track.title}.</p>
         </motion.div>
       )}
 
@@ -214,22 +214,22 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                 ) : isActive ? (
                   pathData.track.trackId === 'ai' ? (
                     learningStyle === 'visual' ? (
-                      <Play className="w-8 h-8 text-white relative z-10 fill-white ml-0.5" />
+                      <Play className="w-8 h-8 text-zinc-800 relative z-10 fill-white ml-0.5" />
                     ) : learningStyle === 'interactive' ? (
-                      <Terminal className="w-8 h-8 text-white relative z-10" />
+                      <Terminal className="w-8 h-8 text-zinc-800 relative z-10" />
                     ) : (
-                      <BookOpen className="w-8 h-8 text-white relative z-10" />
+                      <BookOpen className="w-8 h-8 text-zinc-800 relative z-10" />
                     )
                   ) : (
-                    <Zap className="w-8 h-8 text-white relative z-10" fill="white" />
+                    <Zap className="w-8 h-8 text-zinc-800 relative z-10" fill="white" />
                   )
                 ) : (
-                  <Lock className="w-4 h-4 text-white/10" />
+                  <Lock className="w-4 h-4 text-zinc-800/10" />
                 )}
 
                 {/* Progress indicator for multi-mission days */}
                 {isActive && dailyProgress.total > 1 && (
-                  <div className="absolute -bottom-2 bg-[#050505] border border-white/10 rounded-full px-2 py-0.5 text-[8px] font-black font-mono text-white shadow-xl">
+                  <div className="absolute -bottom-2 bg-white border border-zinc-200 rounded-full px-2 py-0.5 text-[8px] font-black font-mono text-zinc-800 shadow-xl">
                     {dailyProgress.completed}/{dailyProgress.total}
                   </div>
                 )}
@@ -247,7 +247,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
 
               {/* Label */}
               <div className={`mt-3 text-center max-w-[100px] ${isDone ? 'opacity-50' : isActive ? 'opacity-100' : 'opacity-25'}`}>
-                <p className={`text-[11px] font-black uppercase tracking-tight leading-loose ${isActive ? 'text-white' : 'text-zinc-500'}`}>
+                <p className={`text-[11px] font-black uppercase tracking-tight leading-loose ${isActive ? 'text-zinc-800' : 'text-zinc-500'}`}>
                   DAY {day.dayNumber}
                 </p>
                 {isActive && (

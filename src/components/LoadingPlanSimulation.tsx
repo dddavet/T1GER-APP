@@ -50,17 +50,17 @@ export const LoadingPlanSimulation: React.FC<LoadingPlanSimulationProps> = ({ on
         animate={{ opacity: 1, scale: 1 }}
         className="text-center"
       >
-        <div className="text-[6rem] sm:text-[8rem] font-black italic tracking-tighter leading-none text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+        <div className="text-[6rem] sm:text-[8rem] font-black italic tracking-tighter leading-none text-zinc-800 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
           {progress}%
         </div>
-        <h2 className="text-2xl sm:text-3xl font-black italic uppercase tracking-tighter text-white mt-4 px-4">
+        <h2 className="text-2xl sm:text-3xl font-black italic uppercase tracking-tighter text-zinc-800 mt-4 px-4">
           Construyendo arsenal
         </h2>
       </motion.div>
 
       {/* Progress Bar */}
       <div className="w-full max-w-sm px-6">
-        <div className="h-3 w-full bg-white/10 rounded-full overflow-hidden">
+        <div className="h-3 w-full bg-zinc-50 rounded-full overflow-hidden">
           <motion.div 
             className="h-full bg-gradient-to-r from-[#CC5500] to-[#FF6B00]"
             initial={{ width: '0%' }}
@@ -76,7 +76,7 @@ export const LoadingPlanSimulation: React.FC<LoadingPlanSimulationProps> = ({ on
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.2 }}
-              className="text-sm font-medium text-zinc-400 absolute w-full left-0"
+              className="text-sm font-medium text-zinc-500 absolute w-full left-0"
             >
               {currentText}
             </motion.p>
@@ -97,11 +97,11 @@ export const LoadingPlanSimulation: React.FC<LoadingPlanSimulationProps> = ({ on
 };
 
 const ChecklistItem = ({ label, active }: { label: string, active: boolean }) => (
-  <div className={`flex items-center gap-4 p-3 rounded-2xl transition-all duration-500 ${active ? 'bg-white/10 border border-white/20' : 'bg-transparent border border-transparent'}`}>
-    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-500 ${active ? 'bg-[#FF6B00] text-black shadow-[0_0_10px_rgba(255,107,0,0.5)]' : 'bg-white/5 text-zinc-600'}`}>
+  <div className={`flex items-center gap-4 p-3 rounded-2xl transition-all duration-500 ${active ? 'bg-zinc-50 border border-zinc-200' : 'bg-transparent border border-transparent'}`}>
+    <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors duration-500 ${active ? 'bg-[#FF6B00] text-black shadow-[0_0_10px_rgba(255,107,0,0.5)]' : 'bg-zinc-50 text-zinc-600'}`}>
       <Check size={14} strokeWidth={active ? 3 : 2} />
     </div>
-    <span className={`text-sm font-bold transition-colors duration-500 ${active ? 'text-white' : 'text-zinc-600'}`}>
+    <span className={`text-sm font-bold transition-colors duration-500 ${active ? 'text-zinc-800' : 'text-zinc-600'}`}>
       {label}
     </span>
   </div>

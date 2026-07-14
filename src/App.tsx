@@ -26,7 +26,7 @@ import { getUserWeaknesses } from './services/brainService';
 import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 
 const LoadingSpinner = () => (
-  <div className="flex flex-col items-center justify-center h-full w-full bg-[#050505] gap-4">
+  <div className="flex flex-col items-center justify-center h-full w-full bg-white gap-4">
     <Loader2 className="w-8 h-8 text-[#FF6B00] animate-spin" />
     <p className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Loading Predator Profile...</p>
   </div>
@@ -144,32 +144,15 @@ const AppContent = () => {
   };
 
   const themeColors: Record<string, any> = {
-    relaxed: { main: '#60A5FA', glow: 'rgba(96, 165, 250, 0.4)', bg1: 'rgba(96, 165, 250, 0.1)', bg2: 'rgba(0, 229, 255, 0.05)' },
-    rest: { main: '#60A5FA', glow: 'rgba(96, 165, 250, 0.4)', bg1: 'rgba(96, 165, 250, 0.1)', bg2: 'rgba(0, 229, 255, 0.05)' },
-    focus: { main: '#CCFF00', glow: 'rgba(204, 255, 0, 0.4)', bg1: 'rgba(204, 255, 0, 0.1)', bg2: 'rgba(255, 255, 255, 0.02)' },
-    normal: { main: '#CCFF00', glow: 'rgba(204, 255, 0, 0.4)', bg1: 'rgba(204, 255, 0, 0.1)', bg2: 'rgba(255, 255, 255, 0.02)' },
-    beast: { main: '#FF6B00', glow: 'rgba(255, 107, 0, 0.4)', bg1: 'rgba(255, 107, 0, 0.1)', bg2: 'rgba(204, 255, 0, 0.05)' }
-  };
-
-  const themeClassMap: Record<string, string> = {
-    rest: 'theme-relaxed',
-    relaxed: 'theme-relaxed',
-    normal: 'theme-focus',
-    focus: 'theme-focus',
-    beast: 'theme-beast'
+    relaxed: { main: '#FF7300', glow: 'rgba(255, 115, 0, 0.4)', bg1: 'rgba(255, 115, 0, 0.1)', bg2: 'rgba(255, 115, 0, 0.05)' },
+    rest: { main: '#FF7300', glow: 'rgba(255, 115, 0, 0.4)', bg1: 'rgba(255, 115, 0, 0.1)', bg2: 'rgba(255, 115, 0, 0.05)' },
+    focus: { main: '#FF7300', glow: 'rgba(255, 115, 0, 0.4)', bg1: 'rgba(255, 115, 0, 0.1)', bg2: 'rgba(255, 115, 0, 0.02)' },
+    normal: { main: '#FF7300', glow: 'rgba(255, 115, 0, 0.4)', bg1: 'rgba(255, 115, 0, 0.1)', bg2: 'rgba(255, 115, 0, 0.02)' },
+    beast: { main: '#FF7300', glow: 'rgba(255, 115, 0, 0.2)', bg1: 'rgba(255, 115, 0, 0.03)', bg2: 'rgba(255, 115, 0, 0.01)' }
   };
 
   const dayType = dailyTacticalStatus.dayType || 'focus';
-  const theme = themeColors[dayType] || themeColors.focus;
-  const themeClass = themeClassMap[dayType] || 'theme-focus';
-
-  // Futuristic theme change flicker
-  const [isFlickering, setIsFlickering] = React.useState(false);
-  React.useEffect(() => {
-    setIsFlickering(true);
-    const timer = setTimeout(() => setIsFlickering(false), 200);
-    return () => clearTimeout(timer);
-  }, [dailyTacticalStatus.dayType]);
+  const currentTheme = themeColors[dayType] || themeColors.focus;
 
   if (loading) {
     return <LoadingSpinner />;
@@ -179,14 +162,12 @@ const AppContent = () => {
     return <AuthGate />;
   }
 
-  // Developer testing override: useful when comparing the Cal AI-style flow locally.
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
   if (!appUser) {
     return <LoadingSpinner />;
   }
 
-  // Intercept the app experience if onboarding isn't complete or if local testing asks for it.
   if (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser.onboardingComplete) {
     return <InvestmentOnboarding onComplete={() => setOnboardingBypassed(true)} />;
   }
@@ -195,23 +176,11 @@ const AppContent = () => {
 
   return (
     <div 
-      className={`flex flex-col h-full bg-[#050505] text-white font-sans overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${themeClass} ${isFlickering ? 'brightness-150 saturate-200' : ''}`}
-      style={{
-        '--accent-main': theme.main,
-        '--accent-glow': theme.glow,
-        '--bg-glow-1': theme.bg1,
-        '--bg-glow-2': theme.bg2,
-      } as any}
+      className={`min-h-screen bg-[#F7F7F7] text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType}`}
     >
-      {/* Background Atmosphere */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] bg-[var(--bg-glow-1)] opacity-50 transition-colors duration-1000" />
-        <div className="absolute top-[20%] -right-[10%] w-[35%] h-[35%] rounded-full blur-[100px] bg-[var(--bg-glow-2)] opacity-30 transition-colors duration-1000" />
-      </div>
-      {/* Scanline Effect Overlay during flicker */}
-      {isFlickering && (
-        <div className="absolute inset-0 z-[9999] pointer-events-none bg-scanline opacity-20" />
-      )}
+      {/* Gamified clean background */}
+      <div className="absolute inset-0 bg-[#F7F7F7] z-[-1]" />
+      
       {/* HUD - visible on non-fullscreen views */}
       {!isFullscreen && <HUD />}
       
@@ -277,7 +246,7 @@ const AppContent = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#020204]/95 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 backdrop-blur-md"
           >
             {/* Pulsing neons */}
             <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[120px] bg-[var(--accent-glow)] opacity-10 pointer-events-none animate-pulse-glow" />

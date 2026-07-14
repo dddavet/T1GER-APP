@@ -31,14 +31,14 @@ const MementoMoriWidget = ({ age }: { age?: number | null }) => {
   const weeksLeft = Math.max(0, Math.round((90 - currentAge) * 52));
 
   return (
-    <section className="mx-5 liquid-glass-heavy rounded-[2rem] p-5 border border-white/10 shadow-3d relative overflow-hidden">
+    <section className="mx-5 bg-white shadow-sm rounded-[2rem] p-5 border border-zinc-200 shadow-sm relative overflow-hidden">
       <div className="absolute -top-10 -right-8 w-28 h-28 rounded-full bg-red-500/10 blur-[48px] pointer-events-none" />
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
           <span className="text-[8px] font-black font-mono uppercase tracking-[0.25em] text-red-400">
             Memento Mori
           </span>
-          <h2 className="text-2xl font-black italic uppercase tracking-tighter text-white leading-none mt-1">
+          <h2 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 leading-none mt-1">
             Your life in months
           </h2>
         </div>
@@ -59,8 +59,8 @@ const MementoMoriWidget = ({ age }: { age?: number | null }) => {
                 isLived
                   ? 'bg-red-400/70 shadow-[0_0_6px_rgba(248,113,113,0.25)]'
                   : isCurrentYear
-                    ? 'bg-[#CCFF00]/60'
-                    : 'bg-white/[0.06]'
+                    ? 'bg-[#FF7300]/60'
+                    : 'bg-zinc-50'
               }`}
             />
           );
@@ -81,14 +81,14 @@ const PhaseSystem = ({ isPro }: { isPro?: boolean }) => (
       { label: 'Apply', sub: 'Photo proof', state: isPro ? 'Unlocked' : 'Premium' },
       { label: 'Repeat', sub: '7-day hunt', state: 'Active' },
     ].map((phase, index) => (
-      <div key={phase.label} className="rounded-2xl border border-white/5 bg-white/[0.025] p-3 min-h-[96px]">
+      <div key={phase.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 min-h-[96px]">
         <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-600">
           Phase 0{index + 1}
         </span>
-        <h3 className="text-sm font-black uppercase tracking-tight text-white mt-2">{phase.label}</h3>
+        <h3 className="text-sm font-black uppercase tracking-tight text-zinc-800 mt-2">{phase.label}</h3>
         <p className="text-[9px] font-bold text-zinc-500 mt-1 leading-tight">{phase.sub}</p>
         <span className={`mt-3 inline-flex rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
-          phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-[#CCFF00]/10 text-[#CCFF00] border border-[#CCFF00]/20'
+          phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-[#FF7300]/10 text-[#FF7300] border border-[#FF7300]/20'
         }`}>
           {phase.state}
         </span>
@@ -105,7 +105,7 @@ const ModeSelectorTop = ({ current, onSelect }: { current: string, onSelect: (id
   };
 
   return (
-    <div className="flex items-center justify-center gap-1.5 p-1.5 liquid-glass rounded-[2rem] mx-auto w-fit mb-6 shadow-3d">
+    <div className="flex items-center justify-center gap-1.5 p-1.5 bg-white shadow-sm rounded-[2rem] mx-auto w-fit mb-6 shadow-sm">
       {[
         { id: 'rest', icon: Coffee, color: 'text-blue-400', label: 'Relaxed' },
         { id: 'normal', icon: Target, color: 'text-accent', label: 'Focus' },
@@ -118,12 +118,12 @@ const ModeSelectorTop = ({ current, onSelect }: { current: string, onSelect: (id
             onClick={() => { haptic(); onSelect(m.id); }}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-[1.25rem] transition-all duration-300 active:scale-95 cursor-pointer ${
               isActive
-                ? 'liquid-glass-accent shadow-3d-accent scale-[0.98]'
-                : 'text-zinc-500 hover:text-zinc-300 hover:bg-white/5'
+                ? 'bg-white shadow-sm-accent shadow-sm scale-[0.98]'
+                : 'text-zinc-500 hover:text-zinc-500 hover:bg-zinc-50'
             }`}
           >
             <m.icon className={`w-4 h-4 ${isActive ? m.color : ''}`} />
-            <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? 'text-white' : ''}`}>
+            <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? 'text-zinc-800' : ''}`}>
               {m.label}
             </span>
           </button>
@@ -146,7 +146,7 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="liquid-glass-heavy rounded-[2.5rem] p-7 mx-5 my-4 relative overflow-hidden border-white/5 shadow-3d"
+      className="bg-white shadow-sm rounded-[2.5rem] p-7 mx-5 my-4 relative overflow-hidden border-zinc-200 shadow-sm"
     >
       {/* Scanline effect */}
       <div className="absolute inset-0 z-[1] pointer-events-none opacity-[0.03] bg-scanline" />
@@ -172,10 +172,10 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
       </div>
 
       <div className="relative z-10 space-y-3">
-        <h1 className="text-3xl font-black italic tracking-tighter leading-none text-white uppercase">
+        <h1 className="text-3xl font-black italic tracking-tighter leading-none text-zinc-800 uppercase">
           THE PRIDE <span className="text-accent drop-shadow-[0_0_20px_var(--accent-glow)]">STAYS HUNGRY.</span>
         </h1>
-        <p className="text-[11px] font-medium text-zinc-400 leading-relaxed italic border-l-2 border-accent/30 pl-4">
+        <p className="text-[11px] font-medium text-zinc-500 leading-relaxed italic border-l-2 border-accent/30 pl-4">
           "{dailyQuote}"
         </p>
       </div>
@@ -228,7 +228,7 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
         
         <button
           onClick={toggleMinimalist}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-white/5 border-white/10 text-[9px] font-black uppercase tracking-wider text-zinc-400 hover:text-white transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-zinc-50 border-zinc-200 text-[9px] font-black uppercase tracking-wider text-zinc-500 hover:text-zinc-800 transition-all cursor-pointer"
         >
           {isMinimalist ? (
             <>
@@ -268,26 +268,26 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
       <div className="px-5 grid grid-cols-2 gap-3 mb-6">
         <button
           onClick={() => setIsFocusOpen(true)}
-          className="liquid-glass border border-white/5 hover:border-white/12 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
+          className="bg-white shadow-sm border border-zinc-200 hover:border-zinc-200 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
         >
           <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
             <BrainIcon className="w-4 h-4 animate-pulse" />
           </div>
           <div className="text-left">
-            <h4 className="text-[10px] font-black uppercase text-white tracking-tight leading-none">Focus Pomodoro</h4>
+            <h4 className="text-[10px] font-black uppercase text-zinc-800 tracking-tight leading-none">Focus Pomodoro</h4>
             <span className="text-[8px] text-zinc-500 font-mono font-bold mt-1 block">Gamma 40Hz Audio</span>
           </div>
         </button>
 
         <button
           onClick={() => setIsDenOpen(true)}
-          className="liquid-glass border border-white/5 hover:border-white/12 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
+          className="bg-white shadow-sm border border-zinc-200 hover:border-zinc-200 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
         >
           <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
             <Home className="w-4 h-4" />
           </div>
           <div className="text-left">
-            <h4 className="text-[10px] font-black uppercase text-white tracking-tight leading-none">Predator's Den</h4>
+            <h4 className="text-[10px] font-black uppercase text-zinc-800 tracking-tight leading-none">Predator's Den</h4>
             <span className="text-[8px] text-zinc-500 font-mono font-bold mt-1 block">Office Decorator</span>
           </div>
         </button>
@@ -296,7 +296,7 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
       {/* THE AWAKENING ROUTINE MATUTINA INTRO PANEL */}
       {isCommitted && (
         <div className="px-5 mb-1">
-          <div className="border border-white/5 bg-zinc-950/40 rounded-3xl p-4">
+          <div className="border border-zinc-200 bg-white rounded-3xl p-4">
             <h3 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] mb-1">🌅 The Awakening (Fase Matutina)</h3>
             <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">Completa tus objetivos tácticos planeados de forma impecable.</p>
           </div>
@@ -314,7 +314,7 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
             <h3 className="text-[10px] font-black uppercase text-green-400 tracking-[0.2em] mb-1 flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5 animate-spin" /> The Harvest (Cosecha Nocturna)
             </h3>
-            <p className="text-[10px] text-zinc-400 font-semibold mb-4 leading-normal">
+            <p className="text-[10px] text-zinc-500 font-semibold mb-4 leading-normal">
               ¡Has asegurado todos tus objetivos de hoy de forma impecable! Tu racha Predator y recompensas de economía están listas.
             </p>
             <button
@@ -347,7 +347,7 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
                 className={`w-10 h-2 rounded-full transition-all duration-500 ${
                   i < dailyProgress.completed
                     ? 'bg-accent shadow-[0_0_12px_var(--accent-glow)]'
-                    : 'bg-white/8 border border-white/10'
+                    : 'bg-zinc-50 border border-zinc-200'
                 }`}
               />
             ))}
@@ -358,18 +358,18 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.25, type: 'spring', stiffness: 300 }}
-            className="inline-flex items-center justify-center gap-5 text-xs liquid-glass rounded-full py-3 px-7 shadow-3d"
+            className="inline-flex items-center justify-center gap-5 text-xs bg-white shadow-sm rounded-full py-3 px-7 shadow-sm"
           >
             <div className="flex items-center gap-2" title="Learning Streak">
               <BookOpen className={`w-4 h-4 ${learnStreak > 0 ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]' : 'text-zinc-700'}`} />
               <span className={`font-mono font-black text-sm ${learnStreak > 0 ? 'text-cyan-400' : 'text-zinc-700'}`}>{learnStreak}</span>
             </div>
-            <div className="w-px h-4 bg-white/10" />
+            <div className="w-px h-4 bg-zinc-50" />
             <div className="flex items-center gap-2" title="Tactical Streak">
               <Flame className={`w-4 h-4 ${tacticalStreak > 0 ? 'text-accent fill-accent drop-shadow-[0_0_6px_var(--accent-glow)]' : 'text-zinc-700'}`} />
               <span className={`font-mono font-black text-sm ${tacticalStreak > 0 ? 'text-accent' : 'text-zinc-700'}`}>{tacticalStreak}</span>
             </div>
-            <div className="w-px h-4 bg-white/10" />
+            <div className="w-px h-4 bg-zinc-50" />
             <div className="flex items-center gap-2">
               <Zap className="w-4 h-4 text-accent drop-shadow-[0_0_6px_var(--accent-glow)]" />
               <span className="font-mono font-black text-sm text-accent">{stats.xp}</span>

@@ -11,7 +11,7 @@ export const ApexEvolution = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}

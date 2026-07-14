@@ -253,7 +253,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-[#020204] text-white flex flex-col justify-between p-6 overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-[#020204] text-zinc-800 flex flex-col justify-between p-6 overflow-hidden">
       {/* Dynamic Grid Background Overlay */}
       <div className="absolute inset-0 bg-cyber-grid opacity-5 pointer-events-none" />
       <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[50%] rounded-full blur-[120px] bg-[var(--accent-glow)] opacity-10 pointer-events-none" />
@@ -265,13 +265,13 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
       <header className="flex items-center justify-between z-10 w-full">
         <button 
           onClick={() => { stopBinauralBeats(); onClose(); }}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+          className="w-10 h-10 rounded-full bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 transition-all cursor-pointer"
         >
           <ArrowLeft size={16} />
         </button>
         <div className="flex flex-col items-center">
           <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest leading-none">Operation Center</span>
-          <span className="text-xs font-black uppercase text-white tracking-wider mt-1.5 flex items-center gap-1.5">
+          <span className="text-xs font-black uppercase text-zinc-800 tracking-wider mt-1.5 flex items-center gap-1.5">
             <Brain className="w-3.5 h-3.5 text-accent animate-pulse" /> Zen Focus Screen
           </span>
         </div>
@@ -282,7 +282,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
       <div className="flex-1 flex flex-col items-center justify-center relative z-10 my-8">
         
         {/* Neon Aura Rings */}
-        <div className="relative w-64 h-64 flex items-center justify-center rounded-full bg-black/40 border border-white/5 backdrop-blur-md shadow-[inset_0_4px_30px_rgba(255,255,255,0.02)]">
+        <div className="relative w-64 h-64 flex items-center justify-center rounded-full bg-white border border-zinc-200 backdrop-blur-md shadow-[inset_0_4px_30px_rgba(255,255,255,0.02)]">
           
           {/* Progress ring using SVG */}
           <svg className="absolute w-full h-full rotate-[-90deg]">
@@ -309,7 +309,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
             <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-widest mb-1.5">
               {isBreak ? 'BRAIN REST RECOVERY' : 'DEEP WORK FOCUS'}
             </span>
-            <span className="text-5xl font-black font-mono tracking-tight text-white leading-none">
+            <span className="text-5xl font-black font-mono tracking-tight text-zinc-800 leading-none">
               {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
             </span>
             
@@ -337,7 +337,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
               className={`w-3 h-3 rounded-full border transition-all duration-300 ${
                 idx < completedBlocks
                   ? 'bg-accent border-accent shadow-[0_0_8px_var(--accent-glow)]'
-                  : 'bg-zinc-950 border-white/10'
+                  : 'bg-white border-zinc-200'
               }`}
             />
           ))}
@@ -351,19 +351,19 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
       <div className="space-y-6 z-10 w-full max-w-sm mx-auto">
         
         {/* Binaural wave controller box */}
-        <div className="liquid-glass border border-white/5 rounded-3xl p-5 shadow-3d space-y-4 relative overflow-hidden">
+        <div className="bg-white shadow-sm border border-zinc-200 rounded-3xl p-5 shadow-sm space-y-4 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-2 text-[8px] font-mono text-accent font-black uppercase tracking-wider">
             Labs v1.0
           </div>
           
           <div className="flex items-center gap-4">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
-              binauralActive ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-white/5 border-white/10 text-zinc-500'
+              binauralActive ? 'bg-accent/10 border-accent/20 text-accent' : 'bg-zinc-50 border-zinc-200 text-zinc-500'
             }`}>
               <Sparkles className="w-5 h-5 animate-pulse" />
             </div>
             <div>
-              <h3 className="text-xs font-black uppercase text-white tracking-tight">Ondas Binaurales Gamma (40Hz)</h3>
+              <h3 className="text-xs font-black uppercase text-zinc-800 tracking-tight">Ondas Binaurales Gamma (40Hz)</h3>
               <p className="text-[10px] text-zinc-500 font-medium mt-0.5 leading-normal">
                 Sincronización cognitiva demostrada científicamente para inducir el estado de hiperenfoque profundo (usa auriculares).
               </p>
@@ -381,7 +381,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
             ) : (
               <button
                 onClick={toggleBinaural}
-                className="px-4 py-2 bg-white/5 border border-white/10 text-white font-black text-[9px] uppercase tracking-wider rounded-xl hover:bg-white/10 transition-all cursor-pointer"
+                className="px-4 py-2 bg-zinc-50 border border-zinc-200 text-zinc-800 font-black text-[9px] uppercase tracking-wider rounded-xl hover:bg-zinc-50 transition-all cursor-pointer"
               >
                 Encender Ondas
               </button>
@@ -425,7 +425,7 @@ export const FocusPomodoro: React.FC<FocusPomodoroProps> = ({ onClose }) => {
           
           <button
             onClick={resetTimer}
-            className="w-16 py-5 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            className="w-16 py-5 rounded-2xl bg-zinc-50 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 transition-all cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
           </button>

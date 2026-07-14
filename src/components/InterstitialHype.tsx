@@ -18,17 +18,17 @@ export const InterstitialHype: React.FC<InterstitialHypeProps> = ({ timeCommitme
         transition={{ duration: 0.8, ease: "easeOut" }}
         className="space-y-8 relative z-10"
       >
-        <h1 className="text-4xl sm:text-5xl font-black italic tracking-tighter uppercase leading-[0.9] text-white">
+        <h1 className="text-4xl sm:text-5xl font-black italic tracking-tighter uppercase leading-[0.9] text-zinc-800">
           <span className="text-[#FF6B00]">{timeCommitment} minutos</span> al día es suficiente.
         </h1>
-        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white/90 leading-tight">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-800/90 leading-tight">
           El éxito no es suerte.<br />Es sistema.
         </h2>
         
         <div className="h-1 w-16 bg-[#FF6B00] mx-auto my-10 rounded-full shadow-[0_0_10px_#FF6B00]" />
 
-        <p className="text-sm font-medium text-zinc-400 leading-relaxed px-6">
-          <span className="text-white font-black uppercase tracking-wider block mb-2">El 90% de los usuarios de T1GER</span> 
+        <p className="text-sm font-medium text-zinc-500 leading-relaxed px-6">
+          <span className="text-zinc-800 font-black uppercase tracking-wider block mb-2">El 90% de los usuarios de T1GER</span> 
           dicen que su mentalidad cambia por completo en las primeras 2 semanas de misiones consistentes.
         </p>
       </motion.div>

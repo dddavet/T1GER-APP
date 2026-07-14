@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const glassButtonVariants = cva(
-  "tiger-glass-button relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full border-0 bg-transparent tracking-tight text-white transition-transform duration-300 ease-out disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020203]",
+  "tiger-glass-button relative isolate inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full border-0 bg-transparent tracking-tight text-zinc-800 transition-transform duration-300 ease-out disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-main)]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#020203]",
   {
     variants: {
       size: {
@@ -45,13 +45,13 @@ const GlassButton = React.forwardRef<HTMLButtonElement, GlassButtonProps>(
     const customStyle = {
       ...style,
       "--tiger-glass-color": glassColor,
-      "--tiger-glass-filter": `url(#tiger-liquid-glass-${filterId})`,
+      "--tiger-glass-filter": `url(#tiger-bg-white shadow-sm-${filterId})`,
     } as React.CSSProperties;
 
     return (
       <>
         <svg className="pointer-events-none absolute h-0 w-0 overflow-hidden" aria-hidden="true">
-          <filter id={`tiger-liquid-glass-${filterId}`} x="-20%" y="-20%" width="140%" height="140%">
+          <filter id={`tiger-bg-white shadow-sm-${filterId}`} x="-20%" y="-20%" width="140%" height="140%">
             <feTurbulence type="fractalNoise" baseFrequency="0.012 0.035" numOctaves="2" seed="11" result="noise" />
             <feGaussianBlur in="SourceGraphic" stdDeviation="0.35" result="blur" />
             <feDisplacementMap in="blur" in2="noise" scale="10" xChannelSelector="R" yChannelSelector="G" />

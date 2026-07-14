@@ -70,10 +70,10 @@ export const AuthGate: React.FC = () => {
     );
   };
 
-  const inputClassName = 'w-full rounded-2xl border border-white/10 bg-white/[0.06] px-4 py-3 text-sm font-semibold text-white outline-none transition placeholder:text-zinc-600 focus:border-[#CCFF00]/50 focus:bg-white/[0.09]';
+  const inputClassName = 'w-full rounded-2xl border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm font-semibold text-zinc-800 outline-none transition placeholder:text-zinc-600 focus:border-[#FF7300]/50 focus:bg-zinc-50';
 
   return (
-    <div className="w-full h-full bg-[#050505] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <div className="w-full h-full bg-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[50vh] bg-gradient-to-b from-[#FF6B00]/20 to-transparent blur-3xl opacity-50" />
 
@@ -84,7 +84,7 @@ export const AuthGate: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="text-[#CCFF00] font-mono text-xl tracking-widest"
+            className="text-[#FF7300] font-mono text-xl tracking-widest"
           >
             [ AUTHENTICATING PREDATOR_ID... ]
           </motion.div>
@@ -100,7 +100,7 @@ export const AuthGate: React.FC = () => {
               <motion.h1 
                 animate={{ scale: [1, 1.02, 1] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="text-6xl font-black italic tracking-tighter text-white"
+                className="text-6xl font-black italic tracking-tighter text-zinc-800"
               >
                 T1GER
               </motion.h1>
@@ -129,8 +129,8 @@ export const AuthGate: React.FC = () => {
                 Authenticate via Apple
               </GlassButton>
 
-              <form onSubmit={handleEmailAuth} className="space-y-3 rounded-[2rem] border border-white/10 bg-black/30 p-3 shadow-2xl shadow-black/40 backdrop-blur">
-                <div className="grid grid-cols-3 gap-1 rounded-full bg-white/[0.06] p-1">
+              <form onSubmit={handleEmailAuth} className="space-y-3 rounded-[2rem] border border-zinc-200 bg-zinc-50 p-3 shadow-2xl shadow-black/40 backdrop-blur">
+                <div className="grid grid-cols-3 gap-1 rounded-full bg-zinc-50 p-1">
                   {[
                     ['sign-in', 'Sign in'],
                     ['sign-up', 'Create'],
@@ -144,7 +144,7 @@ export const AuthGate: React.FC = () => {
                         setNotice('');
                       }}
                       className={`rounded-full px-3 py-2 text-[11px] font-black uppercase tracking-wider transition ${
-                        mode === key ? 'bg-[#CCFF00] text-black' : 'text-zinc-500 hover:text-white'
+                        mode === key ? 'bg-[#FF7300] text-black' : 'text-zinc-500 hover:text-zinc-800'
                       }`}
                     >
                       {label}
@@ -187,7 +187,7 @@ export const AuthGate: React.FC = () => {
               </form>
 
               {notice && (
-                <p className="px-2 text-center text-[11px] font-bold uppercase tracking-wider text-[#CCFF00]">
+                <p className="px-2 text-center text-[11px] font-bold uppercase tracking-wider text-[#FF7300]">
                   {notice}
                 </p>
               )}

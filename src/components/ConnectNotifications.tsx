@@ -42,7 +42,7 @@ export const ConnectNotifications: React.FC = () => {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2, type: 'spring' }}
-          className="absolute top-8 left-4 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 shadow-lg text-[10px] font-bold tracking-wider uppercase text-zinc-300"
+          className="absolute top-8 left-4 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200 shadow-lg text-[10px] font-bold tracking-wider uppercase text-zinc-500"
         >
           Daily Missions
         </motion.div>
@@ -51,7 +51,7 @@ export const ConnectNotifications: React.FC = () => {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.4, type: 'spring' }}
-          className="absolute bottom-12 left-10 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 shadow-lg text-[10px] font-bold tracking-wider uppercase text-zinc-300"
+          className="absolute bottom-12 left-10 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-200 shadow-lg text-[10px] font-bold tracking-wider uppercase text-zinc-500"
         >
           Streaks
         </motion.div>
@@ -69,16 +69,16 @@ export const ConnectNotifications: React.FC = () => {
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 1, type: 'spring' }}
-          className="absolute top-4 right-10 w-20 h-20 bg-[#050505] border-[3px] border-zinc-800 rounded-3xl flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-10"
+          className="absolute top-4 right-10 w-20 h-20 bg-white border-[3px] border-zinc-800 rounded-3xl flex items-center justify-center shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-10"
         >
-          <Smartphone className="text-white" size={36} strokeWidth={1.5} />
+          <Smartphone className="text-zinc-800" size={36} strokeWidth={1.5} />
         </motion.div>
 
         <motion.div 
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 1.5, type: 'spring' }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-[#050505] rounded-full flex items-center justify-center z-20"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full flex items-center justify-center z-20"
         >
           <CheckCircle2 className="text-[#FF6B00]" size={20} />
         </motion.div>
@@ -91,10 +91,10 @@ export const ConnectNotifications: React.FC = () => {
         transition={{ delay: 1.2 }}
         className="text-center space-y-4 px-2"
       >
-        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-white drop-shadow-md">
+        <h2 className="text-4xl font-black italic tracking-tighter uppercase leading-tight text-zinc-800 drop-shadow-md">
           Activar <br/>Notificaciones
         </h2>
-        <p className="text-sm font-medium text-zinc-400 leading-relaxed max-w-xs mx-auto">
+        <p className="text-sm font-medium text-zinc-500 leading-relaxed max-w-xs mx-auto">
           Recibe recordatorios diarios para tus misiones y protege tu racha de aprendizaje. T1GER solo te contactará cuando sea estrictamente necesario.
         </p>
       </motion.div>

@@ -161,7 +161,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
   };
 
   return (
-    <div className="w-full h-full bg-[#020204] text-white flex flex-col justify-between pt-[calc(1rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
+    <div className="w-full h-full bg-[#020204] text-zinc-800 flex flex-col justify-between pt-[calc(1rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 relative z-50 overflow-hidden">
       
       {/* COINS SHOWER LAYER */}
       <AnimatePresence>
@@ -201,7 +201,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               </span>
             </div>
 
-            <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none mb-1 text-white">
+            <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none mb-1 text-zinc-800">
               {lesson.conceptTitle}
             </h1>
             <span className="text-[10px] font-mono uppercase tracking-wider block mb-6" style={{ color: mentor.accentColor }}>
@@ -213,13 +213,13 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               initial={{ scale: 0.96, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-              className="bg-white/[0.02] border border-white/10 rounded-[2rem] p-6 shadow-2xl space-y-4"
+              className="bg-zinc-50 border border-zinc-200 rounded-[2rem] p-6 shadow-2xl space-y-4"
             >
               <div className="w-10 h-10 rounded-2xl flex items-center justify-center"
                    style={{ backgroundColor: `${mentor.accentColor}1a`, border: `1px solid ${mentor.accentColor}33`, color: mentor.accentColor }}>
                 <BookOpen size={20} />
               </div>
-              <p className="text-xs text-zinc-300 font-medium leading-relaxed font-sans">
+              <p className="text-xs text-zinc-500 font-medium leading-relaxed font-sans">
                 {lesson.conceptText}
               </p>
             </motion.div>
@@ -233,10 +233,10 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               size={64} 
               className="flex-shrink-0"
             />
-            <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:bottom-4 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2"
+            <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:bottom-4 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2"
                  style={{ boxShadow: `0 4px 20px ${mentor.glowColor}` }}>
               <span className="text-[8px] font-black uppercase tracking-widest block mb-0.5" style={{ color: mentor.accentColor }}>CONSEJO DE {mentor.name}</span>
-              <p className="text-[11px] font-semibold leading-relaxed text-zinc-300 font-sans">
+              <p className="text-[11px] font-semibold leading-relaxed text-zinc-500 font-sans">
                 "{lesson.mentorTip}"
               </p>
             </div>
@@ -271,7 +271,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               </span>
             </div>
 
-            <h2 className="text-lg font-black uppercase text-white tracking-tight leading-snug mb-6">
+            <h2 className="text-lg font-black uppercase text-zinc-800 tracking-tight leading-snug mb-6">
               {lesson.puzzleQuestion}
             </h2>
 
@@ -280,7 +280,7 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               {lesson.options.map((opt, i) => {
                 const isSelected = selectedOpt === i;
                 
-                let optionStyle = 'bg-white/[0.02] border-white/5 hover:border-white/10 hover:bg-white/[0.03] text-zinc-300';
+                let optionStyle = 'bg-zinc-50 border-zinc-200 hover:border-zinc-200 hover:bg-zinc-50 text-zinc-500';
                 let optionInlineStyle = {};
 
                 if (isSelected) {
@@ -396,24 +396,24 @@ export const OnboardingMicroLesson: React.FC<OnboardingMicroLessonProps> = ({ tr
               />
             </div>
 
-            <span className="text-[10px] font-black font-mono bg-white/[0.04] border px-3 py-1 rounded-full uppercase tracking-widest"
+            <span className="text-[10px] font-black font-mono bg-zinc-50 border px-3 py-1 rounded-full uppercase tracking-widest"
                   style={{ color: mentor.accentColor, borderColor: `${mentor.accentColor}33` }}>
               NIVEL DE INDUCCIÓN CONCLUIDO
             </span>
             <h1 className="text-3xl font-black italic uppercase tracking-tighter leading-none">
               ¡Caza Completada!
             </h1>
-            <p className="text-xs text-zinc-400 font-medium leading-relaxed max-w-xs font-sans">
+            <p className="text-xs text-zinc-500 font-medium leading-relaxed max-w-xs font-sans">
               Has demostrado un instinto formidable. Has asimilado tu primer concepto clave con {mentor.name} y estás listo para reclamar tus recompensas.
             </p>
 
             {/* Core Earned Rewards Box */}
-            <div className="grid grid-cols-2 gap-4 bg-white/[0.02] border border-white/10 rounded-[2rem] p-5 shadow-inner">
+            <div className="grid grid-cols-2 gap-4 bg-zinc-50 border border-zinc-200 rounded-[2rem] p-5 shadow-inner">
               <div className="text-center">
                 <span className="text-[7px] font-black font-mono text-zinc-500 uppercase tracking-widest block mb-1">XP GANADO</span>
                 <span className="text-2xl font-black font-mono block" style={{ color: mentor.accentColor }}>+50</span>
               </div>
-              <div className="text-center border-l border-white/5">
+              <div className="text-center border-l border-zinc-200">
                 <span className="text-[7px] font-black font-mono text-zinc-500 uppercase tracking-widest block mb-1">MONEDAS T1GER</span>
                 <span className="text-2xl font-black text-amber-400 font-mono block">+25</span>
               </div>

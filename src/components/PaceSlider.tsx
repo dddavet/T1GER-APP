@@ -17,7 +17,7 @@ export const PaceSlider: React.FC<PaceSliderProps> = ({ value, onChange }) => {
     <div className="w-full flex flex-col items-center py-8">
       <div className="text-center mb-10">
         <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest block mb-2">Training Intensity</span>
-        <span className="text-5xl font-black text-white italic tracking-tighter">
+        <span className="text-5xl font-black text-zinc-800 italic tracking-tighter">
           {paces[value].label}
         </span>
       </div>
@@ -30,7 +30,7 @@ export const PaceSlider: React.FC<PaceSliderProps> = ({ value, onChange }) => {
 
       <div className="relative w-full h-8 flex items-center px-4">
         {/* Track */}
-        <div className="absolute left-0 right-0 h-2 bg-white/10 rounded-full mx-6" />
+        <div className="absolute left-0 right-0 h-2 bg-zinc-50 rounded-full mx-6" />
         
         {/* Active Track */}
         <motion.div 
@@ -69,8 +69,8 @@ export const PaceSlider: React.FC<PaceSliderProps> = ({ value, onChange }) => {
         ))}
       </div>
 
-      <div className="mt-10 text-center bg-white/[0.03] rounded-full px-6 py-2.5 border border-white/5 shadow-inner">
-        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">
+      <div className="mt-10 text-center bg-zinc-50 rounded-full px-6 py-2.5 border border-zinc-200 shadow-inner">
+        <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest">
           {value === 0 ? 'Just getting started' : value === 1 ? 'Recommended for most' : 'For the absolutely obsessed'}
         </span>
       </div>

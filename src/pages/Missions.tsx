@@ -186,7 +186,7 @@ export const Missions = () => {
     <div className="space-y-8 max-w-[430px] mx-auto">
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {notifications.map((n, i) => (
-          <div key={i} className="bg-orange-500 text-white p-4 rounded-lg shadow-lg font-bold">
+          <div key={i} className="bg-orange-500 text-zinc-800 p-4 rounded-lg shadow-lg font-bold">
             {n}
           </div>
         ))}
@@ -198,16 +198,16 @@ export const Missions = () => {
         </h1>
         <div className="flex items-center gap-4">
           <VoiceCoach />
-          <div className="flex items-center gap-1 bg-zinc-900 px-3 py-1.5 rounded-full border border-zinc-800">
+          <div className="flex items-center gap-1 bg-white px-3 py-1.5 rounded-full border border-zinc-800">
             <Flame className={`w-5 h-5 ${appUser?.streak > 0 ? 'text-orange-500' : 'text-zinc-600'}`} />
-            <span className="font-bold text-white text-sm font-mono">{appUser?.streak || 0}</span>
+            <span className="font-bold text-zinc-800 text-sm font-mono">{appUser?.streak || 0}</span>
           </div>
           <div className="flex gap-2">
             {(['Easy', 'Medium', 'Hard'] as const).map(d => (
               <button
                 key={d}
                 onClick={() => setDifficulties(prev => prev.includes(d) ? prev.filter(p => p !== d) : [...prev, d])}
-                className={`px-2 py-1 rounded-lg text-xs font-bold uppercase ${difficulties.includes(d) ? 'bg-[#FF6B00] text-white' : 'bg-zinc-900 text-zinc-500'}`}
+                className={`px-2 py-1 rounded-lg text-xs font-bold uppercase ${difficulties.includes(d) ? 'bg-[#FF6B00] text-zinc-800' : 'bg-white text-zinc-500'}`}
               >
                 {d}
               </button>
@@ -218,7 +218,7 @@ export const Missions = () => {
             <select 
               value={generationDifficulty}
               onChange={e => setGenerationDifficulty(e.target.value as 'Easy' | 'Medium' | 'Hard')}
-              className="bg-zinc-900 text-white text-xs font-bold uppercase rounded-lg p-2 border border-zinc-800"
+              className="bg-white text-zinc-800 text-xs font-bold uppercase rounded-lg p-2 border border-zinc-800"
             >
               <option value="Easy">Easy</option>
               <option value="Medium">Medium</option>
@@ -228,7 +228,7 @@ export const Missions = () => {
           <button
             onClick={handleGenerateMissions}
             disabled={generating}
-            className="bg-[#050505] hover:bg-zinc-900 text-white px-4 py-2 rounded-xl font-bold border border-zinc-800 transition-colors disabled:opacity-50 flex items-center gap-2 font-sans uppercase text-sm"
+            className="bg-white hover:bg-white text-zinc-800 px-4 py-2 rounded-xl font-bold border border-zinc-800 transition-colors disabled:opacity-50 flex items-center gap-2 font-sans uppercase text-sm"
           >
             {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
             {generating ? 'Generating...' : 'New Missions'}
@@ -242,36 +242,36 @@ export const Missions = () => {
         placeholder="Search missions..."
         value={searchQuery}
         onChange={e => setSearchQuery(e.target.value)}
-        className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white"
+        className="w-full bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800"
       />
 
       {/* Custom Mission Type Form */}
-      <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div className="bg-white border border-zinc-800 rounded-3xl p-6 space-y-4">
         <h3 className="font-sans font-black uppercase text-lg">Define Custom Mission</h3>
         <input 
           type="text" 
           placeholder="Mission Name" 
           value={newMissionType.name}
           onChange={e => setNewMissionType({...newMissionType, name: e.target.value})}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white"
+          className="w-full bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800"
         />
         <textarea 
           placeholder="Description" 
           value={newMissionType.description}
           onChange={e => setNewMissionType({...newMissionType, description: e.target.value})}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white"
+          className="w-full bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800"
         />
         <input 
           type="text" 
           placeholder="Icon URL (optional)" 
           value={newMissionType.iconUrl}
           onChange={e => setNewMissionType({...newMissionType, iconUrl: e.target.value})}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white"
+          className="w-full bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800"
         />
         <button
           onClick={handleAddMissionType}
           disabled={addingType}
-          className="w-full bg-[#FF6B00] text-white p-3 rounded-xl font-bold hover:bg-orange-600 transition-colors disabled:opacity-50"
+          className="w-full bg-[#FF6B00] text-zinc-800 p-3 rounded-xl font-bold hover:bg-orange-600 transition-colors disabled:opacity-50"
         >
           {addingType ? 'Saving...' : 'Save Mission Type'}
         </button>
@@ -282,12 +282,12 @@ export const Missions = () => {
             placeholder="Keyword/Goal for AI generation" 
             value={missionKeyword}
             onChange={e => setMissionKeyword(e.target.value)}
-            className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white mb-2"
+            className="w-full bg-white border border-zinc-800 rounded-xl p-3 text-zinc-800 mb-2"
           />
           <button
             onClick={handleGenerateMissionType}
             disabled={generatingType || !missionKeyword}
-            className="w-full bg-zinc-800 text-white p-3 rounded-xl font-bold hover:bg-zinc-700 transition-colors disabled:opacity-50"
+            className="w-full bg-zinc-800 text-zinc-800 p-3 rounded-xl font-bold hover:bg-zinc-700 transition-colors disabled:opacity-50"
           >
             {generatingType ? 'Generating...' : 'Generate with AI'}
           </button>
@@ -295,7 +295,7 @@ export const Missions = () => {
       </div>
 
       {/* Mission Suggestions */}
-      <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div className="bg-white border border-zinc-800 rounded-3xl p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="font-sans font-black uppercase text-lg">Mission Suggestions</h3>
           <button
@@ -307,20 +307,20 @@ export const Missions = () => {
           </button>
         </div>
         {suggestedMissions.map((mission, index) => (
-          <div key={index} className="bg-zinc-900 p-4 rounded-xl space-y-2 border border-zinc-800">
+          <div key={index} className="bg-white p-4 rounded-xl space-y-2 border border-zinc-800">
             <input 
               value={mission.title}
               onChange={e => setSuggestedMissions(prev => prev.map((m, i) => i === index ? {...m, title: e.target.value} : m))}
-              className="w-full bg-transparent text-white font-bold"
+              className="w-full bg-transparent text-zinc-800 font-bold"
             />
             <textarea 
               value={mission.description}
               onChange={e => setSuggestedMissions(prev => prev.map((m, i) => i === index ? {...m, description: e.target.value} : m))}
-              className="w-full bg-transparent text-zinc-400 text-sm"
+              className="w-full bg-transparent text-zinc-500 text-sm"
             />
             <button
               onClick={() => handleSaveSuggestion(mission, index)}
-              className="w-full bg-zinc-800 text-white p-2 rounded-lg text-sm font-bold hover:bg-zinc-700"
+              className="w-full bg-zinc-800 text-zinc-800 p-2 rounded-lg text-sm font-bold hover:bg-zinc-700"
             >
               Save Mission
             </button>
@@ -333,14 +333,14 @@ export const Missions = () => {
           <Loader2 className="w-8 h-8 text-[#FF6B00] animate-spin" />
         </div>
       ) : activeMissions.length === 0 && completedMissions.length === 0 ? (
-        <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-12 text-center">
+        <div className="bg-white border border-zinc-800 rounded-3xl p-12 text-center">
           <Target className="w-12 h-12 text-zinc-700 mx-auto mb-4" />
           <h3 className="text-xl font-black mb-2 font-sans uppercase">No active missions</h3>
-          <p className="text-zinc-400 mb-6 font-mono text-sm">Generate your daily missions to start earning XP.</p>
+          <p className="text-zinc-500 mb-6 font-mono text-sm">Generate your daily missions to start earning XP.</p>
           <button
             onClick={handleGenerateMissions}
             disabled={generating}
-            className="bg-[#FF6B00] text-white px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors font-sans uppercase tracking-wider w-full"
+            className="bg-[#FF6B00] text-zinc-800 px-6 py-3 rounded-xl font-bold hover:bg-orange-600 transition-colors font-sans uppercase tracking-wider w-full"
           >
             Generate Daily Missions
           </button>
@@ -349,7 +349,7 @@ export const Missions = () => {
         <>
           {/* Active Missions */}
           <div className="space-y-4">
-            <h2 className="font-sans font-black uppercase text-lg text-zinc-400">Active Missions</h2>
+            <h2 className="font-sans font-black uppercase text-lg text-zinc-500">Active Missions</h2>
             {activeMissions.filter(m => difficulties.includes(m.difficulty) && (m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.description.toLowerCase().includes(searchQuery.toLowerCase()))).length === 0 ? (
               <p className="text-zinc-600 font-mono text-sm">No active missions for selected filters.</p>
             ) : (
@@ -364,14 +364,14 @@ export const Missions = () => {
                       exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.4, ease: "backOut" } }}
                       whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(255, 107, 0, 0.2)" }}
                       whileTap={{ scale: 0.98 }}
-                      className="bg-[#050505] border border-zinc-800 rounded-2xl p-6 transition-all cursor-pointer hover:border-[#FF6B00]/50"
+                      className="bg-white border border-zinc-800 rounded-2xl p-6 transition-all cursor-pointer hover:border-[#FF6B00]/50"
                       onClick={() => setSelectedMission(mission)}
                     >
                       <div className="flex items-start gap-4">
                         <Circle className="w-8 h-8 text-zinc-600 shrink-0 mt-1" />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 bg-zinc-900 px-2 py-0.5 rounded-md font-mono flex items-center gap-1">
+                            <span className="text-xs font-bold uppercase tracking-wider text-zinc-500 bg-white px-2 py-0.5 rounded-md font-mono flex items-center gap-1">
                               {missionTypes.find(t => t.name === mission.type)?.iconUrl && (
                                 <img src={missionTypes.find(t => t.name === mission.type).iconUrl} alt={mission.type} className="w-4 h-4" />
                               )}
@@ -388,13 +388,13 @@ export const Missions = () => {
                             )}
                           </div>
                           <h3 className="text-xl font-black mb-2 font-sans uppercase">{mission.title}</h3>
-                          <p className="text-zinc-400 font-mono text-sm line-clamp-2">{mission.description}</p>
+                          <p className="text-zinc-500 font-mono text-sm line-clamp-2">{mission.description}</p>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedMission(mission);
                             }}
-                            className="mt-4 w-full bg-orange-500 text-white p-2 rounded-lg font-bold text-sm hover:bg-orange-600 transition-colors"
+                            className="mt-4 w-full bg-orange-500 text-zinc-800 p-2 rounded-lg font-bold text-sm hover:bg-orange-600 transition-colors"
                           >
                             Verify Mission
                           </button>
@@ -409,7 +409,7 @@ export const Missions = () => {
 
           {/* Completed Missions History */}
           <div className="space-y-4 mt-8">
-            <h2 className="font-sans font-black uppercase text-lg text-zinc-400">Mission History</h2>
+            <h2 className="font-sans font-black uppercase text-lg text-zinc-500">Mission History</h2>
             {completedMissions.filter(m => difficulties.includes(m.difficulty) && (m.title.toLowerCase().includes(searchQuery.toLowerCase()) || m.description.toLowerCase().includes(searchQuery.toLowerCase()))).length === 0 ? (
               <p className="text-zinc-600 font-mono text-sm">No completed missions match your search.</p>
             ) : (
@@ -421,7 +421,7 @@ export const Missions = () => {
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="bg-[#050505] border border-green-500/30 rounded-2xl p-6 flex flex-col gap-3"
+                      className="bg-white border border-green-500/30 rounded-2xl p-6 flex flex-col gap-3"
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -443,7 +443,7 @@ export const Missions = () => {
                         <span className="text-green-500 font-bold font-mono">+{mission.xpReward} XP</span>
                       </div>
                       {mission.proof && (
-                        <div className="bg-zinc-900 p-3 rounded-xl text-sm text-zinc-400 font-mono">
+                        <div className="bg-white p-3 rounded-xl text-sm text-zinc-500 font-mono">
                           <p>{mission.proof.message}</p>
                           <p className="text-xs mt-1 text-zinc-600">Confidence: {mission.proof.confidenceScore}%</p>
                         </div>
@@ -459,11 +459,11 @@ export const Missions = () => {
 
       {/* Verification Modal */}
       {selectedMission && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 bg-zinc-50 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="relative w-full max-w-[430px] my-auto">
             <button 
               onClick={() => setSelectedMission(null)}
-              className="absolute -top-12 right-0 text-zinc-400 hover:text-white bg-zinc-900 p-2 rounded-full z-50"
+              className="absolute -top-12 right-0 text-zinc-500 hover:text-zinc-800 bg-white p-2 rounded-full z-50"
             >
               <X className="w-6 h-6" />
             </button>

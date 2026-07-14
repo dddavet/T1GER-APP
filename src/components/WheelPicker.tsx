@@ -35,7 +35,7 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ options, value, onChan
       <div className="absolute bottom-0 w-full h-[120px] bg-gradient-to-t from-[#050505] to-transparent z-10 pointer-events-none" />
       
       {/* Selection Highlight */}
-      <div className="absolute top-1/2 -translate-y-1/2 w-[80%] h-[60px] bg-white/[0.03] rounded-2xl z-0 border border-white/10" />
+      <div className="absolute top-1/2 -translate-y-1/2 w-[80%] h-[60px] bg-zinc-50 rounded-2xl z-0 border border-zinc-200" />
 
       {/* Scrollable Container */}
       <div 
@@ -49,7 +49,7 @@ export const WheelPicker: React.FC<WheelPickerProps> = ({ options, value, onChan
             <div 
               key={opt.value}
               className={`h-[60px] flex items-center justify-center snap-center cursor-pointer transition-all duration-200
-                ${isSelected ? 'text-white text-3xl font-black' : 'text-zinc-600 text-xl font-bold'}
+                ${isSelected ? 'text-zinc-800 text-3xl font-black' : 'text-zinc-600 text-xl font-bold'}
               `}
               onClick={() => {
                 const idx = options.findIndex(o => o.value === opt.value);

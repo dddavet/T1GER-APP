@@ -30,15 +30,15 @@ export const ShareableAchievementCard: React.FC<ShareableAchievementCardProps> =
 
   return (
     <div className="space-y-4">
-      <div ref={cardRef} className="bg-gradient-to-br from-[#FF6B00] to-orange-600 p-6 rounded-3xl text-white shadow-xl">
+      <div ref={cardRef} className="bg-gradient-to-br from-[#FF6B00] to-orange-600 p-6 rounded-3xl text-zinc-800 shadow-xl">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-xl font-black uppercase tracking-tight">T1GER Achievement</h3>
-          <Flame className="w-6 h-6 text-white" />
+          <Flame className="w-6 h-6 text-zinc-800" />
         </div>
         <h2 className="text-2xl font-black mb-2">{mission.title}</h2>
-        <p className="text-white/80 text-sm mb-4 font-mono">{mission.description}</p>
-        <div className="bg-black/20 p-3 rounded-xl border border-white/10">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">The "Why":</p>
+        <p className="text-zinc-800/80 text-sm mb-4 font-mono">{mission.description}</p>
+        <div className="bg-zinc-50 p-3 rounded-xl border border-zinc-200">
+          <p className="text-xs font-bold uppercase tracking-widest text-zinc-800/60 mb-1">The "Why":</p>
           <p className="text-sm font-medium italic">"{result.message}"</p>
         </div>
         <div className="mt-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest">
@@ -48,7 +48,7 @@ export const ShareableAchievementCard: React.FC<ShareableAchievementCardProps> =
       </div>
       <button 
         onClick={handleShare}
-        className="w-full bg-zinc-900 text-white py-3 rounded-xl font-black text-sm hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
+        className="w-full bg-white text-zinc-800 py-3 rounded-xl font-black text-sm hover:bg-zinc-800 transition-colors flex items-center justify-center gap-2"
       >
         <Share2 className="w-4 h-4" /> SHARE ACHIEVEMENT
       </button>

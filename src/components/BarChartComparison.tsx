@@ -3,13 +3,13 @@ import { motion } from 'motion/react';
 
 export const BarChartComparison: React.FC = () => {
   return (
-    <div className="w-full bg-[#0a0a0c] border border-white/5 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center my-6">
+    <div className="w-full bg-[#0a0a0c] border border-zinc-200 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center my-6">
       
       <div className="flex justify-center items-end gap-6 h-64 mt-4 px-4 relative z-10">
         {/* Left Bar (Without T1GER) */}
         <div className="flex flex-col items-center w-28">
           <motion.div 
-            className="w-full bg-white/5 border border-white/10 rounded-t-[20px] relative flex items-end justify-center pb-5"
+            className="w-full bg-zinc-50 border border-zinc-200 rounded-t-[20px] relative flex items-end justify-center pb-5"
             initial={{ height: 0 }}
             animate={{ height: '35%' }}
             transition={{ duration: 1, ease: "easeOut" }}
@@ -39,7 +39,7 @@ export const BarChartComparison: React.FC = () => {
             </motion.span>
           </motion.div>
           <div className="mt-5 text-center bg-[#0a0a0c] relative z-20">
-            <span className="text-[10px] font-black text-white uppercase tracking-widest leading-tight block">With<br/>T1GER</span>
+            <span className="text-[10px] font-black text-zinc-800 uppercase tracking-widest leading-tight block">With<br/>T1GER</span>
           </div>
         </div>
       </div>
@@ -50,7 +50,7 @@ export const BarChartComparison: React.FC = () => {
         transition={{ delay: 1.5 }}
         className="mt-8 text-center"
       >
-        <p className="text-sm font-semibold text-zinc-300 leading-relaxed px-2">
+        <p className="text-sm font-semibold text-zinc-500 leading-relaxed px-2">
           T1GER holds you accountable and bypasses theory, making you <span className="text-[#FF6B00] font-black uppercase">lethal</span> much faster.
         </p>
       </motion.div>

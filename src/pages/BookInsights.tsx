@@ -66,13 +66,13 @@ export const BookInsights = () => {
     }
   };
 
-  if (loading) return <div className="text-white">Loading...</div>;
-  if (!book || insights.length === 0) return <div className="text-white">No insights found.</div>;
+  if (loading) return <div className="text-zinc-800">Loading...</div>;
+  if (!book || insights.length === 0) return <div className="text-zinc-800">No insights found.</div>;
 
   const insight = insights[currentIndex];
 
   return (
-    <div className="p-6 space-y-6 text-white">
+    <div className="p-6 space-y-6 text-zinc-800">
       <h1 className="text-3xl font-black font-sans uppercase">{book.title}</h1>
       <div className="flex justify-between items-center">
         <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0}><ChevronLeft /></button>
@@ -80,34 +80,34 @@ export const BookInsights = () => {
         <button onClick={() => setCurrentIndex(Math.min(insights.length - 1, currentIndex + 1))} disabled={currentIndex === insights.length - 1}><ChevronRight /></button>
       </div>
 
-      <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div className="bg-white border border-zinc-800 rounded-3xl p-6 space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-black font-sans uppercase">{insight.title}</h2>
           <button onClick={() => toggleInsight(insight.id)}>
             {progress.completedInsights.includes(insight.id) ? <CheckCircle2 className="text-green-500" /> : <Circle className="text-zinc-600" />}
           </button>
         </div>
-        <p className="text-zinc-400 font-mono text-sm">{insight.summary}</p>
-        <p className="text-zinc-300 font-mono text-sm">{insight.explanation}</p>
+        <p className="text-zinc-500 font-mono text-sm">{insight.summary}</p>
+        <p className="text-zinc-500 font-mono text-sm">{insight.explanation}</p>
       </div>
 
-      <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div className="bg-white border border-zinc-800 rounded-3xl p-6 space-y-4">
         <h3 className="text-xl font-black font-sans uppercase">Exercises</h3>
         {insight.exercises.map((exercise: any, i: number) => (
-          <div key={i} className="bg-zinc-900 p-4 rounded-xl space-y-2 border border-zinc-800">
+          <div key={i} className="bg-white p-4 rounded-xl space-y-2 border border-zinc-800">
             <h4 className="font-bold">{exercise.name}</h4>
-            <p className="text-sm text-zinc-400">{exercise.objective}</p>
-            <p className="text-sm text-zinc-300">{exercise.instructions}</p>
+            <p className="text-sm text-zinc-500">{exercise.objective}</p>
+            <p className="text-sm text-zinc-500">{exercise.instructions}</p>
             <p className="text-xs text-zinc-500 font-mono">{exercise.frequency} - Metric: {exercise.successMetric}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-[#050505] border border-zinc-800 rounded-3xl p-6 space-y-4">
+      <div className="bg-white border border-zinc-800 rounded-3xl p-6 space-y-4">
         <h3 className="text-xl font-black font-sans uppercase">Critical Analysis</h3>
-        <p className="text-sm text-zinc-400">Works: {insight.criticalAnalysis.works}</p>
-        <p className="text-sm text-zinc-400">Fails: {insight.criticalAnalysis.fails}</p>
-        <p className="text-sm text-zinc-400">Target: {insight.criticalAnalysis.target}</p>
+        <p className="text-sm text-zinc-500">Works: {insight.criticalAnalysis.works}</p>
+        <p className="text-sm text-zinc-500">Fails: {insight.criticalAnalysis.fails}</p>
+        <p className="text-sm text-zinc-500">Target: {insight.criticalAnalysis.target}</p>
       </div>
     </div>
   );

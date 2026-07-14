@@ -40,7 +40,7 @@ export const CountdownTimer: React.FC<CountdownTimerProps> = ({ deadline, onExpi
   if (timeLeft <= 0) return <span className="text-red-500 font-mono text-xs">EXPIRED</span>;
 
   return (
-    <div className="flex items-center gap-1 text-zinc-400 font-mono text-xs">
+    <div className="flex items-center gap-1 text-zinc-500 font-mono text-xs">
       <Clock className="w-3 h-3" />
       <span>{hours.toString().padStart(2, '0')}:{minutes.toString().padStart(2, '0')}:{seconds.toString().padStart(2, '0')}</span>
     </div>

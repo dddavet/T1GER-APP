@@ -11,7 +11,7 @@ export const StreakShatter = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <motion.div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#050505]"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white"
       initial={{ x: 0, y: 0 }}
       animate={{ x: [-5, 5, -5, 5, 0], y: [-5, 5, -5, 5, 0] }}
       transition={{ duration: 0.5, repeat: 2 }}
@@ -26,7 +26,7 @@ export const StreakShatter = ({ onComplete }: { onComplete: () => void }) => {
 
       {/* Text */}
       <motion.h1
-        className="text-4xl font-mono text-white z-10"
+        className="text-4xl font-mono text-zinc-800 z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
@@ -41,7 +41,7 @@ export const StreakShatter = ({ onComplete }: { onComplete: () => void }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             onClick={onComplete}
-            className="mt-12 px-8 py-4 bg-zinc-800 text-white font-bold rounded-xl hover:bg-zinc-700 z-10"
+            className="mt-12 px-8 py-4 bg-zinc-800 text-zinc-800 font-bold rounded-xl hover:bg-zinc-700 z-10"
           >
             CONTINUE
           </motion.button>

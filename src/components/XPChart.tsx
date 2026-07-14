@@ -7,8 +7,8 @@ interface XPChartProps {
 
 export const XPChart: React.FC<XPChartProps> = ({ data }) => {
   return (
-    <div className="h-64 w-full glass rounded-2xl p-4 border border-white/5">
-      <h3 className="text-sm font-bold text-zinc-400 mb-4 uppercase tracking-wider">XP Growth</h3>
+    <div className="h-64 w-full glass rounded-2xl p-4 border border-zinc-200">
+      <h3 className="text-sm font-bold text-zinc-500 mb-4 uppercase tracking-wider">XP Growth</h3>
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" stroke="#333" />
@@ -16,9 +16,9 @@ export const XPChart: React.FC<XPChartProps> = ({ data }) => {
           <YAxis stroke="#666" fontSize={12} />
           <Tooltip 
             contentStyle={{ backgroundColor: '#050505', border: '1px solid #333' }}
-            itemStyle={{ color: '#CCFF00' }}
+            itemStyle={{ color: '#FF7300' }}
           />
-          <Line type="monotone" dataKey="xp" stroke="#CCFF00" strokeWidth={2} dot={{ r: 4 }} />
+          <Line type="monotone" dataKey="xp" stroke="#FF7300" strokeWidth={2} dot={{ r: 4 }} />
         </LineChart>
       </ResponsiveContainer>
     </div>

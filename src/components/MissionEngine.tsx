@@ -33,27 +33,27 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       return {
         text: "The individual investor should act consistently as an investor and not as a speculator.",
         author: "Benjamin Graham",
-        context: "El padre del Value Investing nos recuerda la diferencia entre apostar y construir valor sistemático."
+        context: "The father of Value Investing reminds us of the difference between gambling and systematic wealth building."
       };
     }
     if (comp === 'offer' || comp === 'sales' || comp === 'marketing') {
       return {
         text: "Make them an offer so good they feel stupid saying no.",
         author: "Alex Hormozi",
-        context: "Enfócate en maximizar el valor percibido del cliente, no en rebajar tus precios."
+        context: "Focus on maximizing the customer's perceived value, not discounting your prices."
       };
     }
     if (comp === 'ai') {
       return {
         text: "AI will not replace you. A person using AI will replace you.",
         author: "AI Proverb",
-        context: "La habilidad clave es dominar las herramientas y aprender a colaborar con los modelos inteligentes."
+        context: "The key skill is mastering the tools and learning to collaborate with intelligent models."
       };
     }
     return {
-      text: "We are what we repeatedly do. Excellence is not an act, but a habit.",
-      author: "Aristóteles",
-      context: "La disciplina táctica diaria y la consistencia en el mundo real vencen al talento y a la motivación pasajera."
+      text: "We are what we repeatedly do. Excellence, then, is not an act, but a habit.",
+      author: "Aristotle",
+      context: "Daily tactical discipline and real-world consistency beat talent and temporary motivation."
     };
   }, [mission.quote, mission.curatedData?.quote, mission.competency]);
 
@@ -61,15 +61,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
     if (mission.reading?.paragraphs) return mission.reading;
     if (mission.curatedData?.reading?.paragraphs) return mission.curatedData.reading;
     
-    const concept = mission.concept_flashcard || mission.concept || "Aprende el concepto principal de esta lección.";
-    const title = mission.title || "Concepto Clave";
-    const takeaway = mission.keyTakeaway || "Completa la acción de hoy para consolidar el hábito.";
+    const concept = mission.concept_flashcard || mission.concept || "Learn the main concept of this lesson.";
+    const title = mission.title || "Key Concept";
+    const takeaway = mission.keyTakeaway || "Complete today's action to consolidate the habit.";
     
-    const paragraphs = concept.split('. ').filter(Boolean).map(p => p.trim() + (p.endsWith('.') ? '' : '.'));
+    const paragraphs = concept.split('. ').filter(Boolean).map((p: string) => p.trim() + (p.endsWith('.') ? '' : '.'));
     
     return {
       title,
-      subtitle: `Entrenamiento de ${COMPETENCY_LABELS[mission.competency as keyof typeof COMPETENCY_LABELS] || mission.competency || 'Habilidad'}`,
+      subtitle: `${COMPETENCY_LABELS[mission.competency as keyof typeof COMPETENCY_LABELS] || mission.competency || 'Skill'} Training`,
       paragraphs: paragraphs.length > 0 ? paragraphs : [concept],
       takeaway
     };
@@ -82,7 +82,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
     const taskBrief = mission.taskBrief || mission.mission_brief;
     if (taskBrief) {
       return {
-        title: "Acción en Campo",
+        title: "Field Action",
         instruction: taskBrief,
         type: "photo",
         successReward: 50
@@ -90,14 +90,33 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
     }
     
     return {
-      title: "Consistencia Diaria",
-      instruction: "Antes de abrir cualquier red social hoy, realiza 10 lagartijas (pushups). Describe cómo te sentiste o sube una foto.",
+      title: "Daily Consistency",
+      instruction: "Before opening any social media today, perform 10 pushups. Describe how you felt or upload a photo as proof.",
       type: "tap",
       successReward: 50
     };
   }, [mission.action, mission.curatedData?.action, mission.taskBrief, mission.mission_brief]);
 
   const lessonYoutube = useMemo(() => {
+    // 1. Try to find a video in the new sources array
+    if (mission.sources && mission.sources.length > 0) {
+      const videoSource = mission.sources.find((s: any) => s.type === 'video');
+      if (videoSource) {
+        // Extract youtube ID from embed URL
+        const match = videoSource.url?.match(/embed\/([^?]+)/);
+        const youtubeId = match ? match[1] : null;
+        return {
+          youtubeId,
+          title: videoSource.title,
+          channelName: videoSource.author,
+          duration: "10-20 min",
+          takeaway: mission.keyTakeaway || "Apply this knowledge to your portfolio.",
+          notes: []
+        };
+      }
+    }
+    
+    // 2. Fallbacks
     if (mission.youtube?.youtubeId) return mission.youtube;
     if (mission.curatedData?.youtube?.youtubeId) return mission.curatedData.youtube;
     
@@ -108,39 +127,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
         title: "How to Invest in the Stock Market",
         channelName: "Ali Abdaal",
         duration: "15 min",
-        takeaway: "Entiende el interés compuesto y el index investing pasivo a largo plazo.",
+        takeaway: "Understand compound interest and passive long-term index investing.",
         notes: [
-          "Invertir en fondos indexados es superior a largo plazo.",
-          "El interés compuesto es la fuerza más poderosa del universo financiero.",
-          "Automatiza tus depósitos mensuales."
-        ]
-      };
-    }
-    if (comp === 'offer' || comp === 'sales' || comp === 'marketing') {
-      return {
-        youtubeId: "-m9k2WffQsk",
-        title: "How to Build a $100M Offer",
-        channelName: "Alex Hormozi",
-        duration: "20 min",
-        takeaway: "Aprende a estructurar garantías irrazonables y stackear bonos.",
-        notes: [
-          "Una oferta empaqueta la solución y el riesgo.",
-          "La garantía invierte el riesgo y rompe barreras.",
-          "Stackea bonos específicos para cada objeción."
-        ]
-      };
-    }
-    if (comp === 'ai') {
-      return {
-        youtubeId: "jgwUkEyF4_E",
-        title: "Intro to Large Language Models",
-        channelName: "Andrej Karpathy",
-        duration: "1 hour",
-        takeaway: "Los LLMs son redes de pesos predictivos.",
-        notes: [
-          "Los modelos predicen el siguiente token de texto.",
-          "El entrenamiento tiene dos fases clave: pre-entrenamiento y alineación.",
-          "Programar prompts es la interfaz principal."
+          "Investing in index funds is superior long-term.",
+          "Compound interest is the most powerful force in finance.",
+          "Automate your monthly deposits."
         ]
       };
     }
@@ -149,14 +140,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       title: "How to Build Unshakeable Discipline",
       channelName: "Andrew Huberman",
       duration: "10 min",
-      takeaway: "Aprende el circuito neurobiológico de la dopamina.",
+      takeaway: "Learn the neurobiological circuit of dopamine.",
       notes: [
-        "La dopamina es la molécula del deseo y anticipación.",
-        "Completar tareas difíciles temprano equilibra la dopamina.",
-        "La resistencia es fricción límbica."
+        "Dopamine is the molecule of desire and anticipation.",
+        "Completing hard tasks early balances dopamine.",
+        "Resistance is limbic friction."
       ]
     };
-  }, [mission.youtube, mission.curatedData?.youtube, mission.competency]);
+  }, [mission.youtube, mission.curatedData?.youtube, mission.competency, mission.sources, mission.keyTakeaway]);
 
   const character = useMemo(() => getCharacterForTrack(mission.competency || 'general'), [mission.competency]);
 
@@ -337,7 +328,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   }, [mission, isCuratedQuiz, currentCuratedQuiz]);
 
   return (
-    <div className="w-full min-h-screen bg-[#020204] text-white pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 flex flex-col justify-between overflow-hidden relative">
+    <div className="w-full min-h-screen bg-[#020204] text-zinc-800 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 flex flex-col justify-between overflow-hidden relative">
       {/* Atmospheres */}
       <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full blur-[100px] bg-[var(--bg-glow-1)] opacity-20 pointer-events-none" />
       <div className="absolute top-[30%] -right-[10%] w-[30%] h-[30%] rounded-full blur-[90px] bg-[var(--bg-glow-2)] opacity-15 pointer-events-none" />
@@ -347,13 +338,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
         <div className="flex items-center justify-between mb-4">
           <button 
             onClick={onComplete}
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all duration-300"
+            className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 hover:border-zinc-200 transition-all duration-300"
           >
             <X size={18} />
           </button>
           
           {/* Progress bar */}
-          <div className="h-2 flex-1 mx-4 bg-zinc-900 border border-white/5 rounded-full overflow-hidden relative">
+          <div className="h-2 flex-1 mx-4 bg-white border border-zinc-200 rounded-full overflow-hidden relative">
             <motion.div
               className="h-full bg-[var(--accent-main)] rounded-full shadow-[0_0_12px_var(--accent-glow)]"
               initial={{ width: 0 }}
@@ -402,7 +393,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 </div>
               </div>
 
-              <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2 text-white">
+              <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2 text-zinc-800">
                 MISSION COMPLETE
               </h1>
               <p className="text-2xl font-black font-mono text-[var(--accent-main)] drop-shadow-[0_0_10px_var(--accent-glow)] mb-8">
@@ -410,11 +401,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </p>
 
               {/* Competency growth indicator */}
-              <div className="w-full bg-white/[0.03] border border-white/10 rounded-3xl p-5 mb-8">
+              <div className="w-full bg-white border border-zinc-200 rounded-3xl p-5 mb-8">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-[var(--accent-main)]" />
-                    <span className="text-xs font-black uppercase text-zinc-400">
+                    <span className="text-xs font-black uppercase text-zinc-500">
                       {COMPETENCY_LABELS[compKey] || mission.competency}
                     </span>
                   </div>
@@ -422,7 +413,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     {(Math.round(competencies[compKey] || 0) - scoreBefore) > 0 ? `+${(Math.round(competencies[compKey] || 0) - scoreBefore)}` : (Math.round(competencies[compKey] || 0) - scoreBefore)} pts
                   </span>
                 </div>
-                <div className="h-2 bg-zinc-900 border border-white/5 rounded-full overflow-hidden">
+                <div className="h-2 bg-white border border-zinc-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-[var(--accent-main)] rounded-full transition-all duration-1000 shadow-[0_0_8px_var(--accent-glow)]"
                     style={{ width: `${Math.round(competencies[compKey] || 0)}%` }}
@@ -436,7 +427,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={onComplete}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2"
               >
                 Continue <ArrowRight size={18} className="stroke-[3]" />
               </button>
@@ -460,7 +451,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   emotion="DISAPPOINTED" 
                   size={160} 
                 />
-                <div className="absolute -bottom-1 -right-1 bg-red-500 text-white p-2 rounded-full shadow-lg">
+                <div className="absolute -bottom-1 -right-1 bg-red-500 text-zinc-800 p-2 rounded-full shadow-lg">
                   <XCircle size={24} className="stroke-[3]" />
                 </div>
               </div>
@@ -468,13 +459,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-2 text-red-500 drop-shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                 MISSED THIS ONE
               </h1>
-              <p className="text-sm font-medium text-zinc-400 max-w-xs mb-8 leading-relaxed">
+              <p className="text-sm font-medium text-zinc-500 max-w-xs mb-8 leading-relaxed">
                 Every mistake is a lesson, Predator. Review the explanation, sharpen your claws, and try again!
               </p>
               
               <button 
                 onClick={onComplete} 
-                className="w-full py-5 rounded-2xl btn-gamified-3d border-red-800 bg-red-500/10 hover:bg-red-500/20 text-red-400 shadow-[0_4px_0_0_#991b1b] border-red-500/20 flex items-center justify-center gap-2"
+                className="w-full py-5 rounded-2xl btn-gamified border-red-800 bg-red-500/10 hover:bg-red-500/20 text-red-400 shadow-[0_4px_0_0_#991b1b] border-red-500/20 flex items-center justify-center gap-2"
                 style={{ shadow: '0 4px 0 0 #991b1b' } as any}
               >
                 Continue →
@@ -494,33 +485,40 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto"
             >
               {/* Header */}
-              <div className="flex items-center gap-3 bg-zinc-950/40 p-3 rounded-2xl border border-white/5 mb-1">
+              <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-zinc-200 mb-1">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-black font-mono text-sm">
                   Y
                 </div>
                 <div>
-                  <h3 className="text-xs font-black uppercase text-white leading-none">
-                    {mission.curatedData?.youtube.channelName}
+                  <h3 className="text-xs font-black uppercase text-zinc-800 leading-none">
+                    {lessonYoutube.channelName}
                   </h3>
                   <span className="text-[10px] text-zinc-500 font-mono block mt-1">
-                    Duración: {mission.curatedData?.youtube.duration} • Stanford Rigor
+                    Duration: {lessonYoutube.duration} • Stanford Rigor
                   </span>
                 </div>
               </div>
 
               {/* YouTube Responsive Wrapper */}
-              <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
-                <iframe
-                  src={`https://www.youtube.com/embed/${mission.curatedData?.youtube.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
-                  title={mission.curatedData?.youtube.title}
-                  className="absolute inset-0 w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                />
+              <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl bg-white">
+                {lessonYoutube.youtubeId ? (
+                  <iframe
+                    src={`https://www.youtube.com/embed/${lessonYoutube.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
+                    title={lessonYoutube.title}
+                    className="absolute inset-0 w-full h-full border-0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div className="w-full h-full bg-white border border-zinc-200 rounded-3xl flex items-center justify-center flex-col p-4 text-center">
+                    <PlaySquare className="w-10 h-10 text-purple-400 mb-2 opacity-50" />
+                    <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase">Video material not available</span>
+                  </div>
+                )}
               </div>
 
-              <h2 className="text-lg font-black uppercase italic tracking-tighter text-white mt-2">
-                {mission.curatedData?.youtube.title}
+              <h2 className="text-lg font-black uppercase italic tracking-tighter text-zinc-800 mt-2">
+                {lessonYoutube.title}
               </h2>
 
               {/* Takeaway */}
@@ -528,10 +526,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-                    Takeaway de Élite
+                    Elite Takeaway
                   </span>
-                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
-                    {mission.curatedData?.youtube.takeaway}
+                  <p className="text-xs text-zinc-600 font-semibold leading-relaxed">
+                    {lessonYoutube.takeaway}
                   </p>
                 </div>
               </div>
@@ -539,23 +537,23 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Accordion Notes */}
               <div>
                 <span className="text-[9px] font-black uppercase tracking-wider text-zinc-500 block mb-2 px-1">
-                  Apuntes del Instructor (Tap para expandir)
+                  Instructor Notes (Tap to expand)
                 </span>
                 <div className="space-y-2">
-                  {(mission.curatedData?.youtube.notes || []).map((note: string, idx: number) => {
+                  {(lessonYoutube.notes || []).map((note: string, idx: number) => {
                     const isExpanded = expandedNote === idx;
                     return (
                       <div
                         key={idx}
-                        className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300"
+                        className="bg-white border border-zinc-200 rounded-2xl overflow-hidden transition-all duration-300"
                       >
                         <button
                           onClick={() => setExpandedNote(isExpanded ? null : idx)}
-                          className="w-full p-4 flex items-center justify-between text-left gap-4 font-bold text-xs uppercase tracking-tight text-zinc-300 hover:text-white"
+                          className="w-full p-4 flex items-center justify-between text-left gap-4 font-bold text-xs uppercase tracking-tight text-zinc-600 hover:text-zinc-800"
                         >
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-purple-500 text-[10px]">0{idx + 1}.</span>
-                            <span>Concepto clave</span>
+                            <span>Key Concept</span>
                           </div>
                           {isExpanded ? <ChevronUp className="w-4 h-4 text-zinc-500" /> : <ChevronDown className="w-4 h-4 text-zinc-500" />}
                         </button>
@@ -565,7 +563,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                               initial={{ height: 0, opacity: 0 }}
                               animate={{ height: 'auto', opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
-                              className="px-4 pb-4 text-xs font-semibold leading-relaxed text-zinc-400 border-t border-white/5 pt-2"
+                              className="px-4 pb-4 text-xs font-semibold leading-relaxed text-zinc-500 border-t border-zinc-200 pt-2"
                             >
                               {note}
                             </motion.div>
@@ -579,7 +577,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 <Brain className="w-4 h-4 stroke-[3]" /> Got It, Take the Quiz
               </button>
@@ -605,11 +603,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   size={56}
                   className="flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
                     LECTURA CON EL INSTRUCTOR ({character.name})
                   </p>
-                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                  <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
                     Predator, he condensado este conocimiento a nivel de posgrado. Léelo atentamente.
                   </p>
                 </div>
@@ -619,18 +617,18 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <span className="text-[9px] font-mono text-purple-400 uppercase tracking-widest font-black block mb-1">
                   {lessonReading.subtitle}
                 </span>
-                <h1 className="text-2xl font-black uppercase italic tracking-tighter text-white">
+                <h1 className="text-2xl font-black uppercase italic tracking-tighter text-zinc-800">
                   {lessonReading.title}
                 </h1>
               </div>
 
               {mission.sources?.length > 0 && (
-                <div className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-left">
+                <div className="flex items-start gap-3 rounded-2xl border border-zinc-200 bg-white p-4 text-left">
                   <FileText className="mt-0.5 h-4 w-4 shrink-0 text-[var(--accent-main)]" />
                   <div className="min-w-0">
                     <span className="mb-1 block text-[10px] font-bold uppercase text-zinc-500">Fuente de la lección</span>
                     {mission.sources.map((source: { title: string; author: string; type: string }) => (
-                      <p key={`${source.title}-${source.author}`} className="text-xs leading-5 text-zinc-300">
+                      <p key={`${source.title}-${source.author}`} className="text-xs leading-5 text-zinc-600">
                         <strong>{source.title}</strong> · {source.author} · {source.type}
                       </p>
                     ))}
@@ -643,9 +641,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 {(lessonReading.paragraphs || []).map((paragraph: string, idx: number) => (
                   <div
                     key={idx}
-                    className="liquid-glass rounded-2xl p-5 border border-white/5 hover:border-white/10 transition-colors"
+                    className="bg-white shadow-sm rounded-2xl p-5 border border-zinc-200 hover:border-zinc-200 transition-colors"
                   >
-                    <p className="text-xs font-semibold text-zinc-300 leading-relaxed">
+                    <p className="text-xs font-semibold text-zinc-600 leading-relaxed">
                       {paragraph}
                     </p>
                   </div>
@@ -657,9 +655,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <Lightbulb className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-                    Conclusión Táctica
+                    Tactical Takeaway
                   </span>
-                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                  <p className="text-xs text-zinc-600 font-semibold leading-relaxed">
                     {lessonReading.takeaway}
                   </p>
                 </div>
@@ -667,9 +665,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                <Cpu className="w-4 h-4 stroke-[3]" /> Ir a la Acción Real
+                <Cpu className="w-4 h-4 stroke-[3]" /> Go to Real Action
               </button>
             </motion.div>
           )}
@@ -693,10 +691,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <span className="inline-flex items-center gap-2 rounded-full border border-yellow-500/20 bg-yellow-500/10 px-3 py-1 text-[8px] font-black uppercase tracking-[0.2em] text-yellow-400">
                   <Crown className="w-3 h-3" /> Premium Apply
                 </span>
-                <h1 className="text-3xl font-black italic uppercase tracking-tighter text-white">
+                <h1 className="text-3xl font-black italic uppercase tracking-tighter text-zinc-800">
                   Learn is free. Execution is premium.
                 </h1>
-                <p className="text-sm font-semibold text-zinc-400 leading-relaxed">
+                <p className="text-sm font-semibold text-zinc-500 leading-relaxed">
                   You completed the lesson layer. Upgrade to unlock field missions, camera proof, advanced roadmaps, and XP from real-world execution.
                 </p>
               </div>
@@ -707,8 +705,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   ['Proof', 'Photo evidence'],
                   ['Repeat', 'Hunting streaks'],
                 ].map(([title, body]) => (
-                  <div key={title} className="rounded-2xl border border-white/5 bg-white/[0.025] p-3">
-                    <h3 className="text-[10px] font-black uppercase text-white">{title}</h3>
+                  <div key={title} className="rounded-2xl border border-zinc-200 bg-white p-3">
+                    <h3 className="text-[10px] font-black uppercase text-zinc-800">{title}</h3>
                     <p className="mt-1 text-[9px] font-semibold text-zinc-500 leading-tight">{body}</p>
                   </div>
                 ))}
@@ -725,7 +723,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </button>
               <button
                 onClick={onComplete}
-                className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-300 transition-colors"
+                className="text-[10px] font-black uppercase tracking-widest text-zinc-600 hover:text-zinc-600 transition-colors"
               >
                 Stay on free Learn
               </button>
@@ -748,25 +746,25 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   size={64}
                   className="flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>
                     ACCIÓN EN EL MUNDO REAL ({character.name})
                   </p>
-                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                  <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
                     Predator, el aprendizaje sin ejecución no sirve de nada. Completa esta acción hoy mismo.
                   </p>
                 </div>
               </div>
 
               {/* Title & Action Description */}
-              <div className="liquid-glass rounded-3xl p-6 shadow-xl border border-[var(--accent-main)]/10 text-center space-y-4">
+              <div className="bg-white shadow-sm rounded-3xl p-6 shadow-xl border border-[var(--accent-main)]/10 text-center space-y-4">
                 <span className="text-[8px] font-black font-mono text-[var(--accent-main)] uppercase tracking-[0.2em] bg-[var(--accent-main)]/10 px-2.5 py-1 rounded-full border border-[var(--accent-main)]/20 inline-block">
                   Objetivo de Hoy
                 </span>
-                <h2 className="text-xl font-black uppercase italic tracking-tighter text-white">
+                <h2 className="text-xl font-black uppercase italic tracking-tighter text-zinc-800">
                   {lessonAction.title}
                 </h2>
-                <p className="text-sm font-semibold text-zinc-300 leading-relaxed font-sans">
+                <p className="text-sm font-semibold text-zinc-600 leading-relaxed font-sans">
                   {lessonAction.instruction}
                 </p>
               </div>
@@ -774,7 +772,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Start/Proceed button */}
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 Registrar Prueba de Acción <ArrowRight size={18} className="stroke-[3]" />
               </button>
@@ -800,11 +798,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   size={56}
                   className="flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
                     REGISTRO DE EVIDENCIA
                   </span>
-                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                  <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
                     Sube una foto, escribe un reporte rápido, o confirma la ejecución para reclamar tus XP.
                   </p>
                 </div>
@@ -812,7 +810,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <div className="space-y-4">
                 {/* Proof options */}
-                <div className="liquid-glass rounded-3xl p-6 border border-white/5 space-y-4">
+                <div className="bg-white shadow-sm rounded-3xl p-6 border border-zinc-200 space-y-4">
                   {/* File Upload Option */}
                   {lessonAction.type === 'photo' && (
                     <div className="space-y-2">
@@ -820,19 +818,19 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                         Subir Foto Evidencia
                       </span>
                       {proofPhoto ? (
-                        <div className="relative rounded-2xl overflow-hidden aspect-video border border-white/10">
+                        <div className="relative rounded-2xl overflow-hidden aspect-video border border-zinc-200">
                           <img src={proofPhoto} className="w-full h-full object-cover" alt="Proof preview" />
                           <button
                             onClick={() => setProofPhoto(null)}
-                            className="absolute top-2 right-2 bg-black/60 backdrop-blur-md text-white p-1.5 rounded-full hover:bg-black"
+                            className="absolute top-2 right-2 bg-zinc-100 backdrop-blur-md text-zinc-800 p-1.5 rounded-full hover:bg-white"
                           >
                             <X size={14} />
                           </button>
                         </div>
                       ) : (
-                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/15 rounded-2xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white/[0.01] transition-all duration-300">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-zinc-200 rounded-2xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white transition-all duration-300">
                           <Camera className="w-8 h-8 text-zinc-500 mb-2" />
-                          <span className="font-bold text-[9px] uppercase tracking-widest text-zinc-400">Subir foto de la acción</span>
+                          <span className="font-bold text-[9px] uppercase tracking-widest text-zinc-500">Subir foto de la acción</span>
                           <input type="file" accept="image/*" capture="environment" onChange={handlePhotoUpload} className="hidden" />
                         </label>
                       )}
@@ -850,7 +848,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                         onChange={(e) => setProofText(e.target.value)}
                         placeholder="Ej: 'Realicé mis 10 lagartijas antes de abrir las redes sociales. ¡Foco mental!'"
                         rows={4}
-                        className="w-full p-4 bg-black/40 border border-white/10 focus:border-[var(--accent-main)]/50 rounded-2xl text-xs text-zinc-200 placeholder-zinc-700 focus:outline-none resize-none font-medium leading-relaxed"
+                        className="w-full p-4 bg-zinc-100 border border-zinc-200 focus:border-[var(--accent-main)]/50 rounded-2xl text-xs text-zinc-200 placeholder-zinc-700 focus:outline-none resize-none font-medium leading-relaxed"
                       />
                     </div>
                   )}
@@ -859,7 +857,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   {lessonAction.type === 'tap' && (
                     <div className="space-y-2 text-center py-4">
                       <CheckCircle2 className="w-12 h-12 text-accent mx-auto animate-pulse" />
-                      <p className="text-xs text-zinc-400 font-semibold leading-relaxed">
+                      <p className="text-xs text-zinc-500 font-semibold leading-relaxed">
                         Completa la acción en el mundo real y toca el botón inferior para confirmar.
                       </p>
                     </div>
@@ -874,7 +872,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     (lessonAction.type === 'photo' && !proofPhoto) || 
                     (lessonAction.type === 'text' && !proofText.trim())
                   }
-                  className="w-full py-5 rounded-2xl btn-gamified-3d border-green-800 bg-green-500/10 hover:bg-green-500/20 text-green-400 shadow-[0_4px_0_0_#15803d] border-green-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-5 rounded-2xl btn-gamified border-green-800 bg-green-500/10 hover:bg-green-500/20 text-green-400 shadow-[0_4px_0_0_#15803d] border-green-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isSubmittingProof ? (
                     <>
@@ -902,26 +900,26 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex-1 flex flex-col justify-start gap-4 pb-12 overflow-y-auto text-left"
             >
               {/* Header with Pro badge */}
-              <div className="flex items-center gap-3 bg-zinc-950/40 p-3 rounded-2xl border border-white/5 mb-1 animate-fade-in">
+              <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-zinc-200 mb-1 animate-fade-in">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 font-black font-mono text-sm">
                   Pro
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-xs font-black uppercase text-white leading-none">
+                    <h3 className="text-xs font-black uppercase text-zinc-800 leading-none">
                       {lessonYoutube.channelName}
                     </h3>
                     <span className="text-[7px] font-black bg-purple-500/20 text-purple-400 border border-purple-500/30 px-1.5 py-0.5 rounded-sm uppercase tracking-tighter">Pro</span>
                   </div>
                   <span className="text-[10px] text-zinc-500 font-mono block mt-1">
-                    Duración: {lessonYoutube.duration} • Opcional Deep Dive
+                    Duration: {lessonYoutube.duration} • Optional Deep Dive
                   </span>
                 </div>
               </div>
 
               {/* YouTube Player */}
               {lessonYoutube.youtubeId ? (
-                <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-black">
+                <div className="relative w-full aspect-video rounded-3xl overflow-hidden border border-zinc-200 shadow-2xl bg-white">
                   <iframe
                     src={`https://www.youtube.com/embed/${lessonYoutube.youtubeId}?autoplay=0&rel=0&modestbranding=1`}
                     title={lessonYoutube.title}
@@ -931,13 +929,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   />
                 </div>
               ) : (
-                <div className="w-full h-40 bg-zinc-900 border border-white/5 rounded-3xl flex items-center justify-center flex-col p-4 text-center">
+                <div className="w-full h-40 bg-white border border-zinc-200 rounded-3xl flex items-center justify-center flex-col p-4 text-center">
                   <PlaySquare className="w-10 h-10 text-purple-400 mb-2 opacity-50" />
-                  <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase">Material de Profundización no disponible</span>
+                  <span className="text-[10px] text-zinc-500 font-mono font-bold uppercase">Deep Dive Material Not Available</span>
                 </div>
               )}
 
-              <h2 className="text-lg font-black uppercase italic tracking-tighter text-white mt-2">
+              <h2 className="text-lg font-black uppercase italic tracking-tighter text-zinc-800 mt-2">
                 {lessonYoutube.title}
               </h2>
 
@@ -946,9 +944,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0 mt-0.5" />
                 <div>
                   <span className="text-[9px] font-black uppercase tracking-wider text-purple-400 block mb-1">
-                    Concepto de Élite Pro
+                    Elite Pro Concept
                   </span>
-                  <p className="text-xs text-zinc-300 font-semibold leading-relaxed">
+                  <p className="text-xs text-zinc-600 font-semibold leading-relaxed">
                     {lessonYoutube.takeaway}
                   </p>
                 </div>
@@ -958,15 +956,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={advance}
-                  className="flex-1 py-4 bg-white/5 border border-white/10 hover:bg-white/10 text-zinc-400 hover:text-white rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                  className="flex-1 py-4 bg-zinc-100 border border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-800 rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
                 >
-                  Saltar
+                  Skip
                 </button>
                 <button
                   onClick={advance}
                   className="flex-[2] py-4 bg-purple-500 hover:bg-purple-600 text-black rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_4px_0_0_#6b21a8] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Brain className="w-4 h-4 text-black" /> Iniciar Quick Quiz Pro
+                  <Brain className="w-4 h-4 text-black" /> Start Quick Quiz Pro
                 </button>
               </div>
             </motion.div>
@@ -990,22 +988,22 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name}
                   className="w-14 h-14 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
                     PROMPT INJECTION ARENA
                   </span>
-                  <p className="text-xs font-semibold leading-snug text-white font-sans">
+                  <p className="text-xs font-semibold leading-snug text-zinc-800 font-sans">
                     {mission.curatedData?.interactive.objective}
                   </p>
                 </div>
               </div>
 
               {/* Instructions */}
-              <div className="bg-zinc-950/60 border border-white/5 rounded-2xl p-4">
+              <div className="bg-white border border-zinc-200 rounded-2xl p-4">
                 <span className="text-[9px] font-mono text-zinc-500 uppercase tracking-widest block mb-2 font-black">
                   Constraint Validation Rules
                 </span>
-                <ul className="space-y-1.5 text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                <ul className="space-y-1.5 text-[11px] text-zinc-500 font-semibold leading-relaxed">
                   <li className="flex items-start gap-2">
                     <span className="text-purple-400 font-mono">•</span>
                     <span>Instrucción: {mission.curatedData?.interactive.instructionPrompt}</span>
@@ -1018,8 +1016,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </div>
 
               {/* Console Input */}
-              <div className="relative rounded-2xl border border-white/10 bg-black overflow-hidden shadow-inner flex flex-col focus-within:border-purple-500/50 transition-colors">
-                <div className="bg-[#0c0c0e] px-4 py-2 border-b border-white/5 flex items-center justify-between">
+              <div className="relative rounded-2xl border border-zinc-200 bg-white overflow-hidden shadow-inner flex flex-col focus-within:border-purple-500/50 transition-colors">
+                <div className="bg-[#0c0c0e] px-4 py-2 border-b border-zinc-200 flex items-center justify-between">
                   <span className="text-[9px] font-mono text-zinc-500 font-black uppercase tracking-wider">
                     Console Input Area
                   </span>
@@ -1079,7 +1077,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <button
                   onClick={handleExecuteSandbox}
                   disabled={sandboxLoading || !sandboxPrompt.trim()}
-                  className="w-full py-5 rounded-2xl btn-gamified-3d border-purple-800 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 shadow-[0_4px_0_0_#6b21a8] border-purple-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-5 rounded-2xl btn-gamified border-purple-800 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 shadow-[0_4px_0_0_#6b21a8] border-purple-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {sandboxLoading ? (
                     <>
@@ -1095,14 +1093,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               {/* Gemini response pane */}
               {(sandboxResponse || sandboxLoading) && (
-                <div className="bg-zinc-950/80 border border-white/5 rounded-2xl overflow-hidden mt-2">
-                  <div className="bg-[#08080a] px-4 py-2 border-b border-white/5 flex items-center justify-between">
+                <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden mt-2">
+                  <div className="bg-[#08080a] px-4 py-2 border-b border-zinc-200 flex items-center justify-between">
                     <span className="text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-wider">
                       Gemini Terminal Response
                     </span>
                     <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-ping" />
                   </div>
-                  <div className="p-4 font-mono text-[11px] text-zinc-400 min-h-[100px] leading-relaxed max-h-[250px] overflow-y-auto">
+                  <div className="p-4 font-mono text-[11px] text-zinc-500 min-h-[100px] leading-relaxed max-h-[250px] overflow-y-auto">
                     {sandboxLoading ? (
                       <div className="flex flex-col gap-2">
                         <span className="text-zinc-600 italic">Connecting to neural layers...</span>
@@ -1110,7 +1108,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                         <div className="h-1.5 w-2/3 bg-zinc-800 rounded-full animate-pulse" />
                       </div>
                     ) : (
-                      <span className="text-zinc-300 whitespace-pre-wrap">{sandboxResponse}</span>
+                      <span className="text-zinc-600 whitespace-pre-wrap">{sandboxResponse}</span>
                     )}
                   </div>
                 </div>
@@ -1136,11 +1134,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name} 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>
                     Concept Challenge {curatedQuizIndex + 1}/{mission.curatedData?.quizQuestions?.length}
                   </span>
-                  <p className="text-sm font-bold leading-snug text-white font-sans">
+                  <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
                     {currentCuratedQuiz.question}
                   </p>
                 </div>
@@ -1151,7 +1149,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 {(currentCuratedQuiz.options || []).map((option: any, i: number) => {
                   const isSelected = selectedOption === i;
                   
-                  let cls = 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300';
+                  let cls = 'bg-white border-zinc-200 hover:border-zinc-200 hover:bg-white text-zinc-600';
                   if (isSelected) {
                     cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
                   }
@@ -1162,7 +1160,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     } else if (isSelected) {
                       cls = 'bg-red-500/10 border-red-500 text-red-400';
                     } else {
-                      cls = 'bg-white/[0.01] border-white/5 opacity-30 text-zinc-600';
+                      cls = 'bg-white border-zinc-200 opacity-30 text-zinc-600';
                     }
                   }
 
@@ -1177,7 +1175,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black ${
                         isSelected 
                           ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
-                          : 'border-zinc-700 bg-black/40 text-zinc-500'
+                          : 'border-zinc-700 bg-zinc-100 text-zinc-500'
                       }`}>
                         {String.fromCharCode(65 + i)}
                       </div>
@@ -1208,32 +1206,64 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   animate={{ y: [0, -4, 0] }}
                   transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>{character.name} ({character.title})</p>
-                  <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                  <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
                     Predator, he seleccionado esta cita de alto nivel para centrar tu enfoque hoy.
                   </p>
                 </div>
               </div>
 
-              {/* Aristotle / Figure quote layout */}
-              <div className="liquid-glass rounded-3xl p-8 shadow-3xl border border-yellow-500/20 bg-yellow-500/5 relative overflow-hidden text-center space-y-6">
-                <span className="text-4xl text-yellow-500/20 font-serif absolute -top-2 left-4">“</span>
-                <p className="text-lg font-black italic uppercase tracking-tight text-white relative z-10 leading-snug">
-                  {lessonQuote.text}
-                </p>
-                <div className="h-[1px] w-12 bg-yellow-500/30 mx-auto" />
-                <p className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
-                  — {lessonQuote.author} · {mission.topic || "Discipline"}
-                </p>
+              {/* Book Cover Layout */}
+              <div className="relative w-full max-w-[240px] mx-auto perspective-1000">
+                <div className="w-full aspect-[2/3] rounded-r-2xl rounded-l-md shadow-2xl relative overflow-hidden bg-gradient-to-br from-zinc-800 to-black border border-zinc-200 flex flex-col justify-between p-6 transform-gpu rotate-y-[-5deg] rotate-x-[2deg] group-hover:rotate-y-0 transition-transform duration-700 ease-out">
+                  
+                  {/* Spine effect */}
+                  <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/80 to-transparent border-r border-zinc-200 z-20" />
+                  <div className="absolute left-1 top-0 bottom-0 w-0.5 bg-zinc-100 z-20" />
+                  
+                  {/* Top Badge */}
+                  <div className="relative z-10 flex justify-center w-full mt-2">
+                    <span className="bg-[#FF7300]/10 border border-[#FF7300]/20 text-[#FF7300] text-[8px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex items-center gap-1 backdrop-blur-md">
+                      <CheckCircle2 className="w-2.5 h-2.5" /> Verified Source
+                    </span>
+                  </div>
+
+                  {/* Core Quote (Title style) */}
+                  <div className="relative z-10 flex-1 flex items-center justify-center text-center mt-6 mb-4">
+                    <p className="text-xl font-serif italic text-zinc-800/90 leading-tight" style={{ fontFamily: 'Georgia, serif' }}>
+                      "{lessonQuote.text}"
+                    </p>
+                  </div>
+
+                  {/* Author (Bottom) */}
+                  <div className="relative z-10 text-center pb-2">
+                    <div className="h-px w-8 bg-zinc-600 mx-auto mb-3" />
+                    <p className="text-xs font-black uppercase tracking-[0.2em] text-zinc-600">
+                      {lessonQuote.author}
+                    </p>
+                    <p className="text-[8px] uppercase tracking-widest text-zinc-600 mt-1">
+                      {mission.topic || "Core Concept"}
+                    </p>
+                  </div>
+
+                  {/* Subtle textures */}
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay z-0" />
+                </div>
+                
+                {/* 3D Shadow under the book */}
+                <div className="absolute -bottom-4 left-4 right-4 h-4 bg-zinc-100 blur-xl rounded-full z-[-1]" />
               </div>
 
               {/* 2 Sentences contextualizing why it matters today */}
-              <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 space-y-2">
-                <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-500 block">
-                  ¿Por qué importa hoy?
+              <div className="bg-white border border-zinc-200 rounded-2xl p-5 space-y-2 mt-4 text-left relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-5">
+                  <BookOpen className="w-16 h-16" />
+                </div>
+                <span className="text-[8px] font-black font-mono uppercase tracking-widest text-[#FF7300] block relative z-10">
+                  Why it matters today
                 </span>
-                <p className="text-xs text-zinc-300 font-medium leading-relaxed">
+                <p className="text-xs text-zinc-600 font-medium leading-relaxed relative z-10">
                   {lessonQuote.context}
                 </p>
               </div>
@@ -1241,7 +1271,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Start reading core lesson button */}
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4"
               >
                 <BookOpen className="w-4 h-4 stroke-[3]" /> Iniciar Lección (~3 min)
               </button>
@@ -1260,13 +1290,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               className="flex-1 flex flex-col justify-center gap-5 bg-transparent"
             >
               {learningStyle === 'visual' ? (
-                <div className="rounded-[2.5rem] overflow-hidden bg-zinc-950 border border-white/10 flex items-center justify-center relative shadow-2xl h-[380px] w-full">
+                <div className="rounded-[2.5rem] overflow-hidden bg-white border border-zinc-200 flex items-center justify-center relative shadow-2xl h-[380px] w-full">
                   {mission.videoUrl || mission.imageUrl ? (
                      <img src={mission.imageUrl} className="w-full h-full object-cover opacity-50" alt="lesson" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black flex items-center justify-center flex-col p-6 text-center">
                       <PlaySquare className="w-14 h-14 text-[var(--accent-main)] mb-4 opacity-40 animate-pulse" />
-                      <h2 className="text-xl font-black uppercase italic tracking-tighter text-white mb-2">Visual Insight</h2>
+                      <h2 className="text-xl font-black uppercase italic tracking-tighter text-zinc-800 mb-2">Visual Insight</h2>
                       <p className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">Demonstrative Briefing</p>
                     </div>
                   )}
@@ -1276,22 +1306,22 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     {/* Mascot explains */}
                     <div className="flex items-center gap-3 mb-3">
                       <img src={character.avatarImg} alt={character.name} className="w-10 h-10 object-contain" />
-                      <div className="bg-[#121217] border border-white/10 rounded-2xl px-3 py-1.5 shadow-lg relative after:content-[''] after:absolute after:-left-1.5 after:top-1/2 after:-translate-y-1/2 after:w-3 after:h-3 after:bg-[#121217] after:border-l after:border-b after:border-white/10 after:rotate-45">
+                      <div className="bg-[#121217] border border-zinc-200 rounded-2xl px-3 py-1.5 shadow-lg relative after:content-[''] after:absolute after:-left-1.5 after:top-1/2 after:-translate-y-1/2 after:w-3 after:h-3 after:bg-[#121217] after:border-l after:border-b after:border-zinc-200 after:rotate-45">
                         <span className="text-[7px] font-mono uppercase tracking-widest block font-black" style={{ color: character.accentColor }}>{character.name}</span>
-                        <span className="text-[10px] text-zinc-300 font-semibold leading-none">¡Presta atención!</span>
+                        <span className="text-[10px] text-zinc-600 font-semibold leading-none">¡Presta atención!</span>
                       </div>
                     </div>
 
-                    <h1 className="text-2xl font-black italic uppercase tracking-tighter text-white mb-2 shadow-black drop-shadow-md">
+                    <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 mb-2 shadow-black drop-shadow-md">
                       {mission.title}
                     </h1>
-                    <p className="text-xs leading-relaxed text-zinc-300 drop-shadow-md line-clamp-3 font-medium mb-4">
+                    <p className="text-xs leading-relaxed text-zinc-600 drop-shadow-md line-clamp-3 font-medium mb-4">
                       {mission.concept_flashcard || mission.concept || 'Learn this concept.'}
                     </p>
                     
                     <button
                       onClick={advance}
-                      className="w-full py-4.5 rounded-xl btn-gamified-3d flex items-center justify-center gap-2"
+                      className="w-full py-4.5 rounded-xl btn-gamified flex items-center justify-center gap-2"
                     >
                       <Brain className="w-4 h-4" /> Got It, Instructor
                     </button>
@@ -1309,9 +1339,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       animate={{ y: [0, -4, 0] }}
                       transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
                     />
-                    <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                    <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                       <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>{character.name} ({character.title})</p>
-                      <p className="text-[11px] text-zinc-400 font-semibold leading-relaxed">
+                      <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
                         ¡Presta mucha atención, Predator! Este concepto sentará las bases para tu próxima prueba.
                       </p>
                     </div>
@@ -1323,8 +1353,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   </h1>
 
                   {/* Concept card */}
-                  <div className="liquid-glass rounded-3xl p-6 shadow-xl border border-white/5">
-                    <p className="text-[15px] leading-relaxed text-zinc-300 font-medium font-sans">
+                  <div className="bg-white shadow-sm rounded-3xl p-6 shadow-xl border border-zinc-200">
+                    <p className="text-[15px] leading-relaxed text-zinc-600 font-medium font-sans">
                       {mission.concept_flashcard || mission.concept || 'Learn this concept.'}
                     </p>
                   </div>
@@ -1342,7 +1372,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   {/* CTA button (Tactile 3D) */}
                   <button
                     onClick={advance}
-                    className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2 mt-4"
+                    className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4"
                   >
                     <Brain className="w-4 h-4 stroke-[3]" /> Test My Skills
                   </button>
@@ -1369,9 +1399,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name} 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Concept Challenge</span>
-                  <p className="text-sm font-bold leading-snug text-white font-sans">
+                  <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
                     {mission.recallQuestion || mission.business_scenario || mission.scenario || 'Can you apply what you just learned?'}
                   </p>
                 </div>
@@ -1383,7 +1413,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   const isSelected = selectedOption === i;
                   
                   // Setup custom classes for active status checks
-                  let cls = 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300';
+                  let cls = 'bg-white border-zinc-200 hover:border-zinc-200 hover:bg-white text-zinc-600';
                   if (isSelected) {
                     cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
                   }
@@ -1394,7 +1424,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     } else if (isSelected) {
                       cls = 'bg-red-500/10 border-red-500 text-red-400';
                     } else {
-                      cls = 'bg-white/[0.01] border-white/5 opacity-30 text-zinc-600';
+                      cls = 'bg-white border-zinc-200 opacity-30 text-zinc-600';
                     }
                   }
 
@@ -1409,7 +1439,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black ${
                         isSelected 
                           ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
-                          : 'border-zinc-700 bg-black/40 text-zinc-500'
+                          : 'border-zinc-700 bg-zinc-100 text-zinc-500'
                       }`}>
                         {String.fromCharCode(65 + i)}
                       </div>
@@ -1438,9 +1468,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name} 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Scenario Challenge</span>
-                  <p className="text-sm font-bold leading-snug text-white font-sans">
+                  <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
                     {mission.business_scenario || mission.scenario || 'Answer this question:'}
                   </p>
                 </div>
@@ -1451,7 +1481,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 {(mission.options || []).map((option: any, i: number) => {
                   const isSelected = selectedOption === i;
                   
-                  let cls = 'bg-white/[0.02] border-white/5 hover:border-white/15 hover:bg-white/[0.04] text-zinc-300';
+                  let cls = 'bg-white border-zinc-200 hover:border-zinc-200 hover:bg-white text-zinc-600';
                   if (isSelected) {
                     cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
                   }
@@ -1462,7 +1492,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     } else if (isSelected) {
                       cls = 'bg-red-500/10 border-red-500 text-red-400';
                     } else {
-                      cls = 'bg-white/[0.01] border-white/5 opacity-30 text-zinc-600';
+                      cls = 'bg-white border-zinc-200 opacity-30 text-zinc-600';
                     }
                   }
 
@@ -1477,7 +1507,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black ${
                         isSelected 
                           ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
-                          : 'border-zinc-700 bg-black/40 text-zinc-500'
+                          : 'border-zinc-700 bg-zinc-100 text-zinc-500'
                       }`}>
                         {String.fromCharCode(65 + i)}
                       </div>
@@ -1506,30 +1536,30 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name} 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Action Protocol</span>
-                  <p className="text-xs font-semibold leading-relaxed text-zinc-400">
+                  <p className="text-xs font-semibold leading-relaxed text-zinc-500">
                     Predator, completa este ejercicio de campo en el mundo real y sube la foto como prueba irrefutable de tu trabajo.
                   </p>
                 </div>
               </div>
 
-              <h2 className="text-xl font-black italic uppercase tracking-tight text-white pl-4 border-l-4 border-[var(--accent-main)]">
+              <h2 className="text-xl font-black italic uppercase tracking-tight text-zinc-800 pl-4 border-l-4 border-[var(--accent-main)]">
                 REAL-WORLD PROOF
               </h2>
-              <p className="text-sm leading-relaxed text-zinc-300 font-medium font-sans">
+              <p className="text-sm leading-relaxed text-zinc-600 font-medium font-sans">
                 {mission.mission_brief || mission.taskBrief || 'Complete this task and submit photo proof.'}
               </p>
               
-              <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-white/15 rounded-3xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white/[0.01] transition-all duration-300">
+              <label className="flex flex-col items-center justify-center w-full h-44 border-2 border-dashed border-zinc-200 rounded-3xl cursor-pointer hover:border-[var(--accent-main)] hover:bg-white transition-all duration-300">
                 <Camera className="w-10 h-10 text-zinc-500 mb-3" />
-                <span className="font-bold text-[10px] uppercase tracking-widest text-zinc-400">Tap to Capture & Upload Proof</span>
+                <span className="font-bold text-[10px] uppercase tracking-widest text-zinc-500">Tap to Capture & Upload Proof</span>
                 <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleArtifactUpload} />
               </label>
               
               <button 
                 onClick={handleSuccess} 
-                className="w-full py-4.5 border border-white/5 rounded-2xl font-bold text-xs uppercase tracking-widest text-zinc-500 bg-white/[0.01] hover:bg-white/[0.03] transition-colors"
+                className="w-full py-4.5 border border-zinc-200 rounded-2xl font-bold text-xs uppercase tracking-widest text-zinc-500 bg-white hover:bg-white transition-colors"
               >
                 Skip for now
               </button>
@@ -1553,24 +1583,24 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   alt={character.name} 
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
-                <div className="bg-[#0f0f13] border border-white/10 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-[#0f0f13] after:border-l after:border-b after:border-white/10 after:rotate-45 after:-translate-y-1/2">
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
                   <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Knowledge Core</span>
-                  <p className="text-xs font-semibold leading-relaxed text-zinc-400">
+                  <p className="text-xs font-semibold leading-relaxed text-zinc-500">
                     Estudia esta píldora de conocimiento clave, Predator.
                   </p>
                 </div>
               </div>
 
               <h1 className="text-3xl font-black italic uppercase tracking-tighter text-[var(--accent-main)]">{mission.title}</h1>
-              <div className="liquid-glass rounded-3xl p-6 shadow-xl border border-white/5">
-                <p className="text-[15px] leading-relaxed text-zinc-300 font-medium font-sans">
+              <div className="bg-white shadow-sm rounded-3xl p-6 shadow-xl border border-zinc-200">
+                <p className="text-[15px] leading-relaxed text-zinc-600 font-medium font-sans">
                   {mission.concept_flashcard || mission.concept || 'Learn this concept and advance.'}
                 </p>
               </div>
               
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified-3d flex items-center justify-center gap-2"
+                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2"
               >
                 Got It <ArrowRight className="w-4 h-4 stroke-[3]" />
               </button>
@@ -1610,7 +1640,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   <div className="bg-green-500/10 border border-green-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#0a2717] after:border-l after:border-b after:border-green-500/20 after:rotate-45 after:-translate-y-1/2">
                     <h3 className="text-xs font-black text-green-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
                     <p className="text-[11px] text-green-300 leading-normal font-semibold">
-                      <span className="text-white block italic mb-1">"{successPhrase}"</span>
+                      <span className="text-zinc-800 block italic mb-1">"{successPhrase}"</span>
                       {correctExplanationText}
                     </p>
                   </div>
@@ -1652,11 +1682,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   <div className="bg-red-500/10 border border-red-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#3b0f14] after:border-l after:border-b after:border-red-500/20 after:rotate-45 after:-translate-y-1/2">
                     <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
                     <p className="text-[11px] text-red-300 font-semibold leading-normal mb-1">
-                      <span className="text-white block italic mb-1">"{failPhrase}"</span>
+                      <span className="text-zinc-800 block italic mb-1">"{failPhrase}"</span>
                       {correctExplanationText}
                     </p>
                     {correctAnswerText && (
-                      <p className="text-[10px] text-zinc-400 font-mono mt-1">
+                      <p className="text-[10px] text-zinc-500 font-mono mt-1">
                         La correcta era: <span className="text-red-400 font-bold">{correctAnswerText}</span>
                       </p>
                     )}
@@ -1665,7 +1695,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <div className="max-w-md mx-auto w-full">
                   <button 
                     onClick={handleFail}
-                    className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-white bg-[#ef4444] hover:bg-[#dc2626] shadow-[0_4px_0_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all"
+                    className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-zinc-800 bg-[#ef4444] hover:bg-[#dc2626] shadow-[0_4px_0_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all"
                   >
                     Entendido
                   </button>
@@ -1676,12 +1706,12 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
           {/* Idle Selection Checking Bottom Panel */}
           {quizResult === 'idle' && (
-            <div className="w-full bg-[#050508]/90 backdrop-blur-md border-t border-white/5 px-6 py-6 pb-8 shadow-[0_-10px_35px_rgba(0,0,0,0.8)]">
+            <div className="w-full bg-[#050508]/90 backdrop-blur-md border-t border-zinc-200 px-6 py-6 pb-8 shadow-[0_-10px_35px_rgba(0,0,0,0.8)]">
               <div className="max-w-md mx-auto w-full">
                 <button
                   disabled={selectedOption === null}
                   onClick={handleCheckAnswer}
-                  className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest btn-gamified-3d flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest btn-gamified flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Check Answer
                 </button>

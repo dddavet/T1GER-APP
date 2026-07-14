@@ -17,7 +17,7 @@ export const Onboarding_Step3_Contract: React.FC<ContractProps> = ({ onComplete 
   };
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white p-6 flex flex-col justify-between">
+    <div className="min-h-screen bg-white text-zinc-800 p-6 flex flex-col justify-between">
       <div className="pt-12 space-y-2">
         <h1 className="text-4xl font-black italic uppercase tracking-tighter">YOUR TIME IS RUNNING OUT.</h1>
         <p className="text-zinc-500 font-mono text-sm uppercase tracking-widest">Enter your age. Each dot represents one month of an 80-year lifespan.</p>
@@ -29,7 +29,7 @@ export const Onboarding_Step3_Contract: React.FC<ContractProps> = ({ onComplete 
           placeholder="ENTER AGE"
           value={age}
           onChange={(e) => setAge(parseInt(e.target.value) || '')}
-          className="w-full bg-transparent border-b-2 border-white/20 text-6xl font-black italic text-center focus:outline-none focus:border-[#FF6B00] transition-colors"
+          className="w-full bg-transparent border-b-2 border-zinc-200 text-6xl font-black italic text-center focus:outline-none focus:border-[#FF6B00] transition-colors"
           autoFocus
         />
 
@@ -52,7 +52,7 @@ export const Onboarding_Step3_Contract: React.FC<ContractProps> = ({ onComplete 
         disabled={typeof age !== 'number' || age < 12 || age > 100}
         onClick={handleConfirm}
         className={`w-full py-6 rounded-3xl font-black text-lg uppercase tracking-widest transition-colors ${
-          typeof age === 'number' && age >= 12 && age <= 100 ? 'bg-[#CCFF00] text-black' : 'bg-zinc-800 text-zinc-500'
+          typeof age === 'number' && age >= 12 && age <= 100 ? 'bg-[#FF7300] text-black' : 'bg-zinc-800 text-zinc-500'
         }`}
       >
         I COMMIT TO THE HUNT.

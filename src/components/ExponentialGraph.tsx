@@ -3,9 +3,9 @@ import { motion } from 'motion/react';
 
 export const ExponentialGraph: React.FC = () => {
   return (
-    <div className="w-full bg-[#0a0a0c] border border-white/5 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center my-auto">
+    <div className="w-full bg-[#0a0a0c] border border-zinc-200 rounded-3xl p-6 shadow-2xl relative overflow-hidden flex flex-col justify-center my-auto">
       <div className="mb-6">
-        <h3 className="text-3xl font-black italic uppercase tracking-tighter text-white leading-none">
+        <h3 className="text-3xl font-black italic uppercase tracking-tighter text-zinc-800 leading-none">
           T1GER creates <br/> <span className="text-[#FF6B00]">Apex Predators</span>
         </h3>
       </div>
@@ -81,9 +81,9 @@ export const ExponentialGraph: React.FC = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 2.5 }}
-        className="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/5"
+        className="mt-8 p-4 rounded-2xl bg-zinc-50 border border-zinc-200"
       >
-        <p className="text-center text-xs font-semibold text-zinc-300 leading-relaxed">
+        <p className="text-center text-xs font-semibold text-zinc-500 leading-relaxed">
           <span className="text-[#FF6B00] font-black text-sm">85%</span> of T1GER users build a high-income skill in their first 30 days.
         </p>
       </motion.div>
