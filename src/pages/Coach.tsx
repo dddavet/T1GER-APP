@@ -103,30 +103,31 @@ export const Coach = () => {
         summary: responseText.substring(0, 100),
         timestamp: serverTimestamp()
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Coach error:', error);
+      const fallbackText = activeCoachId === 't1ger' 
+        ? "Predator, mi conexión sináptica falló. Revisa tu internet o asegúrate de haber reiniciado tu servidor (npm run dev) para leer mi API Key."
+        : "Ocurrió un error de conexión. Por favor revisa tu entorno.";
+      const errorMessage = { role: 'model', text: fallbackText };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] -mx-6 -mt-20">
+    <div className="flex flex-col h-[calc(100vh-120px)] -mx-5 -mt-5 bg-white">
       {/* Header */}
-      <div className="p-6 border-b border-zinc-200 bg-[#020204]/90 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
+      <div className="px-5 py-4 border-b border-zinc-100 bg-white/95 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
           <div 
-            className="w-10 h-10 rounded-2xl flex items-center justify-center border transition-all duration-500 bg-zinc-50"
-            style={{ 
-              borderColor: `${coachConfig.accentColor}33`, 
-              boxShadow: `0 0 12px ${coachConfig.glowColor}` 
-            }}
+            className="w-10 h-10 rounded-2xl flex items-center justify-center bg-zinc-50 border border-zinc-100"
           >
-            <BrainCircuit className="w-6 h-6" style={{ color: coachConfig.accentColor }} />
+            <BrainCircuit className="w-5 h-5" style={{ color: coachConfig.accentColor }} />
           </div>
           <div>
-            <h1 className="text-lg font-black italic uppercase tracking-tight text-zinc-800">Squad Mentors</h1>
-            <p className="text-[10px] font-black uppercase tracking-widest font-mono" style={{ color: coachConfig.accentColor }}>
+            <h1 className="text-base font-black tracking-tight text-zinc-800">T1GER Mentor</h1>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
               {coachConfig.name} Activated
             </p>
           </div>
@@ -136,90 +137,38 @@ export const Coach = () => {
         </button>
       </div>
 
-      {/* Horizontal Mentor Selector tab */}
-      <div className="px-6 py-4 bg-[#07070a]/90 border-b border-zinc-200 flex gap-3 overflow-x-auto hide-scrollbar z-10">
-        {Object.values(CHARACTER_CAST).map(coach => {
-          const isSelected = coach.id === activeCoachId;
-          const specialty = 
-            coach.id === 't1ger' ? 'Strategy' : 
-            coach.id === 'l1ly' ? 'AI & Operations' : 
-            coach.id === 'eddy' ? 'Finance & VC' : 
-            'Marketing Hook';
 
-          return (
-            <motion.button
-              key={coach.id}
-              onClick={() => handleSelectCoach(coach.id)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`flex-shrink-0 flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition-all duration-300 ${
-                isSelected 
-                  ? 'bg-zinc-50 text-zinc-800 font-bold' 
-                  : 'bg-zinc-50 border-zinc-200 text-zinc-500 hover:border-zinc-200'
-              }`}
-              style={isSelected ? {
-                borderColor: coach.accentColor,
-                boxShadow: `0 0 15px ${coach.glowColor}`
-              } : {}}
-            >
-              <div 
-                className="w-8 h-8 rounded-full border flex items-center justify-center overflow-hidden bg-white"
-                style={{ borderColor: isSelected ? coach.accentColor : 'rgba(255,255,255,0.1)' }}
-              >
-                <img src={coach.avatarImg} alt={coach.name} className="w-6 h-6 object-contain" />
-              </div>
-              <div className="text-left">
-                <span className="text-[10px] font-black tracking-tight block uppercase" style={isSelected ? { color: coach.accentColor } : {}}>
-                  {coach.name}
-                </span>
-                <span className="text-[8px] font-bold text-zinc-500 block uppercase tracking-wider">
-                  {specialty}
-                </span>
-              </div>
-            </motion.button>
-          );
-        })}
-      </div>
 
       {/* Dynamic Coach Status Card */}
-      <div className="px-6 py-4 bg-white border-b border-zinc-200 relative overflow-hidden flex items-center gap-4">
-        {/* Glow behind mascot */}
-        <div 
-          className="absolute -left-10 top-0 w-32 h-32 rounded-full blur-[40px] opacity-10 transition-all duration-500"
-          style={{ backgroundColor: coachConfig.accentColor }}
-        />
-        
+      <div className="px-5 py-4 bg-zinc-50/50 border-b border-zinc-100 flex items-center gap-4">
         {/* Mascot Wrapper */}
         <motion.div 
-          className="relative w-16 h-16 rounded-full border flex items-center justify-center flex-shrink-0 bg-[#07070a]/80 shadow-md z-10"
-          style={{ borderColor: coachConfig.accentColor, borderWidth: '1.5px' }}
-          animate={{ y: [0, -4, 0] }}
+          className="relative w-12 h-12 rounded-full border border-zinc-200 flex items-center justify-center flex-shrink-0 bg-white shadow-sm z-10"
+          animate={{ y: [0, -3, 0] }}
           transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
         >
           <img 
             src={coachConfig.avatarImg} 
             alt={`${coachConfig.name} Avatar`} 
-            className="w-12 h-12 object-contain"
-            style={{ filter: `drop-shadow(0 0 8px ${coachConfig.glowColor})` }}
+            className="w-8 h-8 object-contain"
           />
         </motion.div>
 
         {/* Speech Bubble */}
         <div className="flex-1 min-w-0 z-10 text-left">
           <span 
-            className="text-[9px] font-black font-mono uppercase tracking-widest block mb-0.5"
-            style={{ color: coachConfig.accentColor }}
+            className="text-[10px] font-black uppercase tracking-widest block mb-0.5 text-zinc-800"
           >
             {coachConfig.name} — {coachConfig.title}
           </span>
-          <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed line-clamp-2 italic">
+          <p className="text-xs text-zinc-500 font-medium leading-relaxed line-clamp-2">
             "{coachConfig.speechBubbleText.welcome[0]}"
           </p>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 no-scrollbar">
+      <div className="flex-1 overflow-y-auto p-5 space-y-5 no-scrollbar bg-white">
         {messages.map((m, i) => {
           const isUser = m.role === 'user';
           const mascotImg = !isUser ? getCoachAvatar(activeCoachId, m.text) : '';
@@ -229,29 +178,25 @@ export const Coach = () => {
               key={i}
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              className={`flex items-end gap-3 ${isUser ? 'justify-end' : 'justify-start'}`}
+              className={`flex items-end gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
             >
               {!isUser && (
                 <img 
                   src={mascotImg} 
                   alt={coachConfig.name} 
-                  className="w-10 h-10 object-contain rounded-full bg-zinc-50 border border-zinc-200 p-1 flex-shrink-0 shadow-lg"
-                  style={{ filter: `drop-shadow(0 0 6px ${coachConfig.glowColor})` }}
+                  className="w-8 h-8 object-contain rounded-full bg-zinc-50 border border-zinc-200 p-0.5 flex-shrink-0"
                 />
               )}
               <div 
-                className={`max-w-[78%] p-4 rounded-3xl text-sm leading-relaxed rounded-bl-none text-left`}
+                className={`max-w-[80%] px-4 py-3 rounded-2xl text-[15px] leading-relaxed text-left`}
                 style={isUser ? {
                   backgroundColor: coachConfig.accentColor,
-                  color: '#020204',
-                  fontWeight: '700',
-                  borderBottomRightRadius: '0px',
-                  boxShadow: `0 0 15px ${coachConfig.glowColor}`
+                  color: 'white',
+                  borderBottomRightRadius: '4px',
                 } : {
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
-                  color: '#e4e4e7',
-                  borderBottomLeftRadius: '0px'
+                  backgroundColor: '#F4F4F5', // zinc-100
+                  color: '#27272A', // zinc-800
+                  borderBottomLeftRadius: '4px'
                 }}
               >
                 {m.text}
@@ -275,35 +220,25 @@ export const Coach = () => {
       </div>
 
       {/* Input */}
-      <div className="p-6 bg-[#020204]/90 backdrop-blur-xl border-t border-zinc-200 sticky bottom-0">
-        <div className="relative flex items-center">
+      <div className="p-4 bg-white border-t border-zinc-100 sticky bottom-0">
+        <div className="relative flex items-center max-w-2xl mx-auto">
           <input 
             value={input} 
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            className="w-full bg-white border border-zinc-200 rounded-2xl py-4 pl-5 pr-14 text-sm focus:outline-none text-zinc-800 transition-colors"
-            placeholder={`Ask ${coachConfig.name}...`}
-            style={{ 
-              borderColor: 'rgba(255, 255, 255, 0.05)'
-            }}
-            onFocus={(e) => {
-              e.target.style.borderColor = coachConfig.accentColor;
-            }}
-            onBlur={(e) => {
-              e.target.style.borderColor = 'rgba(255, 255, 255, 0.05)';
-            }}
+            className="w-full bg-zinc-50 border border-zinc-200 rounded-full py-3.5 pl-5 pr-14 text-[15px] focus:outline-none focus:border-zinc-300 focus:bg-white transition-colors text-zinc-800"
+            placeholder={`Message ${coachConfig.name}...`}
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="absolute right-2 p-3 rounded-xl disabled:opacity-50 disabled:grayscale transition-all active:scale-90 shadow-lg"
+            className="absolute right-1.5 p-2 rounded-full disabled:opacity-50 disabled:grayscale transition-all active:scale-95"
             style={{
-              backgroundColor: coachConfig.accentColor,
-              color: '#020204',
-              boxShadow: `0 0 10px ${coachConfig.glowColor}`
+              backgroundColor: input.trim() ? coachConfig.accentColor : '#E5E7EB',
+              color: 'white',
             }}
           >
-            <Send className="w-4 h-4 stroke-[3]" />
+            <Send className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
       </div>

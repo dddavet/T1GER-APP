@@ -57,45 +57,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
   return (
     <div className="relative w-full flex flex-col items-center pb-4">
 
-      {/* Track Title */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="w-full text-center px-4 mb-8"
-      >
-        <h2 className="text-xl font-black uppercase tracking-tight text-zinc-800 mb-1">
-          {pathData.track.title}
-        </h2>
-        <div className="flex items-center justify-center gap-2">
-          <div className="h-[2px] w-8 bg-zinc-800 rounded-full" />
-          <span className="text-xs font-mono text-zinc-500 uppercase tracking-widest">
-            Level {activeLevel.levelNumber}
-          </span>
-          <div className="h-[2px] w-8 bg-zinc-800 rounded-full" />
-        </div>
-      </motion.div>
-
-      {/* Unit header */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full text-center mb-10"
-      >
-        <div
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl border mb-3 shadow-lg"
-          style={{
-            backgroundColor: `color-mix(in srgb, ${trackStyle.color} 15%, transparent)`,
-            borderColor: `color-mix(in srgb, ${trackStyle.color} 30%, transparent)`,
-            color: trackStyle.color,
-          }}
-        >
-          {trackStyle.icon}
-          <span className="text-xs font-black uppercase tracking-[0.2em]">{activeLevel.title}</span>
-        </div>
-        <p className="text-xs text-zinc-500 max-w-[200px] mx-auto leading-relaxed">{activeLevel.subtitle}</p>
-      </motion.div>
-
-      {/* All done celebration */}
+      {/* Path container */}
       {pathData.isFullyCompleted && (
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -134,9 +96,10 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                 key={i}
                 d={`M ${x1} ${y1} C ${x1} ${midY}, ${x2} ${midY}, ${x2} ${y2}`}
                 fill="none"
-                stroke={isPrior ? `color-mix(in srgb, ${trackStyle.color} 60%, transparent)` : isActive ? `color-mix(in srgb, ${trackStyle.color} 40%, transparent)` : 'rgba(255,255,255,0.04)'}
-                strokeWidth="4"
-                strokeDasharray={isPrior ? 'none' : isActive ? 'none' : '6 6'}
+                stroke={isPrior || isActive ? trackStyle.color : '#E5E7EB'}
+                strokeWidth="12"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             );
           })}
@@ -147,7 +110,8 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
           const isDone = i < activeDayIndex || brainState.completedDayIds.includes(day.dayId);
           const isActive = i === activeDayIndex && !pathData.isFullyCompleted;
           const { xOffset } = getNodePosition(i);
-          const nodeSize = isActive ? 76 : isDone ? 64 : 60;
+          const nodeSize = isActive ? 72 : 64;
+          const isChest = (i + 1) % 5 === 0;
 
           return (
             <motion.div
@@ -176,7 +140,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
               <motion.button
                 aria-label={isActive ? `Empezar día ${day.dayNumber}: ${nextMission?.title || 'lección'}` : isDone ? `Día ${day.dayNumber} completado` : `Día ${day.dayNumber} bloqueado`}
                 disabled={!isActive || !nextMission}
-                whileTap={isActive ? { scale: 0.9 } : {}}
+                whileTap={isActive ? { scale: 0.95 } : {}}
                 whileHover={isActive ? { scale: 1.05 } : {}}
                 onClick={() => {
                   if (isActive && nextMission) {
@@ -188,43 +152,32 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                       mission_brief: nextMission.taskBrief,
                     });
                   } else if (!isActive && !isDone) {
-                    // Logic for tapping a locked node - provide feedback
                     console.log("Node is locked. Complete previous missions first.");
                   }
                 }}
-                className="relative flex items-center justify-center rounded-full transition-all group active:scale-95"
+                className="relative flex items-center justify-center transition-all group outline-none"
                 style={{
                   width: nodeSize,
                   height: nodeSize,
+                  borderRadius: isChest ? '25%' : '50%',
                   background: isDone
-                    ? `color-mix(in srgb, ${trackStyle.color} 15%, transparent)`
+                    ? '#FBBF24' // Yellow/Gold for completed
                     : isActive
-                      ? `linear-gradient(135deg, ${trackStyle.color}, color-mix(in srgb, ${trackStyle.color} 80%, black))`
-                      : 'rgba(255,255,255,0.02)',
+                      ? trackStyle.color // Track color for active
+                      : '#F3F4F6', // Light gray for locked
                   border: isDone
-                    ? `2px solid color-mix(in srgb, ${trackStyle.color} 40%, transparent)`
+                    ? `3px solid #F59E0B`
                     : isActive
-                      ? `4px solid ${trackStyle.color}`
-                      : '1px solid rgba(255,255,255,0.05)',
-                  boxShadow: isActive ? `0 0 40px color-mix(in srgb, ${trackStyle.color} 60%, transparent)` : 'none',
+                      ? `3px solid color-mix(in srgb, ${trackStyle.color} 80%, black)`
+                      : '3px solid #E5E7EB',
                 }}
               >
                 {isDone ? (
-                  <Check className="w-6 h-6 stroke-[3]" style={{ color: trackStyle.color }} />
+                  <Crown className="w-8 h-8 stroke-[2.5]" style={{ color: 'white', fill: 'white' }} />
                 ) : isActive ? (
-                  pathData.track.trackId === 'ai' ? (
-                    learningStyle === 'visual' ? (
-                      <Play className="w-8 h-8 text-zinc-800 relative z-10 fill-white ml-0.5" />
-                    ) : learningStyle === 'interactive' ? (
-                      <Terminal className="w-8 h-8 text-zinc-800 relative z-10" />
-                    ) : (
-                      <BookOpen className="w-8 h-8 text-zinc-800 relative z-10" />
-                    )
-                  ) : (
-                    <Zap className="w-8 h-8 text-zinc-800 relative z-10" fill="white" />
-                  )
+                  <Star className="w-8 h-8 stroke-[2.5] text-white fill-white relative z-10" />
                 ) : (
-                  <Lock className="w-4 h-4 text-zinc-800/10" />
+                  <Lock className="w-6 h-6 stroke-[2.5] text-zinc-400" />
                 )}
 
                 {/* Progress indicator for multi-mission days */}

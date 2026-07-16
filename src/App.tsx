@@ -9,7 +9,7 @@ import { HUD } from './components/HUD';
 import { NavDock } from './components/NavDock';
 import { CoachFAB } from './components/CoachFAB';
 import { Loader2 } from 'lucide-react';
-
+import { BuildTab } from './components/BuildTab';
 import { Dashboard } from './pages/Dashboard';
 import { TacticalSetup } from './pages/TacticalSetup';
 import { Learn } from './pages/Learn';
@@ -108,6 +108,7 @@ const AppContent = () => {
       const userNiche = appUser?.niche || 'general';
       const userLevel = appUser?.level || 1;
       const learningStyle = appUser?.learningStyle || 'text';
+      const dailyTime = appUser?.dailyTime || 5;
 
       // Call dynamic generator service
       const personalizedLesson = await generateAdaptiveLesson(
@@ -116,7 +117,8 @@ const AppContent = () => {
         baseMission,
         weaknesses.weakCompetencies,
         weaknesses.recentFailedMissions,
-        learningStyle
+        learningStyle,
+        dailyTime
       );
 
       // Successfully generated dynamic custom lesson!
@@ -130,11 +132,30 @@ const AppContent = () => {
     } catch (e) {
       console.warn('[BirdBrain] Generation failed. Falling back to static lesson:', e);
       // Fallback seamlessly to the high-fidelity pre-compiled mission
+      
+      const dailyTime = appUser?.dailyTime || 5;
+      let questionCount = 3;
+      if (dailyTime >= 10) questionCount = 5;
+      if (dailyTime >= 15) questionCount = 7;
+
+      // Generate synthetic fallback questions to ensure a multi-step lesson
+      const syntheticQuestions = Array.from({ length: questionCount }).map((_, i) => ({
+        text: `Review: ${baseMission.recallQuestion || `What is a key principle of ${baseMission.title}?`} (Part ${i + 1})`,
+        options: baseMission.recallOptions || [
+          { text: baseMission.keyTakeaway || "True", correct: true },
+          { text: "False", correct: false }
+        ],
+        explanation: baseMission.recallExplanation || baseMission.concept
+      }));
+
       setActiveMission({
         ...baseMission,
         concept_flashcard: baseMission.concept,
         business_scenario: baseMission.scenario,
-        mission_brief: baseMission.taskBrief
+        mission_brief: baseMission.taskBrief,
+        curatedData: {
+          quizQuestions: syntheticQuestions
+        }
       });
       setActiveView('mission');
     } finally {
@@ -176,7 +197,7 @@ const AppContent = () => {
 
   return (
     <div 
-      className={`min-h-screen bg-[#F7F7F7] text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType}`}
+      className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-zinc-200 sm:shadow-2xl relative flex flex-col bg-white text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType}`}
     >
       {/* Gamified clean background */}
       <div className="absolute inset-0 bg-[#F7F7F7] z-[-1]" />
@@ -199,14 +220,9 @@ const AppContent = () => {
                 <EveningInterrogation onComplete={() => setActiveView('learn')} />
               </motion.div>
             )}
-            {activeView === 'proof' && (
-              <motion.div key="proof" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <Dashboard onStartMission={startMission} />
-              </motion.div>
-            )}
-            {activeView === 'tactical' && (
-              <motion.div key="tactical" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <TacticalSetup />
+            {activeView === 'build' && (
+              <motion.div key="build" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <BuildTab />
               </motion.div>
             )}
             {activeView === 'learn' && (
@@ -214,8 +230,8 @@ const AppContent = () => {
                 <Learn onStartMission={startMission} />
               </motion.div>
             )}
-            {activeView === 'friends' && (
-              <motion.div key="friends" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+            {activeView === 'compete' && (
+              <motion.div key="compete" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
                 <SquadTab />
               </motion.div>
             )}

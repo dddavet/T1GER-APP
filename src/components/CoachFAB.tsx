@@ -10,7 +10,7 @@ export const CoachFAB = React.memo(() => {
   if (activeView === 'coach') return null;
 
   return (
-    <div className="flex justify-end px-5 -mt-3 mb-2 pointer-events-none">
+    <div className="fixed bottom-28 right-5 z-40 pointer-events-none">
       <motion.button
         onClick={() => setActiveView('coach')}
         onMouseEnter={() => setIsHovered(true)}

@@ -3,11 +3,13 @@ import { useT1ger } from '../contexts/T1gerContext';
 import { Shield, BookOpen, RotateCcw, User } from 'lucide-react';
 import { motion } from 'motion/react';
 
+import { Trophy, Hammer } from 'lucide-react';
+
 const tabs = [
   { id: 'learn', icon: BookOpen, label: 'Learn' },
-  { id: 'proof', icon: Shield, label: 'Apply' },
-  { id: 'friends', icon: RotateCcw, label: 'Repeat' },
-  { id: 'profile', icon: User, label: 'Profile' },
+  { id: 'build', icon: Hammer, label: 'Build' },
+  { id: 'compete', icon: Trophy, label: 'Compete' },
+  { id: 'profile', icon: User, label: 'Perfil' },
 ] as const;
 
 export const NavDock = React.memo(() => {

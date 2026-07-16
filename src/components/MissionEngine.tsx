@@ -201,6 +201,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const [sandboxError, setSandboxError] = useState('');
   const [sandboxSuccess, setSandboxSuccess] = useState(false);
 
+  // Book Reader & Framework States
+  const [bookPage, setBookPage] = useState(0);
+  const [frameworkStep, setFrameworkStep] = useState(0);
+
   // Curated AI Quiz Memos
   const isCuratedQuiz = useMemo(() => currentStep?.startsWith('curated_quiz_') || false, [currentStep]);
   const curatedQuizIndex = useMemo(() => isCuratedQuiz ? parseInt(currentStep.split('_')[2]) : 0, [isCuratedQuiz, currentStep]);
@@ -328,40 +332,41 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   }, [mission, isCuratedQuiz, currentCuratedQuiz]);
 
   return (
-    <div className="w-full min-h-screen bg-[#020204] text-zinc-800 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 flex flex-col justify-between overflow-hidden relative">
-      {/* Atmospheres */}
-      <div className="absolute -top-[10%] -left-[10%] w-[35%] h-[35%] rounded-full blur-[100px] bg-[var(--bg-glow-1)] opacity-20 pointer-events-none" />
-      <div className="absolute top-[30%] -right-[10%] w-[30%] h-[30%] rounded-full blur-[90px] bg-[var(--bg-glow-2)] opacity-15 pointer-events-none" />
+    <div className="w-full min-h-screen bg-white text-zinc-800 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-5 flex flex-col justify-between overflow-hidden relative font-sans">
+      {/* Clean Headway-style Background */}
+      <div className="absolute inset-0 bg-white z-[-1]" />
 
       {/* Top Header Section */}
-      <div className="w-full z-10">
-        <div className="flex items-center justify-between mb-4">
+      <div className="w-full z-10 pt-2">
+        <div className="flex items-center justify-between mb-6">
           <button 
             onClick={onComplete}
-            className="w-10 h-10 rounded-full bg-zinc-100 border border-zinc-200 flex items-center justify-center text-zinc-500 hover:text-zinc-800 hover:bg-zinc-50 hover:border-zinc-200 transition-all duration-300"
+            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
           >
-            <X size={18} />
+            <X size={24} strokeWidth={2.5} />
           </button>
           
-          {/* Progress bar */}
-          <div className="h-2 flex-1 mx-4 bg-white border border-zinc-200 rounded-full overflow-hidden relative">
+          {/* Progress bar (Duolingo style) */}
+          <div className="h-3.5 flex-1 mx-3 bg-[#E5E5E5] rounded-full overflow-hidden relative">
             <motion.div
-              className="h-full bg-[var(--accent-main)] rounded-full shadow-[0_0_12px_var(--accent-glow)]"
+              className="h-full bg-[var(--accent-main)] rounded-full relative"
               initial={{ width: 0 }}
-              animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.4 }}
-            />
+              animate={{ width: `${Math.max(10, progress)}%` }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              {/* Highlight for volume/3D effect */}
+              <div className="absolute top-1 left-2 right-2 h-1 bg-white/20 rounded-full" />
+            </motion.div>
           </div>
           
-          <div className="w-10 text-center font-mono text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-            {stepIndex + 1}/{steps.length}
-          </div>
+          {/* Optional: streak or hearts could go here. For now, empty space to balance the X */}
+          <div className="w-10" />
         </div>
 
         {/* Competency Badge */}
         {showMainUI && (
-          <div className="flex items-center gap-2 mb-2 animate-fade-in">
-            <span className="text-[9px] font-black font-mono text-[var(--accent-main)] bg-[var(--accent-main)]/10 px-2.5 py-0.5 rounded-full border border-[var(--accent-main)]/20 uppercase tracking-widest">
+          <div className="flex items-center gap-2 mb-2 px-1">
+            <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
               {COMPETENCY_LABELS[compKey] || mission.competency || 'Mission'}
             </span>
           </div>
@@ -369,7 +374,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-center py-4 relative z-10 max-w-md mx-auto w-full overflow-y-auto">
+      <div className="flex-1 flex flex-col justify-start py-2 relative z-10 w-full overflow-y-auto hide-scrollbar">
         <AnimatePresence mode="wait">
           {/* ============================================ */}
           {/* SUCCESS SCREEN                               */}
@@ -427,9 +432,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={onComplete}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
               >
-                Continue <ArrowRight size={18} className="stroke-[3]" />
+                Continue <ArrowRight size={20} className="stroke-[3]" />
               </button>
             </motion.div>
           )}
@@ -465,8 +470,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               
               <button 
                 onClick={onComplete} 
-                className="w-full py-5 rounded-2xl btn-gamified border-red-800 bg-red-500/10 hover:bg-red-500/20 text-red-400 shadow-[0_4px_0_0_#991b1b] border-red-500/20 flex items-center justify-center gap-2"
-                style={{ shadow: '0 4px 0 0 #991b1b' } as any}
+                className="w-full py-4 rounded-2xl bg-[#FF4B4B] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#EA1515] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-auto"
               >
                 Continue →
               </button>
@@ -577,9 +581,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                <Brain className="w-4 h-4 stroke-[3]" /> Got It, Take the Quiz
+                <Brain className="w-5 h-5 stroke-[3]" /> Got It, Take the Quiz
               </button>
             </motion.div>
           )}
@@ -665,9 +669,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                <Cpu className="w-4 h-4 stroke-[3]" /> Go to Real Action
+                <Cpu className="w-5 h-5 stroke-[3]" /> Go to Real Action
               </button>
             </motion.div>
           )}
@@ -772,9 +776,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Start/Proceed button */}
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                Registrar Prueba de Acción <ArrowRight size={18} className="stroke-[3]" />
+                Registrar Prueba de Acción <ArrowRight size={20} className="stroke-[3]" />
               </button>
             </motion.div>
           )}
@@ -848,7 +852,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                         onChange={(e) => setProofText(e.target.value)}
                         placeholder="Ej: 'Realicé mis 10 lagartijas antes de abrir las redes sociales. ¡Foco mental!'"
                         rows={4}
-                        className="w-full p-4 bg-zinc-100 border border-zinc-200 focus:border-[var(--accent-main)]/50 rounded-2xl text-xs text-zinc-200 placeholder-zinc-700 focus:outline-none resize-none font-medium leading-relaxed"
+                        className="w-full p-4 bg-zinc-50 border border-zinc-200 focus:border-[#58CC02] focus:ring-2 focus:ring-[#58CC02]/20 rounded-2xl text-[15px] text-zinc-800 placeholder-zinc-400 focus:outline-none resize-none font-medium leading-relaxed transition-all"
                       />
                     </div>
                   )}
@@ -872,15 +876,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     (lessonAction.type === 'photo' && !proofPhoto) || 
                     (lessonAction.type === 'text' && !proofText.trim())
                   }
-                  className="w-full py-5 rounded-2xl btn-gamified border-green-800 bg-green-500/10 hover:bg-green-500/20 text-green-400 shadow-[0_4px_0_0_#15803d] border-green-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed mt-4"
                 >
                   {isSubmittingProof ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" /> Registrando...
+                      <RefreshCw className="w-5 h-5 animate-spin" /> Registrando...
                     </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" /> Marcar como Completado (+50 XP)
+                      <CheckCircle2 className="w-5 h-5" /> Marcar como Completado (+50 XP)
                     </>
                   )}
                 </button>
@@ -956,15 +960,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={advance}
-                  className="flex-1 py-4 bg-zinc-100 border border-zinc-200 hover:bg-zinc-50 text-zinc-500 hover:text-zinc-800 rounded-2xl font-black text-xs uppercase tracking-widest transition-all cursor-pointer"
+                  className="flex-1 py-4 bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all cursor-pointer border-b-4 border-zinc-200 active:border-b-0 active:translate-y-1"
                 >
                   Skip
                 </button>
                 <button
                   onClick={advance}
-                  className="flex-[2] py-4 bg-purple-500 hover:bg-purple-600 text-black rounded-2xl font-black text-xs uppercase tracking-widest shadow-[0_4px_0_0_#6b21a8] active:translate-y-[4px] active:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-[2] py-4 bg-[#58CC02] hover:bg-[#58CC02] text-white rounded-2xl font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Brain className="w-4 h-4 text-black" /> Start Quick Quiz Pro
+                  <Brain className="w-5 h-5" /> Start Quick Quiz Pro
                 </button>
               </div>
             </motion.div>
@@ -1077,15 +1081,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <button
                   onClick={handleExecuteSandbox}
                   disabled={sandboxLoading || !sandboxPrompt.trim()}
-                  className="w-full py-5 rounded-2xl btn-gamified border-purple-800 bg-purple-500/10 hover:bg-purple-500/20 text-purple-400 shadow-[0_4px_0_0_#6b21a8] border-purple-500/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed"
                 >
                   {sandboxLoading ? (
                     <>
-                      <RefreshCw className="w-4 h-4 animate-spin" /> Executing injection...
+                      <RefreshCw className="w-5 h-5 animate-spin" /> Executing injection...
                     </>
                   ) : (
                     <>
-                      <Terminal className="w-4 h-4" /> Run Prompt Injection
+                      <Terminal className="w-5 h-5" /> Run Prompt Injection
                     </>
                   )}
                 </button>
@@ -1216,10 +1220,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               {/* Book Cover Layout */}
               <div className="relative w-full max-w-[240px] mx-auto perspective-1000">
-                <div className="w-full aspect-[2/3] rounded-r-2xl rounded-l-md shadow-2xl relative overflow-hidden bg-gradient-to-br from-zinc-800 to-black border border-zinc-200 flex flex-col justify-between p-6 transform-gpu rotate-y-[-5deg] rotate-x-[2deg] group-hover:rotate-y-0 transition-transform duration-700 ease-out">
+                <div className="w-full aspect-[2/3] rounded-r-2xl rounded-l-md shadow-lg relative overflow-hidden bg-white border border-zinc-200 flex flex-col justify-between p-6 transform-gpu rotate-y-[-5deg] rotate-x-[2deg] group-hover:rotate-y-0 transition-transform duration-700 ease-out">
                   
                   {/* Spine effect */}
-                  <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/80 to-transparent border-r border-zinc-200 z-20" />
+                  <div className="absolute left-0 top-0 bottom-0 w-3 bg-zinc-100 border-r border-zinc-200 z-20" />
                   <div className="absolute left-1 top-0 bottom-0 w-0.5 bg-zinc-100 z-20" />
                   
                   {/* Top Badge */}
@@ -1252,7 +1256,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 </div>
                 
                 {/* 3D Shadow under the book */}
-                <div className="absolute -bottom-4 left-4 right-4 h-4 bg-zinc-100 blur-xl rounded-full z-[-1]" />
+                <div className="absolute -bottom-4 left-4 right-4 h-4 bg-zinc-300 blur-xl rounded-full z-[-1]" />
               </div>
 
               {/* 2 Sentences contextualizing why it matters today */}
@@ -1268,12 +1272,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 </p>
               </div>
 
-              {/* Start reading core lesson button */}
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
-                <BookOpen className="w-4 h-4 stroke-[3]" /> Iniciar Lección (~3 min)
+                <BookOpen className="w-5 h-5" /> Iniciar Lección (~3 min)
               </button>
             </motion.div>
           )}
@@ -1369,14 +1372,163 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     </div>
                   )}
 
-                  {/* CTA button (Tactile 3D) */}
                   <button
                     onClick={advance}
-                    className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2 mt-4"
+                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
                   >
-                    <Brain className="w-4 h-4 stroke-[3]" /> Test My Skills
+                    <Brain className="w-5 h-5" /> Test My Skills
                   </button>
                 </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* BOOK READER STEP (For Book & Build)          */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'book_reader' && (
+            <motion.div
+              key="book_reader"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-center gap-6"
+            >
+              <div className="flex items-start gap-4 mb-2">
+                <img 
+                  src={character.avatarImg} 
+                  alt={character.name} 
+                  className="w-16 h-16 object-contain flex-shrink-0"
+                />
+                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
+                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Reading Phase</span>
+                  <p className="text-xs font-semibold leading-relaxed text-zinc-500">
+                    {bookPage === 0 ? "Read this cover to cover." : "Keep reading."}
+                  </p>
+                </div>
+              </div>
+
+              {bookPage === 0 ? (
+                /* Cover Page */
+                <div className="flex-1 flex flex-col items-center justify-center p-8 bg-gradient-to-br from-zinc-800 to-black rounded-[2rem] text-center shadow-2xl relative border-4 border-zinc-700 overflow-y-auto">
+                  <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20 mix-blend-overlay z-0" />
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-black/40 border-r border-white/10 z-10" />
+                  
+                  <div className="relative z-20">
+                    <BookOpen className="w-16 h-16 text-white/50 mb-6 mx-auto" />
+                    <h1 className="text-3xl font-black uppercase tracking-tighter text-white mb-4 drop-shadow-lg">
+                      {mission.title || "The Intelligent Investor"}
+                    </h1>
+                    <p className="text-[#FF7300] font-bold uppercase tracking-widest text-xs">
+                      By T1GER Curriculum
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                /* Content Page */
+                <div className="flex-1 flex flex-col justify-start p-8 bg-[#fdfcf0] rounded-[2rem] shadow-xl border border-zinc-300 relative overflow-y-auto">
+                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-black/5 border-r border-black/10 rounded-l-[2rem]" />
+                  <h2 className="text-xl font-black italic uppercase tracking-tighter text-zinc-800 mb-6 pl-4 border-l-4 border-[#FF7300]">
+                    Chapter {bookPage}
+                  </h2>
+                  <div className="text-zinc-700 font-serif leading-relaxed space-y-4">
+                    {lessonReading.paragraphs[bookPage - 1] || "No content found for this page."}
+                  </div>
+                  <div className="mt-auto pt-6 text-center text-zinc-400 font-mono text-xs uppercase tracking-widest">
+                    Page {bookPage} of {lessonReading.paragraphs.length}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={() => {
+                  if (bookPage < lessonReading.paragraphs.length) {
+                    setBookPage(prev => prev + 1);
+                  } else {
+                    advance();
+                  }
+                }}
+                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+              >
+                {bookPage < lessonReading.paragraphs.length ? 'Next Page' : 'Finish Reading'}
+              </button>
+            </motion.div>
+          )}
+
+          {/* ============================================ */}
+          {/* BUILD FRAMEWORK STEP (For Book & Build)      */}
+          {/* ============================================ */}
+          {showMainUI && currentStep === 'build_framework' && (
+            <motion.div
+              key="build_framework"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: -50, opacity: 0 }}
+              className="flex-1 flex flex-col justify-start pt-4 gap-4"
+            >
+              <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 text-center mb-2">
+                Action Framework
+              </h1>
+              
+              <div className="space-y-4 overflow-y-auto pb-4">
+                {(mission.frameworkSteps || [
+                  { title: 'Open Trading Platform', desc: 'Go to TradingView.com' },
+                  { title: 'Create Paper Account', desc: 'Sign up and open the Paper Trading tab' },
+                  { title: 'Execute First Trade', desc: 'Buy 1 share of AAPL using virtual money' }
+                ]).map((step: any, idx: number) => {
+                  const isDone = frameworkStep > idx;
+                  const isActive = frameworkStep === idx;
+                  
+                  return (
+                    <div 
+                      key={idx} 
+                      className={`relative overflow-hidden rounded-2xl border-2 transition-all duration-300 ${isDone ? 'border-[#58CC02] bg-[#d7ffb8]' : isActive ? 'border-[#FF7300] bg-white shadow-lg' : 'border-zinc-200 bg-zinc-50 opacity-60'}`}
+                    >
+                      <div className="p-5 flex items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <span className={`text-[10px] font-black uppercase tracking-widest ${isDone ? 'text-[#58A700]' : isActive ? 'text-[#FF7300]' : 'text-zinc-400'}`}>
+                            Step {idx + 1}
+                          </span>
+                          <h3 className={`font-bold text-[15px] ${isDone ? 'text-zinc-800' : 'text-zinc-800'}`}>
+                            {step.title}
+                          </h3>
+                          <p className="text-xs text-zinc-500 font-medium mt-1">
+                            {step.desc}
+                          </p>
+                        </div>
+                        <div className="shrink-0">
+                          {isDone ? (
+                            <div className="w-12 h-12 bg-[#58CC02] rounded-full flex items-center justify-center text-white border-b-4 border-[#58A700]">
+                              <CheckCircle2 className="w-6 h-6" />
+                            </div>
+                          ) : isActive ? (
+                            <button
+                              onClick={() => setFrameworkStep(prev => prev + 1)}
+                              className="px-5 py-3 rounded-xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[13px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all"
+                            >
+                              Done
+                            </button>
+                          ) : (
+                            <div className="w-12 h-12 bg-zinc-200 rounded-full flex items-center justify-center text-zinc-400">
+                              <Lock className="w-5 h-5" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {frameworkStep >= (mission.frameworkSteps?.length || 3) && (
+                <motion.button
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  onClick={advance}
+                  className="w-full py-4 mt-6 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                >
+                  <Crown className="w-5 h-5" /> Framework Completed
+                </motion.button>
               )}
             </motion.div>
           )}
@@ -1600,9 +1752,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               
               <button
                 onClick={advance}
-                className="w-full py-5 rounded-2xl btn-gamified flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                Got It <ArrowRight className="w-4 h-4 stroke-[3]" />
+                Got It <ArrowRight className="w-5 h-5" />
               </button>
             </motion.div>
           )}
@@ -1622,25 +1774,23 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 20, stiffness: 220 }}
-                className="w-full bg-[#0a2717] border-t border-green-500/25 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(16,185,129,0.15)] flex flex-col gap-4"
+                className="w-full bg-[#d7ffb8] border-t-2 border-[#b5e58e] px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.05)] flex flex-col gap-4"
               >
                 <div className="flex items-start gap-4 max-w-md mx-auto w-full">
                   <motion.img 
                     src={character.avatarImg} 
                     alt={character.name} 
-                    className="w-14 h-14 object-contain"
+                    className="w-14 h-14 object-contain drop-shadow-md"
                     animate={{ 
-                      y: [0, -16, 0],
-                      scale: [1, 1.15, 1],
-                      rotate: [0, 8, -8, 0]
+                      y: [0, -8, 0],
+                      scale: [1, 1.05, 1],
+                      rotate: [0, 5, -5, 0]
                     }}
                     transition={{ type: "spring", stiffness: 260, damping: 10, repeat: Infinity, repeatDelay: 2 }}
-                    style={{ filter: `drop-shadow(0 0 10px ${character.glowColor})` }}
                   />
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#0a2717] after:border-l after:border-b after:border-green-500/20 after:rotate-45 after:-translate-y-1/2">
-                    <h3 className="text-xs font-black text-green-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
-                    <p className="text-[11px] text-green-300 leading-normal font-semibold">
-                      <span className="text-zinc-800 block italic mb-1">"{successPhrase}"</span>
+                  <div className="bg-white border border-[#b5e58e] rounded-2xl p-4 flex-1 relative shadow-sm after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-[#b5e58e] after:rotate-45 after:-translate-y-1/2">
+                    <h3 className="text-[13px] font-black text-[#58A700] uppercase tracking-wider mb-1">¡Excelente!</h3>
+                    <p className="text-[14px] text-zinc-700 font-medium leading-relaxed">
                       {correctExplanationText}
                     </p>
                   </div>
@@ -1648,7 +1798,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <div className="max-w-md mx-auto w-full">
                   <button 
                     onClick={advance}
-                    className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-black bg-[#10b981] hover:bg-[#059669] shadow-[0_4px_0_0_#065f46] active:translate-y-[4px] active:shadow-none transition-all"
+                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all"
                   >
                     Continue
                   </button>
@@ -1665,29 +1815,27 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: 'spring', damping: 20, stiffness: 220 }}
-                className="w-full bg-[#3b0f14] border-t border-red-500/25 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(239,68,68,0.15)] flex flex-col gap-4"
+                className="w-full bg-[#ffdfe0] border-t-2 border-[#ffc4c6] px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.05)] flex flex-col gap-4"
               >
                 <div className="flex items-start gap-4 max-w-md mx-auto w-full">
                   <motion.img 
                     src="/tiger_sad.png" 
                     alt={character.name} 
-                    className="w-14 h-14 object-contain"
+                    className="w-14 h-14 object-contain drop-shadow-md"
                     animate={{ 
                       x: [0, -4, 4, -4, 4, 0],
                       y: [0, 3, 0]
                     }}
                     transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2 }}
-                    style={{ filter: `drop-shadow(0 0 10px rgba(239, 68, 68, 0.4))` }}
                   />
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-[1.2rem] p-3 flex-1 relative after:content-[''] after:absolute after:-left-1.5 after:top-6 after:w-3 after:h-3 after:bg-[#3b0f14] after:border-l after:border-b after:border-red-500/20 after:rotate-45 after:-translate-y-1/2">
-                    <h3 className="text-xs font-black text-red-400 uppercase tracking-widest mb-0.5">{character.name}</h3>
-                    <p className="text-[11px] text-red-300 font-semibold leading-normal mb-1">
-                      <span className="text-zinc-800 block italic mb-1">"{failPhrase}"</span>
+                  <div className="bg-white border border-[#ffc4c6] rounded-2xl p-4 flex-1 relative shadow-sm after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-[#ffc4c6] after:rotate-45 after:-translate-y-1/2">
+                    <h3 className="text-[13px] font-black text-[#EA1515] uppercase tracking-wider mb-1">Casi, pero no.</h3>
+                    <p className="text-[14px] text-zinc-700 font-medium leading-relaxed mb-1">
                       {correctExplanationText}
                     </p>
                     {correctAnswerText && (
-                      <p className="text-[10px] text-zinc-500 font-mono mt-1">
-                        La correcta era: <span className="text-red-400 font-bold">{correctAnswerText}</span>
+                      <p className="text-[12px] text-zinc-500 font-medium mt-1">
+                        Respuesta correcta: <span className="text-[#EA1515] font-black">{correctAnswerText}</span>
                       </p>
                     )}
                   </div>
@@ -1695,7 +1843,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <div className="max-w-md mx-auto w-full">
                   <button 
                     onClick={handleFail}
-                    className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest text-zinc-800 bg-[#ef4444] hover:bg-[#dc2626] shadow-[0_4px_0_0_#991b1b] active:translate-y-[4px] active:shadow-none transition-all"
+                    className="w-full py-4 rounded-2xl bg-[#FF4B4B] hover:bg-[#FF4B4B] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#EA1515] active:border-b-0 active:translate-y-1 transition-all"
                   >
                     Entendido
                   </button>
@@ -1706,12 +1854,16 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
           {/* Idle Selection Checking Bottom Panel */}
           {quizResult === 'idle' && (
-            <div className="w-full bg-[#050508]/90 backdrop-blur-md border-t border-zinc-200 px-6 py-6 pb-8 shadow-[0_-10px_35px_rgba(0,0,0,0.8)]">
+            <div className="w-full bg-white border-t-2 border-zinc-200 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.03)]">
               <div className="max-w-md mx-auto w-full">
                 <button
                   disabled={selectedOption === null}
                   onClick={handleCheckAnswer}
-                  className="w-full py-5 rounded-2xl font-black text-sm uppercase tracking-widest btn-gamified flex items-center justify-center gap-2 cursor-pointer"
+                  className={`w-full py-4 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all cursor-pointer border-b-4 
+                    ${selectedOption === null 
+                      ? 'bg-[#E5E5E5] text-[#AFAFAF] border-[#C4C4C4] cursor-not-allowed' 
+                      : 'bg-[#58CC02] hover:bg-[#58CC02] text-white border-[#58A700] active:border-b-0 active:translate-y-1'
+                    }`}
                 >
                   Check Answer
                 </button>
@@ -1729,6 +1881,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // ============================================================
 
 function getStepsForType(type: string, mission: any, learningStyle: string, isPro: boolean = true): string[] {
+  if (type === 'book_and_build') {
+    return ['book_reader', 'build_framework'];
+  }
+  
+  if (type === 'book_lesson') {
+    return ['book_reader'];
+  }
+
   const steps = ['daily_quote', 'reading_chapter'];
   const qQuestions = mission.curatedData?.quizQuestions || mission.quizQuestions || [];
 
@@ -1740,10 +1900,17 @@ function getStepsForType(type: string, mission: any, learningStyle: string, isPr
     steps.push('recall');
   }
 
+  const hasActions = mission.taskBrief || (mission.frameworkSteps && mission.frameworkSteps.length > 0) || type === 'real_world_task';
+
   if (isPro) {
-    steps.push('real_world_action', 'proof_of_action', 'optional_deep_dive');
+    if (hasActions) {
+      steps.push('real_world_action', 'proof_of_action');
+    }
+    steps.push('optional_deep_dive');
   } else {
-    steps.push('apply_paywall');
+    if (hasActions) {
+      steps.push('apply_paywall');
+    }
   }
 
   return steps;

@@ -214,30 +214,35 @@ export const generateAdaptiveLesson = async (
   baseMission: any,
   weaknesses: { competency: string; score: number }[],
   recentFailures: string[],
-  learningStyle: string
+  learningStyle: string,
+  dailyTime: number = 5
 ) => {
   const model = getModel('gemini-1.5-flash');
   
   const compContext = weaknesses.map(w => `${w.competency} (score: ${w.score}/100)`).join(', ');
   const failuresContext = recentFailures.length > 0 ? `Recent mistakes/failures the user made: ${recentFailures.join(', ')}.` : 'No recent mistakes.';
   
+  // Calculate question count based on requested daily time commitment
+  let questionCount = 3;
+  if (dailyTime >= 10) questionCount = 5;
+  if (dailyTime >= 15) questionCount = 7;
+
   const prompt = `You are the T1GER BirdBrain AI Generator. Your goal is to generate a personalized, custom Duolingo-style lesson for an entrepreneur with a niche in "${niche}" who is level ${level}.
   
   Current base topic of the lesson: "${baseMission.title}"
   Concept of the topic: "${baseMission.concept_flashcard || baseMission.concept || ''}"
   Mission Type: "${baseMission.type || 'flashcard'}"
   User Learning Style: "${learningStyle}"
+  User Daily Time Commitment: ${dailyTime} minutes (Generate exactly ${questionCount} quiz questions)
   
   User Competency Weaknesses to strengthen: ${compContext}
   ${failuresContext}
   
   TASK:
-  Provide a highly customized, adaptive lesson. 
+  Provide a highly customized, adaptive lesson broken down into ${questionCount} micro-questions to test their understanding deeply over multiple repetitions (like Duolingo). 
   - If the user's learning style is "visual", optimize the concept explanation to be extremely punchy, graphic, and visually descriptive.
   - If they are "interactive", make the concept concise and focus on intuition.
-  - Construct custom, adaptive options and questions:
-    - If the user has weak competencies, make some options or questions test their understanding in those weak areas.
-    - If they had recent failures, design a custom recall question or option that directly addresses the root cause of those mistakes, giving them a redemptive learning opportunity!
+  - Generate exactly ${questionCount} questions in the quizQuestions array. Vary them: some multiple choice, some scenario-based.
   
   Return the response in this EXACT JSON structure, mapping the dynamic fields (the output must be valid JSON, with absolutely no markdown wrapping except raw JSON):
   {
@@ -249,23 +254,18 @@ export const generateAdaptiveLesson = async (
     "concept": "[Dynamic, highly personalized explanation of the concept based on the learning style]",
     "keyTakeaway": "[Punchy, dynamic 1-sentence summary]",
     
-    // Recall Question (Multiple Choice Quiz to test what was just taught, or to remediate past failures)
-    "recallQuestion": "[Personalized multiple choice question based on the concept, designed to challenge or reinforce their specific weak points]",
-    "recallOptions": [
-      { "text": "[Option A]", "correct": false },
-      { "text": "[Option B]", "correct": true },
-      { "text": "[Option C]", "correct": false }
+    "quizQuestions": [
+      // Generate exactly ${questionCount} questions
+      {
+        "text": "[Question 1 text]",
+        "options": [
+          { "text": "[Option A]", "correct": false },
+          { "text": "[Option B]", "correct": true },
+          { "text": "[Option C]", "correct": false }
+        ],
+        "explanation": "[Explanation of the correct answer]"
+      }
     ],
-    "recallExplanation": "[Clear, insightful explanation of why the correct answer is right and why other options are wrong, matching a mentor's voice]",
-    
-    // Scenario Quiz (For scenario_quiz type)
-    "scenario": "[Custom, dynamic business scenario tailored to their niche and weaknesses]",
-    "options": [
-      { "text": "[Option A]", "correct": false },
-      { "text": "[Option B]", "correct": true },
-      { "text": "[Option C]", "correct": false }
-    ],
-    "failureCritique": "[Personalized review explanation]",
     
     "taskBrief": "${baseMission.taskBrief || ''}",
     "xpReward": ${baseMission.xpReward || 50}

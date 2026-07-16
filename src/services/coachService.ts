@@ -34,8 +34,10 @@ WHAT YOU NEVER DO:
 - Never say "great question" or "absolutely" or any variation of empty affirmation.
 - Never let the user leave a session without one clear next action.
 
-FORMAT:
+FORMAT AND LANGUAGE:
 Keep responses concise. Think out loud when needed but only to show your reasoning, not to fill space. Use plain text. No bullet points unless listing genuinely parallel items. No headers inside a conversation.
+
+CRITICAL RULE: YOU MUST ALWAYS RESPOND IN ENGLISH, NO MATTER WHAT LANGUAGE THE USER SPEAKS.
 `;
 
 const COACH_PERSONALITIES: Record<string, string> = {
@@ -95,9 +97,9 @@ export const getCoachResponse = async (userId: string, userMessage: string, hist
 
   // 4. Call Gemini
   const model = getAi().getGenerativeModel({ 
-    model: "gemini-1.5-flash",
+    model: "gemini-1.5-flash-latest",
     systemInstruction: COACH_SYSTEM_PROMPT + "\n\n" + personalityPrompt + "\n\n" + context
-  });
+  }, { apiVersion: 'v1beta' });
 
   const chat = model.startChat({
     history: history.map(m => ({

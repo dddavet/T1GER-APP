@@ -14,9 +14,12 @@
     "firebase:auth-emulator": "firebase emulators:start --only auth --project t1ger-69d6a --import=./.firebase-emulator-data --export-on-exit=./.firebase-emulator-data",
     "firebase:seed-auth": "tsx src/scripts/seedAuthEmulator.ts",
     "ios:sync": "npm run build && cap sync ios",
-    "ios:open": "cap open ios"
+    "ios:open": "cap open ios",
+    "android:sync": "npm run build && cap sync android",
+    "android:open": "cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.4.2",
     "@capacitor/core": "^8.3.4",
     "@capacitor/ios": "^8.3.4",
     "@google/genai": "^1.29.0",

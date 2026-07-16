@@ -16,7 +16,7 @@ import { auth, db } from '../firebase';
 import { AUTH_BYPASS_ENABLED } from '../config/appMode';
 
 export interface InvestmentProfile {
-  goal: 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement';
+  goal: 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement' | 'investing' | 'ai' | 'sales';
   experience: 'new' | 'basic' | 'active';
   riskComfort: 'protect' | 'balanced' | 'growth';
   weeklyCommitment: number;
@@ -44,6 +44,7 @@ export interface AppUser {
   xp: number;
   streak: number;
   isPro?: boolean;
+  isSuperT1ger?: boolean;
   isFlaggedForInterrogation?: boolean;
   coins?: number;
   streakShields?: number;
@@ -51,6 +52,7 @@ export interface AppUser {
   lastMissionDate?: any;
   lastActive?: any;
   createdAt?: any;
+  energy?: number;
   minimalistMode?: boolean;
   unlockedDenItems?: string[];
   primaryTrack?: 'investing' | 'business' | 'ai';
@@ -61,6 +63,7 @@ export interface AppUser {
     weeklyMinutes: number;
     focusAreas: string[];
   };
+  acquisitionSource?: string;
 }
 
 interface AuthContextType {

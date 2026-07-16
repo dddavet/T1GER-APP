@@ -307,8 +307,8 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     pathData,
     t1gerEmotion,
     t1gerVisualConfig,
-    learnStreak: brainState.learnStreak,
-    tacticalStreak: brainState.tacticalStreak,
+    learnStreak: 67, // hardcoded for demo
+    tacticalStreak: 67, // hardcoded for demo
     completeHabit,
     customHabits: brainState.customHabits,
     customWorkTasks: brainState.customWorkTasks,

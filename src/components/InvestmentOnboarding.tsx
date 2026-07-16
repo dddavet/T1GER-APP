@@ -1,226 +1,621 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, BookOpen, Check, Clock3, Eye, LineChart, Play, Shield, Sparkles, Target, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowLeft, ArrowRight, Brain, TrendingUp, Sparkles, BookOpen, Clock, Bell, Crown, Flame, Target, Users, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useAuth, type InvestmentProfile } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 
-type Answers = Partial<InvestmentProfile>;
-
-interface Choice {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-}
-
-const steps: Array<{
-  key: keyof Answers;
-  eyebrow: string;
-  title: string;
-  subtitle: string;
-  choices: Choice[];
-}> = [
-  {
-    key: 'goal',
-    eyebrow: 'Tu objetivo',
-    title: '¿Qué quieres conseguir invirtiendo?',
-    subtitle: 'Usaremos esto para elegir ejemplos, ejercicios y el orden de tus lecciones.',
-    choices: [
-      { id: 'first-investment', label: 'Hacer mi primera inversión', description: 'Entender lo esencial y empezar sin improvisar.', icon: <Target /> },
-      { id: 'long-term-wealth', label: 'Construir patrimonio', description: 'Crear un sistema para invertir durante años.', icon: <LineChart /> },
-      { id: 'company-analysis', label: 'Analizar empresas', description: 'Aprender a leer negocios, riesgos y valoración.', icon: <Eye /> },
-      { id: 'retirement', label: 'Planificar mi futuro', description: 'Convertir objetivos de vida en un plan financiero.', icon: <Shield /> },
-    ],
-  },
-  {
-    key: 'experience',
-    eyebrow: 'Tu punto de partida',
-    title: '¿Cuánto sabes hoy?',
-    subtitle: 'No es un examen. Solo evita que repitamos lo que ya dominas.',
-    choices: [
-      { id: 'new', label: 'Estoy empezando', description: 'Acciones, fondos y riesgo todavía son conceptos nuevos.', icon: <Sparkles /> },
-      { id: 'basic', label: 'Conozco lo básico', description: 'He leído o visto contenido, pero no tengo un sistema.', icon: <BookOpen /> },
-      { id: 'active', label: 'Ya invierto', description: 'Quiero analizar mejor y tomar decisiones con criterio.', icon: <LineChart /> },
-    ],
-  },
-  {
-    key: 'riskComfort',
-    eyebrow: 'Tu relación con el riesgo',
-    title: 'Si tu inversión cae un 20%, ¿qué harías?',
-    subtitle: 'Tu respuesta adapta los casos prácticos. No constituye asesoramiento financiero.',
-    choices: [
-      { id: 'protect', label: 'Reduciría el riesgo', description: 'Prefiero proteger capital y dormir tranquilo.', icon: <Shield /> },
-      { id: 'balanced', label: 'Revisaría el plan', description: 'Mantendría la calma si la tesis sigue intacta.', icon: <Target /> },
-      { id: 'growth', label: 'Buscaría oportunidades', description: 'Acepto volatilidad a cambio de mayor crecimiento.', icon: <LineChart /> },
-    ],
-  },
-  {
-    key: 'weeklyCommitment',
-    eyebrow: 'Tu ritmo',
-    title: '¿Cuánto tiempo puedes dedicar al día?',
-    subtitle: 'T1GER crea sesiones cortas. La consistencia importa más que una sesión larga.',
-    choices: [
-      { id: '5', label: '5 minutos', description: 'Una idea y una comprobación rápida.', icon: <Clock3 /> },
-      { id: '10', label: '10 minutos', description: 'Lección, quiz y una pequeña aplicación.', icon: <Clock3 /> },
-      { id: '15', label: '15 minutos', description: 'Más casos, análisis y práctica real.', icon: <Clock3 /> },
-    ],
-  },
-  {
-    key: 'contentFormat',
-    eyebrow: 'Cómo aprendes',
-    title: '¿Qué formato te ayuda a entender mejor?',
-    subtitle: 'Podrás cambiarlo en cualquier momento.',
-    choices: [
-      { id: 'read', label: 'Lectura breve', description: 'Ideas de libros y artículos resumidas con precisión.', icon: <BookOpen /> },
-      { id: 'watch', label: 'Video explicado', description: 'Videos seleccionados con notas y preguntas clave.', icon: <Play /> },
-      { id: 'practice', label: 'Aprender haciendo', description: 'Casos, simulaciones y decisiones interactivas.', icon: <Target /> },
-    ],
-  },
-];
-
-const formatToLearningStyle = {
-  read: 'text',
-  watch: 'visual',
-  practice: 'interactive',
-} as const;
+type OnboardingStep = 
+  | 'splash'
+  | 'mascot_intro'
+  | 'source'
+  | 'topic'
+  | 'building_course'
+  | 'experience'
+  | 'motivation'
+  | 'pace'
+  | 'notifications'
+  | 'paywall'
+  | 'ready';
 
 export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
-  const { updateAppUser } = useAuth();
+  const { updateAppUser, appUser } = useAuth();
   const { selectTrack } = useBrain();
-  const [stepIndex, setStepIndex] = useState(0);
-  const [answers, setAnswers] = useState<Answers>({ learnWithFriends: true });
-  const [showPlan, setShowPlan] = useState(false);
+  
+  const [currentStep, setCurrentStep] = useState<OnboardingStep>('splash');
+  const [answers, setAnswers] = useState<Partial<InvestmentProfile>>({ learnWithFriends: true });
   const [saving, setSaving] = useState(false);
-  const step = steps[stepIndex];
+  const [progress, setProgress] = useState(0);
+  const [isSuperOptIn, setIsSuperOptIn] = useState(false);
+  const [acquisitionSource, setAcquisitionSource] = useState<string>('');
 
-  const plan = useMemo(() => {
-    const focusByGoal: Record<string, string[]> = {
-      'first-investment': ['Cómo funciona el mercado', 'Fondos indexados', 'Primera decisión segura'],
-      'long-term-wealth': ['Interés compuesto', 'Diversificación', 'Aportaciones periódicas'],
-      'company-analysis': ['Modelo de negocio', 'Estados financieros', 'Riesgo y valoración'],
-      retirement: ['Objetivo financiero', 'Horizonte temporal', 'Asignación de activos'],
-    };
-    const focusAreas = focusByGoal[answers.goal || 'first-investment'];
-    const minutes = Number(answers.weeklyCommitment || 10);
-    return {
-      title: answers.experience === 'active' ? 'Investor Decision Lab' : 'Investment Foundations',
-      firstLessonId: 'inv-e1',
-      weeklyMinutes: minutes * 5,
-      focusAreas,
-    };
-  }, [answers]);
+  // Auto-advance for building course step
+  useEffect(() => {
+    if (currentStep === 'building_course') {
+      const timer = setTimeout(() => {
+        setCurrentStep('experience');
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentStep]);
 
-  const choose = (choice: Choice) => {
-    const value = step.key === 'weeklyCommitment' ? Number(choice.id) : choice.id;
-    setAnswers(current => ({ ...current, [step.key]: value }));
-    window.setTimeout(() => {
-      if (stepIndex === steps.length - 1) setShowPlan(true);
-      else setStepIndex(current => current + 1);
-    }, 160);
-  };
+  // Update progress bar
+  useEffect(() => {
+    const steps: OnboardingStep[] = ['mascot_intro', 'source', 'topic', 'building_course', 'experience', 'motivation', 'pace', 'notifications', 'paywall', 'ready'];
+    const index = steps.indexOf(currentStep);
+    if (index >= 0) {
+      setProgress(((index + 1) / steps.length) * 100);
+    } else {
+      setProgress(0);
+    }
+  }, [currentStep]);
 
-  const finish = async () => {
-    if (!answers.goal || !answers.experience || !answers.riskComfort || !answers.weeklyCommitment || !answers.contentFormat) return;
+  const handleFinish = async (isSuper: boolean = false) => {
     setSaving(true);
     selectTrack('investing');
+    
+    // Default values if skipped
+    const finalAnswers = {
+      goal: answers.goal || 'long-term-wealth',
+      experience: answers.experience || 'new',
+      riskComfort: answers.riskComfort || 'balanced',
+      weeklyCommitment: answers.weeklyCommitment || 10,
+      contentFormat: answers.contentFormat || 'practice',
+    };
+
+    const plan = {
+      title: finalAnswers.experience === 'active' ? 'Investor Decision Lab' : 'Investment Foundations',
+      firstLessonId: 'inv-e1',
+      weeklyMinutes: (finalAnswers.weeklyCommitment as number) * 5,
+      focusAreas: ['Fundamentos de Mercado', 'Gestión de Riesgo', 'Mentalidad Predator'],
+    };
+
     await updateAppUser({
       niche: 'investing',
       primaryTrack: 'investing',
-      goal: answers.goal,
-      dailyTime: answers.weeklyCommitment,
-      learningStyle: formatToLearningStyle[answers.contentFormat],
-      experienceLevel: answers.experience === 'active' ? 3 : answers.experience === 'basic' ? 2 : 1,
-      investmentProfile: answers as InvestmentProfile,
+      goal: finalAnswers.goal,
+      dailyTime: finalAnswers.weeklyCommitment,
+      learningStyle: 'interactive',
+      experienceLevel: finalAnswers.experience === 'active' ? 3 : finalAnswers.experience === 'basic' ? 2 : 1,
+      investmentProfile: finalAnswers as InvestmentProfile,
       personalizedPlan: plan,
       onboardingStep: 'complete',
       onboardingComplete: true,
+      isSuperT1ger: isSuper,
+      acquisitionSource
     });
+    
     setSaving(false);
     onComplete();
   };
 
-  if (showPlan) {
+  const TopBar = () => {
+    if (currentStep === 'splash' || currentStep === 'paywall') return null;
+    
+    const goBack = () => {
+      const history: Record<OnboardingStep, OnboardingStep> = {
+        mascot_intro: 'splash',
+        source: 'mascot_intro',
+        topic: 'source',
+        building_course: 'topic',
+        experience: 'topic', // Skip building_course going back
+        motivation: 'experience',
+        pace: 'motivation',
+        notifications: 'pace',
+        paywall: 'notifications',
+        ready: 'paywall',
+        splash: 'splash'
+      };
+      setCurrentStep(history[currentStep]);
+    };
+
     return (
-      <div className="flex h-full w-full flex-col overflow-y-auto bg-[#F7F7F7] px-6 pb-8 pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-zinc-800">
-        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col">
-          <div className="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF7300]">
-            <Check className="h-6 w-6" strokeWidth={3} />
-          </div>
-          <p className="mb-2 text-xs font-bold uppercase text-[#FF7300]">Tu ruta está lista</p>
-          <h1 className="mb-3 text-3xl font-black leading-tight">{plan.title}</h1>
-          <p className="mb-8 text-sm leading-6 text-zinc-500">Empezaremos con una lección útil hoy y ajustaremos la dificultad según tus respuestas.</p>
-
-          <div className="mb-6 border-y border-zinc-200 py-5">
-            <div className="mb-5 flex items-center justify-between">
-              <span className="text-sm text-zinc-500">Ritmo semanal</span>
-              <strong className="text-sm text-zinc-800">{plan.weeklyMinutes} min</strong>
-            </div>
-            <div className="space-y-4">
-              {plan.focusAreas.map((area, index) => (
-                <div key={area} className="flex items-center gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-zinc-200 text-xs font-bold text-[#FF7300]">{index + 1}</span>
-                  <span className="text-sm font-semibold text-zinc-200">{area}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setAnswers(current => ({ ...current, learnWithFriends: !current.learnWithFriends }))}
-            className="mb-8 flex w-full items-center justify-between rounded-2xl border border-zinc-200 bg-white shadow-sm p-4 text-left"
-          >
-            <span className="flex items-center gap-3">
-              <Users className="h-5 w-5 text-zinc-500" />
-              <span><strong className="block text-sm">Aprender con amigos</strong><small className="text-xs text-zinc-500">Retos y progreso compartido</small></span>
-            </span>
-            <span className={`h-6 w-11 rounded-full p-1 transition-colors ${answers.learnWithFriends ? 'bg-[#FF7300]' : 'bg-zinc-700'}`}>
-              <span className={`block h-4 w-4 rounded-full bg-white transition-transform ${answers.learnWithFriends ? 'translate-x-5' : ''}`} />
-            </span>
-          </button>
-
-          <button type="button" disabled={saving} onClick={finish} className="mt-auto flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl bg-[#FF7300] px-5 font-black text-black disabled:opacity-60">
-            {saving ? 'Guardando ruta…' : 'Empezar primera lección'} <ArrowRight className="h-5 w-5" />
-          </button>
+      <div className="absolute top-0 left-0 right-0 p-6 flex items-center gap-4 z-10 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))]">
+        <button 
+          onClick={goBack}
+          className="text-zinc-400 hover:text-zinc-600 transition-colors"
+        >
+          <ArrowLeft size={24} strokeWidth={3} />
+        </button>
+        <div className="h-4 flex-1 bg-zinc-200 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-[#58CC02] rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
     );
-  }
+  };
+
+  const OptionButton = ({ onClick, icon: Icon, label, description, selected }: any) => (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all duration-200 active:scale-[0.98]
+        ${selected 
+          ? 'border-[#FF7300] bg-[#FF7300]/10' 
+          : 'border-zinc-200 bg-white hover:bg-zinc-50'
+        }
+      `}
+    >
+      <div className={`p-3 rounded-xl ${selected ? 'bg-[#FF7300] text-white' : 'bg-zinc-100 text-zinc-500'}`}>
+        <Icon size={24} strokeWidth={2.5} />
+      </div>
+      <div className="flex-1 text-left">
+        <h3 className={`font-black uppercase tracking-wider text-[15px] ${selected ? 'text-[#FF7300]' : 'text-zinc-700'}`}>
+          {label}
+        </h3>
+        {description && (
+          <p className="text-[13px] text-zinc-500 font-semibold leading-snug mt-0.5">
+            {description}
+          </p>
+        )}
+      </div>
+    </button>
+  );
 
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden bg-[#F7F7F7] px-6 pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] pt-[calc(2rem+var(--safe-top-inset,env(safe-area-inset-top)))] text-zinc-800">
-      <div className="mx-auto flex w-full max-w-sm items-center gap-4">
-        <button type="button" aria-label="Volver" onClick={() => stepIndex === 0 ? undefined : setStepIndex(current => current - 1)} disabled={stepIndex === 0} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-zinc-200 bg-white shadow-sm disabled:opacity-30">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-zinc-200">
-          <div className="h-full rounded-full bg-[#FF7300] transition-[width] duration-300" style={{ width: `${((stepIndex + 1) / steps.length) * 100}%` }} />
-        </div>
-        <span className="w-8 text-right text-xs font-semibold text-zinc-500">{stepIndex + 1}/{steps.length}</span>
-      </div>
+    <div className="h-[100dvh] w-full max-w-md mx-auto relative flex flex-col bg-white overflow-hidden text-zinc-800 font-sans">
+      <TopBar />
 
-      <div className="mx-auto flex w-full max-w-sm flex-1 flex-col overflow-y-auto pb-2 pt-10">
-        <p className="mb-2 text-xs font-bold uppercase text-[#FF7300]">{step.eyebrow}</p>
-        <h1 className="mb-3 text-[2rem] font-black leading-[1.08]">{step.title}</h1>
-        <p className="mb-7 text-sm leading-6 text-zinc-500">{step.subtitle}</p>
-
-        <div className="space-y-3">
-          {step.choices.map(choice => {
-            const selected = String(answers[step.key]) === choice.id;
-            return (
-              <button key={choice.id} type="button" onClick={() => choose(choice)} className={`flex min-h-[76px] w-full items-center gap-4 rounded-2xl border p-4 text-left transition-colors ${selected ? 'border-[#FF7300] bg-[#FF7300]/10' : 'border-zinc-200 bg-white shadow-sm hover:border-zinc-200'}`}>
-                <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${selected ? 'bg-[#FF7300] text-black' : 'bg-white shadow-sm text-zinc-500'}`}>
-                  {React.isValidElement(choice.icon) ? React.cloneElement(choice.icon as React.ReactElement<{ className?: string }>, { className: 'h-5 w-5' }) : choice.icon}
-                </span>
-                <span className="min-w-0 flex-1">
-                  <strong className="block text-[15px] font-bold leading-5 text-zinc-800">{choice.label}</strong>
-                  <small className="mt-1 block text-xs leading-4 text-zinc-500">{choice.description}</small>
-                </span>
-                <ArrowRight className="h-4 w-4 shrink-0 text-zinc-600" />
+      <AnimatePresence mode="wait">
+        {/* ========================================================== */}
+        {/* STEP 1: SPLASH                                             */}
+        {/* ========================================================== */}
+        {currentStep === 'splash' && (
+          <motion.div 
+            key="splash"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+            className="flex-1 flex flex-col items-center justify-center p-6 text-center"
+          >
+            <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="w-24 h-24 bg-[#FF7300]/10 rounded-full flex items-center justify-center mb-8">
+                <Crown className="w-12 h-12 text-[#FF7300]" />
+              </div>
+              <h1 className="text-4xl font-black italic uppercase tracking-tighter text-[#FF7300] mb-2">
+                T1GER
+              </h1>
+              <p className="text-zinc-500 font-bold uppercase tracking-widest text-sm">
+                Learn. Build. Compete.
+              </p>
+            </div>
+            <div className="w-full pb-8 flex flex-col gap-3">
+              <button 
+                onClick={() => setCurrentStep('mascot_intro')}
+                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all"
+              >
+                Get Started
               </button>
-            );
-          })}
-        </div>
-      </div>
+              <button 
+                onClick={() => onComplete()}
+                className="w-full py-4 rounded-2xl bg-white text-[#FF7300] font-black text-[15px] uppercase tracking-widest border-2 border-zinc-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all"
+              >
+                I already have an account
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 2: MASCOT INTRO                                       */}
+        {/* ========================================================== */}
+        {currentStep === 'mascot_intro' && (
+          <motion.div 
+            key="mascot_intro"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <div className="flex-1 flex flex-col justify-end pb-8">
+              <div className="flex items-end gap-4 mb-12">
+                <div className="w-16 h-16 shrink-0 bg-[#FF7300]/10 rounded-2xl flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-[#FF7300]" />
+                </div>
+                <div className="bg-white border-2 border-zinc-200 rounded-3xl rounded-bl-none p-5 relative shadow-sm max-w-[75%]">
+                  <p className="text-zinc-700 font-bold text-lg leading-snug">
+                    I'm here, I'm T1ger. Just seven quick questions before we start our first mission.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button 
+              onClick={() => setCurrentStep('source')}
+              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all"
+            >
+              Continue
+            </button>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 2.5: SOURCE (How did you hear about us?)              */}
+        {/* ========================================================== */}
+        {currentStep === 'source' && (
+          <motion.div 
+            key="source"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-8 text-center">
+              How did you hear about T1GER?
+            </h2>
+            <div className="flex-1 space-y-3">
+              <OptionButton 
+                icon={Target} 
+                label="TikTok" 
+                selected={acquisitionSource === 'tiktok'}
+                onClick={() => {
+                  setAcquisitionSource('tiktok');
+                  setTimeout(() => setCurrentStep('topic'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Users} 
+                label="Instagram" 
+                selected={acquisitionSource === 'instagram'}
+                onClick={() => {
+                  setAcquisitionSource('instagram');
+                  setTimeout(() => setCurrentStep('topic'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Brain} 
+                label="YouTube" 
+                selected={acquisitionSource === 'youtube'}
+                onClick={() => {
+                  setAcquisitionSource('youtube');
+                  setTimeout(() => setCurrentStep('topic'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Flame} 
+                label="Friends / Family" 
+                selected={acquisitionSource === 'friends'}
+                onClick={() => {
+                  setAcquisitionSource('friends');
+                  setTimeout(() => setCurrentStep('topic'), 300);
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 3: TOPIC                                              */}
+        {/* ========================================================== */}
+        {currentStep === 'topic' && (
+          <motion.div 
+            key="topic"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-8 text-center">
+              What should you learn?
+            </h2>
+            <div className="flex-1 space-y-3">
+              <OptionButton 
+                icon={TrendingUp} 
+                label="Investing & Markets" 
+                selected={answers.goal === 'investing'}
+                onClick={() => {
+                  setAnswers({ ...answers, goal: 'investing' });
+                  setTimeout(() => setCurrentStep('building_course'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Brain} 
+                label="Artificial Intelligence" 
+                selected={answers.goal === 'ai'}
+                onClick={() => {
+                  setAnswers({ ...answers, goal: 'ai' });
+                  setTimeout(() => setCurrentStep('building_course'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Target} 
+                label="Sales & Offer Creation" 
+                selected={answers.goal === 'sales'}
+                onClick={() => {
+                  setAnswers({ ...answers, goal: 'sales' });
+                  setTimeout(() => setCurrentStep('building_course'), 300);
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 4: COURSE BUILDING ANIMATION                          */}
+        {/* ========================================================== */}
+        {currentStep === 'building_course' && (
+          <motion.div 
+            key="building_course"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="flex-1 flex flex-col items-center justify-center p-6 text-center"
+          >
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-[#FF7300]/20 rounded-full animate-ping" />
+              <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center relative z-10 shadow-lg border-4 border-[#FF7300]/20">
+                <Brain className="w-10 h-10 text-[#FF7300] animate-pulse" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-4 px-4 leading-tight">
+              Get ready to join 7 million predators currently learning with T1GER
+            </h2>
+            <div className="w-16 h-16 rounded-full border-4 border-zinc-200 border-t-[#FF7300] animate-spin mx-auto mt-8" />
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 5: EXPERIENCE LEVEL                                   */}
+        {/* ========================================================== */}
+        {currentStep === 'experience' && (
+          <motion.div 
+            key="experience"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-8 text-center">
+              How much investing do you know?
+            </h2>
+            <div className="flex-1 space-y-3">
+              <OptionButton 
+                icon={Sparkles} 
+                label="I'm new to investing" 
+                selected={answers.experience === 'new'}
+                onClick={() => {
+                  setAnswers({ ...answers, experience: 'new' });
+                  setTimeout(() => setCurrentStep('motivation'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={BookOpen} 
+                label="I know the basics" 
+                selected={answers.experience === 'basic'}
+                onClick={() => {
+                  setAnswers({ ...answers, experience: 'basic' });
+                  setTimeout(() => setCurrentStep('motivation'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Flame} 
+                label="I already invest actively" 
+                selected={answers.experience === 'active'}
+                onClick={() => {
+                  setAnswers({ ...answers, experience: 'active' });
+                  setTimeout(() => setCurrentStep('motivation'), 300);
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 6: MOTIVATION                                         */}
+        {/* ========================================================== */}
+        {currentStep === 'motivation' && (
+          <motion.div 
+            key="motivation"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-8 text-center">
+              Why are you learning investing?
+            </h2>
+            <div className="flex-1 space-y-3">
+              <OptionButton 
+                icon={Crown} 
+                label="Build wealth & freedom" 
+                selected={answers.riskComfort === 'growth'}
+                onClick={() => {
+                  setAnswers({ ...answers, riskComfort: 'growth' });
+                  setTimeout(() => setCurrentStep('pace'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Users} 
+                label="Beat the system" 
+                selected={answers.riskComfort === 'balanced'}
+                onClick={() => {
+                  setAnswers({ ...answers, riskComfort: 'balanced' });
+                  setTimeout(() => setCurrentStep('pace'), 300);
+                }}
+              />
+              <OptionButton 
+                icon={Target} 
+                label="Plan for the future" 
+                selected={answers.riskComfort === 'protect'}
+                onClick={() => {
+                  setAnswers({ ...answers, riskComfort: 'protect' });
+                  setTimeout(() => setCurrentStep('pace'), 300);
+                }}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 7: PACE                                               */}
+        {/* ========================================================== */}
+        {currentStep === 'pace' && (
+          <motion.div 
+            key="pace"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-800 mb-8 text-center">
+              Let's set up your learning routine
+            </h2>
+            <div className="flex-1 space-y-3">
+              <OptionButton 
+                icon={Clock} 
+                label="Casual" 
+                description="5 mins / day"
+                selected={answers.weeklyCommitment === 5}
+                onClick={() => setAnswers({ ...answers, weeklyCommitment: 5 })}
+              />
+              <OptionButton 
+                icon={Clock} 
+                label="Regular" 
+                description="10 mins / day"
+                selected={answers.weeklyCommitment === 10}
+                onClick={() => setAnswers({ ...answers, weeklyCommitment: 10 })}
+              />
+              <OptionButton 
+                icon={Clock} 
+                label="Intense" 
+                description="15 mins / day"
+                selected={answers.weeklyCommitment === 15}
+                onClick={() => setAnswers({ ...answers, weeklyCommitment: 15 })}
+              />
+            </div>
+            <button 
+              disabled={!answers.weeklyCommitment}
+              onClick={() => setCurrentStep('notifications')}
+              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50 mt-4"
+            >
+              Continue
+            </button>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 8: NOTIFICATIONS                                      */}
+        {/* ========================================================== */}
+        {currentStep === 'notifications' && (
+          <motion.div 
+            key="notifications"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6"
+          >
+            <div className="flex-1 flex flex-col justify-end pb-8">
+              <div className="flex items-end gap-4 mb-12">
+                <div className="w-16 h-16 shrink-0 bg-[#FF7300]/10 rounded-2xl flex items-center justify-center">
+                  <Bell className="w-8 h-8 text-[#FF7300]" />
+                </div>
+                <div className="bg-white border-2 border-zinc-200 rounded-3xl rounded-bl-none p-5 relative shadow-sm max-w-[75%]">
+                  <p className="text-zinc-700 font-bold text-lg leading-snug">
+                    I will remind you to practice so it becomes a habit.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => {
+                  // Simulate push notification permission
+                  setTimeout(() => setCurrentStep('paywall'), 300);
+                }}
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+              >
+                <Bell className="w-5 h-5" /> Allow Notifications
+              </button>
+              <button 
+                onClick={() => setCurrentStep('paywall')}
+                className="w-full py-4 rounded-2xl bg-white text-zinc-400 font-black text-[15px] uppercase tracking-widest border-2 border-zinc-200 border-b-4 active:border-b-2 active:translate-y-[2px] transition-all"
+              >
+                Not Now
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ========================================================== */}
+        {/* STEP 9: PAYWALL                                            */}
+        {/* ========================================================== */}
+        {currentStep === 'paywall' && (
+          <motion.div 
+            key="paywall"
+            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
+            className="flex-1 flex flex-col bg-[#1e1e24] text-white p-6 justify-between absolute inset-0 z-20"
+          >
+            <div className="flex items-center justify-end pt-4">
+              <button 
+                onClick={() => { setIsSuperOptIn(false); setCurrentStep('ready'); }}
+                className="text-zinc-400 font-black uppercase tracking-widest text-xs opacity-50"
+              >
+                Skip
+              </button>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-[#FF7300] to-yellow-500 rounded-3xl flex items-center justify-center mb-6 shadow-[0_0_40px_rgba(255,115,0,0.4)]">
+                <Crown className="w-10 h-10 text-white" />
+              </div>
+              <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-4">
+                Super T1GER
+              </h1>
+              <p className="text-zinc-300 font-bold mb-8 max-w-[280px]">
+                Unlock unlimited AI feedback, deep dives, and remove all wait times.
+              </p>
+
+              <div className="w-full bg-white/10 border border-white/20 rounded-2xl p-4 text-left mb-8">
+                <ul className="space-y-4">
+                  <li className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-[#58CC02]" strokeWidth={3} />
+                    <span className="font-bold">Unlimited AI Analysis</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-[#58CC02]" strokeWidth={3} />
+                    <span className="font-bold">No ads or interruptions</span>
+                  </li>
+                  <li className="flex items-center gap-3">
+                    <Check className="w-5 h-5 text-[#58CC02]" strokeWidth={3} />
+                    <span className="font-bold">Personalized Coach</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="w-full pb-8">
+              <button 
+                disabled={saving}
+                onClick={() => { setIsSuperOptIn(true); setCurrentStep('ready'); }}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#FF7300] to-yellow-500 text-white font-black text-[15px] uppercase tracking-widest shadow-[0_4px_0_0_#CC5C00] active:translate-y-[4px] active:shadow-none transition-all mb-4"
+              >
+                Start 2-Week Free Trial
+              </button>
+              <button 
+                disabled={saving}
+                onClick={() => { setIsSuperOptIn(false); setCurrentStep('ready'); }}
+                className="w-full py-4 rounded-2xl bg-transparent text-zinc-400 font-black text-[15px] uppercase tracking-widest transition-all"
+              >
+                Learn for Free
+              </button>
+            </div>
+          </motion.div>
+        )}
+        {/* ========================================================== */}
+        {/* STEP 10: READY (Complete first lesson CTA)                 */}
+        {/* ========================================================== */}
+        {currentStep === 'ready' && (
+          <motion.div 
+            key="ready"
+            initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 50, opacity: 0 }}
+            className="flex-1 flex flex-col bg-[#F7F7F7] text-zinc-800 pt-[calc(4rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(2rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-6 justify-between items-center absolute inset-0 z-30"
+          >
+            <div className="text-center w-full max-w-sm mt-8">
+              <div className="w-32 h-32 mx-auto bg-[#FF7300]/10 rounded-full flex items-center justify-center mb-6">
+                 <Sparkles className="w-16 h-16 text-[#FF7300]" />
+              </div>
+              <h1 className="text-3xl font-black italic uppercase tracking-tighter mb-4 text-[#FF7300]">
+                Profile Created
+              </h1>
+              <p className="text-zinc-500 font-medium mb-8">
+                You're all set up. Now it's time to build your foundation.
+              </p>
+            </div>
+            
+            <div className="w-full max-w-sm pb-8">
+              <button
+                disabled={saving}
+                onClick={() => handleFinish(isSuperOptIn)}
+                className="w-full bg-[#58CC02] text-white py-5 rounded-2xl font-black uppercase tracking-widest text-[15px] flex items-center justify-center gap-2 transition-all border-b-4 border-[#58A700] active:border-b-0 active:translate-y-[4px]"
+              >
+                {saving ? 'Loading...' : 'Complete First Lesson'} 
+                <ArrowRight size={20} className="stroke-[3]" />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

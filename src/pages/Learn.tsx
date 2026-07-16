@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { BookOpen, ChevronRight, Cpu, Gamepad2, LineChart, Play, X } from 'lucide-react';
+import { BookOpen, ChevronRight, Cpu, Gamepad2, LineChart, Play, X, Flame } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { WindingPath } from '../components/WindingPath';
@@ -11,12 +11,6 @@ const trackMeta = {
   business: { icon: BookOpen, label: 'Business', color: '#FF7300' },
   ai: { icon: Cpu, label: 'Artificial Intelligence', color: '#c084fc' },
 };
-
-const learningModes = [
-  { id: 'text', label: 'Read', icon: BookOpen },
-  { id: 'visual', label: 'Watch', icon: Play },
-  { id: 'interactive', label: 'Practice', icon: Gamepad2 },
-] as const;
 
 export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => void }) => {
   const { pathData, currentTrackId, selectTrack, brainState } = useBrain();
@@ -32,74 +26,39 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
 
   return (
     <div className="-mx-5 min-h-full bg-white pb-28 text-zinc-800">
-      <header className="border-b border-zinc-200 px-5 pb-6 pt-5">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-[#FF7300]/25 bg-[#FF7300]/10 text-[#FF7300]">
-              <TrackIcon className="h-5 w-5" />
-            </span>
-            <div>
-              <p className="text-xs font-semibold text-zinc-500">Active Track</p>
-              <h1 className="text-lg font-black leading-5">{meta.label}</h1>
-            </div>
-          </div>
-          <button type="button" onClick={() => setIsSelectorOpen(true)} className="flex min-h-10 items-center gap-1 rounded-xl border border-zinc-200 px-3 text-xs font-bold text-zinc-600">
-            Change <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="mb-1 text-xs font-bold uppercase text-[#FF7300]">Today's Session</p>
-            <h2 className="max-w-[260px] text-[1.7rem] font-black leading-[1.08]">Learn an idea. Use it in a decision.</h2>
-          </div>
-          <div className="shrink-0 text-right">
-            <strong className="block text-xl text-[#FF7300]">{appUser?.dailyTime || 10}</strong>
-            <span className="text-xs text-zinc-500">minutes</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="px-5 pt-5">
-        {plan && (
-          <section className="mb-5 rounded-2xl border border-zinc-200 bg-white shadow-sm p-4">
-            <div className="mb-3 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-zinc-500">Personal Plan</p>
-                <h3 className="text-sm font-bold">{plan.title}</h3>
+      {/* Duolingo-style Stage/Section Floating Header */}
+      <div className="sticky top-4 z-40 px-4 mb-8">
+        <motion.button 
+          whileTap={{ scale: 0.96 }}
+          className="w-full px-5 py-4 shadow-xl rounded-3xl text-left outline-none border-b-4 border-black/20 backdrop-blur-md relative overflow-hidden"
+          style={{ backgroundColor: meta.color || '#10B981', color: 'white' }}
+          onClick={() => setIsSelectorOpen(true)}
+        >
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none" />
+          
+          <div className="flex flex-col relative z-10">
+            <div className="flex items-center justify-between mb-1 opacity-90">
+              <span className="text-[11px] font-black uppercase tracking-widest text-white/90">
+                STAGE {currentLevel?.levelNumber || 1}, SECTION {pathData.currentDayIndex + 1}
+              </span>
+              <div className="flex items-center gap-1.5 bg-black/20 px-2.5 py-1 rounded-full shadow-inner">
+                <Flame className="w-3.5 h-3.5 text-orange-400 fill-orange-400" />
+                <span className="text-[11px] font-black tracking-wider text-orange-100">67</span>
               </div>
-              <span className="rounded-lg bg-[#FF7300]/10 px-2.5 py-1 text-xs font-bold text-[#FF7300]">{completion}%</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-50">
-              <div className="h-full rounded-full bg-[#FF7300]" style={{ width: `${Math.max(completion, 3)}%` }} />
+          <div className="flex items-center justify-between">
+            <h1 className="text-xl font-black leading-tight">
+              {currentLevel?.title || 'Introduction to Investing'}
+            </h1>
+            <div className="bg-white/20 p-1 rounded-full">
+              <ChevronRight className="h-5 w-5 rotate-90" />
             </div>
-            <p className="mt-3 text-xs leading-5 text-zinc-500">Now: {currentLevel?.title || 'Foundations'} · {plan.focusAreas[0]}</p>
-          </section>
-        )}
-
-        <div className="mb-8 grid grid-cols-3 gap-1 rounded-2xl border border-zinc-200 bg-white shadow-sm p-1">
-          {learningModes.map(mode => {
-            const Icon = mode.icon;
-            const selected = appUser?.learningStyle === mode.id || (!appUser?.learningStyle && mode.id === 'text');
-            return (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => updateAppUser({ learningStyle: mode.id })}
-                className={`flex min-h-11 items-center justify-center gap-2 rounded-xl text-xs font-bold transition-colors ${selected ? 'bg-[#FF7300] text-black' : 'text-zinc-500'}`}
-              >
-                <Icon className="h-4 w-4" /> {mode.label}
-              </button>
-            );
-          })}
+          </div>
         </div>
+        </motion.button>
+      </div>
 
-        <div className="mb-5">
-          <p className="mb-1 text-xs font-bold uppercase text-[#FF7300]">Your Progress</p>
-          <h2 className="text-xl font-black">Learning Path</h2>
-          <p className="mt-1 text-sm text-zinc-500">Complete each node to unlock the next.</p>
-        </div>
-
+      <main className="px-5 pt-5 flex justify-center">
         <WindingPath onStart={onStartMission} />
       </main>
 
