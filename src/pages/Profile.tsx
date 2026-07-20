@@ -4,10 +4,12 @@ import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload, Info, Bell, Clock, Mail } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { parseLibreLingoYAML } from '../services/libreLingoParser';
+import { generateWeeklyReport, setWeeklyReportOptIn, sendMockWeeklyReportEmail, PredatorReport } from '../services/predatorReportService';
+import { ConsistencyHeatmap } from '../components/gamification/ConsistencyHeatmap';
 
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
   const { appUser, logout, updateAppUser } = useAuth();
@@ -15,6 +17,49 @@ export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => v
   const { competencies, learnStreak, tacticalStreak, resetBrain, brainState } = useBrain();
   const [showMarket, setShowMarket] = useState(false);
   const [sessions, setSessions] = useState<any[]>([]);
+
+  // Weekly Predator Report States & Actions
+  const [weeklyReport, setWeeklyReport] = useState<PredatorReport | null>(null);
+  const [loadingReport, setLoadingReport] = useState(false);
+  const [showReportPreview, setShowReportPreview] = useState(false);
+  const [emailSentAlert, setEmailSentAlert] = useState(false);
+  const [isUpdatingOptIn, setIsUpdatingOptIn] = useState(false);
+
+  const handleToggleWeeklyOptIn = async () => {
+    if (!appUser?.uid) return;
+    setIsUpdatingOptIn(true);
+    try {
+      const currentOptIn = !appUser.weeklyReportOptIn;
+      await setWeeklyReportOptIn(appUser.uid, currentOptIn);
+      await updateAppUser({ weeklyReportOptIn: currentOptIn } as any);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsUpdatingOptIn(false);
+    }
+  };
+
+  const handleGenerateAndPreviewReport = async () => {
+    if (!appUser?.uid) return;
+    setLoadingReport(true);
+    try {
+      const rep = await generateWeeklyReport(appUser.uid, appUser.streak || 0);
+      setWeeklyReport(rep);
+      setShowReportPreview(true);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingReport(false);
+    }
+  };
+
+  const handleSendTestEmail = () => {
+    if (weeklyReport && appUser?.email) {
+      sendMockWeeklyReportEmail(appUser.email, weeklyReport);
+      setEmailSentAlert(true);
+      setTimeout(() => setEmailSentAlert(false), 4000);
+    }
+  };
 
   // Developer Mode Toggle
   const [isDevMode, setIsDevMode] = useState(false);
@@ -598,6 +643,32 @@ quizQuestions:
         </div>
 
         <div className="liquid-glass rounded-[2rem] p-6 space-y-8 shadow-3d">
+          {/* Theme Toggle */}
+          <div className="space-y-3">
+            <label className="block text-[9px] font-black uppercase text-zinc-600 tracking-widest ml-1">UI Aesthetic</label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => updateAppUser({ themePreference: 'light' })}
+                className={`relative flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                  (!appUser?.themePreference || appUser?.themePreference === 'light')
+                    ? 'bg-white border-black/10 text-zinc-900 shadow-sm'
+                    : 'bg-black/20 border-white/5 text-zinc-500 hover:bg-black/30'
+                }`}
+              >
+                <span>Light Mode</span>
+              </button>
+              <button
+                onClick={() => updateAppUser({ themePreference: 'dark' })}
+                className={`relative flex items-center justify-center gap-2 p-3 rounded-xl border text-xs font-bold transition-all ${
+                  appUser?.themePreference === 'dark'
+                    ? 'bg-[#050505] border-white/10 text-white shadow-3d'
+                    : 'bg-white border-black/5 text-zinc-500 hover:bg-zinc-50'
+                }`}
+              >
+                <span>Dark Mode</span>
+              </button>
+            </div>
+          </div>
           {/* Goal Setting */}
           <div className="space-y-3">
             <label className="block text-[9px] font-black uppercase text-zinc-600 tracking-widest ml-1">Current Directive (90D Goal)</label>
@@ -1133,6 +1204,26 @@ quizQuestions:
         </div>
       )}
 
+      {/* Consistency Heatmap */}
+      <section className="space-y-4">
+        <ConsistencyHeatmap 
+          data={[
+            // Generate some fake recent activity
+            ...Array.from({ length: 45 }).map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - i);
+              // Random activity pattern simulating 85% consistency
+              return { 
+                date: d.toISOString().split('T')[0], 
+                count: Math.random() > 0.15 ? Math.floor(Math.random() * 100) + 10 : 0 
+              };
+            })
+          ]}
+          days={90}
+          title="T1GER FOCUS CONSISTENCY"
+        />
+      </section>
+
       {/* Public Profile Preview */}
       <section className="space-y-4">
         <div className="flex items-center gap-2 px-2">
@@ -1176,6 +1267,169 @@ quizQuestions:
            </p>
         </div>
       </section>
+
+      {/* Weekly Predator Report */}
+      <div className="pt-4 border-t border-zinc-200 space-y-4">
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <div className="flex items-center gap-1.5">
+              <Mail className="w-4 h-4 text-[#FF6B00]" />
+              <p className="text-xs font-black uppercase tracking-tight text-zinc-800">Weekly Predator Report</p>
+            </div>
+            <p className="text-[9px] font-medium text-zinc-500 uppercase leading-relaxed max-w-[280px]">
+              Opt-in to receive automated weekly performance summaries with total completions and streak growth.
+            </p>
+          </div>
+          
+          <button 
+            onClick={handleToggleWeeklyOptIn}
+            disabled={isUpdatingOptIn}
+            className={`w-12 h-6 rounded-full transition-all relative flex-shrink-0 cursor-pointer ${appUser?.weeklyReportOptIn ? 'bg-[#FF6B00] shadow-sm' : 'bg-zinc-800'}`}
+          >
+            <motion.div 
+              animate={{ x: appUser?.weeklyReportOptIn ? 26 : 2 }}
+              className={`absolute top-1 w-4 h-4 rounded-full shadow-md ${appUser?.weeklyReportOptIn ? 'bg-white' : 'bg-zinc-500'}`} 
+            />
+          </button>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            onClick={handleGenerateAndPreviewReport}
+            disabled={loadingReport}
+            className="w-full py-3 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-zinc-700 font-black text-[10px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 cursor-pointer"
+          >
+            {loadingReport ? (
+              <>
+                <RefreshCcw className="w-3.5 h-3.5 animate-spin text-[#FF6B00]" />
+                Calculating Metrics...
+              </>
+            ) : (
+              <>
+                <FileText className="w-3.5 h-3.5 text-[#FF6B00]" />
+                {showReportPreview ? 'Recalculate & Refresh Report' : 'Generate Weekly Report Preview'}
+              </>
+            )}
+          </button>
+
+          <AnimatePresence>
+            {showReportPreview && weeklyReport && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                className="bg-zinc-950 text-zinc-200 border border-zinc-800 rounded-3xl p-5 space-y-5 shadow-2xl overflow-hidden relative"
+              >
+                {/* Orange grid overlay accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#FF6B00]/5 rounded-full blur-2xl pointer-events-none" />
+                
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                  <div>
+                    <span className="text-[8px] font-black font-mono text-[#FF6B00] uppercase tracking-widest block">
+                      T1GER PERFORMANCE INTEL
+                    </span>
+                    <h4 className="text-xs font-black uppercase tracking-tight text-white flex items-center gap-1.5">
+                      Weekly Predator Report
+                    </h4>
+                  </div>
+                  <span className="text-[8px] font-black font-mono text-zinc-500 bg-zinc-900 px-2 py-1 rounded-md border border-zinc-850">
+                    {weeklyReport.startDate.toLocaleDateString()} - {weeklyReport.endDate.toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3.5">
+                  <div className="bg-zinc-900/60 border border-zinc-850 rounded-2xl p-3">
+                    <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider">Completed Missions</p>
+                    <p className="text-xl font-black text-white mt-1">{weeklyReport.totalCompletedMissions}</p>
+                    <span className="text-[8px] font-mono text-zinc-500 block mt-0.5">Past 7 Days</span>
+                  </div>
+
+                  <div className="bg-zinc-900/60 border border-zinc-850 rounded-2xl p-3">
+                    <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider">XP Accumulated</p>
+                    <p className="text-xl font-black text-emerald-400 mt-1">+{weeklyReport.xpEarned} XP</p>
+                    <span className="text-[8px] font-mono text-zinc-500 block mt-0.5">Focus Compound</span>
+                  </div>
+
+                  <div className="bg-zinc-900/60 border border-zinc-850 rounded-2xl p-3">
+                    <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider">Streak Growth</p>
+                    <p className="text-xl font-black text-[#FF6B00] mt-1">+{weeklyReport.streakStatus.streakGrowth}D</p>
+                    <span className="text-[8px] font-mono text-zinc-500 block mt-0.5">Active Streak: {weeklyReport.streakStatus.currentStreak}D</span>
+                  </div>
+
+                  <div className="bg-zinc-900/60 border border-zinc-850 rounded-2xl p-3">
+                    <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-wider">Missions with Reflections</p>
+                    <p className="text-xl font-black text-amber-300 mt-1">{weeklyReport.reflectionsCount}</p>
+                    <span className="text-[8px] font-mono text-zinc-500 block mt-0.5">Logged Learning Insights</span>
+                  </div>
+                </div>
+
+                {/* Category Breakdown */}
+                {Object.keys(weeklyReport.byCategory).length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest">Focus Competencies Mapped</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {Object.entries(weeklyReport.byCategory).map(([cat, count]) => (
+                        <span key={cat} className="text-[8px] font-mono font-black uppercase px-2.5 py-1 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300">
+                          {cat}: <strong className="text-white">{count}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Reflections & Lessons Logged */}
+                <div className="space-y-3">
+                  <p className="text-[8px] font-black font-mono text-zinc-500 uppercase tracking-widest">Compound Learning Reflections</p>
+                  
+                  {weeklyReport.recentMissions.length === 0 ? (
+                    <p className="text-[9px] font-mono text-zinc-600 italic">No missions completed in the past 7 days to extract reflections.</p>
+                  ) : (
+                    <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                      {weeklyReport.recentMissions.map(m => (
+                        <div key={m.id} className="p-2.5 bg-zinc-900 border border-zinc-850 rounded-xl space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[8px] font-black uppercase text-white font-mono truncate max-w-[200px]">
+                              {m.title}
+                            </span>
+                            <span className="text-[7px] font-mono text-zinc-500">
+                              {m.completedAt.toLocaleDateString()}
+                            </span>
+                          </div>
+                          <p className="text-[9px] text-zinc-400 font-bold italic font-mono leading-normal">
+                            "{m.reflection || 'Completado sin reflexión.'}"
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Email Action Mock */}
+                <div className="pt-2 border-t border-zinc-800 space-y-2.5">
+                  <button
+                    onClick={handleSendTestEmail}
+                    className="w-full py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-zinc-950 font-black text-[9px] uppercase tracking-widest transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Mail className="w-3 h-3 text-zinc-950" />
+                    Send Mock Report Email
+                  </button>
+
+                  {emailSentAlert && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-mono font-black uppercase tracking-wider py-2 rounded-xl text-center"
+                    >
+                      ⚡ Predator Summary Dispatched to {appUser?.email} (Logged to console)
+                    </motion.div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
 
       {/* Logout */}
       <div className="pt-4">

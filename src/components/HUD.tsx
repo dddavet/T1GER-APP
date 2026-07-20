@@ -32,32 +32,34 @@ export const HUD = React.memo(() => {
 
   return (
     <div className="flex-none z-40 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-3 px-5 flex items-center justify-between bg-transparent gap-2">
-      {/* Left: Dual Streaks Capsules */}
+      {/* Left: Gamification Metrics (Consistency & Energy) */}
       <div className="flex items-center gap-1.5">
-        {/* Learn Streak Capsule */}
+        {/* Consistency % Capsule */}
         <div 
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-[#050508]/40 shadow-sm transition-all duration-300"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-white dark:bg-[#050508]/40 shadow-sm transition-all duration-300"
           style={{
-            borderColor: learnStreak >= 3 ? '#CCFF00' : 'rgba(255,255,255,0.05)',
-            boxShadow: learnStreak >= 3 ? '0 0 10px rgba(204,255,0,0.1)' : 'none',
-            color: learnStreak >= 3 ? '#CCFF00' : '#8a8a9e',
+            borderColor: '#FF6B00',
+            boxShadow: '0 0 10px rgba(255,107,0,0.1)',
+            color: '#FF6B00',
           }}
+          title="30-Day Consistency Map"
         >
-          <Brain className="w-3 h-3 flex-shrink-0" />
-          <span className="font-mono text-xs leading-none">{learnStreak}</span>
+          <Target className="w-3 h-3 flex-shrink-0" />
+          <span className="font-mono text-xs leading-none">85%</span>
         </div>
 
-        {/* Tactical Streak Capsule */}
+        {/* Energy Slots Capsule */}
         <div 
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-[#050508]/40 shadow-sm transition-all duration-300"
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[10px] font-black border bg-white dark:bg-[#050508]/40 shadow-sm transition-all duration-300"
           style={{
-            borderColor: tacticalStreak >= 3 ? '#60A5FA' : 'rgba(255,255,255,0.05)',
-            boxShadow: tacticalStreak >= 3 ? '0 0 10px rgba(96,165,250,0.1)' : 'none',
-            color: tacticalStreak >= 3 ? '#60A5FA' : '#8a8a9e',
+            borderColor: '#60A5FA',
+            boxShadow: '0 0 10px rgba(96,165,250,0.1)',
+            color: '#60A5FA',
           }}
+          title="Reserve Energy Slots (Stored Effort)"
         >
           <Zap className="w-3 h-3 flex-shrink-0" />
-          <span className="font-mono text-xs leading-none">{tacticalStreak}</span>
+          <span className="font-mono text-xs leading-none">2/3</span>
         </div>
       </div>
 

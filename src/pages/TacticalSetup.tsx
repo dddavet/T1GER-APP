@@ -44,6 +44,7 @@ export const TacticalSetup = () => {
   const [recurrence, setRecurrence] = useState<'daily' | 'weekdays' | 'weekly' | 'custom'>('daily');
   const [recurrenceInterval, setRecurrenceInterval] = useState<number>(3);
   const [recurrenceDayOfWeek, setRecurrenceDayOfWeek] = useState<number>(1);
+  const [validationSource, setValidationSource] = useState<'manual' | 'github' | 'todoist'>('manual');
 
   const haptic = () => {
     if (window.navigator && window.navigator.vibrate) {
@@ -259,6 +260,34 @@ export const TacticalSetup = () => {
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </div>
+
+                {/* Automation & Proof of Work Picker */}
+                <div className="space-y-3 pt-2">
+                  <label className="block text-[8px] font-black uppercase text-zinc-500 tracking-widest text-left flex items-center gap-1.5">
+                    <Zap className="w-3 h-3 text-cyan-400" />
+                    Validation Source (Proof of Work)
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 bg-black/40 border border-white/5 rounded-2xl p-1">
+                    {[
+                      { id: 'manual', label: 'Manual' },
+                      { id: 'github', label: 'GitHub Push' },
+                      { id: 'todoist', label: 'Todoist' },
+                    ].map((v) => (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => { haptic(); setValidationSource(v.id as any); }}
+                        className={`py-2.5 rounded-xl text-[8px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                          validationSource === v.id 
+                            ? 'bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shadow-sm' 
+                            : 'text-zinc-500 hover:text-zinc-300'
+                        }`}
+                      >
+                        {v.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <button 

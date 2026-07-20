@@ -78,3 +78,30 @@ See `firestore.rules` for security rules and data schemas.
 ## Styling
 
 Tailwind CSS v4 with custom theme variables (`--accent-main`, `--accent-glow`) for dynamic color themes based on day type (focus, beast, relaxed, rest).
+
+## T1GER Brand Design Principles (Duolingo Style)
+
+When building UI components for T1GER, adhere STRICTLY to the following principles inspired by Duolingo but adapted to the T1GER color palette:
+
+1. **Colors**:
+   - Primary Action: T1GER Orange (`#FF7300`) with a dark orange border bottom (`#CC5C00`).
+   - Success Action: Green (`#58CC02`) with dark green border bottom (`#58A700`).
+   - Danger/Fail Action: Red (`#FF4B4B`) with dark red border bottom (`#EA1515`).
+   - Backgrounds: Off-white (`#F7F7F7`) for app backgrounds, pure white (`#FFFFFF`) for cards.
+   - Text: `zinc-800` for headings, `zinc-600` for body, `zinc-500` for captions.
+
+2. **3D Tactile Buttons**:
+   - All primary buttons must look like physical keys.
+   - Use `border-b-4` of a darker shade of the background color.
+   - Use `active:border-b-0` and `active:translate-y-1` to create the "press" effect.
+   - Give buttons rounded corners (`rounded-2xl` or `rounded-3xl`).
+   - Text should be bold/black, uppercase, and tracking wide (`font-black uppercase tracking-widest text-[15px]`).
+
+3. **Typography**:
+   - Headings should be bold, italic, and tight (`font-black italic uppercase tracking-tighter`).
+   - Badges and microcopy should use monospaced or highly tracked sans (`font-mono text-[9px] uppercase tracking-widest`).
+   
+4. **Layout & Feedback**:
+   - Modals should slide up from the bottom (`fixed bottom-0 w-full`).
+   - Correct/Incorrect states should tint the background (e.g., `#d7ffb8` for correct, `#ffdfe0` for incorrect) and use thick top borders.
+   - Avatars should be prominently featured with speech bubbles to guide the user.

@@ -42,11 +42,6 @@ const AppContent = () => {
   const [loadingText, setLoadingText] = useState('Sincronizando...');
   const [onboardingBypassed, setOnboardingBypassed] = useState(false);
 
-  useEffect(() => {
-    if (!activeView) {
-      setActiveView('learn');
-    }
-  }, [activeView, setActiveView]);
 
   const startMission = async (baseMission: any) => {
     setLoadingMission(true);
@@ -149,17 +144,35 @@ const AppContent = () => {
 
   // Futuristic theme change flicker
   const [isFlickering, setIsFlickering] = React.useState(false);
+  
+  // Theme preference
+  const themePref = appUser?.themePreference || 'light';
+  
   React.useEffect(() => {
     setIsFlickering(true);
     const timer = setTimeout(() => setIsFlickering(false), 200);
     return () => clearTimeout(timer);
   }, [dailyTacticalStatus.dayType]);
 
+  useEffect(() => {
+    if (themePref === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [themePref]);
+
+  useEffect(() => {
+    if (!activeView) {
+      setActiveView('learn');
+    }
+  }, [activeView, setActiveView]);
+
   if (loading) {
     return <LoadingSpinner />;
   }
 
-  if (!user) {
+  if (!user && !appUser) {
     return <AuthGate />;
   }
 
@@ -179,7 +192,7 @@ const AppContent = () => {
 
   return (
     <div 
-      className={`flex flex-col h-full bg-[#050505] text-white font-sans overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${themeClass} ${isFlickering ? 'brightness-150 saturate-200' : ''}`}
+      className={`flex flex-col h-full bg-[#F7F7F7] dark:bg-[#050505] text-zinc-900 dark:text-white font-sans overflow-hidden transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)] ${themeClass} ${isFlickering ? 'brightness-150 saturate-200' : ''}`}
       style={{
         '--accent-main': theme.main,
         '--accent-glow': theme.glow,

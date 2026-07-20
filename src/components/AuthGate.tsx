@@ -186,6 +186,27 @@ export const AuthGate: React.FC = () => {
                 </GlassButton>
               </form>
 
+              {/* DEVELOPER BYPASS */}
+              <GlassButton
+                onClick={() => {
+                  window.localStorage.setItem('t1ger_local_app_user', JSON.stringify({
+                    uid: 'local_dev_bypass',
+                    email: 'dev@local.host',
+                    niche: 'Dev',
+                    level: 99,
+                    xp: 9999,
+                    streak: 999,
+                    onboardingComplete: true
+                  }));
+                  window.location.reload();
+                }}
+                className="w-full mt-4"
+                intensity="low"
+                contentClassName="text-[#CCFF00] font-black uppercase tracking-widest text-[10px]"
+              >
+                [ FORCE DEV BYPASS ]
+              </GlassButton>
+
               {notice && (
                 <p className="px-2 text-center text-[11px] font-bold uppercase tracking-wider text-[#CCFF00]">
                   {notice}

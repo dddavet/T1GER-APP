@@ -35,6 +35,7 @@ export interface AppUser {
   streak: number;
   isPro?: boolean;
   isFlaggedForInterrogation?: boolean;
+  weeklyReportOptIn?: boolean;
   coins?: number;
   streakShields?: number;
   activeCoachId?: string;
@@ -43,6 +44,7 @@ export interface AppUser {
   createdAt?: any;
   minimalistMode?: boolean;
   unlockedDenItems?: string[];
+  themePreference?: 'light' | 'dark' | 'system';
 }
 
 interface AuthContextType {
