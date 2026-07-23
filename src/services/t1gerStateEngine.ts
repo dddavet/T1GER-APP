@@ -1,4 +1,4 @@
-import { type BrainState } from './brainService';
+import { type BrainState, getLocalDateString } from './brainService';
 
 export type T1gerEmotion = 'PREDATOR' | 'PROUD' | 'FERAL' | 'DISAPPOINTED' | 'RESTING';
 
@@ -20,11 +20,11 @@ export const calculateT1gerEmotion = (
   state: BrainState,
   currentHour: number = new Date().getHours()
 ): T1gerEmotion => {
-  const todayStr = new Date().toISOString().split('T')[0];
+  const todayStr = getLocalDateString();
 
   // 1. DISAPPOINTED: Did the user fail any mission today?
   const todayFailedMissions = state.missionHistory.filter(record => {
-    const recordDate = new Date(record.timestamp).toISOString().split('T')[0];
+    const recordDate = getLocalDateString(new Date(record.timestamp));
     return recordDate === todayStr && !record.completed;
   });
   

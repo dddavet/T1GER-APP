@@ -25,12 +25,9 @@ import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
 import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 
-const LoadingSpinner = () => (
-  <div className="flex flex-col items-center justify-center h-full w-full bg-white gap-4">
-    <Loader2 className="w-8 h-8 text-[#FF6B00] animate-spin" />
-    <p className="text-xs font-mono text-zinc-600 uppercase tracking-widest">Loading Predator Profile...</p>
-  </div>
-);
+import { AppSkeleton } from './components/ui/AppSkeleton';
+import { MissionSkeleton } from './components/ui/MissionSkeleton';
+
 
 const AppContent = () => {
   const { activeView, setActiveView } = useT1ger();
@@ -176,7 +173,7 @@ const AppContent = () => {
   const currentTheme = themeColors[dayType] || themeColors.focus;
 
   if (loading) {
-    return <LoadingSpinner />;
+    return <AppSkeleton />;
   }
 
   if (!user && !appUser) {
@@ -186,14 +183,14 @@ const AppContent = () => {
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
   if (!appUser) {
-    return <LoadingSpinner />;
+    return <AppSkeleton />;
   }
 
   if (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser.onboardingComplete) {
     return <InvestmentOnboarding onComplete={() => setOnboardingBypassed(true)} />;
   }
 
-  const isFullscreen = activeView === 'mission' || activeView === 'debrief';
+  const isFullscreen = activeView === 'mission' || activeView === 'debrief' || activeView === 'coach';
 
   return (
     <div 
@@ -258,44 +255,7 @@ const AppContent = () => {
       {/* Tactical Loading Overlay */}
       <AnimatePresence>
         {loadingMission && (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white/95 backdrop-blur-md"
-          >
-            {/* Pulsing neons */}
-            <div className="absolute top-[20%] left-[20%] w-[50%] h-[50%] rounded-full blur-[120px] bg-[var(--accent-glow)] opacity-10 pointer-events-none animate-pulse-glow" />
-
-            <div className="relative flex flex-col items-center justify-center p-6 text-center max-w-xs">
-              {/* Spinner wrapper */}
-              <div className="relative mb-6">
-                <motion.div 
-                  className="w-16 h-16 rounded-full border-2 border-white/5 border-t-[var(--accent-main)] shadow-[0_0_15px_var(--accent-glow)]"
-                  animate={{ rotate: 360 }}
-                  transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
-                />
-                <div className="absolute inset-0 flex items-center justify-center font-black text-xs font-mono text-[var(--accent-main)]">
-                  T1
-                </div>
-              </div>
-
-              {/* Status information */}
-              <span className="text-[10px] font-black font-mono text-[var(--accent-main)] uppercase tracking-[0.25em] mb-2 animate-pulse">
-                Sincronizando Cerebro
-              </span>
-              <h2 className="text-sm font-bold text-white uppercase tracking-tight mb-3">
-                Cargando Reto Adaptativo
-              </h2>
-              
-              {/* Animated phrase */}
-              <div className="h-10 flex items-center justify-center">
-                <p className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider leading-relaxed animate-fade-in" key={loadingText}>
-                  {loadingText}
-                </p>
-              </div>
-            </div>
-          </motion.div>
+          <MissionSkeleton loadingText={loadingText} />
         )}
       </AnimatePresence>
     </div>

@@ -106,8 +106,8 @@ export const Coach = () => {
     } catch (error: any) {
       console.error('Coach error:', error);
       const fallbackText = activeCoachId === 't1ger' 
-        ? "Predator, mi conexión sináptica falló. Revisa tu internet o asegúrate de haber reiniciado tu servidor (npm run dev) para leer mi API Key."
-        : "Ocurrió un error de conexión. Por favor revisa tu entorno.";
+        ? "Predator, mi conexión sináptica falló. Ocurrió un error en el servidor o la API Key no está configurada."
+        : "Ocurrió un error de conexión con la IA.";
       const errorMessage = { role: 'model', text: fallbackText };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
@@ -116,10 +116,13 @@ export const Coach = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] -mx-5 -mt-5 bg-white">
+    <div className="absolute inset-0 flex flex-col bg-[#F7F7F7] z-50 overflow-hidden">
       {/* Header */}
-      <div className="px-5 py-4 border-b border-zinc-100 bg-white/95 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20">
+      <div className="px-5 py-4 border-b border-zinc-100 bg-white/95 backdrop-blur-xl flex items-center justify-between sticky top-0 z-20 shadow-sm">
         <div className="flex items-center gap-3">
+          <button onClick={() => setActiveView('learn')} className="p-2 hover:bg-zinc-50 rounded-xl transition-colors btn-haptic mr-1">
+            <ArrowLeft className="w-5 h-5 text-zinc-500" />
+          </button>
           <div 
             className="w-10 h-10 rounded-2xl flex items-center justify-center bg-zinc-50 border border-zinc-100"
           >
@@ -132,9 +135,6 @@ export const Coach = () => {
             </p>
           </div>
         </div>
-        <button onClick={() => setActiveView('home')} className="p-2 hover:bg-zinc-50 rounded-xl transition-colors">
-          <ArrowLeft className="w-5 h-5 text-zinc-500" />
-        </button>
       </div>
 
 
@@ -211,8 +211,10 @@ export const Coach = () => {
               alt="Thinking Mascot" 
               className="w-10 h-10 object-contain rounded-full bg-zinc-50 border border-zinc-200 p-1 flex-shrink-0 animate-pulse"
             />
-            <div className="glass border border-zinc-200 p-4 rounded-3xl rounded-tl-none flex items-center justify-center">
-              <Loader2 className="w-5 h-5 animate-spin" style={{ color: coachConfig.accentColor }} />
+            <div className="glass border border-zinc-200 py-3 px-4 rounded-3xl rounded-tl-none flex items-center justify-center gap-1.5 h-12">
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-[bounce_1s_infinite_0ms]" style={{ backgroundColor: coachConfig.accentColor }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-[bounce_1s_infinite_200ms]" style={{ backgroundColor: coachConfig.accentColor }} />
+              <div className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-[bounce_1s_infinite_400ms]" style={{ backgroundColor: coachConfig.accentColor }} />
             </div>
           </div>
         )}
@@ -226,15 +228,18 @@ export const Coach = () => {
             value={input} 
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            className="w-full bg-zinc-50 border border-zinc-200 rounded-full py-3.5 pl-5 pr-14 text-[15px] focus:outline-none focus:border-zinc-300 focus:bg-white transition-colors text-zinc-800"
+            aria-label={`Message ${coachConfig.name}`}
+            className="w-full bg-zinc-50 border border-zinc-200 rounded-full py-3.5 pl-5 pr-14 text-[15px] focus:outline-none focus:border-[#FF7300] focus:bg-white transition-colors text-zinc-800"
             placeholder={`Message ${coachConfig.name}...`}
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim() || loading}
-            className="absolute right-1.5 p-2 rounded-full disabled:opacity-50 disabled:grayscale transition-all active:scale-95"
+            aria-label="Send message"
+            className="absolute right-1.5 p-2.5 rounded-full disabled:opacity-50 disabled:grayscale transition-all border-b-2 active:border-b-0 active:translate-y-0.5 shadow-sm"
             style={{
               backgroundColor: input.trim() ? coachConfig.accentColor : '#E5E7EB',
+              borderColor: input.trim() ? '#CC5C00' : '#D1D5DB',
               color: 'white',
             }}
           >

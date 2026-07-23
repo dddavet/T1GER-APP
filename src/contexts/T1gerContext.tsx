@@ -51,33 +51,43 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [appUser]);
 
-  const addXP = React.useCallback(async (amount: number, isMissionComplete = false) => {
-    const newXP = stats.xp + amount;
-    // Nivel basado en un tracker de misiones (10 misiones = 1 nivel)
-    // Para no romper la DB actual, usamos XP como proxy si no hay `isMissionComplete`, pero lo ideal es pasar stats.completedMissions.
-    // Simplificación: Asumimos que la XP principal viene de misiones (10 XP por misión).
-    const newLevel = Math.floor(newXP / 100) + 1;
-    
-    if (newLevel > (appUser?.level || 1)) {
-      setTriggerAnimation('level-up');
-      setTimeout(() => setTriggerAnimation('none'), 3000);
-    }
+  const addXP = React.useCallback(async (amount: number) => {
+    let calculatedXP = 0;
+    let calculatedLevel = 1;
+    let earnedCoins = Math.floor(amount / 2);
+    let calculatedCoins = 0;
 
-    setStats(prev => ({ ...prev, xp: newXP }));
-    
+    setStats(prev => {
+      calculatedXP = prev.xp + amount;
+      calculatedLevel = Math.floor(calculatedXP / 100) + 1;
+      calculatedCoins = prev.coins + earnedCoins;
+
+      if (calculatedLevel > (appUser?.level || 1)) {
+        setTriggerAnimation('level-up');
+        setTimeout(() => setTriggerAnimation('none'), 3000);
+      }
+
+      return {
+        ...prev,
+        xp: calculatedXP,
+        coins: calculatedCoins,
+      };
+    });
+
     if (appUser) {
-      const earnedCoins = Math.floor(amount / 2);
-      const newCoins = (appUser.coins || 0) + earnedCoins;
-      setStats(prev => ({ ...prev, coins: newCoins }));
-      await updateAppUser({ xp: newXP, level: newLevel, coins: newCoins });
+      await updateAppUser({ xp: calculatedXP, level: calculatedLevel, coins: calculatedCoins });
     }
-  }, [stats.xp, appUser, updateAppUser]);
+  }, [appUser, updateAppUser]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
-    const newCoins = Math.max(0, (appUser?.coins || 0) - amount);
-    setStats(prev => ({ ...prev, coins: newCoins }));
+    let finalCoins = 0;
+    setStats(prev => {
+      finalCoins = Math.max(0, prev.coins - amount);
+      return { ...prev, coins: finalCoins };
+    });
+
     if (appUser) {
-      await updateAppUser({ coins: newCoins });
+      await updateAppUser({ coins: finalCoins });
     }
   }, [appUser, updateAppUser]);
 

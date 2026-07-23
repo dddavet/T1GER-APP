@@ -260,21 +260,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, data);
+      const cleanData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined));
+      await setDoc(userRef, cleanData, { merge: true });
 
       const publicFields = ['displayName', 'photoURL', 'niche', 'level', 'xp', 'streak'];
       const publicUpdate: any = {};
       let hasPublicUpdate = false;
 
       publicFields.forEach(field => {
-        if (field in data) {
+        if (field in data && (data as any)[field] !== undefined) {
           publicUpdate[field] = (data as any)[field];
           hasPublicUpdate = true;
         }
       });
 
       if (hasPublicUpdate) {
-        await updateDoc(doc(db, 'users_public', user.uid), publicUpdate);
+        await setDoc(doc(db, 'users_public', user.uid), publicUpdate, { merge: true });
       }
     } catch (error) {
       console.warn('Firestore profile update failed; keeping local signed-in profile.', error);
@@ -307,7 +308,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } else {
         const localData = getLocalAppUser();
         const accountRole = getAccountRole(firebaseUser.email);
-        const newUser: AppUser = {
+        const rawNewUser: Record<string, any> = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
@@ -315,9 +316,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           ...accountRole,
           niche: localData?.niche || 'none',
           goal: localData?.goal || 'none',
-          learningStyle: localData?.learningStyle,
-          experienceLevel: localData?.experienceLevel,
-          ageRange: localData?.ageRange,
+          learningStyle: localData?.learningStyle || 'text',
+          experienceLevel: localData?.experienceLevel || 1,
+          ageRange: localData?.ageRange || '25-34',
           onboardingStep: localData?.onboardingStep || 'identity',
           onboardingComplete: localData?.onboardingComplete || false,
           level: localData?.level || 1,
@@ -330,17 +331,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           lastActive: serverTimestamp(),
         };
 
-        await setDoc(userRef, newUser);
+        // Remove any undefined values before calling Firestore setDoc
+        const newUser = Object.fromEntries(Object.entries(rawNewUser).filter(([_, v]) => v !== undefined)) as AppUser;
+
+        await setDoc(userRef, newUser, { merge: true });
         await setDoc(doc(db, 'users_public', firebaseUser.uid), {
           uid: newUser.uid,
-          displayName: newUser.displayName,
-          photoURL: newUser.photoURL,
-          niche: newUser.niche,
-          level: newUser.level,
-          xp: newUser.xp,
-          streak: newUser.streak,
+          displayName: newUser.displayName || '',
+          photoURL: newUser.photoURL || '',
+          niche: newUser.niche || 'none',
+          level: newUser.level || 1,
+          xp: newUser.xp || 0,
+          streak: newUser.streak || 0,
           ...accountRole,
-        });
+        }, { merge: true });
         setAppUser(newUser);
         saveLocalAppUser(null);
       }

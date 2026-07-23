@@ -3,26 +3,24 @@ import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebas
 import { getAi } from "./gemini";
 
 const COACH_SYSTEM_PROMPT = `
-You are a world-class mentor inside a learning app for entrepreneurs and founders. You are not a chatbot. You are not an assistant. You are a highly specialized mentor who has seen hundreds of founders succeed and fail, and you know the difference between the two.
+You are a world-class mentor inside a learning app for entrepreneurs and founders. Your PRIMARY goal is to answer the user's questions about the educational content, concepts, and lessons they are learning in the app. Help them understand the theory deeply and how to apply it to their real-life business.
 
 You have full context about this user:
 - Their business stage and goals from onboarding
 - Every book insight they have read and saved
 - Every exercise they completed or skipped
 - Their consistency patterns and streak history
-- The homework you assigned in previous sessions and whether they did it
 - Short summaries of every past coaching session
 
 Use this context in every response. Never give advice that ignores what you already know about them. If they ask you something you already have context on, reference it directly.
 
 YOUR GENERAL COACHING STYLE:
-- You ask before you advise. When a user brings you a problem, your first response is always one sharp clarifying question — not advice. You need to understand their specific situation before you speak.
-- You are direct and honest. If their plan has a weakness, you name it clearly and explain why. You do not soften important truths.
+- You are an expert at breaking down complex business, marketing, and finance concepts into easy-to-understand, actionable insights.
+- You ask before you advise. When a user brings you a problem, your first response is often a sharp clarifying question.
 - You connect dots. You reference specific insights the user has already read and show how they apply to their current problem.
-- You challenge lazy thinking. If the user is avoiding a hard decision, you name the avoidance.
-- You never validate just to be kind. Encouragement must be earned and specific. Empty praise is a waste of their time.
-- You end every session with one concrete action the user must take before tomorrow. One. Not a list.
-- You open every new session by asking if they completed the last action you assigned. If they did not, that becomes the first topic.
+- You challenge lazy thinking. If their logic is flawed, you point it out directly.
+- You are direct and honest. You do not soften important truths.
+- If a user asks a question about a concept from the app (e.g., LTV, CAC, Offer Creation), explain it using real-world examples that apply to their specific business context.
 
 YOUR GENERAL TONE:
 Direct. Intelligent. High standards. You speak like a mentor who respects the user enough to tell them the truth. Short sentences. No filler words. No corporate language.
@@ -78,36 +76,42 @@ YOUR PERSONALITY & TONE:
 };
 
 export const getCoachResponse = async (userId: string, userMessage: string, history: any[], coachId = 't1ger') => {
-  // 1. Fetch user context
-  const userDoc = await getDoc(doc(db, "users", userId));
-  const userData = userDoc.data();
+  try {
+    // 1. Fetch user context
+    const userDoc = await getDoc(doc(db, "users", userId));
+    const userData = userDoc.data() || {};
 
-  // 2. Fetch past sessions
-  const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(5));
-  const sessionsSnapshot = await getDocs(sessionsQ);
-  const sessionHistory = sessionsSnapshot.docs.map(doc => doc.data());
+    // 2. Fetch past sessions
+    const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(5));
+    const sessionsSnapshot = await getDocs(sessionsQ);
+    const sessionHistory = sessionsSnapshot.docs.map(doc => doc.data());
 
-  // 3. Construct prompt
-  const context = `
-  User Context: ${JSON.stringify(userData)}
-  Session History: ${JSON.stringify(sessionHistory)}
-  `;
+    // 3. Construct prompt
+    const context = `
+    User Context: ${JSON.stringify(userData)}
+    Session History: ${JSON.stringify(sessionHistory)}
+    `;
 
-  const personalityPrompt = COACH_PERSONALITIES[coachId] || COACH_PERSONALITIES.t1ger;
+    const personalityPrompt = COACH_PERSONALITIES[coachId] || COACH_PERSONALITIES.t1ger;
 
-  // 4. Call Gemini
-  const model = getAi().getGenerativeModel({ 
-    model: "gemini-1.5-flash-latest",
-    systemInstruction: COACH_SYSTEM_PROMPT + "\n\n" + personalityPrompt + "\n\n" + context
-  }, { apiVersion: 'v1beta' });
+    // 4. Call Gemini
+    const model = getAi().getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: COACH_SYSTEM_PROMPT + "\n\n" + personalityPrompt + "\n\n" + context
+    });
 
-  const chat = model.startChat({
-    history: history.map(m => ({
-      role: m.role === 'model' ? 'model' : 'user',
-      parts: [{ text: m.text }]
-    }))
-  });
+    const chat = model.startChat({
+      history: history.map(m => ({
+        role: m.role === 'model' ? 'model' : 'user',
+        parts: [{ text: m.text }]
+      }))
+    });
 
-  const result = await chat.sendMessage(userMessage);
-  return result.response.text();
+    const result = await chat.sendMessage(userMessage);
+    return result.response.text();
+  } catch (error) {
+    console.warn("Gemini API call error in coachService:", error);
+    // Graceful fallback response when API key is unconfigured or rate limited
+    return "Predator, estoy listo para guiarte. Revisa tu conexión o tu API Key para activar la inteligencia sináptica completa.";
+  }
 };

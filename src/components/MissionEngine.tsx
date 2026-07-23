@@ -23,6 +23,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const { completeMission, failMission, competencies } = useBrain();
   const { appUser, updateAppUser } = useAuth();
   const learningStyle = appUser?.learningStyle || 'text';
+  
+  const haptic = () => {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(15);
+  };
 
   const lessonQuote = useMemo(() => {
     if (mission.quote?.text) return mission.quote;
@@ -341,6 +345,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
         <div className="flex items-center justify-between mb-6">
           <button 
             onClick={onComplete}
+            aria-label="Close mission"
             className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
           >
             <X size={24} strokeWidth={2.5} />
@@ -374,7 +379,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-start py-2 relative z-10 w-full overflow-y-auto hide-scrollbar">
+      <div className="flex-1 flex flex-col justify-start py-2 pb-44 relative z-10 w-full overflow-y-auto hide-scrollbar">
         <AnimatePresence mode="wait">
           {/* ============================================ */}
           {/* SUCCESS SCREEN                               */}
@@ -870,7 +875,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
                 {/* Submit button */}
                 <button
-                  onClick={handleSubmitProofOfAction}
+                  onClick={() => { haptic(); handleSubmitProofOfAction(); }}
                   disabled={
                     isSubmittingProof || 
                     (lessonAction.type === 'photo' && !proofPhoto) || 
@@ -1565,18 +1570,18 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   const isSelected = selectedOption === i;
                   
                   // Setup custom classes for active status checks
-                  let cls = 'bg-white border-zinc-200 hover:border-zinc-200 hover:bg-white text-zinc-600';
+                  let cls = 'bg-white border-zinc-200 border-b-4 border-b-zinc-300 text-zinc-700 hover:border-zinc-300 active:border-b-2 active:translate-y-0.5';
                   if (isSelected) {
-                    cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
+                    cls = 'bg-[var(--accent-main)]/10 border-[var(--accent-main)] border-b-4 border-b-[var(--accent-main)] text-zinc-900 shadow-[0_0_15px_rgba(204,255,0,0.15)] active:translate-y-0.5';
                   }
                   
                   if (quizResult !== 'idle') {
                     if (option.correct) {
-                      cls = 'bg-green-500/10 border-green-500 text-green-400';
+                      cls = 'bg-[#58CC02]/15 border-[#58CC02] border-b-4 border-b-[#58A700] text-zinc-900';
                     } else if (isSelected) {
-                      cls = 'bg-red-500/10 border-red-500 text-red-400';
+                      cls = 'bg-[#FF4B4B]/15 border-[#FF4B4B] border-b-4 border-b-[#EA1515] text-zinc-900';
                     } else {
-                      cls = 'bg-white border-zinc-200 opacity-30 text-zinc-600';
+                      cls = 'bg-white border-zinc-200 border-b-2 opacity-30 text-zinc-500';
                     }
                   }
 
@@ -1585,13 +1590,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       key={i}
                       onClick={() => quizResult === 'idle' && setSelectedOption(i)}
                       disabled={quizResult !== 'idle'}
-                      className={`w-full p-4.5 rounded-[1.5rem] border text-left font-bold text-sm transition-all duration-300 flex items-center justify-between group active:scale-[0.98] ${cls}`}
+                      aria-selected={isSelected}
+                      role="option"
+                      className={`w-full p-4.5 rounded-[1.5rem] border text-left font-bold text-sm transition-all duration-100 flex items-center justify-between group ${cls}`}
                     >
                       <span>{option.text}</span>
-                      <div className={`w-5 h-5 rounded-full border flex items-center justify-center font-mono text-[9px] font-black ${
+                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center font-mono text-[10px] font-black ${
                         isSelected 
                           ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
-                          : 'border-zinc-700 bg-zinc-100 text-zinc-500'
+                          : 'border-zinc-300 bg-zinc-100 text-zinc-500'
                       }`}>
                         {String.fromCharCode(65 + i)}
                       </div>

@@ -6,6 +6,8 @@
 
 import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from 'react';
 import { useAuth } from './AuthContext';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '../firebase';
 import {
   type BrainState,
   type CompetencyProfile,
@@ -66,9 +68,6 @@ interface BrainContextType {
   resetBrain: () => void;
 }
 
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-
 import { 
   type TacticalTask, 
   type DayType, 
@@ -128,8 +127,19 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const cloudData = snap.data().brainState as BrainState;
             if (cloudData) {
               setBrainState(prev => ({
+                ...DEFAULT_BRAIN_STATE,
                 ...prev,
                 ...cloudData,
+                competencies: {
+                  ...DEFAULT_BRAIN_STATE.competencies,
+                  ...prev.competencies,
+                  ...cloudData?.competencies,
+                },
+                dailyTacticalStatus: {
+                  ...DEFAULT_BRAIN_STATE.dailyTacticalStatus,
+                  ...prev.dailyTacticalStatus,
+                  ...cloudData?.dailyTacticalStatus,
+                }
               }));
             }
           }
@@ -149,7 +159,10 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const syncToFirestore = async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
-          await updateDoc(userRef, { brainState });
+          const cleanBrainState = Object.fromEntries(
+            Object.entries(brainState).filter(([_, v]) => v !== undefined)
+          );
+          await setDoc(userRef, { brainState: cleanBrainState }, { merge: true });
         } catch (err) {
           console.error("Failed to sync to Firestore", err);
         }

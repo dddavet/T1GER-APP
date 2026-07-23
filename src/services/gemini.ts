@@ -4,9 +4,9 @@ let aiInstance: GoogleGenerativeAI | null = null;
 
 export const getAi = () => {
   if (!aiInstance) {
-    const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     if (!apiKey) {
-      throw new Error('VITE_GEMINI_API_KEY environment variable is required');
+      throw new Error('API_KEY_MISSING');
     }
     aiInstance = new GoogleGenerativeAI(apiKey);
   }
@@ -30,13 +30,11 @@ const withRetry = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): 
 
 // HELPER TO GET MODEL WITH STABLE API VERSION AND LATEST IDENTIFIERS
 const getModel = (modelName: string) => {
-  // Use v1beta as it is more permissive for multi-modal tasks on the free tier
-  // Using 'gemini-flash-latest' and 'gemini-pro-latest' for maximum compatibility
   let modelId = modelName;
-  if (modelName === 'gemini-1.5-flash') modelId = 'gemini-1.5-flash-latest';
-  if (modelName === 'gemini-1.5-pro') modelId = 'gemini-1.5-pro-latest';
+  if (modelName === 'gemini-1.5-flash-latest') modelId = 'gemini-1.5-flash';
+  if (modelName === 'gemini-1.5-pro-latest') modelId = 'gemini-1.5-pro';
   
-  return getAi().getGenerativeModel({ model: modelId }, { apiVersion: 'v1beta' });
+  return getAi().getGenerativeModel({ model: modelId });
 };
 
 export const generateDailyLesson = async (niche: string, level: number) => {

@@ -276,6 +276,13 @@ export function buildCurriculumSession(state: BrainState): DailySession {
   };
 }
 
+export function getLocalDateString(d: Date = new Date()): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 // ============================================================
 // STRENGTH DECAY & CORE LOGIC
 // ============================================================
@@ -313,12 +320,16 @@ export function processMissionResult(
 
   const competency = mission.competency;
 
-  const diffMultiplier = 1.0;
+  // Apply decay to current competencies first so penalties are not wiped out
+  const decayedCompetencies = applyDecay(state);
+
+  const diffMultiplier = mission.difficulty === 'hard' ? 1.5 : mission.difficulty === 'medium' ? 1.2 : 1.0;
   const change = completed
     ? Math.round((score / 100) * 8 * diffMultiplier)
     : -5;
 
-  const newScore = Math.max(0, Math.min(100, state.competencies[competency] + change));
+  const newScore = Math.max(0, Math.min(100, decayedCompetencies[competency] + change));
+  const updatedCompetencies = { ...decayedCompetencies, [competency]: newScore };
 
   const record: MissionRecord = {
     missionId,
@@ -391,7 +402,7 @@ export function processMissionResult(
   });
 
   // Handle Learn Streak
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   let newLearnStreak = state.learnStreak;
   let newLastLearnDate = state.lastLearnDate;
 
@@ -400,7 +411,7 @@ export function processMissionResult(
     if (state.lastLearnDate) {
       const yesterday = new Date();
       yesterday.setDate(yesterday.getDate() - 1);
-      const yesterdayStr = yesterday.toISOString().split('T')[0];
+      const yesterdayStr = getLocalDateString(yesterday);
       
       if (state.lastLearnDate === yesterdayStr) {
         newLearnStreak += 1;
@@ -415,10 +426,7 @@ export function processMissionResult(
 
   return {
     ...state,
-    competencies: {
-      ...state.competencies,
-      [competency]: newScore,
-    },
+    competencies: updatedCompetencies,
     missionHistory: newHistory,
     lastActiveDate: {
       ...state.lastActiveDate,
@@ -437,13 +445,13 @@ export function processMissionResult(
  * Handle Tactical Streak increment
  */
 export function processTacticalResult(state: BrainState): BrainState {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   if (state.lastTacticalDate === today) return state;
 
   let newStreak = state.tacticalStreak;
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
-  const yesterdayStr = yesterday.toISOString().split('T')[0];
+  const yesterdayStr = getLocalDateString(yesterday);
 
   if (state.lastTacticalDate === yesterdayStr) {
     newStreak += 1;
