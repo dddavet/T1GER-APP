@@ -1287,7 +1287,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ============================================ */}
-          {/* TEACH STEP — Show the concept (Standard)     */}
+          {/* TEACH STEP — Executive Content Cards         */}
           {/* ============================================ */}
           {showMainUI && currentStep === 'teach' && (
             <motion.div
@@ -1295,96 +1295,139 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -50, opacity: 0 }}
-              className="flex-1 flex flex-col justify-center gap-5 bg-transparent"
+              className="flex-1 flex flex-col justify-between gap-4 bg-transparent max-w-md mx-auto w-full pb-6"
             >
-              {learningStyle === 'visual' ? (
-                <div className="rounded-[2.5rem] overflow-hidden bg-white border border-zinc-200 flex items-center justify-center relative shadow-2xl h-[380px] w-full">
-                  {mission.videoUrl || mission.imageUrl ? (
-                     <img src={mission.imageUrl} className="w-full h-full object-cover opacity-50" alt="lesson" />
+              {/* Top Header Badge */}
+              <div className="flex items-center justify-between px-1">
+                <span className="text-[10px] font-black font-mono uppercase tracking-widest text-[#FF7300] bg-[#FF7300]/10 px-3 py-1 rounded-full border border-[#FF7300]/20 flex items-center gap-1.5">
+                  {mission.contentType === 'video' ? (
+                    <><PlaySquare className="w-3 h-3" /> Vídeo Ejecutivo</>
+                  ) : mission.contentType === 'book_extract' ? (
+                    <><BookOpen className="w-3 h-3" /> Extracto de Libro</>
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-zinc-900 to-black flex items-center justify-center flex-col p-6 text-center">
-                      <PlaySquare className="w-14 h-14 text-[var(--accent-main)] mb-4 opacity-40 animate-pulse" />
-                      <h2 className="text-xl font-black uppercase italic tracking-tighter text-zinc-800 mb-2">Visual Insight</h2>
-                      <p className="text-xs font-mono text-zinc-500 font-bold uppercase tracking-wider">Demonstrative Briefing</p>
-                    </div>
+                    <><FileText className="w-3 h-3" /> Artículo de Análisis</>
                   )}
-                  
-                  {/* TikTok style text overlay */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black via-black/60 to-transparent">
-                    {/* Mascot explains */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <img src={character.avatarImg} alt={character.name} className="w-10 h-10 object-contain" />
-                      <div className="bg-[#121217] border border-zinc-200 rounded-2xl px-3 py-1.5 shadow-lg relative after:content-[''] after:absolute after:-left-1.5 after:top-1/2 after:-translate-y-1/2 after:w-3 after:h-3 after:bg-[#121217] after:border-l after:border-b after:border-zinc-200 after:rotate-45">
-                        <span className="text-[7px] font-mono uppercase tracking-widest block font-black" style={{ color: character.accentColor }}>{character.name}</span>
-                        <span className="text-[10px] text-zinc-600 font-semibold leading-none">¡Presta atención!</span>
+                </span>
+                <span className="text-[10px] font-black font-mono uppercase tracking-wider text-zinc-400">
+                  Formación de Inversión
+                </span>
+              </div>
+
+              {/* Title */}
+              <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 text-left px-1">
+                {mission.title}
+              </h1>
+
+              {/* Main Content Card Container */}
+              <div className="flex-1 bg-white border-2 border-zinc-200 rounded-3xl p-5 shadow-xl flex flex-col justify-between overflow-y-auto space-y-4">
+                {/* 1. VIDEO FORMAT */}
+                {mission.contentType === 'video' && (
+                  <div className="space-y-4">
+                    <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-md bg-black border border-zinc-200 relative">
+                      {mission.videoUrl ? (
+                        <iframe
+                          src={mission.videoUrl}
+                          title={mission.title}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center flex-col text-white p-4 text-center">
+                          <PlaySquare className="w-10 h-10 text-[#FF7300] mb-2" />
+                          <span className="text-xs font-bold">Vídeo de Inversión</span>
+                        </div>
+                      )}
+                    </div>
+                    {mission.reading?.paragraphs && (
+                      <div className="space-y-2 text-left">
+                        <span className="text-[9px] font-black font-mono uppercase tracking-widest text-zinc-400 block">Resumen Ejecutivo</span>
+                        {mission.reading.paragraphs.map((p: string, idx: number) => (
+                          <p key={idx} className="text-xs text-zinc-600 font-medium leading-relaxed">
+                            {p}
+                          </p>
+                        ))}
                       </div>
-                    </div>
+                    )}
+                  </div>
+                )}
 
-                    <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 mb-2 shadow-black drop-shadow-md">
-                      {mission.title}
-                    </h1>
-                    <p className="text-xs leading-relaxed text-zinc-600 drop-shadow-md line-clamp-3 font-medium mb-4">
-                      {mission.concept_flashcard || mission.concept || 'Learn this concept.'}
+                {/* 2. BOOK EXTRACT FORMAT */}
+                {mission.contentType === 'book_extract' && (
+                  <div className="space-y-4 text-left">
+                    {mission.bookExtract && (
+                      <>
+                        <div className="bg-orange-50/60 border border-orange-200/80 rounded-2xl p-4 space-y-1">
+                          <span className="text-[9px] font-black font-mono uppercase tracking-widest text-[#FF7300] block">
+                            📚 {mission.bookExtract.bookTitle}
+                          </span>
+                          <span className="text-[10px] font-bold text-zinc-500 block uppercase">
+                            Por {mission.bookExtract.author}
+                          </span>
+                        </div>
+
+                        <div className="p-4 bg-zinc-50 border-l-4 border-[#FF7300] rounded-r-2xl">
+                          <p className="text-xs font-serif italic text-zinc-700 leading-relaxed">
+                            "{mission.bookExtract.excerpt}"
+                          </p>
+                        </div>
+
+                        {mission.bookExtract.keyFramework && (
+                          <div className="p-4 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl space-y-1">
+                            <span className="text-[9px] font-black font-mono uppercase tracking-widest text-[#58A700] block flex items-center gap-1">
+                              <Sparkles className="w-3 h-3" /> Marco Clave de Decisión
+                            </span>
+                            <p className="text-xs font-bold text-zinc-800 leading-relaxed">
+                              {mission.bookExtract.keyFramework}
+                            </p>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* 3. ARTICLE FORMAT */}
+                {mission.contentType === 'article' && (
+                  <div className="space-y-3 text-left">
+                    {mission.reading?.subtitle && (
+                      <h3 className="text-sm font-black uppercase tracking-wide text-[#FF7300]">
+                        {mission.reading.subtitle}
+                      </h3>
+                    )}
+                    <div className="space-y-2.5">
+                      {(mission.reading?.paragraphs || [mission.concept]).map((p: string, idx: number) => (
+                        <p key={idx} className="text-xs text-zinc-700 font-medium leading-relaxed">
+                          {p}
+                        </p>
+                      ))}
+                    </div>
+                    {mission.reading?.takeaway && (
+                      <div className="p-3 bg-sky-50 border border-sky-200 rounded-xl">
+                        <span className="text-[9px] font-black font-mono uppercase tracking-widest text-[#1CB0F6] block">Conclusión</span>
+                        <p className="text-xs font-bold text-zinc-800 mt-0.5">{mission.reading.takeaway}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Concept Fallback if contentType undefined */}
+                {!mission.contentType && (
+                  <div className="space-y-3 text-left">
+                    <p className="text-sm font-medium leading-relaxed text-zinc-700">
+                      {mission.concept}
                     </p>
-                    
-                    <button
-                      onClick={advance}
-                      className="w-full py-4.5 rounded-xl btn-gamified flex items-center justify-center gap-2"
-                    >
-                      <Brain className="w-4 h-4" /> Got It, Instructor
-                    </button>
                   </div>
-                </div>
-              ) : (
-                /* Text Learning Style: Mascot + clean neomorphic layout */
-                <div className="flex-1 flex flex-col justify-center gap-6">
-                  {/* Mascot explains speaking bubble */}
-                  <div className="flex items-start gap-4 mb-2">
-                    <motion.img 
-                      src={character.avatarImg} 
-                      alt={character.name} 
-                      className="w-16 h-16 object-contain flex-shrink-0"
-                      animate={{ y: [0, -4, 0] }}
-                      transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
-                    />
-                    <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
-                      <p className="text-[9px] font-black font-mono uppercase tracking-widest mb-1" style={{ color: character.accentColor }}>{character.name} ({character.title})</p>
-                      <p className="text-[11px] text-zinc-500 font-semibold leading-relaxed">
-                        ¡Presta mucha atención, Predator! Este concepto sentará las bases para tu próxima prueba.
-                      </p>
-                    </div>
-                  </div>
+                )}
+              </div>
 
-                  {/* Title */}
-                  <h1 className="text-3xl font-black italic uppercase tracking-tighter text-[var(--accent-main)] border-l-4 border-[var(--accent-main)] pl-4">
-                    {mission.title}
-                  </h1>
-
-                  {/* Concept card */}
-                  <div className="bg-white shadow-sm rounded-3xl p-6 shadow-xl border border-zinc-200">
-                    <p className="text-[15px] leading-relaxed text-zinc-600 font-medium font-sans">
-                      {mission.concept_flashcard || mission.concept || 'Learn this concept.'}
-                    </p>
-                  </div>
-
-                  {/* Key takeaway pill */}
-                  {(mission.keyTakeaway) && (
-                    <div className="flex items-start gap-3 bg-[var(--accent-main)]/5 border border-[var(--accent-main)]/10 rounded-2xl p-4">
-                      <Lightbulb className="w-5 h-5 text-[var(--accent-main)] flex-shrink-0 mt-0.5" />
-                      <p className="text-xs font-bold text-[var(--accent-main)] leading-normal uppercase tracking-wide">
-                        Takeaway: {mission.keyTakeaway}
-                      </p>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={advance}
-                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
-                  >
-                    <Brain className="w-5 h-5" /> Test My Skills
-                  </button>
-                </div>
-              )}
+              {/* Bottom 3D Tactile Action Button */}
+              <button
+                onClick={advance}
+                className="w-full py-4 rounded-2xl bg-[#FF7300] hover:bg-[#E06500] text-black font-black text-[14px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shrink-0"
+              >
+                Ver Conclusión Ejecutiva ➔
+              </button>
             </motion.div>
           )}
 
@@ -1539,7 +1582,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           )}
 
           {/* ================================================= */}
-          {/* RECALL STEP — Quiz on what was just taught (Std)  */}
+          {/* RECALL / EXECUTIVE CONCLUSION STEP                */}
           {/* ================================================= */}
           {showMainUI && currentStep === 'recall' && (
             <motion.div
@@ -1547,65 +1590,116 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: -50, opacity: 0 }}
-              className="flex-1 flex flex-col justify-center gap-5"
+              className="flex-1 flex flex-col justify-between gap-5 max-w-md mx-auto w-full pb-6"
             >
-              {/* Mascot asking question */}
-              <div className="flex items-start gap-4 mb-2">
-                <img 
-                  src={character.avatarImg} 
-                  alt={character.name} 
-                  className="w-16 h-16 object-contain flex-shrink-0"
-                />
-                <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
-                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Concept Challenge</span>
-                  <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
-                    {mission.recallQuestion || mission.business_scenario || mission.scenario || 'Can you apply what you just learned?'}
-                  </p>
-                </div>
-              </div>
+              {(mission.contentType || mission.type === 'book_lesson') ? (
+                /* Pure Executive Content Conclusion Card */
+                <div className="flex-1 flex flex-col justify-between gap-4">
+                  {/* Mascot Header */}
+                  <div className="flex items-start gap-4 mb-2 text-left">
+                    <img 
+                      src={character.avatarImg} 
+                      alt={character.name} 
+                      className="w-16 h-16 object-contain flex-shrink-0"
+                    />
+                    <div className="bg-white border-2 border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l-2 after:border-b-2 after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
+                      <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>{character.name} ({character.title})</span>
+                      <p className="text-xs font-bold leading-snug text-zinc-800">
+                        ¡Excelente enfoque, Predator! Has asimilado esta lección estratégica.
+                      </p>
+                    </div>
+                  </div>
 
-              {/* Options list */}
-              <div className="space-y-3 mb-4">
-                {(mission.recallOptions || mission.options || []).map((option: any, i: number) => {
-                  const isSelected = selectedOption === i;
-                  
-                  // Setup custom classes for active status checks
-                  let cls = 'bg-white border-zinc-200 border-b-4 border-b-zinc-300 text-zinc-700 hover:border-zinc-300 active:border-b-2 active:translate-y-0.5';
-                  if (isSelected) {
-                    cls = 'bg-[var(--accent-main)]/10 border-[var(--accent-main)] border-b-4 border-b-[var(--accent-main)] text-zinc-900 shadow-[0_0_15px_rgba(204,255,0,0.15)] active:translate-y-0.5';
-                  }
-                  
-                  if (quizResult !== 'idle') {
-                    if (option.correct) {
-                      cls = 'bg-[#58CC02]/15 border-[#58CC02] border-b-4 border-b-[#58A700] text-zinc-900';
-                    } else if (isSelected) {
-                      cls = 'bg-[#FF4B4B]/15 border-[#FF4B4B] border-b-4 border-b-[#EA1515] text-zinc-900';
-                    } else {
-                      cls = 'bg-white border-zinc-200 border-b-2 opacity-30 text-zinc-500';
-                    }
-                  }
+                  {/* Main Takeaway Card */}
+                  <div className="flex-1 bg-white border-2 border-zinc-200 rounded-3xl p-6 shadow-xl flex flex-col justify-center gap-4 text-left">
+                    <div className="flex items-center gap-2 text-[#58CC02]">
+                      <Sparkles className="w-5 h-5" />
+                      <span className="text-xs font-black uppercase tracking-widest">Conclusión Estratégica</span>
+                    </div>
 
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => quizResult === 'idle' && setSelectedOption(i)}
-                      disabled={quizResult !== 'idle'}
-                      aria-selected={isSelected}
-                      role="option"
-                      className={`w-full p-4.5 rounded-[1.5rem] border text-left font-bold text-sm transition-all duration-100 flex items-center justify-between group ${cls}`}
-                    >
-                      <span>{option.text}</span>
-                      <div className={`w-6 h-6 rounded-full border flex items-center justify-center font-mono text-[10px] font-black ${
-                        isSelected 
-                          ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
-                          : 'border-zinc-300 bg-zinc-100 text-zinc-500'
-                      }`}>
-                        {String.fromCharCode(65 + i)}
+                    <p className="text-sm font-bold text-zinc-800 leading-relaxed bg-zinc-50 border border-zinc-200 p-4 rounded-2xl">
+                      {mission.keyTakeaway || mission.reading?.takeaway || mission.concept}
+                    </p>
+
+                    {/* XP Reward Badge */}
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <Crown className="w-7 h-7 text-amber-500" />
+                        <div>
+                          <span className="text-[10px] font-black font-mono uppercase tracking-widest text-amber-700 block">Recompensa</span>
+                          <span className="text-xs font-black text-zinc-800 uppercase">+100 XP Inversor Ejecutivo</span>
+                        </div>
                       </div>
-                    </button>
-                  );
-                })}
-              </div>
+                      <span className="px-3 py-1 bg-amber-400 text-black font-black text-xs rounded-full uppercase tracking-wider">
+                        Verificado
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Big Green 3D Tactile Complete Button */}
+                  <button
+                    onClick={advance}
+                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#4EB702] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shrink-0"
+                  >
+                    <CheckCircle2 className="w-5 h-5" /> Completar Lección 🟢
+                  </button>
+                </div>
+              ) : (
+                /* Legacy Quiz Recall */
+                <div className="flex-1 flex flex-col justify-center gap-5">
+                  <div className="flex items-start gap-4 mb-2">
+                    <img 
+                      src={character.avatarImg} 
+                      alt={character.name} 
+                      className="w-16 h-16 object-contain flex-shrink-0"
+                    />
+                    <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
+                      <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Concept Challenge</span>
+                      <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
+                        {mission.recallQuestion || mission.business_scenario || mission.scenario || 'Can you apply what you just learned?'}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 mb-4">
+                    {(mission.recallOptions || mission.options || []).map((option: any, i: number) => {
+                      const isSelected = selectedOption === i;
+                      let cls = 'bg-white border-zinc-200 border-b-4 border-b-zinc-300 text-zinc-700 hover:border-zinc-300 active:border-b-2 active:translate-y-0.5';
+                      if (isSelected) {
+                        cls = 'bg-[var(--accent-main)]/10 border-[var(--accent-main)] border-b-4 border-b-[var(--accent-main)] text-zinc-900 shadow-[0_0_15px_rgba(204,255,0,0.15)] active:translate-y-0.5';
+                      }
+                      if (quizResult !== 'idle') {
+                        if (option.correct) {
+                          cls = 'bg-[#58CC02]/15 border-[#58CC02] border-b-4 border-b-[#58A700] text-zinc-900';
+                        } else if (isSelected) {
+                          cls = 'bg-[#FF4B4B]/15 border-[#FF4B4B] border-b-4 border-b-[#EA1515] text-zinc-900';
+                        } else {
+                          cls = 'bg-white border-zinc-200 border-b-2 opacity-30 text-zinc-500';
+                        }
+                      }
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => quizResult === 'idle' && setSelectedOption(i)}
+                          disabled={quizResult !== 'idle'}
+                          aria-selected={isSelected}
+                          role="option"
+                          className={`w-full p-4.5 rounded-[1.5rem] border text-left font-bold text-sm transition-all duration-100 flex items-center justify-between group ${cls}`}
+                        >
+                          <span>{option.text}</span>
+                          <div className={`w-6 h-6 rounded-full border flex items-center justify-center font-mono text-[10px] font-black ${
+                            isSelected 
+                              ? 'border-[var(--accent-main)] bg-[var(--accent-main)] text-black' 
+                              : 'border-zinc-300 bg-zinc-100 text-zinc-500'
+                          }`}>
+                            {String.fromCharCode(65 + i)}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </motion.div>
           )}
 
@@ -1628,30 +1722,30 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   className="w-16 h-16 object-contain flex-shrink-0"
                 />
                 <div className="bg-white border border-zinc-200 rounded-[1.5rem] p-4 relative shadow-lg flex-1 after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-zinc-200 after:rotate-45 after:-translate-y-1/2">
-                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Scenario Challenge</span>
+                  <span className="text-[9px] font-black uppercase tracking-widest block mb-1" style={{ color: character.accentColor }}>Decision Challenge</span>
                   <p className="text-sm font-bold leading-snug text-zinc-800 font-sans">
-                    {mission.business_scenario || mission.scenario || 'Answer this question:'}
+                    {mission.scenario || mission.concept_flashcard || 'What would you do?'}
                   </p>
                 </div>
               </div>
 
-              {/* Options */}
+              {/* Options list */}
               <div className="space-y-3 mb-4">
                 {(mission.options || []).map((option: any, i: number) => {
                   const isSelected = selectedOption === i;
                   
-                  let cls = 'bg-white border-zinc-200 hover:border-zinc-200 hover:bg-white text-zinc-600';
+                  let cls = 'bg-white border-zinc-200 border-b-4 border-b-zinc-300 text-zinc-700 hover:border-zinc-300 active:border-b-2 active:translate-y-0.5';
                   if (isSelected) {
-                    cls = 'bg-[var(--accent-main)]/5 border-[var(--accent-main)] text-[var(--accent-main)] shadow-[0_0_15px_rgba(204,255,0,0.08)]';
+                    cls = 'bg-[var(--accent-main)]/10 border-[var(--accent-main)] border-b-4 border-b-[var(--accent-main)] text-zinc-900 shadow-[0_0_15px_rgba(204,255,0,0.15)] active:translate-y-0.5';
                   }
-
+                  
                   if (quizResult !== 'idle') {
                     if (option.correct) {
-                      cls = 'bg-green-500/10 border-green-500 text-green-400';
+                      cls = 'bg-[#58CC02]/15 border-[#58CC02] border-b-4 border-b-[#58A700] text-zinc-900';
                     } else if (isSelected) {
-                      cls = 'bg-red-500/10 border-red-500 text-red-400';
+                      cls = 'bg-[#FF4B4B]/15 border-[#FF4B4B] border-b-4 border-b-[#EA1515] text-zinc-900';
                     } else {
-                      cls = 'bg-white border-zinc-200 opacity-30 text-zinc-600';
+                      cls = 'bg-white border-zinc-200 border-b-2 opacity-30 text-zinc-500';
                     }
                   }
 
@@ -1888,12 +1982,12 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // ============================================================
 
 function getStepsForType(type: string, mission: any, learningStyle: string, isPro: boolean = true): string[] {
-  if (type === 'book_and_build') {
-    return ['book_reader', 'build_framework'];
+  if (type === 'book_lesson' || mission.contentType || mission.bookExtract || mission.videoUrl) {
+    return ['daily_quote', 'teach', 'recall'];
   }
   
-  if (type === 'book_lesson') {
-    return ['book_reader'];
+  if (type === 'book_and_build') {
+    return ['book_reader', 'build_framework'];
   }
 
   const steps = ['daily_quote', 'reading_chapter'];

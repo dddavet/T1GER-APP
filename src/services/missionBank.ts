@@ -42,10 +42,15 @@ export interface BankMission {
   competency: Competency;
   difficulty: Difficulty;
   type: MissionType;
+  contentType?: 'video' | 'article' | 'book_extract';
   title: string;
   sources?: LearningSource[];
   concept?: string;
   keyTakeaway?: string;          
+  quote?: { text: string; author: string; context: string };
+  videoUrl?: string;
+  reading?: { title?: string; subtitle: string; paragraphs: string[]; takeaway: string };
+  bookExtract?: { bookTitle: string; author: string; excerpt: string; keyFramework: string };
   recallQuestion?: string;       
   recallOptions?: QuizOption[];  
   recallExplanation?: string;    
@@ -65,186 +70,250 @@ const createInformationalLesson = (id: string, title: string, concept: string, k
   title,
   concept,
   keyTakeaway,
-  recallQuestion: `What is the core takeaway of ${title}?`,
-  recallOptions: [
-    { text: keyTakeaway, correct: true },
-    { text: "The opposite of the takeaway.", correct: false },
-    { text: "It depends on the market.", correct: false },
-  ],
-  recallExplanation: concept,
   xpReward: 60
 });
 
 const investingMissions: BankMission[] = [
-  // --- LEVEL 1: FOUNDATIONS (10 Interactive Executive Lessons) ---
+  // --- LEVEL 1: FOUNDATIONS (10 Pure Executive Content Lessons: Book Extract, Video, Article) ---
   {
     id: 'inv-1-1',
     competency: 'investing',
     difficulty: 'easy',
-    type: 'scenario_quiz',
+    type: 'book_lesson',
+    contentType: 'book_extract',
     title: 'ACTIVOS PROD. VS PASIVOS DE LUJO',
-    concept: 'Un activo pone dinero en tu bolsillo de forma recurrente. Un pasivo destruye caja mediante depreciación y costos de mantenimiento fijos.',
-    keyTakeaway: 'Los inversores profesionales adquieren activos productivos; la clase media acumula pasivos disfrazados de estatus.',
-    scenario: 'Una empresa invierte $500,000 en adquirir una flotilla de vehículos de lujo para sus ejecutivos. Los vehículos se deprecian un 20% anual y generan $40,000 en costos anuales de mantenimiento e impuestos. ¿Cómo se clasifica financieramente esta decisión?',
-    options: [
-      { text: 'Un pasivo destructivo de caja, ya que drena $40,000 anuales y pierde valor de capital.', correct: true },
-      { text: 'Un activo de capital, porque aumenta el valor total de los activos en el balance.', correct: false },
-      { text: 'Una inversión productiva, porque eleva el prestigio operativo de la empresa.', correct: false },
-    ],
-    failureCritique: 'Recuerda: Un activo DEBE generar entradas netas de flujo de efectivo o apreciarse en valor intrínseco. Un vehículo depreciable con costos fijos es un pasivo directo.',
+    concept: 'Un activo genera flujo de caja de forma constante. Un pasivo destruye dinero mediante depreciación y mantenimiento.',
+    keyTakeaway: 'Los inversores profesionales compran activos productivos; la clase media acumula pasivos pensando que son riqueza.',
+    quote: {
+      text: "Un activo pone dinero en tu bolsillo. Un pasivo saca dinero de tu bolsillo. Si no entiendes la diferencia, trabajarás para siempre.",
+      author: "Robert Kiyosaki",
+      context: "Extraído de 'Padre Rico, Padre Pobre', la biblia de la educación financiera moderna."
+    },
+    bookExtract: {
+      bookTitle: "Padre Rico, Padre Pobre",
+      author: "Robert Kiyosaki",
+      excerpt: "Las personas de clase media compran pasivos creyendo que son activos. Un automóvil de lujo, una mansión o un barco son pasivos directos porque generan impuestos, depreciación y mantenimiento constante. Un activo es un negocio, una propiedad en renta o una cartera de acciones que deposita efectivo en tu cuenta cada mes.",
+      keyFramework: "REGLA DE ORO DE CAJA: Activo = (+) Entrada de efectivo. Pasivo = (-) Salida de efectivo continua."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-2',
     competency: 'investing',
     difficulty: 'easy',
-    type: 'scenario_quiz',
-    title: 'EL PODER DEL INTERÉS COMPUESTO & LA REGLA DEL 72',
-    concept: 'Dividiendo 72 entre tu tasa de retorno anual (72 / r), obtienes el número exacto de años necesarios para duplicar tu capital.',
-    keyTakeaway: 'El tiempo es la fuerza más destructiva para la deuda y la más exponencial para el capital invertido.',
-    scenario: 'Inviertes $10,000 USD en un portafolio diversificado que rinde un 12% anual compuesto. Utilizando la Regla del 72, ¿cuántos años tardará tu capital inicial en cuadruplicarse (llegar a $40,000 USD) sin añadir capital adicional?',
-    options: [
-      { text: '12 años (Se duplica a $20k en 6 años [72/12], y vuelve a duplicarse a $40k en otros 6 años).', correct: true },
-      { text: '6 años (Duplicar toma 6 años, por lo que cuadruplicar toma el mismo tiempo).', correct: false },
-      { text: '18 años (Se requieren 6 años por cada $10k agregados).', correct: false },
-    ],
-    failureCritique: '72 / 12 = 6 años para el primer duplicado ($10k -> $20k). Para duplicarse nuevamente ($20k -> $40k) se requieren otros 6 años, sumando 12 años en total.',
+    type: 'book_lesson',
+    contentType: 'video',
+    title: 'EL PODER DEL INTERÉS COMPUESTO',
+    concept: 'Dividiendo 72 entre tu tasa de retorno anual (72 / r), calculas los años necesarios para duplicar tu dinero sin esfuerzo adicional.',
+    keyTakeaway: 'El tiempo en el mercado es la fuerza más destructiva para la deuda y la más exponencial para el capital.',
+    quote: {
+      text: "El interés compuesto es la octava maravilla del mundo. Quien lo entiende, lo gana; quien no, lo paga.",
+      author: "Albert Einstein",
+      context: "El principio matemático fundamental que construye grandes fortunas a lo largo del tiempo."
+    },
+    videoUrl: "https://www.youtube.com/embed/gS_4VzR18hI",
+    reading: {
+      subtitle: "La Regla del 72 en Acción",
+      paragraphs: [
+        "El interés compuesto no suma ganancias de forma lineal; las multiplica de forma exponencial. Al reinvertir los rendimientos generados, el capital crece sobre una base cada vez mayor.",
+        "Para calcular la velocidad de crecimiento, usa la Regla del 72: divide 72 entre la tasa de rendimiento esperada. Si tu portafolio rinde un 12% anual, tu capital se duplicará exactamente cada 6 años (72 / 12 = 6).",
+        "A 24 años de plazo, $10,000 USD iniciales se convierten en $160,000 USD gracias a 4 duplicaciones sucesivas, sin necesidad de agregar un solo dólar extra."
+      ],
+      takeaway: "Empezar 5 años antes duplica el resultado final de un portafolio a 30 años."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-3',
     competency: 'investing',
     difficulty: 'easy',
-    type: 'scenario_quiz',
-    title: 'EL MARGEN DE SEGURIDAD (BUFFETT & GRAHAM)',
-    concept: 'Comprar un activo con un descuento sustancial (30% al 50%) respecto a su Valor Intrínseco estimado para absorber errores de estimación.',
-    keyTakeaway: 'Si construyes un puente que soporta 10,000 libras, no dejes pasar un camión de 9,800 libras. Exige un margen de seguridad.',
-    scenario: 'Tras analizar los flujos de caja descontados de una empresa de software, calculas su valor intrínseco real en $100 por acción. Actualmente cotiza en bolsa a $95 por acción. ¿Tiene un Margen de Seguridad adecuado para comprar según el modelo de Ben Graham?',
-    options: [
-      { text: 'No. Un descuento de solo 5% ($95 vs $100) no deja margen para errores de cálculo o recesiones.', correct: true },
-      { text: 'Sí. Cualquier precio por debajo del valor intrínseco representa una compra segura.', correct: false },
-      { text: 'Sí. El margen del 5% garantiza ganancias cuando la acción cotice en su valor objetivo.', correct: false },
-    ],
-    failureCritique: 'Un verdadero Margen de Seguridad requiere un descuento sustancial (idealmente 30% o más, ej. comprar a $65-$70 lo que vale $100) para protegerte contra imprevistos del mercado.',
+    type: 'book_lesson',
+    contentType: 'book_extract',
+    title: 'EL MARGEN DE SEGURIDAD',
+    concept: 'Exigir un descuento sustancial (30%-50%) respecto al Valor Intrínseco calculado de una empresa antes de invertir.',
+    keyTakeaway: 'Un margen de seguridad amplio absorbe errores de estimación, crisis macroeconómicas y cisnes negros.',
+    quote: {
+      text: "Regla N° 1: Nunca pierdas dinero. Regla N° 2: Nunca olvides la regla N° 1.",
+      author: "Warren Buffett",
+      context: "El pilar maestro del Value Investing desarrollado por Benjamin Graham en Wall Street."
+    },
+    bookExtract: {
+      bookTitle: "El Inversor Inteligente",
+      author: "Benjamin Graham",
+      excerpt: "Si construyes un puente diseñado para soportar 10,000 libras de peso, no dejes pasar un camión de 9,800 libras. Debes construir el puente para soportar 30,000 libras y dejar pasar camiones de 10,000. En inversiones, si estimas que una empresa vale $100 por acción, solo cómprala si el mercado te la ofrece a $65 o $70.",
+      keyFramework: "MARGEN DE SEGURIDAD = Valor Intrínseco Calculado ($100) - Precio de Compra ($65) = 35% de Colchón de Protección."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-4',
     competency: 'investing',
     difficulty: 'easy',
-    type: 'scenario_quiz',
-    title: 'FONDOS INDEXADOS VS. GESTIÓN ACTIVA',
-    concept: 'El 90% de los gestores activos de fondos no logran superar al índice S&P 500 a 10 años debido al impacto destructivo de las comisiones de gestión.',
-    keyTakeaway: 'No busques la aguja en el pajar. Compra el pajar completo mediante un fondo indexado de bajo costo.',
-    scenario: 'El Fondo Activo A cobra una comisión de gestión del 2% anual y promete retornos brutos del 10%. El Fondo Indexado B cobra 0.04% anual y replica el S&P 500 al 9.5% anual. ¿Cuál generará mayor riqueza neta acumulada al cabo de 20 años?',
-    options: [
-      { text: 'El Fondo Indexado B. El retorno neto del Fondo A es 8% (10% - 2%), mientras el Fondo B rinde 9.46% neto.', correct: true },
-      { text: 'El Fondo Activo A, porque su retorno bruto del 10% supera el 9.5% del índice.', correct: false },
-      { text: 'Ambos generarán exactamente el mismo resultado al cabo de dos décadas.', correct: false },
-    ],
-    failureCritique: 'Las comisiones de gestión son un dreno directo sobre el interés compuesto. Un 2% de comisión anual reduce el retorno final en más de un 30% a lo largo de 20 años.',
+    type: 'book_lesson',
+    contentType: 'article',
+    title: 'FONDOS INDEXADOS VS GESTIÓN ACTIVA',
+    concept: 'El 90% de los fondos de inversión activos pierden contra el índice S&P 500 a 10 años debido a las comisiones de gestión.',
+    keyTakeaway: 'No intentes buscar la aguja en el pajar; compra el pajar completo mediante fondos indexados de bajo costo.',
+    quote: {
+      text: "No busques la aguja en el pajar. Simplemente compra el pajar entero.",
+      author: "John C. Bogle",
+      context: "Fundador de Vanguard y creador del primer fondo indexado para inversores particulares."
+    },
+    reading: {
+      subtitle: "La Tiranía de los Costos de Gestión",
+      paragraphs: [
+        "Los fondos de inversión tradicionales (Gestión Activa) cobran comisiones del 2% anual sobre el total administrado más un 20% sobre ganancias. Aunque suena pequeño, un 2% destruye más del 35% del patrimonio acumulado en 25 años.",
+        "Un Fondo Indexado pasivo simplemente replica el comportamiento de las 500 empresas más grandes de EE. UU. (S&P 500) a un costo casi nulo del 0.03% al 0.04% anual.",
+        "La evidencia empírica muestra que menos del 10% de los gestores profesionales logran superar al mercado de forma consistente en el largo plazo."
+      ],
+      takeaway: "Minimizar comisiones es la única garantía comprobada de maximizar el rendimiento neto final."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-5',
     competency: 'investing',
     difficulty: 'medium',
-    type: 'scenario_quiz',
+    type: 'book_lesson',
+    contentType: 'video',
     title: 'LA INFLACIÓN: EL IMPUESTO SILENCIOSO',
-    concept: 'Guardar efectivo erosiona el poder adquisitivo cada año. La rentabilidad real es igual a la rentabilidad nominal menos la tasa de inflación.',
-    keyTakeaway: 'El efectivo en custodia bancaria no es seguro; pierde poder de compra todos los días.',
-    scenario: 'Tienes $100,000 USD invertidos en un depósito bancario a plazo fijo que rinde un 4% anual. La tasa de inflación anual de la economía es del 6.5%. ¿Cuál es el resultado financiero real de tu capital al cabo de 1 año?',
-    options: [
-      { text: 'Perdiste un -2.5% de poder adquisitivo real, ya que el dinero rinde menos que la subida de precios.', correct: true },
-      { text: 'Ganaste $4,000 USD de beneficio neto sin ningún riesgo.', correct: false },
-      { text: 'Mantuviste exactamente el mismo poder de compra inicial.', correct: false },
-    ],
-    failureCritique: 'Rentabilidad Real = Rentabilidad Nominal - Inflación. 4% - 6.5% = -2.5%. Aunque el saldo numérico suba, compras menos bienes y servicios que hace un año.',
+    concept: 'El dinero en efectivo pierde poder adquisitivo todos los días debido al aumento de la masa monetaria y la subida de precios.',
+    keyTakeaway: 'El efectivo en custodia bancaria no está seguro; su poder de compra se evapora en silencio.',
+    quote: {
+      text: "La inflación es la manera más segura de destruir la riqueza sin que los ciudadanos se den cuenta.",
+      author: "Ray Dalio",
+      context: "Fundador de Bridgewater Associates, el fondo de cobertura más grande del mundo."
+    },
+    videoUrl: "https://www.youtube.com/embed/PHe0bXAIuk0",
+    reading: {
+      subtitle: "Rentabilidad Real vs. Rentabilidad Nominal",
+      paragraphs: [
+        "Si tienes $100,000 USD guardados en el banco rindiendo un 3% anual, pero la inflación de la economía es del 6%, numéricamente tendrás $103,000 USD al final del año.",
+        "Sin embargo, debido a que los bienes, servicios y propiedades subieron un 6%, tu poder de compra real se redujo un -3% neto.",
+        "Para preservar el patrimonio, todo capital debe estar colocado en activos productivos (acciones, bienes raíces, negocios) que aumenten sus precios por encima de la inflación."
+      ],
+      takeaway: "Rentabilidad Real = Rentabilidad Nominal - Tasa de Inflación. Busca siempre rendimientos reales positivos."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-6',
     competency: 'investing',
     difficulty: 'medium',
-    type: 'scenario_quiz',
-    title: 'LA GRAVITACIÓN DE LAS TASAS DE INTERÉS',
-    concept: 'Las tasas de interés de los bancos centrales actúan como la gravedad sobre los activos: a tasas más altas, las valoraciones de mercado caen.',
-    keyTakeaway: 'Cuando el costo del dinero sube, el valor presente de las ganancias futuras disminuye.',
-    scenario: 'La Reserva Federal anuncia un incremento agresivo de tasas de interés de 200 puntos básicos (2%) para combatir la inflación. ¿Qué impacto directo tiene esto en la valoración de empresas tecnológicas no rentables de alto crecimiento?',
-    options: [
-      { text: 'Sus valoraciones caen drásticamente porque sus flujos de caja futuros descontados valen menos hoy.', correct: true },
-      { text: 'Sus valoraciones aumentan porque las tasas altas impulsan el consumo tecnológico.', correct: false },
-      { text: 'Las tasas de interés no afectan a las empresas de capital de riesgo.', correct: false },
-    ],
-    failureCritique: 'Las tasas de interés actúan como la gravedad sobre los activos. Al subir la tasa de descuento, el valor presente de ganancias futuras lejanas disminuye fuertemente.',
+    type: 'book_lesson',
+    contentType: 'article',
+    title: 'GRAVITACIÓN DE LAS TASAS DE INTERÉS',
+    concept: 'Las tasas de interés dictadas por los bancos centrales actúan como la gravedad sobre los activos financieros.',
+    keyTakeaway: 'Cuando el costo del dinero sube, el valor presente de los flujos de caja futuros se desploma.',
+    quote: {
+      text: "Las tasas de interés son para las valoraciones de los activos lo que la gravedad es para la manzana.",
+      author: "Warren Buffett",
+      context: "Explicación magistral sobre cómo la política monetaria afecta los precios de acciones y bienes raíces."
+    },
+    reading: {
+      subtitle: "La Matemática del Valor Presente",
+      paragraphs: [
+        "El valor de cualquier empresa o inmueble es la suma descontada de todos los flujos de efectivo que generará en el futuro traídos al presente.",
+        "Cuando la Reserva Federal o los bancos centrales suben la tasa de interés de referencia (para frenar la inflación), la tasa de descuento de los modelos financieros aumenta automáticamente.",
+        "Como resultado directo, una empresa cuyas ganancias mayores se esperan a 10 años vista sufre una caída drástica en su cotización de mercado hoy."
+      ],
+      takeaway: "Comprender el ciclo de tasas de interés permite prever expansiones y correcciones en los mercados."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-7',
     competency: 'investing',
     difficulty: 'medium',
-    type: 'scenario_quiz',
+    type: 'book_lesson',
+    contentType: 'book_extract',
     title: 'ACCIONES (EQUITY) VS. BONOS (DEUDA)',
-    concept: 'Las acciones otorgan propiedad sobre el negocio y sus flujos libres. Los bonos son contratos de préstamo con cobro prioritario y retorno fijo.',
-    keyTakeaway: 'La deuda cobra primero; el equity se queda con todo el crecimiento ilimitado.',
-    scenario: 'Una empresa emite Bonos Corporativos al 7% de interés anual y al mismo tiempo cotiza Acciones Ordinarias. Si la empresa quiebra y entra en liquidación, ¿quién cobra primero los activos restantes?',
-    options: [
-      { text: 'Los tenedores de Bonos (Acreedores), ya que la deuda tiene prioridad absoluta sobre el equity.', correct: true },
-      { text: 'Los accionistas de capital ordinario, por ser los dueños de la empresa.', correct: false },
-      { text: 'Ambos cobran simultáneamente en partes iguales.', correct: false },
-    ],
-    failureCritique: 'En la estructura de capital, la deuda (bonos) siempre tiene prioridad de pago sobre los accionistas (equity). Los accionistas asumen mayor riesgo a cambio de participación ilimitada en el crecimiento.',
+    concept: 'Las acciones otorgan propiedad sobre las utilidades ilimitadas del negocio. Los bonos son préstamos con cobro prioritario y retorno fijo.',
+    keyTakeaway: 'La deuda cobra primero y arriesga menos; el equity cobra al final pero captura todo el potencial infinito.',
+    quote: {
+      text: "Detrás de cada acción hay una empresa real. Averigua qué está haciendo y por qué.",
+      author: "Peter Lynch",
+      context: "Legendario gestor del fondo Fidelity Magellan que logró retornos del 29% anual durante 13 años."
+    },
+    bookExtract: {
+      bookTitle: "Un Paso por Delante de Wall Street",
+      author: "Peter Lynch",
+      excerpt: "Cuando compras un bono corporativo, le estás prestando dinero a la empresa. Ellos prometen pagarte un interés fijo (ej. 5% anual) y devolverte el capital. Si a la empresa le va espectacularmente bien y duplica sus ingresos, tu bono sigue pagando el mismo 5%. Pero si compras acciones (equity) y la empresa prospera, tus ganancias no tienen techo.",
+      keyFramework: "ESTRUCTURA DE CAPITAL: Deuda (Bonos) = Retorno Fijo + Protección Prioritaria. Equity (Acciones) = Retorno Variable + Crecimiento Ilimitado."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-8',
     competency: 'investing',
     difficulty: 'hard',
-    type: 'scenario_quiz',
-    title: 'FREE CASH FLOW (FCF) VS. BENEFICIO NETO',
-    concept: 'El beneficio neto es una convención contable ajustable; el Flujo de Caja Libre (FCF) es el dinero en efectivo real que entra a la caja bancaria.',
-    keyTakeaway: 'Revenue is vanity, profit is sanity, but cash is king.',
-    scenario: 'La Empresa X reporta una Utilidad Neta de $50 millones, pero su Flujo de Caja Operativo menos CapEx (FCF) es de -$10 millones debido a clientes que no han pagado e inventario acumulado. ¿Cuál es el diagnóstico financiero?',
-    options: [
-      { text: 'Alerta roja de liquidez. La empresa no está generando efectivo real y podría necesitar endeudarse.', correct: true },
-      { text: 'Excelente salud financiera, ya que la utilidad neta es alta y positiva.', correct: false },
-      { text: 'Significa que la empresa está reinvirtiendo eficientemente en crecimiento sin deuda.', correct: false },
-    ],
-    failureCritique: 'La contabilidad por devengo puede mostrar beneficios ficticios en papel. El dinero en efectivo real (FCF) es lo que paga dividendos, recompras de acciones y deudas.',
+    type: 'book_lesson',
+    contentType: 'article',
+    title: 'FREE CASH FLOW (FCF) VS BENEFICIO NETO',
+    concept: 'La utilidad neta es un número contable manipulable; el Flujo de Caja Libre (FCF) es el efectivo líquido real en caja.',
+    keyTakeaway: 'Los ingresos son vanidad, el beneficio es sensatez, pero el efectivo libre en caja es el rey.',
+    quote: {
+      text: "La contabilidad por devengo puede inventar beneficios en papel. Solo el efectivo real paga las facturas.",
+      author: "Charlie Munger",
+      context: "Socio histórico de Warren Buffett y vicepresidente de Berkshire Hathaway."
+    },
+    reading: {
+      subtitle: "Análisis de Liquidez Real Ejecutiva",
+      paragraphs: [
+        "Una empresa puede reportar $50 millones en utilidad neta en su estado de resultados porque emitió facturas de venta a crédito a 120 días que aún no ha cobrado.",
+        "Si para operar y mantener sus fábricas tuvo que gastar $60 millones en efectivo contante y sonante (CapEx), su Flujo de Caja Libre (FCF) real es negativo (-$10 millones).",
+        "Las quiebras corporativas no ocurren por falta de utilidad neta contabilizada; ocurren por quedarse sin efectivo líquido para pagar la nómina y la deuda."
+      ],
+      takeaway: "Evalúa siempre el Free Cash Flow (FCF Yield) antes de juzgar la rentabilidad de un negocio."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-9',
     competency: 'investing',
     difficulty: 'hard',
-    type: 'scenario_quiz',
-    title: 'DIVIDENDOS Y REINVERSIÓN AUTOMÁTICA (DRIP)',
-    concept: 'Reinvertir dividendos automáticamente compra más acciones del negocio, acelerando de forma multiplicativa el crecimiento del portafolio.',
-    keyTakeaway: 'Los dividendos reinvertidos generan el 70% del retorno histórico total del mercado accionario.',
-    scenario: 'Posees 1,000 acciones de una empresa que paga $2 USD de dividendo anual por acción. Si utilizas un plan DRIP (Reinversión Automática) mientras la acción cotiza a $40 USD, ¿qué sucede en tu portafolio al recibir el dividendo anual?',
-    options: [
-      { text: 'Recibes $2,000 USD que compran automáticamente 50 acciones adicionales sin pagar comisiones.', correct: true },
-      { text: 'Recibes $2,000 USD en efectivo en tu cuenta bancaria y tus acciones se reducen en 50.', correct: false },
-      { text: 'El precio de tus acciones sube inmediatamente un 5%.', correct: false },
-    ],
-    failureCritique: 'El plan DRIP convierte los dividendos recibidos ($2,000) en nuevas acciones ($2,000 / $40 = 50 acciones), aumentando tu base accionaria para cobrar aún más dividendos el año siguiente.',
+    type: 'book_lesson',
+    contentType: 'video',
+    title: 'DIVIDENDOS Y REINVERSIÓN AUTOMÁTICA',
+    concept: 'Reinvertir dividendos automáticamente (DRIP) compra más títulos sin pagar comisiones, acelerando el interés compuesto.',
+    keyTakeaway: 'La reinversión continua de dividendos genera más del 70% del retorno histórico total del mercado accionario.',
+    quote: {
+      text: "¿Sabes cuál es la única cosa que me da placer real? Ver mis dividendos entrar cada trimestre.",
+      author: "John D. Rockefeller",
+      context: "El primer multimillonario de la historia moderna y fundador de Standard Oil."
+    },
+    videoUrl: "https://www.youtube.com/embed/f5dQp2B2yV4",
+    reading: {
+      subtitle: "La Bola de Nieve del Plan DRIP",
+      paragraphs: [
+        "Cuando una empresa madura y rentable genera excedentes de efectivo, distribuye parte de las ganancias a sus dueños mediante dividendos en dinero.",
+        "Un plan DRIP (Dividend Reinvestment Plan) toma automáticamente ese efectivo pagado y lo convierte en acciones adicionales de la misma empresa sin comisiones.",
+        "Al año siguiente, posees más acciones, las cuales cobran más dividendos, los cuales compran aún más acciones. Este ciclo crea una bola de nieve imparable a 15 y 20 años."
+      ],
+      takeaway: "Reinvertir dividendos en etapas de acumulación de riqueza es el acelerador financiero número 1."
+    },
     xpReward: 100
   },
   {
     id: 'inv-1-10',
     competency: 'investing',
     difficulty: 'hard',
-    type: 'scenario_quiz',
-    title: 'EL PERSONAJE "MR. MARKET" (BENJAMIN GRAHAM)',
-    concept: 'El mercado es un socio maníaco-depresivo que te ofrece precios todos los días. Debes aprovechar sus crisis de pánico para comprar con descuento.',
-    keyTakeaway: 'Mr. Market existe para servirte con precios de remate, no para guiar tus emociones.',
-    scenario: 'Durante una crisis bancaria temporal, Mr. Market ofrece venderte acciones de un banco ultra sólido con balance impecable a un 40% de descuento sobre su valor en libros. ¿Cómo debe actuar un inversor ejecutivo formado por Graham y Buffett?',
-    options: [
-      { text: 'Aprovechar el pánico irracional de Mr. Market y comprar activos sólidos a precio de remate.', correct: true },
-      { text: 'Vender todas tus acciones inmediatamente para evitar caer en el pánico general.', correct: false },
-      { text: 'Esperar a que el mercado vuelva a máximos históricos para comprar con confianza.', correct: false },
-    ],
-    failureCritique: 'Mr. Market no te dice cuánto vale una empresa; solo te dice a qué precio está dispuesto a negociar hoy. El inversor inteligente aprovecha sus accesos de locura para comprar barato y vender caro.',
+    type: 'book_lesson',
+    contentType: 'book_extract',
+    title: 'EL PERSONAJE "MR. MARKET"',
+    concept: 'El mercado bursátil es un socio maníaco-depresivo que todos los días te ofrece precios de compra y venta emocionales.',
+    keyTakeaway: 'Mr. Market está ahí para servirte con precios de oportunidad, no para dirigir tus emociones ni decisiones.',
+    quote: {
+      text: "El mercado bursátil es un mecanismo para transferir dinero del impaciente al paciente.",
+      author: "Benjamin Graham",
+      context: "Cita emblemática del capítulo 8 de 'El Inversor Inteligente'."
+    },
+    bookExtract: {
+      bookTitle: "El Inversor Inteligente",
+      author: "Benjamin Graham",
+      excerpt: "Imagina que eres socio en un negocio privado con un tipo llamado Mr. Market. Todos los días sin falta, Mr. Market viene y te nombra un precio al que te compraría tu parte o te vendería la suya. Cuando se siente eufórico, exige precios astronómicos. Cuando cae en pánico o depresión, te ofrece vender a precios de liquidación ridículamente bajos. Tú eres libre de ignorarlo por completo o aprovechar sus locuras.",
+      keyFramework: "REGLA DE BEN GRAHAM: No compres porque Mr. Market está alegre ni vendas porque está asustado. Compra cuando esté desesperado y vende cuando esté eufórico."
+    },
     xpReward: 100
   },
 
