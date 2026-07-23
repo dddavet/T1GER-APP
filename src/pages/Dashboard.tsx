@@ -203,10 +203,9 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
   const [isFocusOpen, setIsFocusOpen] = useState(false);
   const [isDenOpen, setIsDenOpen] = useState(false);
 
-  const activeTrackProgress = brainState?.trackProgress?.[currentTrackId];
   const currentTrack = CURRICULUM_TRACKS[currentTrackId] as CurriculumTrack;
   const currentLevelIndex = Math.max(0, Math.min(
-    activeTrackProgress?.currentLevelIndex ?? Math.floor(((appUser?.level || 1) - 1) / 3),
+    Math.floor(((appUser?.level || 1) - 1) / 3),
     (currentTrack?.levels?.length || 1) - 1
   ));
 
