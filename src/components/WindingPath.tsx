@@ -85,7 +85,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
             </span>
           </div>
           <h2 className="text-xl font-black uppercase italic tracking-tight drop-shadow-sm">
-            {activeLevel.name || 'Fundamentos Ejecutivos'}
+            {activeLevel.title || (activeLevel as any).name || 'Fundamentos Ejecutivos'}
           </h2>
           <p className="text-xs font-semibold text-white/90 leading-tight max-w-[220px]">
             Mastering key business & investment principles daily.
