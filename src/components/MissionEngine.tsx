@@ -336,50 +336,43 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   }, [mission, isCuratedQuiz, currentCuratedQuiz]);
 
   return (
-    <div className="w-full min-h-screen bg-white text-zinc-800 pt-[calc(1.5rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(1.5rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))] px-5 flex flex-col justify-between overflow-hidden relative font-sans">
-      {/* Clean Headway-style Background */}
-      <div className="absolute inset-0 bg-white z-[-1]" />
+    <div className="fixed inset-0 z-50 bg-[#F7F7F7] text-zinc-800 flex flex-col justify-between overflow-hidden select-none font-sans p-4 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-[calc(0.75rem+var(--safe-bottom-inset,env(safe-area-inset-bottom)))]">
+      {/* Clean Duolingo Off-White Background */}
+      <div className="absolute inset-0 bg-[#F7F7F7] z-[-1]" />
 
-      {/* Top Header Section */}
-      <div className="w-full z-10 pt-2">
-        <div className="flex items-center justify-between mb-6">
+      {/* Top Header Section (Fixed flex-none) */}
+      <div className="flex-none w-full max-w-md mx-auto z-20">
+        <div className="flex items-center justify-between mb-2">
           <button 
             onClick={onComplete}
             aria-label="Close mission"
-            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+            className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors cursor-pointer"
           >
             <X size={24} strokeWidth={2.5} />
           </button>
           
-          {/* Progress bar (Duolingo style) */}
+          {/* Progress bar (Duolingo style 3D) */}
           <div className="h-3.5 flex-1 mx-3 bg-[#E5E5E5] rounded-full overflow-hidden relative">
             <motion.div
-              className="h-full bg-[var(--accent-main)] rounded-full relative"
+              className="h-full bg-[#58CC02] rounded-full relative"
               initial={{ width: 0 }}
               animate={{ width: `${Math.max(10, progress)}%` }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
             >
-              {/* Highlight for volume/3D effect */}
-              <div className="absolute top-1 left-2 right-2 h-1 bg-white/20 rounded-full" />
+              {/* Glossy highlight */}
+              <div className="absolute top-0.5 left-2 right-2 h-1 bg-white/30 rounded-full" />
             </motion.div>
           </div>
           
-          {/* Optional: streak or hearts could go here. For now, empty space to balance the X */}
-          <div className="w-10" />
-        </div>
-
-        {/* Competency Badge */}
-        {showMainUI && (
-          <div className="flex items-center gap-2 mb-2 px-1">
-            <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
-              {COMPETENCY_LABELS[compKey] || mission.competency || 'Mission'}
-            </span>
+          {/* Heart / Streak Badge */}
+          <div className="flex items-center gap-1 bg-white border-2 border-zinc-200 px-2.5 py-1 rounded-2xl shadow-sm">
+            <span className="text-red-500 text-xs font-black">❤️ 5</span>
           </div>
-        )}
+        </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col justify-start py-2 pb-44 relative z-10 w-full overflow-y-auto hide-scrollbar">
+      {/* Main Middle Content Area (Flex-1, Center, Zero Scroll) */}
+      <div className="flex-1 w-full max-w-md mx-auto flex flex-col justify-center items-center relative z-10 overflow-hidden py-2">
         <AnimatePresence mode="wait">
           {/* ============================================ */}
           {/* SUCCESS SCREEN                               */}
@@ -1865,111 +1858,33 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       {/* ============================================================ */}
       {/* PERSISTENT DUOLINGO-STYLE SLIDE-UP BOTTOM PANEL              */}
       {/* ============================================================ */}
-      {showMainUI && (currentStep === 'recall' || currentStep === 'quiz' || (currentStep && currentStep.startsWith('curated_quiz_'))) && (
-        <div className="fixed bottom-0 left-0 right-0 z-30">
-          {/* Correct Answer Bottom Panel */}
-          <AnimatePresence>
-            {quizResult === 'correct' && (
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 20, stiffness: 220 }}
-                className="w-full bg-[#d7ffb8] border-t-2 border-[#b5e58e] px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.05)] flex flex-col gap-4"
-              >
-                <div className="flex items-start gap-4 max-w-md mx-auto w-full">
-                  <motion.img 
-                    src={character.avatarImg} 
-                    alt={character.name} 
-                    className="w-14 h-14 object-contain drop-shadow-md"
-                    animate={{ 
-                      y: [0, -8, 0],
-                      scale: [1, 1.05, 1],
-                      rotate: [0, 5, -5, 0]
-                    }}
-                    transition={{ type: "spring", stiffness: 260, damping: 10, repeat: Infinity, repeatDelay: 2 }}
-                  />
-                  <div className="bg-white border border-[#b5e58e] rounded-2xl p-4 flex-1 relative shadow-sm after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-[#b5e58e] after:rotate-45 after:-translate-y-1/2">
-                    <h3 className="text-[13px] font-black text-[#58A700] uppercase tracking-wider mb-1">¡Excelente!</h3>
-                    <p className="text-[14px] text-zinc-700 font-medium leading-relaxed">
-                      {correctExplanationText}
-                    </p>
-                  </div>
-                </div>
-                <div className="max-w-md mx-auto w-full">
-                  <button 
-                    onClick={advance}
-                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all"
-                  >
-                    Continue
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+      {showMainUI && (
+        <div className="flex-none w-full max-w-md mx-auto bg-white border-t-2 border-zinc-200 p-4 pt-3 pb-6 rounded-t-3xl shadow-[0_-10px_25px_rgba(0,0,0,0.04)] z-30">
+          {currentStep === 'daily_quote' && (
+            <button
+              onClick={() => { haptic(); advance(); }}
+              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              CONTINUAR <ArrowRight size={20} className="stroke-[3]" />
+            </button>
+          )}
 
-          {/* Incorrect Answer Bottom Panel */}
-          <AnimatePresence>
-            {quizResult === 'wrong' && (
-              <motion.div
-                initial={{ y: '100%' }}
-                animate={{ y: 0 }}
-                exit={{ y: '100%' }}
-                transition={{ type: 'spring', damping: 20, stiffness: 220 }}
-                className="w-full bg-[#ffdfe0] border-t-2 border-[#ffc4c6] px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.05)] flex flex-col gap-4"
-              >
-                <div className="flex items-start gap-4 max-w-md mx-auto w-full">
-                  <motion.img 
-                    src="/tiger_sad.png" 
-                    alt={character.name} 
-                    className="w-14 h-14 object-contain drop-shadow-md"
-                    animate={{ 
-                      x: [0, -4, 4, -4, 4, 0],
-                      y: [0, 3, 0]
-                    }}
-                    transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2 }}
-                  />
-                  <div className="bg-white border border-[#ffc4c6] rounded-2xl p-4 flex-1 relative shadow-sm after:content-[''] after:absolute after:-left-2 after:top-6 after:w-4 after:h-4 after:bg-white after:border-l after:border-b after:border-[#ffc4c6] after:rotate-45 after:-translate-y-1/2">
-                    <h3 className="text-[13px] font-black text-[#EA1515] uppercase tracking-wider mb-1">Casi, pero no.</h3>
-                    <p className="text-[14px] text-zinc-700 font-medium leading-relaxed mb-1">
-                      {correctExplanationText}
-                    </p>
-                    {correctAnswerText && (
-                      <p className="text-[12px] text-zinc-500 font-medium mt-1">
-                        Respuesta correcta: <span className="text-[#EA1515] font-black">{correctAnswerText}</span>
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="max-w-md mx-auto w-full">
-                  <button 
-                    onClick={handleFail}
-                    className="w-full py-4 rounded-2xl bg-[#FF4B4B] hover:bg-[#FF4B4B] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#EA1515] active:border-b-0 active:translate-y-1 transition-all"
-                  >
-                    Entendido
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {(currentStep === 'teach' || currentStep === 'reading_chapter') && (
+            <button
+              onClick={() => { haptic(); advance(); }}
+              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              VER CONCLUSIÓN <ArrowRight size={20} className="stroke-[3]" />
+            </button>
+          )}
 
-          {/* Idle Selection Checking Bottom Panel */}
-          {quizResult === 'idle' && (
-            <div className="w-full bg-white border-t-2 border-zinc-200 px-6 py-6 pb-8 shadow-[0_-15px_40px_rgba(0,0,0,0.03)]">
-              <div className="max-w-md mx-auto w-full">
-                <button
-                  disabled={selectedOption === null}
-                  onClick={handleCheckAnswer}
-                  className={`w-full py-4 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all cursor-pointer border-b-4 
-                    ${selectedOption === null 
-                      ? 'bg-[#E5E5E5] text-[#AFAFAF] border-[#C4C4C4] cursor-not-allowed' 
-                      : 'bg-[#58CC02] hover:bg-[#58CC02] text-white border-[#58A700] active:border-b-0 active:translate-y-1'
-                    }`}
-                >
-                  Check Answer
-                </button>
-              </div>
-            </div>
+          {currentStep === 'recall' && (
+            <button
+              onClick={() => { haptic(); handleSuccess(); }}
+              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              COMPLETAR LECCIÓN 🟢
+            </button>
           )}
         </div>
       )}
