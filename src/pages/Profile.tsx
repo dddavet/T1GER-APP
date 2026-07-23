@@ -11,6 +11,7 @@ import { parseLibreLingoYAML } from '../services/libreLingoParser';
 import { downloadT1gerDataExport, readT1gerDataExport, restoreT1gerDataExport } from '../services/dataPortability';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import { TermsOfService } from './TermsOfService';
+import { t } from '../services/i18n';
 
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
   const { appUser, logout, updateAppUser, loginAsDemoUser, deleteAccountAndData } = useAuth();
@@ -339,7 +340,7 @@ quizQuestions:
               <Crown className="w-2.5 h-2.5" /> {appUser?.isFounder ? 'FOUNDER' : 'APEX'}
             </div>
             <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">•</span>
-            <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{appUser?.email || 'Modo Invitado'}</span>
+            <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{appUser?.email || t('guest_mode', language)}</span>
           </div>
 
           <div className="pt-2 flex justify-center">
@@ -347,7 +348,7 @@ quizQuestions:
               onClick={() => logout()}
               className="px-4 py-2 bg-white hover:bg-zinc-50 text-zinc-800 font-black text-[11px] uppercase tracking-wider rounded-xl border border-b-2 border-zinc-300 active:border-b-0 active:translate-y-0.5 shadow-sm flex items-center gap-1.5 cursor-pointer transition-all"
             >
-              <LogOut className="w-3.5 h-3.5 text-[#FF7300]" /> Cambiar de Cuenta / Iniciar Sesión
+              <LogOut className="w-3.5 h-3.5 text-[#FF7300]" /> {t('switch_account_btn', language)}
             </button>
           </div>
         </div>
@@ -366,7 +367,7 @@ quizQuestions:
           <div className="flex items-center gap-2">
             <Globe className="w-5 h-5 text-[#FF7300]" />
             <h3 className="font-black italic uppercase text-sm text-zinc-800 tracking-tight">
-              {language === 'es' ? 'Idioma de la Aplicación' : 'App Language'}
+              {t('language_setting', language)}
             </h3>
           </div>
           <span className="text-[9px] font-black font-mono uppercase bg-[#58CC02]/10 text-[#58CC02] px-2 py-0.5 rounded-full border border-[#58CC02]/20">
@@ -411,7 +412,7 @@ quizQuestions:
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-[#FF7300]" />
             <h3 className="font-black italic uppercase text-sm text-zinc-800 tracking-tight">
-              Cambiar de Cuenta (5 Perfiles)
+              {t('switch_account_title', language)}
             </h3>
           </div>
           <span className="text-[9px] font-black font-mono uppercase bg-[#FF7300]/10 text-[#FF7300] px-2 py-0.5 rounded-full border border-[#FF7300]/20">
@@ -420,13 +421,18 @@ quizQuestions:
         </div>
 
         <p className="text-xs text-zinc-500 font-medium leading-relaxed">
-          Alterna al instante entre 5 usuarios de prueba con diferentes niveles, competencias y estados de onboarding:
+          {t('switch_account_sub', language)}
         </p>
 
         <div className="grid grid-cols-1 gap-2 pt-1">
           {(Object.keys(DEMO_PRESET_USERS) as DemoPreset[]).map((key) => {
             const preset = DEMO_PRESET_USERS[key];
             const isActive = appUser?.uid === preset.user.uid;
+            const labelKey = `preset_${key}_label` as any;
+            const descKey = `preset_${key}_desc` as any;
+            const label = t(labelKey, language);
+            const description = t(descKey, language);
+
             return (
               <button
                 key={key}
@@ -441,15 +447,15 @@ quizQuestions:
                   <span className="text-xl">{preset.icon}</span>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-zinc-800">{preset.label}</span>
+                      <span className="text-xs font-black text-zinc-800">{label}</span>
                       {isActive && (
                         <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-[#FF7300] text-black">
-                          ACTIVO
+                          {t('active', language)}
                         </span>
                       )}
                     </div>
                     <span className="text-[10px] font-semibold text-zinc-500 block line-clamp-1">
-                      {preset.description}
+                      {description}
                     </span>
                   </div>
                 </div>
@@ -475,14 +481,14 @@ quizQuestions:
         <h2 className="text-6xl font-black italic tracking-tighter text-zinc-800 drop-shadow-md">
           {learnStreak}
         </h2>
-        <span className="text-[12px] font-black uppercase text-zinc-500 tracking-[0.2em] mt-1">Días de Racha</span>
+        <span className="text-[12px] font-black uppercase text-zinc-500 tracking-[0.2em] mt-1">{t('streak_days', language)}</span>
       </section>
 
       {/* Stats Grid Minimal */}
       <div className="grid grid-cols-2 gap-3 px-2">
         {[
-          { label: 'Tactical Score', value: tacticalStreak, color: '#fff' },
-          { label: 'Total XP', value: stats.xp, color: '#fff' },
+          { label: t('tactical_score', language), value: tacticalStreak, color: '#fff' },
+          { label: t('total_xp', language), value: stats.xp, color: '#fff' },
         ].map((stat, i) => (
           <div key={i} className="bg-white shadow-sm p-5 rounded-3xl flex flex-col items-center justify-center text-center relative">
             <p className="text-[10px] font-bold uppercase text-zinc-500 mb-1 leading-none tracking-widest">{stat.label}</p>
