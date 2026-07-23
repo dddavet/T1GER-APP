@@ -4,18 +4,39 @@ import { db } from '../firebase';
 import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload, ShieldCheck, Scale, Trash2 } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { parseLibreLingoYAML } from '../services/libreLingoParser';
 import { downloadT1gerDataExport, readT1gerDataExport, restoreT1gerDataExport } from '../services/dataPortability';
+import { PrivacyPolicy } from './PrivacyPolicy';
+import { TermsOfService } from './TermsOfService';
 
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
-  const { appUser, logout, updateAppUser, loginAsDemoUser } = useAuth();
+  const { appUser, logout, updateAppUser, loginAsDemoUser, deleteAccountAndData } = useAuth();
   const { stats, user, setActiveView, spendCoins, addXP } = useT1ger();
   const { competencies, learnStreak, tacticalStreak, resetBrain, brainState } = useBrain();
   const [sessions, setSessions] = useState<any[]>([]);
   const importInputId = 't1ger-data-import';
+
+  // Legal & Privacy Modals
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+
+  const handleConfirmDeleteAccount = async () => {
+    const confirm1 = window.confirm("⚠️ ALERTA DE SEGURIDAD: ¿Estás seguro de que deseas eliminar permanentemente tu cuenta de T1GER APP?");
+    if (!confirm1) return;
+    const confirm2 = window.confirm("⚠️ Confirmación final: Esta acción borrará todas tus misiones, nivel, XP, racha y datos asociados de forma irreversible. ¿Proceder?");
+    if (!confirm2) return;
+
+    try {
+      await deleteAccountAndData();
+      alert("Tu cuenta y datos personales han sido eliminados permanentemente de T1GER APP. Cumplimiento verificado.");
+    } catch (e) {
+      console.error("Error al eliminar la cuenta:", e);
+      alert("Ocurrió un error al procesar la eliminación. Contacta a privacy@t1ger.app");
+    }
+  };
 
   // Developer Mode Toggle
   const [isDevMode, setIsDevMode] = useState(false);
@@ -1274,21 +1295,109 @@ quizQuestions:
         </div>
       </section>
 
-      {/* Logout */}
-      <div className="pt-4">
+      {/* Legal & Account Deletion Compliance Section */}
+      <section className="space-y-3 pt-4 border-t border-zinc-200">
+        <div className="flex items-center justify-between px-2">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-4 h-4 text-[#FF7300]" />
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-500">Legal & Privacidad (Play Store / App Store)</h3>
+          </div>
+          <span className="text-[8px] font-mono font-black uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Compliant 2026
+          </span>
+        </div>
+
+        <div className="bg-white border border-zinc-200 rounded-3xl p-4 space-y-2 shadow-sm">
+          <button
+            onClick={() => setShowPrivacyModal(true)}
+            className="w-full py-3 px-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-left font-bold text-xs text-zinc-700 flex items-center justify-between transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <FileText className="w-4 h-4 text-[#FF7300]" />
+              <span>Política de Privacidad (GDPR / CCPA)</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-400" />
+          </button>
+
+          <button
+            onClick={() => setShowTermsModal(true)}
+            className="w-full py-3 px-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-left font-bold text-xs text-zinc-700 flex items-center justify-between transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Scale className="w-4 h-4 text-[#FF7300]" />
+              <span>Términos de Servicio & Exención de Responsabilidad</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-400" />
+          </button>
+
+          <button
+            onClick={handleConfirmDeleteAccount}
+            className="w-full py-3 px-4 rounded-2xl bg-red-50 hover:bg-red-100 border border-red-200 text-left font-bold text-xs text-red-700 flex items-center justify-between transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Trash2 className="w-4 h-4 text-red-600" />
+              <span>Eliminar mi Cuenta y Datos Permanentemente</span>
+            </div>
+            <span className="text-[9px] font-mono uppercase bg-red-200/80 text-red-900 px-2 py-0.5 rounded-full">Exigencia Google/Apple</span>
+          </button>
+        </div>
+      </section>
+
+      {/* Terminate Session */}
+      <div className="pt-2">
         <button 
           onClick={logout}
-          className="w-full bg-white shadow-sm p-5 rounded-3xl border-red-500/20 hover:bg-red-500/10 flex items-center justify-between group transition-all"
+          className="w-full bg-white shadow-sm p-5 rounded-3xl border border-red-200 hover:bg-red-50 flex items-center justify-between group transition-all cursor-pointer"
         >
-          <div className="flex items-center gap-4 text-red-500">
+          <div className="flex items-center gap-4 text-red-600">
             <LogOut className="w-5 h-5 flex-shrink-0" />
-            <span className="font-black text-sm uppercase tracking-widest">Terminate Session</span>
+            <span className="font-black text-sm uppercase tracking-widest">Cerrar Sesión</span>
           </div>
-          <ChevronRight className="w-4 h-4 text-red-500/50 group-hover:translate-x-1 transition-transform" />
+          <ChevronRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
         </button>
       </div>
 
+      {/* Privacy Policy Modal */}
+      <AnimatePresence>
+        {showPrivacyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-xl max-h-[85vh] overflow-y-auto"
+            >
+              <PrivacyPolicy onBack={() => setShowPrivacyModal(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
+      {/* Terms of Service Modal */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-xl max-h-[85vh] overflow-y-auto"
+            >
+              <TermsOfService onBack={() => setShowTermsModal(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

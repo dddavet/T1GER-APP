@@ -217,6 +217,7 @@ interface AuthContextType {
   sendEmailSignInLink: (email: string) => Promise<void>;
   updateAppUser: (data: Partial<AppUser>) => Promise<void>;
   logout: () => Promise<void>;
+  deleteAccountAndData: () => Promise<void>;
   refreshAppUser: () => Promise<void>;
   loginAsDemoUser: (demoPreset?: DemoPreset) => void;
 }
@@ -232,6 +233,7 @@ const AuthContext = createContext<AuthContextType>({
   sendEmailSignInLink: async () => {},
   updateAppUser: async () => {},
   logout: async () => {},
+  deleteAccountAndData: async () => {},
   refreshAppUser: async () => {},
   loginAsDemoUser: () => {},
 });
@@ -378,6 +380,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.warn('Firebase signout skipped', e);
     }
   }, []);
+
+  const deleteAccountAndData = useCallback(async () => {
+    const currentUid = appUser?.uid || user?.uid;
+    
+    if (currentUid) {
+      localStorage.removeItem(`tiger_brain_state_v3_${currentUid}`);
+    }
+    saveLocalAppUser(null);
+
+    if (user) {
+      try {
+        const userRef = doc(db, 'users', user.uid);
+        const publicRef = doc(db, 'users_public', user.uid);
+        await setDoc(userRef, { deletedAt: serverTimestamp(), isDeleted: true }, { merge: true });
+        await setDoc(publicRef, { deletedAt: serverTimestamp(), isDeleted: true }, { merge: true });
+        await user.delete();
+      } catch (err) {
+        console.warn('Error deleting cloud user account:', err);
+      }
+    }
+
+    setAppUser(null);
+    setUser(null);
+  }, [user, appUser]);
 
   const loginAsDemoUser = useCallback((demoPreset: DemoPreset = 'founder') => {
     const preset = DEMO_PRESET_USERS[demoPreset] || DEMO_PRESET_USERS.founder;
@@ -576,6 +602,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendEmailSignInLink,
     updateAppUser,
     logout,
+    deleteAccountAndData,
     refreshAppUser,
     loginAsDemoUser,
   }), [
@@ -589,6 +616,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendEmailSignInLink,
     updateAppUser,
     logout,
+    deleteAccountAndData,
     refreshAppUser,
     loginAsDemoUser
   ]);

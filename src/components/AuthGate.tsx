@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
 import { GlassButton } from './ui/apple-tahoe-liquid-glass-button';
 
+import { PrivacyPolicy } from '../pages/PrivacyPolicy';
+import { TermsOfService } from '../pages/TermsOfService';
+
 type AuthMode = 'sign-in' | 'sign-up' | 'email-link';
 
 export const AuthGate: React.FC = () => {
@@ -11,6 +14,8 @@ export const AuthGate: React.FC = () => {
   const [mode, setMode] = useState<AuthMode>('sign-in');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const {
     googleSignIn,
     appleSignIn,
@@ -228,11 +233,71 @@ export const AuthGate: React.FC = () => {
                   })}
                 </div>
               </div>
+
+              {/* Legal Compliance Footer Links (Required for App Store & Play Store) */}
+              <div className="pt-2 text-center flex items-center justify-center gap-3 text-[10px] text-zinc-500 font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className="hover:underline cursor-pointer"
+                >
+                  Política de Privacidad
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className="hover:underline cursor-pointer"
+                >
+                  Términos y Condiciones
+                </button>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
+      {/* Privacy Policy Modal */}
+      <AnimatePresence>
+        {showPrivacyModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-xl max-h-[85vh] overflow-y-auto"
+            >
+              <PrivacyPolicy onBack={() => setShowPrivacyModal(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Terms of Service Modal */}
+      <AnimatePresence>
+        {showTermsModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto"
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              className="w-full max-w-xl max-h-[85vh] overflow-y-auto"
+            >
+              <TermsOfService onBack={() => setShowTermsModal(false)} />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
