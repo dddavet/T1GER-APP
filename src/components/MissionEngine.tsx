@@ -1982,37 +1982,5 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 // ============================================================
 
 function getStepsForType(type: string, mission: any, learningStyle: string, isPro: boolean = true): string[] {
-  if (type === 'book_lesson' || mission.contentType || mission.bookExtract || mission.videoUrl) {
-    return ['daily_quote', 'teach', 'recall'];
-  }
-  
-  if (type === 'book_and_build') {
-    return ['book_reader', 'build_framework'];
-  }
-
-  const steps = ['daily_quote', 'reading_chapter'];
-  const qQuestions = mission.curatedData?.quizQuestions || mission.quizQuestions || [];
-
-  if (qQuestions.length > 0) {
-    steps.push(...qQuestions.map((_: any, idx: number) => `curated_quiz_${idx}`));
-  } else if (type === 'scenario_quiz' || mission.options) {
-    steps.push('quiz');
-  } else if (mission.recallQuestion || mission.recallOptions) {
-    steps.push('recall');
-  }
-
-  const hasActions = mission.taskBrief || (mission.frameworkSteps && mission.frameworkSteps.length > 0) || type === 'real_world_task';
-
-  if (isPro) {
-    if (hasActions) {
-      steps.push('real_world_action', 'proof_of_action');
-    }
-    steps.push('optional_deep_dive');
-  } else {
-    if (hasActions) {
-      steps.push('apply_paywall');
-    }
-  }
-
-  return steps;
+  return ['daily_quote', 'teach', 'recall'];
 }
