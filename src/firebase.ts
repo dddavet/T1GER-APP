@@ -18,8 +18,8 @@ const app = initializeApp(finalConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, import.meta.env.VITE_FIRESTORE_DATABASE_ID || firebaseConfig.firestoreDatabaseId);
 
-if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
-  connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL || 'http://127.0.0.1:9099', {
+if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' && import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL) {
+  connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL, {
     disableWarnings: true,
   });
 }

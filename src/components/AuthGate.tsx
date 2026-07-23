@@ -39,6 +39,7 @@ export const AuthGate: React.FC = () => {
     } catch (error) {
       console.error('Auth failed', error);
       setNotice(getAuthMessage(error));
+    } finally {
       setLoading(false);
     }
   };
