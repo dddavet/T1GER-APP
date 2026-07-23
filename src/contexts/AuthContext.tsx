@@ -78,6 +78,7 @@ interface AuthContextType {
   updateAppUser: (data: Partial<AppUser>) => Promise<void>;
   logout: () => Promise<void>;
   refreshAppUser: () => Promise<void>;
+  loginAsDemoUser: (demoPreset?: 'founder' | 'hunter') => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -92,6 +93,7 @@ const AuthContext = createContext<AuthContextType>({
   updateAppUser: async () => {},
   logout: async () => {},
   refreshAppUser: async () => {},
+  loginAsDemoUser: () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -235,6 +237,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     await auth.signOut();
     setAppUser(getLocalAppUser());
+  }, []);
+
+  const loginAsDemoUser = useCallback((demoPreset: 'founder' | 'hunter' = 'founder') => {
+    const isHunter = demoPreset === 'hunter';
+    const demoUser: AppUser = {
+      uid: isHunter ? 'demo-hunter-id' : 'demo-founder-id',
+      email: isHunter ? 'hunter@t1ger.app' : 'founder@t1ger.app',
+      displayName: isHunter ? 'Hunter Predator' : 'Founder Predator',
+      niche: 'ecommerce',
+      level: isHunter ? 12 : 5,
+      xp: isHunter ? 1200 : 450,
+      streak: isHunter ? 14 : 7,
+      coins: isHunter ? 850 : 300,
+      isPro: true,
+      onboardingComplete: true,
+      role: isHunter ? 'member' : 'founder',
+      isFounder: !isHunter,
+      learningStyle: 'interactive'
+    };
+    saveLocalAppUser(demoUser);
+    setAppUser(demoUser);
   }, []);
 
   const updateAppUser = useCallback(async (data: Partial<AppUser>) => {
@@ -429,6 +452,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateAppUser,
     logout,
     refreshAppUser,
+    loginAsDemoUser,
   }), [
     user,
     appUser,
@@ -440,7 +464,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     sendEmailSignInLink,
     updateAppUser,
     logout,
-    refreshAppUser
+    refreshAppUser,
+    loginAsDemoUser
   ]);
 
   return (

@@ -16,7 +16,8 @@ export const AuthGate: React.FC = () => {
     appleSignIn,
     emailPasswordSignIn,
     emailPasswordSignUp,
-    sendEmailSignInLink
+    sendEmailSignInLink,
+    loginAsDemoUser
   } = useAuth();
 
   const getAuthMessage = (error: unknown) => {
@@ -191,6 +192,29 @@ export const AuthGate: React.FC = () => {
                   {notice}
                 </p>
               )}
+
+              {/* Localhost Quick Test Accounts */}
+              <div className="pt-2 border-t border-zinc-200/60 space-y-2 text-center">
+                <span className="text-[10px] font-black font-mono text-zinc-600 uppercase tracking-widest block">
+                  Prueba Rápida Localhost
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => loginAsDemoUser('founder')}
+                    className="py-2.5 px-3 rounded-xl bg-[#FF7300] hover:bg-[#E06500] text-black font-black text-[11px] uppercase tracking-wider border-b-2 border-[#CC5C00] active:translate-y-0.5 transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    ⚡ Demo Founder
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => loginAsDemoUser('hunter')}
+                    className="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-black text-[11px] uppercase tracking-wider border-b-2 border-zinc-950 active:translate-y-0.5 transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    🎯 Demo Hunter
+                  </button>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}
