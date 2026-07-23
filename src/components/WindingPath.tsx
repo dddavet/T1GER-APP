@@ -68,38 +68,6 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
   return (
     <div className="relative w-full flex flex-col items-center pb-8 pt-2">
       
-      {/* 3D DUOLINGO UNIT BANNER */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-sm mb-8 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden flex items-center justify-between border-b-4"
-        style={{ 
-          backgroundColor: trackStyle.color, 
-          borderColor: trackStyle.borderColor 
-        }}
-      >
-        <div className="space-y-1 relative z-10">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-0.5 rounded-full font-mono">
-              SECCIÓN {pathData.currentLevelIndex + 1}
-            </span>
-          </div>
-          <h2 className="text-xl font-black uppercase italic tracking-tight drop-shadow-sm">
-            {activeLevel.title || (activeLevel as any).name || 'Fundamentos Ejecutivos'}
-          </h2>
-          <p className="text-xs font-semibold text-white/90 leading-tight max-w-[220px]">
-            Mastering key business & investment principles daily.
-          </p>
-        </div>
-
-        <div className="w-12 h-12 bg-white/20 border-2 border-white/30 rounded-2xl flex items-center justify-center text-white backdrop-blur-md relative z-10 shadow-inner">
-          <BookOpen className="w-6 h-6 stroke-[2.5]" />
-        </div>
-
-        {/* Decorative background circle */}
-        <div className="absolute -right-6 -bottom-6 w-28 h-28 bg-white/10 rounded-full blur-sm pointer-events-none" />
-      </motion.div>
-
       {/* Completion Banner if Track Finished */}
       {pathData.isFullyCompleted && (
         <motion.div

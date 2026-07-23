@@ -1269,13 +1269,6 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   {lessonQuote.context}
                 </p>
               </div>
-
-              <button
-                onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
-              >
-                <BookOpen className="w-5 h-5" /> Iniciar Lección (~3 min)
-              </button>
             </motion.div>
           )}
 
@@ -1413,14 +1406,6 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                   </div>
                 )}
               </div>
-
-              {/* Bottom 3D Tactile Action Button */}
-              <button
-                onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#FF7300] hover:bg-[#E06500] text-black font-black text-[14px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shrink-0"
-              >
-                Ver Conclusión Ejecutiva ➔
-              </button>
             </motion.div>
           )}
 
