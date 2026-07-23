@@ -29,12 +29,15 @@ const withRetry = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): 
 };
 
 // HELPER TO GET MODEL WITH STABLE API VERSION AND LATEST IDENTIFIERS
-const getModel = (modelName: string) => {
+const getModel = (modelName: string, systemInstruction?: string) => {
   let modelId = modelName;
   if (modelName === 'gemini-1.5-flash-latest') modelId = 'gemini-1.5-flash';
   if (modelName === 'gemini-1.5-pro-latest') modelId = 'gemini-1.5-pro';
   
-  return getAi().getGenerativeModel({ model: modelId });
+  return getAi().getGenerativeModel({ 
+    model: modelId,
+    ...(systemInstruction ? { systemInstruction } : {})
+  });
 };
 
 export const generateDailyLesson = async (niche: string, level: number) => {
@@ -51,9 +54,12 @@ export const generateDailyLesson = async (niche: string, level: number) => {
     "actionItem": "..."
   }`;
 
-  const result = await withRetry(() => model.generateContent(prompt));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 export const generateLearningPath = async (userProfile: any) => {
@@ -85,9 +91,12 @@ export const generateLearningPath = async (userProfile: any) => {
     ]
   }`;
 
-  const result = await withRetry(() => model.generateContent(prompt));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 
@@ -98,9 +107,12 @@ export const generateMissionType = async (keyword: string) => {
   
   Return the response as a JSON object: { "name": "...", "description": "...", "iconUrl": "..." }`;
 
-  const result = await withRetry(() => model.generateContent(prompt));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 export const generateMissions = async (niche: string, level: number, missionTypes: any[], difficulties: ('Easy' | 'Medium' | 'Hard')[]) => {
@@ -115,9 +127,12 @@ export const generateMissions = async (niche: string, level: number, missionType
   
   Return the response as a JSON array of objects with keys: title, description, type, xpReward, difficulty.`;
 
-  const result = await withRetry(() => model.generateContent(prompt));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 export const verifyMissionProof = async (missionType: string, missionTitle: string, base64Image: string, mimeType: string) => {
@@ -151,18 +166,24 @@ export const verifyMissionProof = async (missionType: string, missionTitle: stri
     }
   }
 
-  const result = await withRetry(() => model.generateContent([
-    { text: prompt },
-    {
-      inlineData: {
-        data: finalBase64,
-        mimeType: finalMimeType
-      }
-    }
-  ]));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{
+      role: 'user',
+      parts: [
+        { text: prompt },
+        {
+          inlineData: {
+            data: finalBase64,
+            mimeType: finalMimeType
+          }
+        }
+      ]
+    }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
 
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 export const requestSeniorReview = async (missionType: string, missionTitle: string, base64Image: string, mimeType: string) => {
@@ -184,18 +205,24 @@ export const requestSeniorReview = async (missionType: string, missionTitle: str
     }
   }
 
-  const result = await withRetry(() => model.generateContent([
-    { text: prompt },
-    {
-      inlineData: {
-        data: finalBase64,
-        mimeType: finalMimeType
-      }
-    }
-  ]));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{
+      role: 'user',
+      parts: [
+        { text: prompt },
+        {
+          inlineData: {
+            data: finalBase64,
+            mimeType: finalMimeType
+          }
+        }
+      ]
+    }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
 
   const text = result.response.text();
-  return JSON.parse(text.replace(/```json|```/g, '').trim());
+  return JSON.parse(text.trim());
 };
 
 export const reviewMissionProof = requestSeniorReview;
@@ -242,7 +269,7 @@ export const generateAdaptiveLesson = async (
   - If they are "interactive", make the concept concise and focus on intuition.
   - Generate exactly ${questionCount} questions in the quizQuestions array. Vary them: some multiple choice, some scenario-based.
   
-  Return the response in this EXACT JSON structure, mapping the dynamic fields (the output must be valid JSON, with absolutely no markdown wrapping except raw JSON):
+  Return the response in this EXACT JSON structure, mapping the dynamic fields:
   {
     "id": "${baseMission.id}",
     "competency": "${baseMission.competency}",
@@ -253,7 +280,6 @@ export const generateAdaptiveLesson = async (
     "keyTakeaway": "[Punchy, dynamic 1-sentence summary]",
     
     "quizQuestions": [
-      // Generate exactly ${questionCount} questions
       {
         "text": "[Question 1 text]",
         "options": [
@@ -269,16 +295,16 @@ export const generateAdaptiveLesson = async (
     "xpReward": ${baseMission.xpReward || 50}
   }`;
 
-  const result = await withRetry(() => model.generateContent(prompt));
+  const result = await withRetry(() => model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: "application/json" }
+  }));
   const text = result.response.text();
-  const cleaned = text.replace(/```json|```/g, '').trim();
-  return JSON.parse(cleaned);
+  return JSON.parse(text.trim());
 };
 
 export const executePromptChallenge = async (userPrompt: string, systemConstraint: string): Promise<string> => {
-  const model = getModel('gemini-1.5-flash');
-  const fullPrompt = `System Rules/Constraint: ${systemConstraint}\n\nUser Input: ${userPrompt}`;
-  
-  const result = await withRetry(() => model.generateContent(fullPrompt));
+  const model = getModel('gemini-1.5-flash', systemConstraint);
+  const result = await withRetry(() => model.generateContent(userPrompt));
   return result.response.text();
 };
