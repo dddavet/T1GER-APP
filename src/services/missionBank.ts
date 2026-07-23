@@ -398,8 +398,77 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
       }
     ]
   },
-  business: { trackId: 'business', title: 'BUSINESS', levels: [] },
-  ai: { trackId: 'ai', title: 'ARTIFICIAL INTELLIGENCE', levels: [] }
+  business: {
+    trackId: 'business',
+    title: 'BUSINESS & SALES',
+    levels: [
+      {
+        levelId: 'biz-level-1', levelNumber: 1, title: 'OFFER & SALES FOUNDATIONS', subtitle: 'Crafting $100M offers and objection handling',
+        days: [
+          { dayId: 'biz-1-d1', dayNumber: 1, missionIds: ['off-e1'] },
+          { dayId: 'biz-1-d2', dayNumber: 2, missionIds: ['off-e2'] },
+          { dayId: 'biz-1-d3', dayNumber: 3, missionIds: ['sales-e1'] },
+          { dayId: 'biz-1-d4', dayNumber: 4, missionIds: ['sales-e2'] },
+          { dayId: 'biz-1-d5', dayNumber: 5, missionIds: ['off-m1'] },
+          { dayId: 'biz-1-d6', dayNumber: 6, missionIds: ['sales-m1'] },
+          { dayId: 'biz-1-d7', dayNumber: 7, missionIds: ['sales-m2'] },
+          { dayId: 'biz-1-d8', dayNumber: 8, missionIds: ['sales-h1'] },
+          { dayId: 'biz-1-d9', dayNumber: 9, missionIds: ['sales-h2'] },
+          { dayId: 'biz-1-d10', dayNumber: 10, missionIds: ['off-h1'] },
+        ]
+      },
+      {
+        levelId: 'biz-level-2', levelNumber: 2, title: 'GROWTH & MARKETING SCALE', subtitle: 'Lead generation and acquisition funnels',
+        days: [
+          { dayId: 'biz-2-d1', dayNumber: 11, missionIds: ['mktg-e1'] },
+          { dayId: 'biz-2-d2', dayNumber: 12, missionIds: ['mktg-e2'] },
+          { dayId: 'biz-2-d3', dayNumber: 13, missionIds: ['mktg-e3'] },
+          { dayId: 'biz-2-d4', dayNumber: 14, missionIds: ['mktg-m1'] },
+          { dayId: 'biz-2-d5', dayNumber: 15, missionIds: ['mktg-m2'] },
+          { dayId: 'biz-2-d6', dayNumber: 16, missionIds: ['mktg-m3'] },
+          { dayId: 'biz-2-d7', dayNumber: 17, missionIds: ['ops-e1'] },
+          { dayId: 'biz-2-d8', dayNumber: 18, missionIds: ['ops-e2'] },
+          { dayId: 'biz-2-d9', dayNumber: 19, missionIds: ['ops-m1'] },
+          { dayId: 'biz-2-d10', dayNumber: 20, missionIds: ['ops-h1'] },
+        ]
+      },
+      {
+        levelId: 'biz-level-3', levelNumber: 3, title: 'ENTERPRISE B2B & HIGH-TICKET', subtitle: 'MEDDPICC, outbound cadences, and $10k+ deals',
+        days: [
+          { dayId: 'biz-3-d1', dayNumber: 21, missionIds: ['sales-h1'] },
+          { dayId: 'biz-3-d2', dayNumber: 22, missionIds: ['sales-h2'] },
+          { dayId: 'biz-3-d3', dayNumber: 23, missionIds: ['off-h1'] },
+          { dayId: 'biz-3-d4', dayNumber: 24, missionIds: ['mktg-m3'] },
+          { dayId: 'biz-3-d5', dayNumber: 25, missionIds: ['ops-h1'] },
+        ]
+      }
+    ]
+  },
+  ai: {
+    trackId: 'ai',
+    title: 'ARTIFICIAL INTELLIGENCE',
+    levels: [
+      {
+        levelId: 'ai-level-1', levelNumber: 1, title: 'LLM ARCHITECTURE & PROMPTING', subtitle: 'Weights, tokens, and prompt engineering',
+        days: [
+          { dayId: 'ai-1-d1', dayNumber: 1, missionIds: ['ai-d1'] },
+          { dayId: 'ai-1-d2', dayNumber: 2, missionIds: ['ai-d2'] },
+          { dayId: 'ai-1-d3', dayNumber: 3, missionIds: ['ai-d3'] },
+          { dayId: 'ai-1-d4', dayNumber: 4, missionIds: ['ai-d4'] },
+          { dayId: 'ai-1-d5', dayNumber: 5, missionIds: ['ai-d5'] },
+          { dayId: 'ai-1-d6', dayNumber: 6, missionIds: ['ai-d6'] },
+        ]
+      },
+      {
+        levelId: 'ai-level-2', levelNumber: 2, title: 'RAG & AGENTIC SYSTEMS', subtitle: 'Vector search, embeddings, and autonomous loops',
+        days: [
+          { dayId: 'ai-2-d1', dayNumber: 7, missionIds: ['ai-d4'] },
+          { dayId: 'ai-2-d2', dayNumber: 8, missionIds: ['ai-d5'] },
+          { dayId: 'ai-2-d3', dayNumber: 9, missionIds: ['ai-d6'] },
+        ]
+      }
+    ]
+  }
 };
 
 export const COMPETENCY_LABELS: Record<Competency, string> = {
@@ -426,6 +495,8 @@ export const STANDARD_HABITS: StandardHabit[] = [
   { id: 'sh3', label: 'Cold Shower', icon: 'Droplets', category: 'morning' },
   { id: 'sh4', label: 'Deep Work Block (90 min)', icon: 'Brain', category: 'business' },
   { id: 'sh5', label: 'Daily Outreach (10 leads)', icon: 'Rocket', category: 'business' },
+  { id: 'sh9', label: '20 Outbound B2B Touchpoints', icon: 'Send', category: 'business' },
+  { id: 'sh10', label: 'Update CRM Pipeline', icon: 'BarChart2', category: 'business' },
   { id: 'sh6', label: 'Read 10 pages', icon: 'Book', category: 'wellness' },
   { id: 'sh7', label: 'No Sugar Day', icon: 'Zap', category: 'wellness' },
   { id: 'sh8', label: 'Plan Tomorrow', icon: 'Target', category: 'business' },

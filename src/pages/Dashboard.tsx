@@ -194,7 +194,8 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
     tacticalStreak, 
     completeHabit,
     dailyTacticalStatus,
-    setDayType 
+    setDayType,
+    brainState 
   } = useBrain();
   const { appUser, updateAppUser } = useAuth();
 
@@ -202,8 +203,12 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
   const [isFocusOpen, setIsFocusOpen] = useState(false);
   const [isDenOpen, setIsDenOpen] = useState(false);
 
-  const currentLevelIndex = 0; // Fixed for MVP prototype
+  const activeTrackProgress = brainState?.trackProgress?.[currentTrackId];
   const currentTrack = CURRICULUM_TRACKS[currentTrackId] as CurriculumTrack;
+  const currentLevelIndex = Math.max(0, Math.min(
+    activeTrackProgress?.currentLevelIndex ?? Math.floor(((appUser?.level || 1) - 1) / 3),
+    (currentTrack?.levels?.length || 1) - 1
+  ));
 
   const isCommitted = dailyTacticalStatus.committedHabitIds.length > 0 || 
                       dailyTacticalStatus.committedWorkIds.length > 0 ||

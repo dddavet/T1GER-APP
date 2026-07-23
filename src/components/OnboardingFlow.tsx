@@ -321,7 +321,7 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
   const resolvedTrackId = useMemo((): 'business' | 'investing' | 'ai' => {
     const goal = answers.goal || 'career';
     if (goal === 'investing') return 'investing';
-    if (goal === 'startup') return 'business';
+    if (goal === 'startup' || goal === 'career' || goal === 'freedom') return 'business';
     return 'ai';
   }, [answers.goal]);
 

@@ -86,10 +86,15 @@ export const PaywallIntro: React.FC = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="flex items-center justify-center gap-2"
+        className="flex flex-col items-center justify-center space-y-2 text-center"
       >
-        <Check size={20} className="text-zinc-800" />
-        <span className="text-zinc-800 font-bold text-[15px]">No Payment Due Now</span>
+        <div className="flex items-center gap-2">
+          <Check size={20} className="text-[#FF7300]" />
+          <span className="text-zinc-800 font-black text-[15px]">Prueba 7 Días Gratis — Cancela cuando quieras</span>
+        </div>
+        <p className="text-xs font-semibold text-zinc-500">
+          Solo <span className="font-bold text-zinc-800">$2.49/mes</span> ($29.99 facturados anualmente). Sin cobros hoy.
+        </p>
       </motion.div>
 
     </div>
