@@ -4,7 +4,7 @@ import { db } from '../firebase';
 import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload, ShieldCheck, Scale, Trash2 } from 'lucide-react';
+import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload, ShieldCheck, Scale, Trash2, Globe } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 import { parseLibreLingoYAML } from '../services/libreLingoParser';
@@ -15,7 +15,7 @@ import { TermsOfService } from './TermsOfService';
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
   const { appUser, logout, updateAppUser, loginAsDemoUser, deleteAccountAndData } = useAuth();
   const { stats, user, setActiveView, spendCoins, addXP } = useT1ger();
-  const { competencies, learnStreak, tacticalStreak, resetBrain, brainState } = useBrain();
+  const { competencies, learnStreak, tacticalStreak, resetBrain, brainState, language, setLanguage } = useBrain();
   const [sessions, setSessions] = useState<any[]>([]);
   const importInputId = 't1ger-data-import';
 
@@ -357,8 +357,53 @@ quizQuestions:
            <p className="text-[#00E5FF] font-black uppercase text-[9px] tracking-widest drop-shadow-[0_0_5px_rgba(0,229,255,0.4)]">
              {appUser?.niche || 'Ambitious Entrepreneur'}
            </p>
-        </div>
+         </div>
       </header>
+
+      {/* APP LANGUAGE SWITCHER CARD (i18n) */}
+      <div className="bg-white border-2 border-zinc-200 rounded-3xl p-5 shadow-xl space-y-3 text-left">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-[#FF7300]" />
+            <h3 className="font-black italic uppercase text-sm text-zinc-800 tracking-tight">
+              {language === 'es' ? 'Idioma de la Aplicación' : 'App Language'}
+            </h3>
+          </div>
+          <span className="text-[9px] font-black font-mono uppercase bg-[#58CC02]/10 text-[#58CC02] px-2 py-0.5 rounded-full border border-[#58CC02]/20">
+            {language === 'es' ? '100% Traducido 🇪🇸' : '100% Pure English 🇺🇸'}
+          </span>
+        </div>
+
+        <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+          {language === 'es' 
+            ? 'Selecciona tu idioma preferido para toda la interfaz, lecciones y navegación:'
+            : 'Select your preferred language for the entire interface, lessons, and navigation:'}
+        </p>
+
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <button
+            onClick={() => setLanguage('es')}
+            className={`py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border-b-4 ${
+              language === 'es'
+                ? 'bg-[#FF7300] text-white border-[#CC5C00] shadow-md'
+                : 'bg-white text-zinc-600 border-zinc-200 border-b-zinc-300 hover:bg-zinc-50'
+            }`}
+          >
+            <span>🇪🇸 Español</span>
+          </button>
+
+          <button
+            onClick={() => setLanguage('en')}
+            className={`py-3.5 px-4 rounded-2xl font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-2 border-b-4 ${
+              language === 'en'
+                ? 'bg-[#FF7300] text-white border-[#CC5C00] shadow-md'
+                : 'bg-white text-zinc-600 border-zinc-200 border-b-zinc-300 hover:bg-zinc-50'
+            }`}
+          >
+            <span>🇺🇸 English</span>
+          </button>
+        </div>
+      </div>
 
       {/* 5 PRESET TEST ACCOUNTS SWITCHER */}
       <div className="bg-white border-2 border-zinc-200 rounded-3xl p-5 shadow-xl space-y-3 text-left">

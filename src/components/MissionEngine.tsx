@@ -20,7 +20,7 @@ interface MissionEngineProps {
 
 export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplete }) => {
   const { addXP } = useT1ger();
-  const { completeMission, failMission, competencies } = useBrain();
+  const { completeMission, failMission, competencies, language } = useBrain();
   const { appUser, updateAppUser } = useAuth();
   const learningStyle = appUser?.learningStyle || 'text';
   
@@ -1844,31 +1844,38 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       {/* PERSISTENT DUOLINGO-STYLE SLIDE-UP BOTTOM PANEL              */}
       {/* ============================================================ */}
       {showMainUI && (
-        <div className="flex-none w-full max-w-md mx-auto bg-white border-t-2 border-zinc-200 p-4 pt-3 pb-6 rounded-t-3xl shadow-[0_-10px_25px_rgba(0,0,0,0.04)] z-30">
+        <div className="flex-none w-full max-w-md mx-auto bg-white border-t-2 border-zinc-200 p-4 pt-3 pb-6 rounded-t-3xl shadow-[0_-10px_25px_rgba(0,0,0,0.04)] z-30 flex items-center gap-3">
+          <button
+            onClick={() => { haptic(); advance(); }}
+            className="w-1/3 py-4 rounded-2xl bg-white border-2 border-zinc-200 border-b-4 border-zinc-300 active:border-b-0 active:translate-y-1 text-zinc-600 font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 hover:bg-zinc-50"
+          >
+            {language === 'es' ? 'SALTAR' : 'SKIP'}
+          </button>
+
           {currentStep === 'daily_quote' && (
             <button
               onClick={() => { haptic(); advance(); }}
-              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
-              CONTINUAR <ArrowRight size={20} className="stroke-[3]" />
+              {language === 'es' ? 'CONTINUAR' : 'CONTINUE'} <ArrowRight size={20} className="stroke-[3]" />
             </button>
           )}
 
           {(currentStep === 'teach' || currentStep === 'reading_chapter') && (
             <button
               onClick={() => { haptic(); advance(); }}
-              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
-              VER CONCLUSIÓN <ArrowRight size={20} className="stroke-[3]" />
+              {language === 'es' ? 'VER CONCLUSIÓN' : 'VIEW TAKEAWAY'} <ArrowRight size={20} className="stroke-[3]" />
             </button>
           )}
 
           {currentStep === 'recall' && (
             <button
               onClick={() => { haptic(); handleSuccess(); }}
-              className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
-              COMPLETAR LECCIÓN 🟢
+              {language === 'es' ? 'COMPLETAR LECCIÓN 🟢' : 'COMPLETE LESSON 🟢'}
             </button>
           )}
         </div>

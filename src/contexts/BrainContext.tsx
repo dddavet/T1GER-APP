@@ -65,6 +65,10 @@ interface BrainContextType {
   removeTacticalTask: (id: string, type: 'habit' | 'work' | 'lesson') => void;
   submitTacticalProof: (id: string, proofUrl?: string, proofText?: string, verified?: boolean) => void;
   commitTactical: (habitIds: string[], workIds: string[], lessonIds: string[]) => void;
+  // Internationalization (i18n)
+  language: Language;
+  setLanguage: (lang: Language) => void;
+
   resetBrain: () => void;
 }
 
@@ -181,9 +185,20 @@ function saveState(userId: string, state: BrainState) {
   }
 }
 
+import { type Language } from '../services/i18n';
+
 export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { appUser } = useAuth();
   const [brainState, setBrainState] = useState<BrainState>(DEFAULT_BRAIN_STATE);
+
+  const [language, setLanguageState] = useState<Language>(() => {
+    return (localStorage.getItem('t1ger_app_language') as Language) || 'es';
+  });
+
+  const setLanguage = useCallback((lang: Language) => {
+    setLanguageState(lang);
+    localStorage.setItem('t1ger_app_language', lang);
+  }, []);
 
   const LOCAL_STORAGE_ID = 'anonymous_local_user';
 
@@ -408,8 +423,10 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     removeTacticalTask,
     submitTacticalProof,
     commitTactical,
+    language,
+    setLanguage,
     resetBrain,
-  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, selectTrack, skipDaysForPlacement, t1gerEmotion, t1gerVisualConfig, resetBrain]);
+  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, selectTrack, skipDaysForPlacement, t1gerEmotion, t1gerVisualConfig, resetBrain, language, setLanguage]);
 
   return (
     <BrainContext.Provider value={value}>

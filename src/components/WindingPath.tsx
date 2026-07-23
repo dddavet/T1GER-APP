@@ -42,7 +42,7 @@ const getNodePosition = (index: number): { xOffset: number } => {
 };
 
 export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) => {
-  const { pathData, brainState, getSessionMissions, dailyProgress } = useBrain();
+  const { pathData, brainState, getSessionMissions, dailyProgress, language } = useBrain();
   const { appUser } = useAuth();
 
   const activeLevel = pathData.track?.levels?.[pathData.currentLevelIndex] || pathData.track?.levels?.[0];
@@ -141,7 +141,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
                   className="absolute -top-12 z-20 flex flex-col items-center pointer-events-none whitespace-nowrap"
                 >
                   <div className="bg-[#58CC02] border-b-4 border-[#58A700] text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5">
-                    <span>¡EMPEZAR (+100 XP)!</span>
+                    <span>{language === 'es' ? '¡EMPEZAR (+100 XP)!' : 'START (+100 XP)!'}</span>
                   </div>
                   {/* Callout Arrow */}
                   <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#58CC02] -mt-0.5" />
@@ -150,7 +150,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
 
               {/* 3D PHYSICAL KEY BUTTON NODE */}
               <motion.button
-                aria-label={isActive ? `Empezar día ${day.dayNumber}: ${nextMission?.title || 'lección'}` : isDone ? `Día ${day.dayNumber} completado` : `Día ${day.dayNumber} bloqueado`}
+                aria-label={isActive ? `${language === 'es' ? 'Empezar día' : 'Start day'} ${day.dayNumber}: ${nextMission?.title || 'lección'}` : isDone ? `${language === 'es' ? 'Día' : 'Day'} ${day.dayNumber} ${language === 'es' ? 'completado' : 'completed'}` : `${language === 'es' ? 'Día' : 'Day'} ${day.dayNumber} ${language === 'es' ? 'bloqueado' : 'locked'}`}
                 disabled={!isActive || !nextMission}
                 whileTap={isActive ? { y: 6 } : {}}
                 whileHover={isActive ? { scale: 1.05 } : {}}
@@ -206,7 +206,7 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
               {/* NODE DAY LABEL */}
               <div className="mt-2 text-center max-w-[110px]">
                 <p className={`text-[10px] font-black uppercase tracking-wider ${isActive ? 'text-zinc-800' : 'text-zinc-400'}`}>
-                  DÍA {day.dayNumber}
+                  {language === 'es' ? `DÍA ${day.dayNumber}` : `DAY ${day.dayNumber}`}
                 </p>
                 {isActive && (
                   <p className="text-[9px] font-extrabold text-[#58CC02] line-clamp-2 mt-0.5 leading-tight">
