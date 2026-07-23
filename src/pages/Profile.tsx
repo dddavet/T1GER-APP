@@ -318,7 +318,16 @@ quizQuestions:
               <Crown className="w-2.5 h-2.5" /> {appUser?.isFounder ? 'FOUNDER' : 'APEX'}
             </div>
             <span className="text-zinc-600 text-[10px] font-black uppercase tracking-widest">•</span>
-            <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{appUser?.email}</span>
+            <span className="text-zinc-500 font-bold uppercase text-[10px] tracking-widest">{appUser?.email || 'Modo Invitado'}</span>
+          </div>
+
+          <div className="pt-2 flex justify-center">
+            <button
+              onClick={() => logout()}
+              className="px-4 py-2 bg-white hover:bg-zinc-50 text-zinc-800 font-black text-[11px] uppercase tracking-wider rounded-xl border border-b-2 border-zinc-300 active:border-b-0 active:translate-y-0.5 shadow-sm flex items-center gap-1.5 cursor-pointer transition-all"
+            >
+              <LogOut className="w-3.5 h-3.5 text-[#FF7300]" /> Cambiar de Cuenta / Iniciar Sesión
+            </button>
           </div>
         </div>
         

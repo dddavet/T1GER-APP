@@ -229,14 +229,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const logout = useCallback(async () => {
-    if (AUTH_DISABLED_FOR_PROTOTYPE) {
-      const prototypeUser = buildPrototypeUser();
-      saveLocalAppUser(prototypeUser);
-      setAppUser(prototypeUser);
-      return;
+    saveLocalAppUser(null);
+    setAppUser(null);
+    setUser(null);
+    try {
+      await auth.signOut();
+    } catch (e) {
+      console.warn('Firebase signout skipped', e);
     }
-    await auth.signOut();
-    setAppUser(getLocalAppUser());
   }, []);
 
   const loginAsDemoUser = useCallback((demoPreset: 'founder' | 'hunter' = 'founder') => {
@@ -386,16 +386,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [user, fetchAppUser]);
 
   useEffect(() => {
-    if (AUTH_DISABLED_FOR_PROTOTYPE) {
-      const prototypeUser = buildPrototypeUser();
-      saveLocalAppUser(prototypeUser);
+    const localUser = getLocalAppUser();
+
+    if (AUTH_DISABLED_FOR_PROTOTYPE && localUser) {
       setUser(null);
-      setAppUser(prototypeUser);
+      setAppUser(localUser);
       setLoading(false);
       return;
     }
 
-    const localUser = getLocalAppUser();
     if (localUser && !user) {
       setAppUser(localUser);
     }
