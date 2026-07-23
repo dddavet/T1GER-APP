@@ -66,6 +66,146 @@ export interface AppUser {
   acquisitionSource?: string;
 }
 
+export type DemoPreset = 'founder' | 'investor' | 'hacker' | 'growth' | 'newbie';
+
+export const DEMO_PRESET_USERS: Record<DemoPreset, { user: AppUser; label: string; badge: string; description: string; avatarBg: string; icon: string }> = {
+  founder: {
+    label: "⚡ David Founder",
+    badge: "FUNDADOR",
+    description: "Creador de T1GER APP. Nivel 15, 21 días de racha.",
+    avatarBg: "bg-amber-500",
+    icon: "⚡",
+    user: {
+      uid: 'demo-founder-id',
+      email: 'founder@t1ger.app',
+      displayName: 'David (Founder)',
+      role: 'founder',
+      isFounder: true,
+      niche: 'saas',
+      goal: 'Escalar T1GER APP a $100k MRR',
+      businessStage: 'scaling',
+      dailyTime: 20,
+      level: 15,
+      xp: 2450,
+      streak: 21,
+      coins: 1200,
+      isPro: true,
+      onboardingComplete: true,
+      onboardingStep: 'complete',
+      learningStyle: 'interactive',
+      primaryTrack: 'investing'
+    }
+  },
+  investor: {
+    label: "🎯 Carlos Mendoza",
+    badge: "INVERSOR EJECUTIVO",
+    description: "Value Investing & Interés Compuesto. Nivel 8, 14 racha.",
+    avatarBg: "bg-[#FF7300]",
+    icon: "🎯",
+    user: {
+      uid: 'demo-investor-id',
+      email: 'carlos.investor@t1ger.app',
+      displayName: 'Carlos Mendoza',
+      role: 'member',
+      isFounder: false,
+      niche: 'investing',
+      goal: 'Construir Portafolio con Interés Compuesto',
+      businessStage: 'investor',
+      dailyTime: 15,
+      level: 8,
+      xp: 980,
+      streak: 14,
+      coins: 450,
+      isPro: true,
+      onboardingComplete: true,
+      onboardingStep: 'complete',
+      learningStyle: 'text',
+      primaryTrack: 'investing'
+    }
+  },
+  hacker: {
+    label: "🚀 Sofía Arango",
+    badge: "AI ENGINEER",
+    description: "Desarrolladora de IA & Prompting. Nivel 5, 8 racha.",
+    avatarBg: "bg-purple-600",
+    icon: "🚀",
+    user: {
+      uid: 'demo-hacker-id',
+      email: 'sofia.ai@t1ger.app',
+      displayName: 'Sofía Arango',
+      role: 'member',
+      isFounder: false,
+      niche: 'ai',
+      goal: 'Lanzar 3 Agentes de IA en 90 días',
+      businessStage: 'building',
+      dailyTime: 30,
+      level: 5,
+      xp: 450,
+      streak: 8,
+      coins: 250,
+      isPro: true,
+      onboardingComplete: true,
+      onboardingStep: 'complete',
+      learningStyle: 'interactive',
+      primaryTrack: 'ai'
+    }
+  },
+  growth: {
+    label: "📈 Elena Rivas",
+    badge: "GROWTH EXEC",
+    description: "Especialista en Ventas B2B & High-Ticket. Nivel 10, 19 racha.",
+    avatarBg: "bg-emerald-600",
+    icon: "📈",
+    user: {
+      uid: 'demo-growth-id',
+      email: 'elena.growth@t1ger.app',
+      displayName: 'Elena Rivas',
+      role: 'member',
+      isFounder: false,
+      niche: 'sales',
+      goal: 'Cerrar $50k MRR en Contratos Corporate',
+      businessStage: 'scaling',
+      dailyTime: 15,
+      level: 10,
+      xp: 1420,
+      streak: 19,
+      coins: 650,
+      isPro: true,
+      onboardingComplete: true,
+      onboardingStep: 'complete',
+      learningStyle: 'visual',
+      primaryTrack: 'business'
+    }
+  },
+  newbie: {
+    label: "🦁 Mateo Silva",
+    badge: "NUEVO (PROBAR ONBOARDING)",
+    description: "Cuenta sin configurar. Activa el Onboarding desde 0.",
+    avatarBg: "bg-sky-500",
+    icon: "🦁",
+    user: {
+      uid: 'demo-newbie-id',
+      email: 'mateo.new@t1ger.app',
+      displayName: 'Mateo Silva (Nuevo)',
+      role: 'member',
+      isFounder: false,
+      niche: '',
+      goal: '',
+      businessStage: 'idea',
+      dailyTime: 10,
+      level: 1,
+      xp: 0,
+      streak: 0,
+      coins: 0,
+      isPro: true,
+      onboardingComplete: false,
+      onboardingStep: 'splash',
+      learningStyle: 'interactive',
+      primaryTrack: 'investing'
+    }
+  }
+};
+
 interface AuthContextType {
   user: User | null;
   appUser: AppUser | null;
@@ -78,7 +218,7 @@ interface AuthContextType {
   updateAppUser: (data: Partial<AppUser>) => Promise<void>;
   logout: () => Promise<void>;
   refreshAppUser: () => Promise<void>;
-  loginAsDemoUser: (demoPreset?: 'founder' | 'hunter') => void;
+  loginAsDemoUser: (demoPreset?: DemoPreset) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -239,23 +379,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  const loginAsDemoUser = useCallback((demoPreset: 'founder' | 'hunter' = 'founder') => {
-    const isHunter = demoPreset === 'hunter';
-    const demoUser: AppUser = {
-      uid: isHunter ? 'demo-hunter-id' : 'demo-founder-id',
-      email: isHunter ? 'hunter@t1ger.app' : 'founder@t1ger.app',
-      displayName: isHunter ? 'Hunter Predator' : 'Founder Predator',
-      niche: 'ecommerce',
-      level: isHunter ? 12 : 5,
-      xp: isHunter ? 1200 : 450,
-      streak: isHunter ? 14 : 7,
-      coins: isHunter ? 850 : 300,
-      isPro: true,
-      onboardingComplete: true,
-      role: isHunter ? 'member' : 'founder',
-      isFounder: !isHunter,
-      learningStyle: 'interactive'
-    };
+  const loginAsDemoUser = useCallback((demoPreset: DemoPreset = 'founder') => {
+    const preset = DEMO_PRESET_USERS[demoPreset] || DEMO_PRESET_USERS.founder;
+    const demoUser = preset.user;
     saveLocalAppUser(demoUser);
     setAppUser(demoUser);
   }, []);

@@ -83,6 +83,80 @@ const BrainContext = createContext<BrainContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'tiger_brain_state_v3';
 
+function getSeedBrainStateForUser(userId: string): BrainState {
+  if (userId === 'demo-founder-id') {
+    return {
+      ...DEFAULT_BRAIN_STATE,
+      currentTrackId: 'investing',
+      completedDayIds: ['inv-1-1', 'inv-1-2', 'inv-1-3', 'inv-1-4', 'inv-1-5'],
+      learnStreak: 21,
+      tacticalStreak: 18,
+      competencies: {
+        offer: 75, sales: 80, marketing: 70, mindset: 90,
+        operations: 85, investing: 95, accounting: 70, ai: 85
+      }
+    };
+  }
+
+  if (userId === 'demo-investor-id') {
+    return {
+      ...DEFAULT_BRAIN_STATE,
+      currentTrackId: 'investing',
+      completedDayIds: ['inv-1-1', 'inv-1-2', 'inv-1-3'],
+      learnStreak: 14,
+      tacticalStreak: 10,
+      competencies: {
+        offer: 40, sales: 45, marketing: 30, mindset: 70,
+        operations: 50, investing: 88, accounting: 82, ai: 40
+      }
+    };
+  }
+
+  if (userId === 'demo-hacker-id') {
+    return {
+      ...DEFAULT_BRAIN_STATE,
+      currentTrackId: 'ai',
+      completedDayIds: ['ai-d1', 'ai-d2'],
+      learnStreak: 8,
+      tacticalStreak: 5,
+      competencies: {
+        offer: 50, sales: 30, marketing: 40, mindset: 65,
+        operations: 60, investing: 35, accounting: 30, ai: 92
+      }
+    };
+  }
+
+  if (userId === 'demo-growth-id') {
+    return {
+      ...DEFAULT_BRAIN_STATE,
+      currentTrackId: 'business',
+      completedDayIds: ['biz-d1', 'biz-d2', 'biz-d3', 'biz-d4'],
+      learnStreak: 19,
+      tacticalStreak: 15,
+      competencies: {
+        offer: 85, sales: 92, marketing: 88, mindset: 75,
+        operations: 70, investing: 50, accounting: 45, ai: 60
+      }
+    };
+  }
+
+  if (userId === 'demo-newbie-id') {
+    return {
+      ...DEFAULT_BRAIN_STATE,
+      currentTrackId: 'investing',
+      completedDayIds: [],
+      learnStreak: 0,
+      tacticalStreak: 0,
+      competencies: {
+        offer: 0, sales: 0, marketing: 0, mindset: 0,
+        operations: 0, investing: 0, accounting: 0, ai: 0
+      }
+    };
+  }
+
+  return { ...DEFAULT_BRAIN_STATE };
+}
+
 function loadState(userId: string): BrainState {
   try {
     const raw = localStorage.getItem(`${STORAGE_KEY}_${userId}`);
@@ -96,7 +170,7 @@ function loadState(userId: string): BrainState {
   } catch (e) {
     console.warn('[Brain] Failed to load state', e);
   }
-  return { ...DEFAULT_BRAIN_STATE };
+  return getSeedBrainStateForUser(userId);
 }
 
 function saveState(userId: string, state: BrainState) {

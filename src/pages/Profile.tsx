@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '../firebase';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
 import { User, Award, History, Settings, LogOut, ChevronRight, BrainCircuit, Users, Crown, Sparkles, RefreshCcw, Flame, Terminal, Activity, BarChart2, CheckCircle2, TrendingUp, FileText, Play, Download, Upload } from 'lucide-react';
@@ -11,7 +11,7 @@ import { parseLibreLingoYAML } from '../services/libreLingoParser';
 import { downloadT1gerDataExport, readT1gerDataExport, restoreT1gerDataExport } from '../services/dataPortability';
 
 export const Profile = ({ onPlayMission }: { onPlayMission?: (mission: any) => void }) => {
-  const { appUser, logout, updateAppUser } = useAuth();
+  const { appUser, logout, updateAppUser, loginAsDemoUser } = useAuth();
   const { stats, user, setActiveView, spendCoins, addXP } = useT1ger();
   const { competencies, learnStreak, tacticalStreak, resetBrain, brainState } = useBrain();
   const [sessions, setSessions] = useState<any[]>([]);
@@ -338,6 +338,63 @@ quizQuestions:
            </p>
         </div>
       </header>
+
+      {/* 5 PRESET TEST ACCOUNTS SWITCHER */}
+      <div className="bg-white border-2 border-zinc-200 rounded-3xl p-5 shadow-xl space-y-3 text-left">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-[#FF7300]" />
+            <h3 className="font-black italic uppercase text-sm text-zinc-800 tracking-tight">
+              Cambiar de Cuenta (5 Perfiles)
+            </h3>
+          </div>
+          <span className="text-[9px] font-black font-mono uppercase bg-[#FF7300]/10 text-[#FF7300] px-2 py-0.5 rounded-full border border-[#FF7300]/20">
+            Multi-User Live
+          </span>
+        </div>
+
+        <p className="text-xs text-zinc-500 font-medium leading-relaxed">
+          Alterna al instante entre 5 usuarios de prueba con diferentes niveles, competencias y estados de onboarding:
+        </p>
+
+        <div className="grid grid-cols-1 gap-2 pt-1">
+          {(Object.keys(DEMO_PRESET_USERS) as DemoPreset[]).map((key) => {
+            const preset = DEMO_PRESET_USERS[key];
+            const isActive = appUser?.uid === preset.user.uid;
+            return (
+              <button
+                key={key}
+                onClick={() => loginAsDemoUser(key)}
+                className={`p-3 rounded-2xl border-2 transition-all flex items-center justify-between text-left cursor-pointer ${
+                  isActive
+                    ? 'border-[#FF7300] bg-[#FF7300]/10 border-b-4 shadow-md'
+                    : 'border-zinc-200 bg-zinc-50 hover:bg-white border-b-4 border-b-zinc-300 active:translate-y-0.5'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">{preset.icon}</span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-zinc-800">{preset.label}</span>
+                      {isActive && (
+                        <span className="text-[8px] font-black uppercase px-2 py-0.5 rounded-full bg-[#FF7300] text-black">
+                          ACTIVO
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-semibold text-zinc-500 block line-clamp-1">
+                      {preset.description}
+                    </span>
+                  </div>
+                </div>
+                <span className="text-[8px] font-black font-mono uppercase px-2 py-1 rounded-lg bg-white border border-zinc-200 text-zinc-600 shrink-0">
+                  {preset.badge}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* STREAK ALTAR (Duolingo Style Focus) */}
       <section className="relative flex flex-col items-center justify-center py-8">

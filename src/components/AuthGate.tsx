@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
 import { GlassButton } from './ui/apple-tahoe-liquid-glass-button';
 
 type AuthMode = 'sign-in' | 'sign-up' | 'email-link';
@@ -194,26 +194,38 @@ export const AuthGate: React.FC = () => {
                 </p>
               )}
 
-              {/* Localhost Quick Test Accounts */}
-              <div className="pt-2 border-t border-zinc-200/60 space-y-2 text-center">
-                <span className="text-[10px] font-black font-mono text-zinc-600 uppercase tracking-widest block">
-                  Prueba Rápida Localhost
+              {/* Localhost 5 Preset Test Accounts */}
+              <div className="pt-3 border-t border-zinc-200/80 space-y-2.5 text-center">
+                <span className="text-[10px] font-black font-mono text-zinc-500 uppercase tracking-widest block">
+                  ⚡ ACCESO RÁPIDO A 5 PERFILES DE PRUEBA
                 </span>
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => loginAsDemoUser('founder')}
-                    className="py-2.5 px-3 rounded-xl bg-[#FF7300] hover:bg-[#E06500] text-black font-black text-[11px] uppercase tracking-wider border-b-2 border-[#CC5C00] active:translate-y-0.5 transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    ⚡ Demo Founder
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => loginAsDemoUser('hunter')}
-                    className="py-2.5 px-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-black text-[11px] uppercase tracking-wider border-b-2 border-zinc-950 active:translate-y-0.5 transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
-                  >
-                    🎯 Demo Hunter
-                  </button>
+                <div className="flex flex-col gap-1.5">
+                  {(Object.keys(DEMO_PRESET_USERS) as DemoPreset[]).map((key) => {
+                    const preset = DEMO_PRESET_USERS[key];
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => loginAsDemoUser(key)}
+                        className="w-full py-2.5 px-3 rounded-2xl bg-white hover:bg-zinc-50 border-2 border-zinc-200 border-b-4 border-b-zinc-300 active:border-b-2 active:translate-y-0.5 transition-all text-left flex items-center justify-between group cursor-pointer"
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <span className="text-base">{preset.icon}</span>
+                          <div>
+                            <p className="text-xs font-black text-zinc-800 leading-tight group-hover:text-[#FF7300]">
+                              {preset.label}
+                            </p>
+                            <p className="text-[9px] font-bold text-zinc-600 line-clamp-1">
+                              {preset.description}
+                            </p>
+                          </div>
+                        </div>
+                        <span className="text-[8px] font-black font-mono uppercase px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600 border border-zinc-200 shrink-0">
+                          {preset.badge}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
