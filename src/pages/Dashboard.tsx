@@ -235,13 +235,10 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
 
       <PhaseSystem isPro={appUser?.isPro} isEs={isEs} />
 
-      <TacticalColumns />
+      <TacticalColumns onTaskComplete={() => {}} />
 
-      <FocusPomodoro />
-
-      <PredatorDen />
-
-      <MementoMoriWidget age={appUser?.age} isEs={isEs} />
+      {/* Optional widgets rendered when active */}
+      <MementoMoriWidget age={(appUser as any)?.age} isEs={isEs} />
     </div>
   );
 };
