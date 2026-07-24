@@ -22,7 +22,8 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
     customWorkTasks, 
     customLessonTasks,
     dailyTacticalStatus, 
-    submitTacticalProof 
+    submitTacticalProof,
+    language
   } = useBrain();
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
 
@@ -138,13 +139,13 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="bg-accent/15 text-accent px-2.5 py-1 rounded-lg border border-accent/25 flex items-center gap-1.5 shadow-[0_0_12px_rgba(204,255,0,0.15)]"
+                      className="bg-emerald-500/15 text-emerald-600 px-2.5 py-1 rounded-lg border border-emerald-500/25 flex items-center gap-1.5 shadow-sm"
                     >
                       <Check className="w-3 h-3" strokeWidth={3.5} />
-                      <span className="text-[7px] font-black uppercase tracking-tighter">Secured</span>
+                      <span className="text-[7px] font-black uppercase tracking-tighter">{language === 'es' ? 'Completado' : 'Secured'}</span>
                     </motion.div>
                   ) : (
-                    <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-600 border border-zinc-200 group-hover:border-accent/30 group-hover:text-accent transition-all">
+                    <div className="w-8 h-8 rounded-full bg-zinc-50 flex items-center justify-center text-zinc-600 border border-zinc-200 group-hover:border-[#FF7300]/30 group-hover:text-[#FF7300] transition-all">
                       <Camera className="w-3.5 h-3.5" />
                     </div>
                   )}
@@ -155,9 +156,11 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="py-5 text-center border-2 border-dashed border-zinc-200 rounded-[1.25rem] opacity-20"
+              className="py-5 text-center border-2 border-dashed border-zinc-200 rounded-[1.25rem] opacity-40"
             >
-              <p className="text-[8px] font-black uppercase tracking-widest">No protocol active</p>
+              <p className="text-[8px] font-black uppercase tracking-widest text-zinc-500">
+                {language === 'es' ? 'Sin protocolo activo' : 'No protocol active'}
+              </p>
             </motion.div>
           )}
         </div>
@@ -167,9 +170,9 @@ export const TacticalColumns = ({ onTaskComplete }: { onTaskComplete: () => void
 
   return (
     <div className="px-5 mb-10 space-y-8">
-      <Column title="Habits" type="habit" color="text-accent" icon={Target} />
-      <Column title="Lessons" type="lesson" color="text-purple-400" icon={Book} />
-      <Column title="Work" type="work" color="text-blue-400" icon={Rocket} />
+      <Column title={language === 'es' ? 'Hábitos' : 'Habits'} type="habit" color="text-[#FF7300]" icon={Target} />
+      <Column title={language === 'es' ? 'Lecciones' : 'Lessons'} type="lesson" color="text-purple-500" icon={Book} />
+      <Column title={language === 'es' ? 'Trabajo' : 'Work'} type="work" color="text-blue-500" icon={Rocket} />
 
       <AnimatePresence>
         {selectedTask && (

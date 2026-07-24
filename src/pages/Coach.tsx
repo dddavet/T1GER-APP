@@ -29,9 +29,12 @@ const getCoachAvatar = (coachId: CharacterId, text: string) => {
   return CHARACTER_CAST[coachId].avatarImg;
 };
 
+import { useBrain } from '../contexts/BrainContext';
+
 export const Coach = () => {
   const { appUser, updateAppUser } = useAuth();
   const { setActiveView } = useT1ger();
+  const { language } = useBrain();
   const [messages, setMessages] = useState<{ role: string; text: string }[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -131,7 +134,7 @@ export const Coach = () => {
           <div>
             <h1 className="text-base font-black tracking-tight text-zinc-800">T1GER Mentor</h1>
             <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-              {coachConfig.name} Activated
+              {coachConfig.name} {language === 'es' ? 'Activado' : 'Activated'}
             </p>
           </div>
         </div>
@@ -230,7 +233,7 @@ export const Coach = () => {
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             aria-label={`Message ${coachConfig.name}`}
             className="w-full bg-zinc-50 border border-zinc-200 rounded-full py-3.5 pl-5 pr-14 text-[15px] focus:outline-none focus:border-[#FF7300] focus:bg-white transition-colors text-zinc-800"
-            placeholder={`Message ${coachConfig.name}...`}
+            placeholder={language === 'es' ? `Enviar mensaje a ${coachConfig.name}...` : `Message ${coachConfig.name}...`}
           />
           <button 
             onClick={handleSend}

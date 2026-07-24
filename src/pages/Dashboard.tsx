@@ -14,24 +14,34 @@ import { DailyCommitment } from '../components/DailyCommitment';
 import { FocusPomodoro } from '../components/FocusPomodoro';
 import { PredatorDen } from '../components/PredatorDen';
 
-const DAILY_QUOTES = [
-  "The pride doesn't sleep. Prove your grind.",
-  "Excuses don't have metadata. T1GER doesn't care about your intentions.",
-  "Document the grind or it didn't happen. Results are the only language we speak.",
-  "Your competitors are sleeping. Use this hour to bury them.",
-  "Discipline is the bridge between goals and accomplishment.",
-  "The only bad workout is the one that didn't happen.",
-  "Innovation distinguishes between a leader and a follower."
+const DAILY_QUOTES_ES = [
+  "La manada no duerme. Demuestra tu disciplina diaria.",
+  "Las excusas no tienen valor. T1GER mide tus resultados ejecutados.",
+  "Documenta el trabajo o no ocurrió. La ejecución es el único idioma verdadero.",
+  "Tu competencia está descansando. Aprovecha esta hora para tomar la delantera.",
+  "La disciplina es el puente inquebrantable entre los objetivos y el éxito.",
+  "El único entrenamiento fallido es el que nunca comenzaste.",
+  "La innovación constante separa a los verdaderos líderes de los seguidores."
 ];
 
-const MementoMoriWidget = ({ age }: { age?: number | null }) => {
+const DAILY_QUOTES_EN = [
+  "The pride doesn't sleep. Prove your daily grind.",
+  "Excuses have no value. T1GER measures executed results.",
+  "Document the work or it didn't happen. Execution is our only language.",
+  "Your competition is sleeping. Use this hour to take the lead.",
+  "Discipline is the unbreakable bridge between goals and accomplishment.",
+  "The only failed workout is the one you never started.",
+  "Relentless innovation separates true leaders from followers."
+];
+
+const MementoMoriWidget = ({ age, isEs }: { age?: number | null, isEs: boolean }) => {
   const currentAge = Math.max(18, Math.min(90, age || 22));
   const totalMonths = 90 * 12;
   const livedMonths = Math.min(totalMonths, Math.round(currentAge * 12));
   const weeksLeft = Math.max(0, Math.round((90 - currentAge) * 52));
 
   return (
-    <section className="mx-5 bg-white shadow-sm rounded-[2rem] p-5 border border-zinc-200 shadow-sm relative overflow-hidden">
+    <section className="mx-5 bg-white shadow-sm rounded-[2rem] p-5 border border-zinc-200 relative overflow-hidden text-left">
       <div className="absolute -top-10 -right-8 w-28 h-28 rounded-full bg-red-500/10 blur-[48px] pointer-events-none" />
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
@@ -39,12 +49,14 @@ const MementoMoriWidget = ({ age }: { age?: number | null }) => {
             Memento Mori
           </span>
           <h2 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 leading-none mt-1">
-            Your life in months
+            {isEs ? 'Tu vida en meses' : 'Your life in months'}
           </h2>
         </div>
         <div className="text-right">
           <p className="text-2xl font-black text-red-400 leading-none">{weeksLeft.toLocaleString()}</p>
-          <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">weeks left</span>
+          <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">
+            {isEs ? 'semanas restantes' : 'weeks left'}
+          </span>
         </div>
       </div>
 
@@ -68,22 +80,24 @@ const MementoMoriWidget = ({ age }: { age?: number | null }) => {
       </div>
 
       <p className="mt-4 text-[10px] font-semibold text-zinc-500 leading-relaxed">
-        Every dot is one month. T1GER exists to turn consumed content into executed proof before those dots run out.
+        {isEs
+          ? 'Cada punto representa un mes de vida. T1GER existe para convertir el aprendizaje en evidencia ejecutada antes de que los puntos se agoten.'
+          : 'Every dot is one month. T1GER exists to turn consumed content into executed proof before those dots run out.'}
       </p>
     </section>
   );
 };
 
-const PhaseSystem = ({ isPro }: { isPro?: boolean }) => (
-  <section className="px-5 grid grid-cols-3 gap-2">
+const PhaseSystem = ({ isPro, isEs }: { isPro?: boolean, isEs: boolean }) => (
+  <section className="px-5 grid grid-cols-3 gap-2 text-left">
     {[
-      { label: 'Learn', sub: 'Micro-lessons', state: 'Free' },
-      { label: 'Apply', sub: 'Photo proof', state: isPro ? 'Unlocked' : 'Premium' },
-      { label: 'Repeat', sub: '7-day hunt', state: 'Active' },
+      { label: isEs ? 'Aprender' : 'Learn', sub: isEs ? 'Micro-lecciones' : 'Micro-lessons', state: isEs ? 'Gratis' : 'Free' },
+      { label: isEs ? 'Aplicar' : 'Apply', sub: isEs ? 'Evidencia fotográfica' : 'Photo proof', state: isPro ? (isEs ? 'Desbloqueado' : 'Unlocked') : 'Premium' },
+      { label: isEs ? 'Repetir' : 'Repeat', sub: isEs ? 'Racha de 7 días' : '7-day hunt', state: isEs ? 'Activo' : 'Active' },
     ].map((phase, index) => (
       <div key={phase.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 min-h-[96px]">
         <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-600">
-          Phase 0{index + 1}
+          {isEs ? `Fase 0${index + 1}` : `Phase 0${index + 1}`}
         </span>
         <h3 className="text-sm font-black uppercase tracking-tight text-zinc-800 mt-2">{phase.label}</h3>
         <p className="text-[9px] font-bold text-zinc-500 mt-1 leading-tight">{phase.sub}</p>
@@ -97,20 +111,22 @@ const PhaseSystem = ({ isPro }: { isPro?: boolean }) => (
   </section>
 );
 
-const ModeSelectorTop = ({ current, onSelect }: { current: string, onSelect: (id: any) => void }) => {
+const ModeSelectorTop = ({ current, onSelect, isEs }: { current: string, onSelect: (id: any) => void, isEs: boolean }) => {
   const haptic = () => {
     if (window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(12);
     }
   };
 
+  const modes = [
+    { id: 'rest', icon: Coffee, color: 'text-blue-400', label: isEs ? 'Relajado' : 'Relaxed' },
+    { id: 'normal', icon: Target, color: 'text-accent', label: isEs ? 'Enfoque' : 'Focus' },
+    { id: 'beast', icon: Flame, color: 'text-orange-500', label: isEs ? 'Bestia' : 'Beast' },
+  ];
+
   return (
-    <div className="flex items-center justify-center gap-1.5 p-1.5 bg-white shadow-sm rounded-[2rem] mx-auto w-fit mb-6 shadow-sm">
-      {[
-        { id: 'rest', icon: Coffee, color: 'text-blue-400', label: 'Relaxed' },
-        { id: 'normal', icon: Target, color: 'text-accent', label: 'Focus' },
-        { id: 'beast', icon: Flame, color: 'text-orange-500', label: 'Beast' },
-      ].map((m) => {
+    <div className="flex items-center justify-center gap-1.5 p-1.5 bg-white shadow-sm rounded-[2rem] mx-auto w-fit mb-6">
+      {modes.map((m) => {
         const isActive = current === m.id;
         return (
           <button
@@ -133,25 +149,25 @@ const ModeSelectorTop = ({ current, onSelect }: { current: string, onSelect: (id
   );
 };
 
-const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, levelIndex: number, appUser: any }) => {
-  const level = track?.levels?.[levelIndex] || track?.levels?.[0] || { title: 'Unknown Phase' };
+const StoryBanner = ({ track, levelIndex, appUser, isEs }: { track: CurriculumTrack, levelIndex: number, appUser: any, isEs: boolean }) => {
+  const level = track?.levels?.[levelIndex] || track?.levels?.[0] || { title: isEs ? 'Fundamentos Ejecutivos' : 'Executive Foundations' };
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000);
-  const dailyQuote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+  const dailyQuote = isEs ? DAILY_QUOTES_ES[dayOfYear % DAILY_QUOTES_ES.length] : DAILY_QUOTES_EN[dayOfYear % DAILY_QUOTES_EN.length];
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Morning Briefing" : hour < 18 ? "Afternoon Ops" : "Evening Debrief";
+  const greeting = isEs 
+    ? (hour < 12 ? "Informe Matutino" : hour < 18 ? "Operaciones de Tarde" : "Reflexión Nocturna")
+    : (hour < 12 ? "Morning Briefing" : hour < 18 ? "Afternoon Ops" : "Evening Debrief");
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="bg-white shadow-sm rounded-[2.5rem] p-7 mx-5 my-4 relative overflow-hidden border-zinc-200 shadow-sm"
+      className="bg-white shadow-sm rounded-[2.5rem] p-7 mx-5 my-4 relative overflow-hidden border-zinc-200 text-left"
     >
-      {/* Scanline effect */}
       <div className="absolute inset-0 z-[1] pointer-events-none opacity-[0.03] bg-scanline" />
 
-      {/* Animated background glow */}
       <motion.div
         className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-[80px] pointer-events-none"
         style={{ background: 'radial-gradient(circle, var(--bg-glow-1) 0%, transparent 70%)' }}
@@ -163,8 +179,8 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
       />
 
       <div className="flex items-center justify-between mb-4 relative z-10">
-        <div className="px-2.5 py-1 rounded-full bg-accent/10 border border-accent/20">
-          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-accent">
+        <div className="px-2.5 py-1 rounded-full bg-[#FF7300]/10 border border-[#FF7300]/20">
+          <span className="text-[8px] font-black uppercase tracking-[0.25em] text-[#FF7300]">
             {level.title}
           </span>
         </div>
@@ -173,9 +189,13 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
 
       <div className="relative z-10 space-y-3">
         <h1 className="text-3xl font-black italic tracking-tighter leading-none text-zinc-800 uppercase">
-          THE PRIDE <span className="text-accent drop-shadow-[0_0_20px_var(--accent-glow)]">STAYS HUNGRY.</span>
+          {isEs ? (
+            <>LA MANADA TIENE <span className="text-[#FF7300] drop-shadow-[0_0_20px_rgba(255,115,0,0.3)]">HAMBRE DE ÉXITO.</span></>
+          ) : (
+            <>THE PRIDE <span className="text-[#FF7300] drop-shadow-[0_0_20px_rgba(255,115,0,0.3)]">STAYS HUNGRY.</span></>
+          )}
         </h1>
-        <p className="text-[11px] font-medium text-zinc-500 leading-relaxed italic border-l-2 border-accent/30 pl-4">
+        <p className="text-[11px] font-medium text-zinc-500 leading-relaxed italic border-l-2 border-[#FF7300]/30 pl-4">
           "{dailyQuote}"
         </p>
       </div>
@@ -184,228 +204,44 @@ const StoryBanner = ({ track, levelIndex, appUser }: { track: CurriculumTrack, l
 };
 
 export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) => void }) => {
-  const { setActiveView, user } = useT1ger();
-  const { stats } = useT1ger();
+  const { setActiveView } = useT1ger();
   const { 
-    totalCompleted, 
-    dailyProgress, 
     currentTrackId, 
-    learnStreak, 
-    tacticalStreak, 
-    completeHabit,
     dailyTacticalStatus,
     setDayType,
-    brainState 
+    pathData,
+    language 
   } = useBrain();
-  const { appUser, updateAppUser } = useAuth();
+  const { appUser } = useAuth();
+  const isEs = language === 'es';
 
-  // Component Modals trigger state
-  const [isFocusOpen, setIsFocusOpen] = useState(false);
-  const [isDenOpen, setIsDenOpen] = useState(false);
-
-  const currentTrack = CURRICULUM_TRACKS[currentTrackId] as CurriculumTrack;
-  const currentLevelIndex = Math.max(0, Math.min(
-    Math.floor(((appUser?.level || 1) - 1) / 3),
-    (currentTrack?.levels?.length || 1) - 1
-  ));
-
-  const isCommitted = dailyTacticalStatus.committedHabitIds.length > 0 || 
-                      dailyTacticalStatus.committedWorkIds.length > 0 ||
-                      dailyTacticalStatus.committedLessonIds?.length > 0;
-
-  const isMinimalist = appUser?.minimalistMode || false;
-
-  const toggleMinimalist = async () => {
-    if (updateAppUser) {
-      await updateAppUser({ minimalistMode: !isMinimalist });
-    }
-  };
+  const currentTrack = CURRICULUM_TRACKS[currentTrackId] || CURRICULUM_TRACKS.investing;
+  const currentDayType = dailyTacticalStatus.dayType || 'normal';
 
   return (
-    <div className="relative w-full pt-4 pb-20 space-y-2">
-      
-      {/* ZEN WORKSPACE TOP CONTROL SWITCH */}
-      <div className="px-5 flex items-center justify-between mb-4">
-        <span className="text-[10px] font-black font-mono text-zinc-600 uppercase tracking-widest">
-          {isMinimalist ? 'ZEN WORKSPACE ACTIVE' : 'TACTICAL OVERVIEW'}
-        </span>
-        
-        <button
-          onClick={toggleMinimalist}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border bg-zinc-50 border-zinc-200 text-[9px] font-black uppercase tracking-wider text-zinc-500 hover:text-zinc-800 transition-all cursor-pointer"
-        >
-          {isMinimalist ? (
-            <>
-              <Eye className="w-3.5 h-3.5 text-accent" />
-              <span>Normal View</span>
-            </>
-          ) : (
-            <>
-              <EyeOff className="w-3.5 h-3.5" />
-              <span>Zen Mode</span>
-            </>
-          )}
-        </button>
-      </div>
+    <div className="space-y-6 pb-28 min-h-full">
+      <StoryBanner 
+        track={currentTrack} 
+        levelIndex={pathData.currentLevelIndex} 
+        appUser={appUser}
+        isEs={isEs} 
+      />
 
-      <AnimatePresence>
-        {!isCommitted && <DailyCommitment />}
-      </AnimatePresence>
+      <ModeSelectorTop 
+        current={currentDayType} 
+        onSelect={(type) => setDayType(type)} 
+        isEs={isEs}
+      />
 
-      <MementoMoriWidget age={user.age || appUser?.experienceLevel || null} />
-      <PhaseSystem isPro={appUser?.isPro} />
+      <PhaseSystem isPro={appUser?.isPro} isEs={isEs} />
 
-      {/* Mode Selector - hidden in Minimalist Zen mode */}
-      {!isMinimalist && (
-        <ModeSelectorTop 
-          current={dailyTacticalStatus.dayType} 
-          onSelect={setDayType} 
-        />
-      )}
+      <TacticalColumns />
 
-      {/* Storytelling Narrative Block - hidden in Minimalist Zen mode */}
-      {!isMinimalist && (
-        <StoryBanner track={currentTrack} levelIndex={currentLevelIndex} appUser={appUser} />
-      )}
+      <FocusPomodoro />
 
-      {/* QUICK LABS FOCUS OPERATIONS (POMODORO & DEN CAPABILITIES) */}
-      <div className="px-5 grid grid-cols-2 gap-3 mb-6">
-        <button
-          onClick={() => setIsFocusOpen(true)}
-          className="bg-white shadow-sm border border-zinc-200 hover:border-zinc-200 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
-        >
-          <div className="w-8 h-8 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
-            <BrainIcon className="w-4 h-4 animate-pulse" />
-          </div>
-          <div className="text-left">
-            <h4 className="text-[10px] font-black uppercase text-zinc-800 tracking-tight leading-none">Focus Pomodoro</h4>
-            <span className="text-[8px] text-zinc-500 font-mono font-bold mt-1 block">Gamma 40Hz Audio</span>
-          </div>
-        </button>
+      <PredatorDen />
 
-        <button
-          onClick={() => setIsDenOpen(true)}
-          className="bg-white shadow-sm border border-zinc-200 hover:border-zinc-200 rounded-3xl p-4 flex flex-col items-start gap-2 cursor-pointer transition-all active:scale-[0.98]"
-        >
-          <div className="w-8 h-8 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
-            <Home className="w-4 h-4" />
-          </div>
-          <div className="text-left">
-            <h4 className="text-[10px] font-black uppercase text-zinc-800 tracking-tight leading-none">Predator's Den</h4>
-            <span className="text-[8px] text-zinc-500 font-mono font-bold mt-1 block">Office Decorator</span>
-          </div>
-        </button>
-      </div>
-
-      {/* THE AWAKENING ROUTINE MATUTINA INTRO PANEL */}
-      {isCommitted && (
-        <div className="px-5 mb-1">
-          <div className="border border-zinc-200 bg-white rounded-3xl p-4">
-            <h3 className="text-[10px] font-black uppercase text-accent tracking-[0.2em] mb-1">🌅 The Awakening (Fase Matutina)</h3>
-            <p className="text-[10px] text-zinc-500 font-semibold leading-relaxed">Completa tus objetivos tácticos planeados de forma impecable.</p>
-          </div>
-        </div>
-      )}
-
-      {/* 3-PILLAR TACTICAL GRID */}
-      <TacticalColumns onTaskComplete={completeHabit} />
-
-      {/* THE HARVEST PHASE REWARD (NOCTURNA) */}
-      {dailyProgress.completed >= dailyProgress.total && dailyProgress.total > 0 && (
-        <div className="px-5 my-6 animate-fade-in relative z-10">
-          <div className="border border-green-500/15 bg-green-500/5 rounded-3xl p-5 relative overflow-hidden shadow-lg">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/10 rounded-full blur-[40px] pointer-events-none" />
-            <h3 className="text-[10px] font-black uppercase text-green-400 tracking-[0.2em] mb-1 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 animate-spin" /> The Harvest (Cosecha Nocturna)
-            </h3>
-            <p className="text-[10px] text-zinc-500 font-semibold mb-4 leading-normal">
-              ¡Has asegurado todos tus objetivos de hoy de forma impecable! Tu racha Predator y recompensas de economía están listas.
-            </p>
-            <button
-              onClick={() => setActiveView('debrief')}
-              className="w-full py-4 bg-green-500 hover:bg-green-600 text-black font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-[0_4px_15px_rgba(34,197,94,0.35)] cursor-pointer hover:scale-[1.01] active:scale-95 transition-all"
-            >
-              Iniciar Interrogación Nocturna
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Daily progress indicators - hidden in Minimalist Zen mode */}
-      {!isMinimalist && (
-        <motion.div
-          initial={{ opacity: 0, y: -5 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.15, duration: 0.4 }}
-          className="text-center px-5 mb-4"
-        >
-          <p className="text-[9px] font-mono text-zinc-500 uppercase tracking-[0.25em] mb-3">Today's Objective</p>
-
-          <div className="flex items-center justify-center gap-2 mb-5">
-            {Array.from({ length: Math.max(1, dailyProgress.total) }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: i * 0.08, type: 'spring', stiffness: 400 }}
-                className={`w-10 h-2 rounded-full transition-all duration-500 ${
-                  i < dailyProgress.completed
-                    ? 'bg-accent shadow-[0_0_12px_var(--accent-glow)]'
-                    : 'bg-zinc-50 border border-zinc-200'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Stats lozenge */}
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.25, type: 'spring', stiffness: 300 }}
-            className="inline-flex items-center justify-center gap-5 text-xs bg-white shadow-sm rounded-full py-3 px-7 shadow-sm"
-          >
-            <div className="flex items-center gap-2" title="Learning Streak">
-              <BookOpen className={`w-4 h-4 ${learnStreak > 0 ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.5)]' : 'text-zinc-700'}`} />
-              <span className={`font-mono font-black text-sm ${learnStreak > 0 ? 'text-cyan-400' : 'text-zinc-700'}`}>{learnStreak}</span>
-            </div>
-            <div className="w-px h-4 bg-zinc-50" />
-            <div className="flex items-center gap-2" title="Tactical Streak">
-              <Flame className={`w-4 h-4 ${tacticalStreak > 0 ? 'text-accent fill-accent drop-shadow-[0_0_6px_var(--accent-glow)]' : 'text-zinc-700'}`} />
-              <span className={`font-mono font-black text-sm ${tacticalStreak > 0 ? 'text-accent' : 'text-zinc-700'}`}>{tacticalStreak}</span>
-            </div>
-            <div className="w-px h-4 bg-zinc-50" />
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-accent drop-shadow-[0_0_6px_var(--accent-glow)]" />
-              <span className="font-mono font-black text-sm text-accent">{stats.xp}</span>
-            </div>
-          </motion.div>
-
-          {/* Mission count */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center justify-center gap-1.5 mt-4"
-          >
-            <CheckCircle2 className="w-3.5 h-3.5 text-zinc-600" />
-            <span className="text-[8px] font-black text-zinc-600 uppercase tracking-widest">{totalCompleted} Missions Logged</span>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* FULLSCREEN OVERLAYS (POMODORO / PREDATOR ROOM CUSTOMIZER) */}
-      <AnimatePresence>
-        {isFocusOpen && (
-          <FocusPomodoro onClose={() => setIsFocusOpen(false)} />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isDenOpen && (
-          <PredatorDen onClose={() => setIsDenOpen(false)} />
-        )}
-      </AnimatePresence>
-
+      <MementoMoriWidget age={appUser?.age} isEs={isEs} />
     </div>
   );
 };

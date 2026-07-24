@@ -9,16 +9,26 @@ interface StreakModalProps {
   streak: number;
 }
 
+import { useBrain } from '../contexts/BrainContext';
+
+interface StreakModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  streak: number;
+}
+
 export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, streak }) => {
   const [activeTab, setActiveTab] = useState<'personal' | 'friends'>('personal');
   const { appUser } = useAuth();
+  const { language } = useBrain();
+  const isEs = language === 'es';
   
   const freezes = appUser?.streakShields || 0;
   const hasStreak = streak > 0;
 
   // Simple calendar generation (current month)
   const today = new Date();
-  const currentMonth = today.toLocaleString('default', { month: 'long' });
+  const currentMonth = today.toLocaleString(isEs ? 'es-ES' : 'en-US', { month: 'long' });
   const currentYear = today.getFullYear();
   
   const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
@@ -57,11 +67,11 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
           
           {/* Header */}
           <div className="flex items-center justify-between px-4 pb-2 relative z-20">
-            <button onClick={onClose} className="p-2 text-white/90 hover:text-white transition-colors">
+            <button onClick={onClose} className="p-2 text-white/90 hover:text-white transition-colors cursor-pointer">
               <X size={28} strokeWidth={2.5} />
             </button>
-            <span className="font-black text-lg text-white tracking-wide">Streak</span>
-            <button className="p-2 text-white/90 hover:text-white transition-colors">
+            <span className="font-black text-lg text-white tracking-wide">{isEs ? 'Racha Diaria' : 'Streak'}</span>
+            <button className="p-2 text-white/90 hover:text-white transition-colors cursor-pointer">
               <Share size={24} strokeWidth={2.5} />
             </button>
           </div>
@@ -69,23 +79,23 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
           {/* Tabs */}
           <div className="flex border-b-2 border-white/20 px-4 relative z-20">
             <button 
-              className={`flex-1 py-3 text-sm font-black tracking-widest uppercase transition-colors relative
+              className={`flex-1 py-3 text-sm font-black tracking-widest uppercase transition-colors relative cursor-pointer
                 ${activeTab === 'personal' ? 'text-white' : 'text-white/60'}
               `}
               onClick={() => setActiveTab('personal')}
             >
-              Personal
+              {isEs ? 'Personal' : 'Personal'}
               {activeTab === 'personal' && (
                 <motion.div layoutId="streakTab" className="absolute bottom-[-2px] left-0 right-0 h-1 bg-white rounded-t-md" />
               )}
             </button>
             <button 
-              className={`flex-1 py-3 text-sm font-black tracking-widest uppercase transition-colors relative
+              className={`flex-1 py-3 text-sm font-black tracking-widest uppercase transition-colors relative cursor-pointer
                 ${activeTab === 'friends' ? 'text-white' : 'text-white/60'}
               `}
               onClick={() => setActiveTab('friends')}
             >
-              Friends
+              {isEs ? 'Amigos' : 'Friends'}
               {activeTab === 'friends' && (
                 <motion.div layoutId="streakTab" className="absolute bottom-[-2px] left-0 right-0 h-1 bg-white rounded-t-md" />
               )}
@@ -95,11 +105,13 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
           {/* Hero Section (only in personal) */}
           {activeTab === 'personal' && (
             <div className="flex justify-between items-start relative z-10 px-8 pt-8 pb-10">
-              <div className="flex flex-col">
+              <div className="flex flex-col text-left">
                 <span className="text-[80px] font-black leading-none text-white tracking-tighter" style={{ textShadow: '0 4px 0 rgba(0,0,0,0.1)' }}>
                   {streak}
                 </span>
-                <span className="text-xl font-bold text-white/90 tracking-wide mt-1">day streak!</span>
+                <span className="text-xl font-bold text-white/90 tracking-wide mt-1">
+                  {isEs ? '¡días de racha!' : 'day streak!'}
+                </span>
               </div>
               
               {/* Big Icon */}

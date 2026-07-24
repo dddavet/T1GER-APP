@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Shield } from 'lucide-react';
+import { useBrain } from '../contexts/BrainContext';
 
 interface GemsModalProps {
   isOpen: boolean;
@@ -9,11 +10,13 @@ interface GemsModalProps {
 }
 
 export const GemsModal: React.FC<GemsModalProps> = ({ isOpen, onClose, coins }) => {
+  const { language } = useBrain();
+  const isEs = language === 'es';
+
   return (
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -22,27 +25,26 @@ export const GemsModal: React.FC<GemsModalProps> = ({ isOpen, onClose, coins }) 
             className="fixed inset-0 bg-black/60 z-[9998] backdrop-blur-sm"
           />
 
-          {/* Modal Container */}
           <motion.div
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 z-[9999] bg-white rounded-t-3xl overflow-hidden max-h-[85vh] flex flex-col"
+            className="fixed bottom-0 left-0 right-0 z-[9999] bg-white rounded-t-3xl overflow-hidden max-h-[85vh] flex flex-col font-sans"
           >
-            {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-zinc-100">
-              <h2 className="text-xl font-black italic uppercase tracking-tighter text-zinc-800">Shop</h2>
+              <h2 className="text-xl font-black italic uppercase tracking-tighter text-zinc-800">
+                {isEs ? 'Tienda de Gemas' : 'Gems Shop'}
+              </h2>
               <button
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors"
+                className="w-8 h-8 flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} />
               </button>
             </div>
 
             <div className="overflow-y-auto p-5 pb-10 flex flex-col items-center">
-              {/* Big Gem Display */}
               <div className="mb-6 flex flex-col items-center">
                 <svg viewBox="0 0 24 24" fill="none" className="w-24 h-24 mb-2 drop-shadow-md">
                   <path d="M12 2L2 9L12 22L22 9L12 2Z" fill="#1CB0F6" />
@@ -52,62 +54,32 @@ export const GemsModal: React.FC<GemsModalProps> = ({ isOpen, onClose, coins }) 
                   <path d="M22 9L12 22L12 11L22 9Z" fill="#1473A6" />
                 </svg>
                 <div className="text-3xl font-black text-[#1CB0F6]">{coins}</div>
-                <div className="text-xs font-black text-zinc-400 uppercase tracking-widest mt-1">Gems Balance</div>
-              </div>
-
-              {/* Power-Ups Section */}
-              <div className="w-full mb-6">
-                <h3 className="text-lg font-black text-zinc-800 mb-4">Power-Ups</h3>
-                
-                {/* Item: Streak Freeze */}
-                <div className="flex items-center justify-between border-2 border-zinc-200 rounded-2xl p-4 mb-3 bg-white">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center border-b-4 border-blue-200">
-                      <Shield className="w-6 h-6 text-[#1CB0F6]" fill="#1CB0F6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-zinc-800 text-[15px]">Streak Freeze</h4>
-                      <p className="text-xs text-zinc-500 font-medium">Keep your streak safe if you miss a day.</p>
-                    </div>
-                  </div>
-                  <button className="py-2.5 px-4 rounded-xl bg-white border-2 border-zinc-200 text-[#1CB0F6] font-black text-sm uppercase flex items-center gap-1 hover:bg-zinc-50 active:translate-y-[2px] transition-transform">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
-                      <path d="M12 2L2 9L12 22L22 9L12 2Z" fill="#1CB0F6" />
-                      <path d="M12 2L2 9L12 11L12 2Z" fill="#78C8F5" />
-                      <path d="M12 2L22 9L12 11L12 2Z" fill="#1CB0F6" />
-                      <path d="M2 9L12 22L12 11L2 9Z" fill="#1899D6" />
-                      <path d="M22 9L12 22L12 11L22 9Z" fill="#1473A6" />
-                    </svg>
-                    200
-                  </button>
-                </div>
-
-                {/* Item: Heart Refill */}
-                <div className="flex items-center justify-between border-2 border-zinc-200 rounded-2xl p-4 bg-white">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center border-b-4 border-red-200">
-                      <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
-                        <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" fill="#FF4B4B" />
-                      </svg>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-zinc-800 text-[15px]">Heart Refill</h4>
-                      <p className="text-xs text-zinc-500 font-medium">Get full hearts to keep learning.</p>
-                    </div>
-                  </div>
-                  <button className="py-2.5 px-4 rounded-xl bg-white border-2 border-zinc-200 text-[#1CB0F6] font-black text-sm uppercase flex items-center gap-1 hover:bg-zinc-50 active:translate-y-[2px] transition-transform">
-                    <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4">
-                      <path d="M12 2L2 9L12 22L22 9L12 2Z" fill="#1CB0F6" />
-                      <path d="M12 2L2 9L12 11L12 2Z" fill="#78C8F5" />
-                      <path d="M12 2L22 9L12 11L12 2Z" fill="#1CB0F6" />
-                      <path d="M2 9L12 22L12 11L2 9Z" fill="#1899D6" />
-                      <path d="M22 9L12 22L12 11L22 9Z" fill="#1473A6" />
-                    </svg>
-                    350
-                  </button>
+                <div className="text-xs font-black text-zinc-400 uppercase tracking-widest mt-1">
+                  {isEs ? 'Saldo de Gemas' : 'Gems Balance'}
                 </div>
               </div>
 
+              <div className="w-full mb-6 text-left">
+                <h3 className="text-lg font-black text-zinc-800 mb-4">
+                  {isEs ? 'Potenciadores' : 'Power-Ups'}
+                </h3>
+                <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm text-zinc-800">
+                        {isEs ? 'Escudo de Racha' : 'Streak Freeze'}
+                      </h4>
+                      <p className="text-xs text-zinc-500">
+                        {isEs ? 'Protege tu racha si pierdes un día' : 'Protect your streak if you miss a day'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black text-[#1CB0F6]">200 💎</span>
+                </div>
+              </div>
             </div>
           </motion.div>
         </>
