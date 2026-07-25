@@ -413,9 +413,9 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
                 icon={TrendingUp} 
                 label={isEs ? "Aumentar mis ingresos" : "Grow my income"} 
                 description={isEs ? "Escalar flujo de caja y rentabilidad" : "Scale cash flow and profit"}
-                selected={answers.contentFormat === 'income'}
+                selected={answers.contentFormat === 'practice'}
                 onClick={() => {
-                  setAnswers({ ...answers, contentFormat: 'income' });
+                  setAnswers({ ...answers, contentFormat: 'practice' });
                   setTimeout(() => setCurrentStep('pace'), 300);
                 }}
               />
@@ -423,9 +423,9 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
                 icon={Flame} 
                 label={isEs ? "Construir disciplina indestructible" : "Build bulletproof discipline"} 
                 description={isEs ? "Misiones diarias y streak consistente" : "Daily missions and consistent streak"}
-                selected={answers.contentFormat === 'discipline'}
+                selected={answers.contentFormat === 'read'}
                 onClick={() => {
-                  setAnswers({ ...answers, contentFormat: 'discipline' });
+                  setAnswers({ ...answers, contentFormat: 'read' });
                   setTimeout(() => setCurrentStep('pace'), 300);
                 }}
               />
