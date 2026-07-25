@@ -88,28 +88,54 @@ const MementoMoriWidget = ({ age, isEs }: { age?: number | null, isEs: boolean }
   );
 };
 
-const PhaseSystem = ({ isPro, isEs }: { isPro?: boolean, isEs: boolean }) => (
-  <section className="px-5 grid grid-cols-3 gap-2 text-left">
-    {[
-      { label: isEs ? 'Aprender' : 'Learn', sub: isEs ? 'Micro-lecciones' : 'Micro-lessons', state: isEs ? 'Gratis' : 'Free' },
-      { label: isEs ? 'Aplicar' : 'Apply', sub: isEs ? 'Evidencia fotográfica' : 'Photo proof', state: isPro ? (isEs ? 'Desbloqueado' : 'Unlocked') : 'Premium' },
-      { label: isEs ? 'Repetir' : 'Repeat', sub: isEs ? 'Racha de 7 días' : '7-day hunt', state: isEs ? 'Activo' : 'Active' },
-    ].map((phase, index) => (
-      <div key={phase.label} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3 min-h-[96px]">
-        <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-600">
-          {isEs ? `Fase 0${index + 1}` : `Phase 0${index + 1}`}
-        </span>
-        <h3 className="text-sm font-black uppercase tracking-tight text-zinc-800 mt-2">{phase.label}</h3>
-        <p className="text-[9px] font-bold text-zinc-500 mt-1 leading-tight">{phase.sub}</p>
-        <span className={`mt-3 inline-flex rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
-          phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : 'bg-[#FF7300]/10 text-[#FF7300] border border-[#FF7300]/20'
-        }`}>
-          {phase.state}
-        </span>
-      </div>
-    ))}
-  </section>
-);
+const PhaseSystem = ({ isPro, isEs }: { isPro?: boolean, isEs: boolean }) => {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
+  };
+
+  return (
+    <motion.section 
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="px-5 grid grid-cols-3 gap-3 text-left"
+    >
+      {[
+        { label: isEs ? 'Aprender' : 'Learn', sub: isEs ? 'Micro-lecciones' : 'Micro-lessons', state: isEs ? 'Gratis' : 'Free' },
+        { label: isEs ? 'Aplicar' : 'Apply', sub: isEs ? 'Evidencia fotográfica' : 'Photo proof', state: isPro ? (isEs ? 'Desbloqueado' : 'Unlocked') : 'Premium' },
+        { label: isEs ? 'Repetir' : 'Repeat', sub: isEs ? 'Racha de 7 días' : '7-day hunt', state: isEs ? 'Activo' : 'Active' },
+      ].map((phase, index) => (
+        <motion.div 
+          key={phase.label} 
+          variants={itemVariants}
+          className="rounded-[1.25rem] border-2 border-zinc-200 border-b-4 border-b-zinc-300 bg-white p-3 min-h-[105px] flex flex-col justify-between hover:border-b-zinc-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer"
+        >
+          <div>
+            <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-400">
+              {isEs ? `Fase 0${index + 1}` : `Phase 0${index + 1}`}
+            </span>
+            <h3 className="text-sm font-black uppercase tracking-tight text-zinc-800 mt-1.5">{phase.label}</h3>
+            <p className="text-[9px] font-bold text-zinc-500 mt-0.5 leading-tight">{phase.sub}</p>
+          </div>
+          <span className={`mt-2 inline-flex w-fit rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
+            phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/30' : 'bg-[#FF7300]/10 text-[#FF7300] border border-[#FF7300]/20'
+          }`}>
+            {phase.state}
+          </span>
+        </motion.div>
+      ))}
+    </motion.section>
+  );
+};
 
 const ModeSelectorTop = ({ current, onSelect, isEs }: { current: string, onSelect: (id: any) => void, isEs: boolean }) => {
   const haptic = () => {

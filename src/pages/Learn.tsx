@@ -60,8 +60,21 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
       {/* Track Selector Modal */}
       <AnimatePresence>
         {isSelectorOpen && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-end justify-center">
-            <div className="w-full max-w-md rounded-t-3xl border-t border-zinc-200 bg-white p-6 pb-12 shadow-2xl">
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[100] bg-black/50 backdrop-blur-md flex items-end justify-center"
+            onClick={() => setIsSelectorOpen(false)}
+          >
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-md rounded-t-3xl border-t border-zinc-200 bg-white p-6 pb-12 shadow-[0_-20px_50px_rgba(0,0,0,0.2)]"
+            >
               <div className="mb-6 flex items-center justify-between">
                 <h2 className="text-xl font-black italic uppercase tracking-tight text-zinc-800">
                   {language === 'es' ? 'Seleccionar Ruta' : 'Select Track'}
@@ -106,7 +119,7 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

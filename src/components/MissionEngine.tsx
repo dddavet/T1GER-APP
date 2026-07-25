@@ -1613,14 +1613,6 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                       </span>
                     </div>
                   </div>
-
-                  {/* Big Green 3D Tactile Complete Button */}
-                  <button
-                    onClick={advance}
-                    className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#4EB702] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shrink-0"
-                  >
-                    <CheckCircle2 className="w-5 h-5" /> Completar Lección 🟢
-                  </button>
                 </div>
               ) : (
                 /* Legacy Quiz Recall */
