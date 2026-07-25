@@ -27,6 +27,7 @@ import { PaywallIntro } from './PaywallIntro';
 
 import { CHARACTER_CAST } from '../services/characterStateEngine';
 import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
+import { TigerMascot } from './TigerMascot';
 
 interface DiagnosticQuestion {
   id: string;
@@ -296,8 +297,9 @@ const QUESTIONS: any[] = [
 ];
 
 export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComplete }) => {
-  const { skipDaysForPlacement } = useBrain();
+  const { skipDaysForPlacement, language } = useBrain();
   const { updateAppUser, googleSignIn } = useAuth();
+  const isEs = language === 'es';
   
   const [stepIndex, setStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, any>>({
@@ -757,49 +759,65 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
           key={stepIndex}
           className="relative flex flex-col w-full h-full overflow-y-auto hide-scrollbar pr-0.5"
         >
-            {!['graph', 'scurve', 'interstitial', 'barchart', 'socialProofReviews', 'privacyTrust', 'connectNotifications', 'hardcoreMode', 'rollover', 'generatePlanIntro', 'loadingSimulation', 'planReady', 'saveProgress', 'paywallIntro', 'referralCode'].includes(currentQuestion.type) && (
-              <>
-                <h1 className="font-black italic uppercase tracking-tight leading-[0.9] mb-3 text-zinc-800 shrink-0 break-words" style={{ fontSize: 'clamp(1.8rem, 8vw, 3rem)' }}>
-                  {currentQuestion.title}
-                </h1>
-                <p className="text-xs font-medium text-zinc-500 mb-8 leading-relaxed uppercase tracking-wider shrink-0">
-                  {currentQuestion.subtitle}
-                </p>
-              </>
-            )}
+          {!['graph', 'scurve', 'interstitial', 'barchart', 'socialProofReviews', 'privacyTrust', 'connectNotifications', 'hardcoreMode', 'rollover', 'generatePlanIntro', 'loadingSimulation', 'planReady', 'saveProgress', 'paywallIntro', 'referralCode'].includes(currentQuestion.type) && (
+            <div className="mb-6 space-y-4 shrink-0">
+              {/* Duolingo 3D Tiger Mascot Companion with Speech Bubble */}
+              <TigerMascot
+                pose={stepIndex % 2 === 0 ? 'welcome' : 'coaching'}
+                speech={
+                  currentQuestion.id === 'goal'
+                    ? (isEs ? "¡Hola! Bienvenido a T1GER. ¿Cuál es tu objetivo principal?" : "Welcome to T1GER! What is your main goal?")
+                    : currentQuestion.id === 'placementChoice'
+                      ? (isEs ? "¿Desde qué nivel prefieres comenzar tu ruta?" : "Where would you like to start your path?")
+                      : currentQuestion.id === 'timeCommitment'
+                        ? (isEs ? "¿Cuántos minutos al día entrenaremos tu mente?" : "How many minutes a day will we train?")
+                        : currentQuestion.id === 'obstacles'
+                          ? (isEs ? "¿Cuál ha sido tu mayor obstáculo en el pasado?" : "What was your main obstacle in the past?")
+                          : (isEs ? "¡Excelente! Sigamos configurando tu plan personalizado." : "Great! Let's build your tailored plan.")
+                }
+              />
+            </div>
+          )}
 
-            <div className="space-y-4 flex-1 min-h-fit pb-4 flex flex-col justify-start sm:justify-center">
-              
-              {/* OPTIONS RENDER */}
-              {(!currentQuestion.type || currentQuestion.type === 'options') && currentQuestion.options?.map((opt: any) => {
-                const isSelected = answers[currentQuestion.id] === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    onClick={() => handleSelect(opt.id)}
-                    className={`w-full text-left p-5 rounded-[2rem] transition-all duration-300 flex items-center justify-between group active:scale-[0.98] border-2
-                      ${isSelected 
-                        ? 'bg-[#FF6B00] text-[#050505] border-[#FF6B00] shadow-[0_8px_20px_rgba(255,107,0,0.3)]' 
-                        : 'bg-zinc-50 text-zinc-800 border-zinc-200 hover:border-zinc-200 hover:bg-zinc-50'
-                      }`}
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-4">
-                      {opt.icon && (
-                        <div className={`w-12 h-12 rounded-[1.5rem] flex items-center justify-center border ${isSelected ? 'bg-zinc-50 border-black/10' : 'bg-white border-zinc-200'}`}>
-                          {React.cloneElement(opt.icon as React.ReactElement<any>, { className: `w-5 h-5 ${isSelected ? 'text-[#050505]' : 'text-zinc-800'}` })}
-                        </div>
-                      )}
-                      <div className="min-w-0 flex-1">
-                        <h3 className="break-words font-black text-sm tracking-tight uppercase">{opt.label}</h3>
-                        {'description' in opt && (
-                          <p className={`text-[10px] font-bold mt-1 uppercase tracking-tight ${isSelected ? 'text-[#050505]/70' : 'text-zinc-500'}`}>{opt.description}</p>
-                        )}
+          <div className="space-y-3.5 flex-1 min-h-fit pb-4 flex flex-col justify-start sm:justify-center">
+            
+            {/* 3D VISUAL OPTIONS RENDER (DUOLINGO STYLE) */}
+            {(!currentQuestion.type || currentQuestion.type === 'options') && currentQuestion.options?.map((opt: any) => {
+              const isSelected = answers[currentQuestion.id] === opt.id;
+              const label = isEs ? (opt.labelEs || opt.label) : opt.label;
+              const description = isEs ? (opt.descriptionEs || opt.description) : opt.description;
+
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelect(opt.id)}
+                  className={`w-full text-left p-4.5 rounded-2xl transition-all duration-200 flex items-center justify-between group cursor-pointer border-2 border-b-4 ${
+                    isSelected 
+                      ? 'bg-[#FF7300] text-white border-[#CC5C00] shadow-lg active:translate-y-1' 
+                      : 'bg-white text-zinc-800 border-zinc-200 border-b-zinc-300 hover:bg-zinc-50 active:translate-y-1'
+                  }`}
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-4">
+                    {opt.icon && (
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-b-4 ${
+                        isSelected ? 'bg-white/20 border-white/30 text-white' : 'bg-zinc-50 border-zinc-200 text-[#FF7300]'
+                      }`}>
+                        {React.cloneElement(opt.icon as React.ReactElement<any>, { className: 'w-6 h-6 stroke-[2.5]' })}
                       </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="break-words font-black text-sm tracking-wide uppercase italic">{label}</h3>
+                      {description && (
+                        <p className={`text-[11px] font-semibold mt-0.5 leading-snug ${isSelected ? 'text-white/90' : 'text-zinc-500'}`}>
+                          {description}
+                        </p>
+                      )}
                     </div>
-                    <ChevronRight className={`ml-3 h-5 w-5 shrink-0 transition-transform ${isSelected ? 'translate-x-1 text-[#050505]' : 'group-hover:translate-x-1 text-zinc-600'}`} />
-                  </button>
-                );
-              })}
+                  </div>
+                  <ChevronRight className={`ml-3 h-5 w-5 shrink-0 transition-transform ${isSelected ? 'translate-x-1 text-white' : 'group-hover:translate-x-1 text-zinc-400'}`} />
+                </button>
+              );
+            })}
 
               {currentQuestion.type === 'wheel' && (
                 <div className="w-full flex-1 flex flex-col justify-center animate-in fade-in zoom-in duration-500">
