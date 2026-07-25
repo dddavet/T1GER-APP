@@ -164,10 +164,10 @@ const QUESTIONS: any[] = [
     subtitle: 'We will personalize your initial curriculum.',
     type: 'options',
     options: [
-      { id: 'startup', label: 'Build a Startup', icon: <Target className="w-5 h-5" /> },
-      { id: 'investing', label: 'Master Investing', icon: <Zap className="w-5 h-5" /> },
-      { id: 'career', label: 'Grow My Career', icon: <Brain className="w-5 h-5" /> },
-      { id: 'freedom', label: 'Financial Freedom', icon: <Target className="w-5 h-5" /> }
+      { id: 'startup', label: 'Build a Startup', labelEs: 'Construir una Startup', description: 'Scale a business to +$1M MRR', descriptionEs: 'Escalar una empresa a +$1M MRR', icon: <Target className="w-6 h-6" />, badgeBg: 'bg-orange-500' },
+      { id: 'investing', label: 'Master Investing', labelEs: 'Dominar Inversiones', description: 'Stocks, valuation & compounding', descriptionEs: 'Acciones, valuación e interés compuesto', icon: <Zap className="w-6 h-6" />, badgeBg: 'bg-blue-500' },
+      { id: 'career', label: 'Grow My Career', labelEs: 'Acelerar Carrera', description: 'Executive leadership & AI tools', descriptionEs: 'Liderazgo ejecutivo y herramientas de IA', icon: <Brain className="w-6 h-6" />, badgeBg: 'bg-emerald-500' },
+      { id: 'freedom', label: 'Financial Freedom', labelEs: 'Libertad Financiera', description: 'Passive income & asset allocation', descriptionEs: 'Ingresos pasivos y gestión de capital', icon: <Target className="w-6 h-6" />, badgeBg: 'bg-purple-500' }
     ]
   },
   {
@@ -176,8 +176,8 @@ const QUESTIONS: any[] = [
     subtitle: 'Beginners start at Level 1. Advanced users can test out of basics.',
     type: 'options',
     options: [
-      { id: 'beginner', label: 'I am a complete beginner', description: 'Start from Level 1 foundations', icon: <BookOpen className="w-5 h-5 text-[#FF6B00]" /> },
-      { id: 'test', label: 'Take the Placement Challenge', description: 'Test your skills to skip introductory levels', icon: <Trophy className="w-5 h-5 text-[#FF6B00]" /> }
+      { id: 'beginner', label: 'I am a complete beginner', labelEs: 'Soy principiante absoluto', description: 'Start from Day 1 foundations', descriptionEs: 'Comenzar desde las bases del Día 1', icon: <BookOpen className="w-6 h-6" />, badgeBg: 'bg-[#FF7300]' },
+      { id: 'test', label: 'Take Placement Challenge', labelEs: 'Desafío de Nivelación', description: '3 quick questions to skip basics', descriptionEs: '3 preguntas para saltar niveles', icon: <Trophy className="w-6 h-6" />, badgeBg: 'bg-[#1CB0F6]' }
     ]
   },
   {
@@ -203,11 +203,10 @@ const QUESTIONS: any[] = [
     subtitle: 'Be honest with yourself.',
     type: 'options',
     options: [
-      { id: 'consistency', label: 'Lack of consistency', icon: <Activity className="w-5 h-5" /> },
-      { id: 'distractions', label: 'Too many distractions', icon: <Frown className="w-5 h-5" /> },
-      { id: 'support', label: 'Lack of support/mentors', icon: <ShieldAlert className="w-5 h-5" /> },
-      { id: 'time', label: 'Busy schedule', icon: <Clock className="w-5 h-5" /> },
-      { id: 'overload', label: 'Information overload', icon: <HelpCircle className="w-5 h-5" /> }
+      { id: 'consistency', label: 'Lack of consistency', labelEs: 'Falta de consistencia', icon: <Activity className="w-6 h-6" />, badgeBg: 'bg-red-500' },
+      { id: 'distractions', label: 'Too many distractions', labelEs: 'Muchas distracciones', icon: <Frown className="w-6 h-6" />, badgeBg: 'bg-amber-500' },
+      { id: 'support', label: 'Lack of mentors', labelEs: 'Falta de mentores', icon: <ShieldAlert className="w-6 h-6" />, badgeBg: 'bg-indigo-500' },
+      { id: 'time', label: 'Busy schedule', labelEs: 'Agenda muy ocupada', icon: <Clock className="w-6 h-6" />, badgeBg: 'bg-blue-500' }
     ]
   },
   {
@@ -222,14 +221,14 @@ const QUESTIONS: any[] = [
   },
   {
     id: 'heardAboutUs',
-    title: 'How did you hear about us?',
+    title: 'How did you hear about T1GER?',
     subtitle: 'Help us understand our pack.',
     type: 'options',
     options: [
-      { id: 'tiktok', label: 'TikTok / Shorts', icon: <Youtube className="w-5 h-5" /> },
-      { id: 'instagram', label: 'Instagram', icon: <Instagram className="w-5 h-5" /> },
-      { id: 'friend', label: 'Friend or Colleague', icon: <MessageSquare className="w-5 h-5" /> },
-      { id: 'podcast', label: 'Podcast / YouTube', icon: <Youtube className="w-5 h-5" /> }
+      { id: 'tiktok', label: 'TikTok', labelEs: 'TikTok', description: 'Shorts & viral videos', descriptionEs: 'Videos virales y Shorts', icon: <PlaySquare className="w-6 h-6" />, badgeBg: 'bg-[#FE2C55]' },
+      { id: 'youtube', label: 'YouTube', labelEs: 'YouTube', description: 'Longform videos & podcasts', descriptionEs: 'Canal de YouTube y guías', icon: <Youtube className="w-6 h-6" />, badgeBg: 'bg-[#FF0000]' },
+      { id: 'instagram', label: 'Instagram', labelEs: 'Instagram', description: 'Reels & posts', descriptionEs: 'Reels y publicaciones', icon: <Instagram className="w-6 h-6" />, badgeBg: 'bg-[#E4405F]' },
+      { id: 'friend', label: 'Friend or Colleague', labelEs: 'Amigo o Colega', description: 'Word of mouth recommendation', descriptionEs: 'Recomendación directa', icon: <MessageSquare className="w-6 h-6" />, badgeBg: 'bg-[#00E5FF]' }
     ]
   },
   {
@@ -238,8 +237,8 @@ const QUESTIONS: any[] = [
     subtitle: 'Like Duolingo, Brilliant, or Masterclass.',
     type: 'options',
     options: [
-      { id: 'yes', label: 'Yes, but I wanted more depth', icon: <ThumbsUp className="w-5 h-5" /> },
-      { id: 'no', label: 'No, this is my first time', icon: <ThumbsDown className="w-5 h-5" /> }
+      { id: 'yes', label: 'Yes, I want more depth', labelEs: 'Sí, pero busco más nivel', icon: <ThumbsUp className="w-6 h-6" />, badgeBg: 'bg-emerald-500' },
+      { id: 'no', label: 'No, this is my first time', labelEs: 'No, es mi primera vez', icon: <ThumbsDown className="w-6 h-6" />, badgeBg: 'bg-zinc-500' }
     ]
   },
   {
@@ -799,8 +798,8 @@ export const OnboardingFlow: React.FC<{ onComplete?: () => void }> = ({ onComple
                 >
                   <div className="flex min-w-0 flex-1 items-center gap-4">
                     {opt.icon && (
-                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-b-4 ${
-                        isSelected ? 'bg-white/20 border-white/30 text-white' : 'bg-zinc-50 border-zinc-200 text-[#FF7300]'
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-b-4 text-white shadow-sm ${
+                        opt.badgeBg || (isSelected ? 'bg-[#FF7300] border-[#CC5C00]' : 'bg-zinc-800 border-zinc-900')
                       }`}>
                         {React.cloneElement(opt.icon as React.ReactElement<any>, { className: 'w-6 h-6 stroke-[2.5]' })}
                       </div>

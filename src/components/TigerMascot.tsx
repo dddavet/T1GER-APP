@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { useBrain } from '../contexts/BrainContext';
+import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
 
 export type MascotPose = 'welcome' | 'celebrating' | 'coaching' | 'thinking' | 'proud';
 
@@ -11,26 +11,16 @@ interface TigerMascotProps {
   className?: string;
 }
 
-const POSE_IMAGES: Record<MascotPose, string> = {
-  welcome: '/tiger_avatar_3d.png',
-  celebrating: '/tiger_celebrating.png',
-  coaching: '/tiger_avatar_3d.png',
-  thinking: '/tiger_sad.png',
-  proud: '/tiger_celebrating.png',
-};
-
 export const TigerMascot: React.FC<TigerMascotProps> = ({
   speech,
   pose = 'welcome',
   size = 'md',
   className = '',
 }) => {
-  const { language } = useBrain();
-
-  const avatarSizeClasses = {
-    sm: 'w-14 h-14',
-    md: 'w-20 h-20',
-    lg: 'w-28 h-28',
+  const avatarSize = {
+    sm: 56,
+    md: 80,
+    lg: 100,
   }[size];
 
   const speechTextSize = {
@@ -39,28 +29,27 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
     lg: 'text-base',
   }[size];
 
-  const avatarSrc = POSE_IMAGES[pose] || '/tiger_avatar_3d.png';
+  const emotionMap: Record<MascotPose, 'PROUD' | 'PREDATOR' | 'DISAPPOINTED' | 'FERAL' | 'RESTING'> = {
+    welcome: 'PREDATOR',
+    celebrating: 'PROUD',
+    coaching: 'PREDATOR',
+    thinking: 'RESTING',
+    proud: 'PROUD',
+  };
 
   return (
-    <div className={`flex items-start gap-3.5 max-w-md mx-auto w-full ${className}`}>
-      {/* 3D Mascot Character Avatar with Bounce */}
+    <div className={`flex items-center gap-3 max-w-md mx-auto w-full ${className}`}>
+      {/* 3D Mascot Character Avatar with Vector SVG & Neon Glow */}
       <motion.div
         animate={{ y: [0, -4, 0] }}
         transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
-        className={`relative ${avatarSizeClasses} rounded-full bg-gradient-to-b from-orange-400 to-[#FF7300] border-4 border-white shadow-xl flex items-center justify-center shrink-0 overflow-hidden group cursor-pointer`}
+        className="shrink-0 flex items-center justify-center"
       >
-        <img
-          src={avatarSrc}
-          alt="T1GER Mascot"
-          className="w-full h-full object-cover transform scale-110 group-hover:scale-125 transition-transform"
-          onError={(e) => {
-            // Fallback to emoji avatar if image asset fails
-            (e.target as HTMLElement).style.display = 'none';
-          }}
+        <T1gerInteractiveAvatar
+          characterId="t1ger"
+          emotion={emotionMap[pose] || 'PREDATOR'}
+          size={avatarSize}
         />
-        <div className="absolute inset-0 flex items-center justify-center text-3xl font-black select-none pointer-events-none">
-          🐅
-        </div>
       </motion.div>
 
       {/* Duolingo 3D Speech Bubble */}
@@ -74,7 +63,7 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
         <div className="absolute top-5 -left-2.5 w-0 h-0 border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent border-r-[10px] border-r-white z-10" />
         <div className="absolute top-5 -left-3.5 w-0 h-0 border-t-[9px] border-t-transparent border-b-[9px] border-b-transparent border-r-[11px] border-r-zinc-200" />
 
-        <p className={`${speechTextSize} font-bold text-zinc-800 leading-snug tracking-tight`}>
+        <p className={`${speechTextSize} font-extrabold text-zinc-800 leading-snug tracking-tight font-sans`}>
           {speech}
         </p>
       </motion.div>
