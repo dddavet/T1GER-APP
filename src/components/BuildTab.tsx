@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Hammer, Briefcase, TrendingUp, DollarSign, Target, Plus, ChevronRight } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
+import { MagneticButton } from './ui/magnetic-button';
 
 export const BuildTab = () => {
   const { setActiveView } = useT1ger();
@@ -127,17 +128,19 @@ export const BuildTab = () => {
 
         {/* CTA Button */}
         <section className="pt-4 pb-8">
-          <button 
-            className="w-full relative group active:scale-95 transition-transform"
-            onClick={() => setActiveView('learn')}
-          >
-            {/* Duolingo style 3D button */}
-            <div className="absolute inset-0 bg-[#CC5C00] rounded-2xl translate-y-1.5" />
-            <div className="relative bg-[#FF7300] border-2 border-[#FF7300] rounded-2xl p-4 flex items-center justify-center gap-2 text-white font-black uppercase text-sm tracking-widest">
-              <Plus className="w-5 h-5" />
-              {isEs ? 'Lanzar Nuevo Proyecto' : 'Launch New Project'}
-            </div>
-          </button>
+          <MagneticButton>
+            <button 
+              className="w-full relative group active:scale-95 transition-transform"
+              onClick={() => setActiveView('learn')}
+            >
+              {/* Duolingo style 3D button */}
+              <div className="absolute inset-0 bg-[#CC5C00] rounded-2xl translate-y-1.5" />
+              <div className="relative bg-[#FF7300] border-2 border-[#FF7300] rounded-2xl p-4 flex items-center justify-center gap-2 text-white font-black uppercase text-sm tracking-widest">
+                <Plus className="w-5 h-5" />
+                {isEs ? 'Lanzar Nuevo Proyecto' : 'Launch New Project'}
+              </div>
+            </button>
+          </MagneticButton>
         </section>
       </div>
     </div>
