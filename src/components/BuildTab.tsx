@@ -2,9 +2,12 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { Hammer, Briefcase, TrendingUp, DollarSign, Target, Plus, ChevronRight } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
+import { useBrain } from '../contexts/BrainContext';
 
 export const BuildTab = () => {
   const { setActiveView } = useT1ger();
+  const { language } = useBrain();
+  const isEs = language === 'es';
 
   return (
     <div className="-mx-5 min-h-full bg-[#F7F7F7] pb-28 text-zinc-800">
@@ -17,10 +20,10 @@ export const BuildTab = () => {
           <div className="relative z-10 flex items-center justify-between">
             <div>
               <span className="text-[11px] font-black uppercase tracking-widest text-white/90 block mb-1">
-                WORKSPACE
+                {isEs ? 'ESPACIO DE TRABAJO' : 'WORKSPACE'}
               </span>
               <h1 className="text-xl font-black leading-tight italic uppercase tracking-tighter">
-                Operation Center
+                {isEs ? 'Centro de Operaciones' : 'Operation Center'}
               </h1>
             </div>
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -35,9 +38,11 @@ export const BuildTab = () => {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-black uppercase tracking-widest text-zinc-400">
-              Active Frameworks
+              {isEs ? 'Frameworks Activos' : 'Active Frameworks'}
             </h2>
-            <span className="text-xs font-bold text-[#FF7300]">1 in progress</span>
+            <span className="text-xs font-bold text-[#FF7300]">
+              {isEs ? '1 en progreso' : '1 in progress'}
+            </span>
           </div>
           
           <motion.div 
@@ -50,8 +55,12 @@ export const BuildTab = () => {
                   <Briefcase className="w-5 h-5 text-[#FF7300]" />
                 </div>
                 <div>
-                  <h3 className="font-black text-zinc-800 uppercase tracking-tight">Paper Trading Setup</h3>
-                  <p className="text-xs text-zinc-500 font-medium">Investing Track • Step 1</p>
+                  <h3 className="font-black text-zinc-800 uppercase tracking-tight">
+                    {isEs ? 'Setup Paper Trading' : 'Paper Trading Setup'}
+                  </h3>
+                  <p className="text-xs text-zinc-500 font-medium">
+                    {isEs ? 'Ruta de Inversión • Paso 1' : 'Investing Track • Step 1'}
+                  </p>
                 </div>
               </div>
               <div className="bg-zinc-100 p-2 rounded-full group-hover:bg-[#FF7300]/10 transition-colors">
@@ -66,7 +75,7 @@ export const BuildTab = () => {
               </div>
             </div>
             <div className="flex justify-between items-center mt-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-              <span>Progress</span>
+              <span>{isEs ? 'Progreso' : 'Progress'}</span>
               <span>33%</span>
             </div>
           </motion.div>
@@ -76,7 +85,7 @@ export const BuildTab = () => {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-black uppercase tracking-widest text-zinc-400">
-              Key Metrics
+              {isEs ? 'Métricas Clave' : 'Key Metrics'}
             </h2>
           </div>
           
@@ -85,7 +94,9 @@ export const BuildTab = () => {
               <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mb-2">
                 <DollarSign className="w-4 h-4 text-green-600" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Revenue</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                {isEs ? 'Ingresos' : 'Revenue'}
+              </span>
               <span className="font-black text-xl text-zinc-800">$0.00</span>
             </div>
             
@@ -93,7 +104,9 @@ export const BuildTab = () => {
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mb-2">
                 <Target className="w-4 h-4 text-blue-600" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Leads Generated</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                {isEs ? 'Leads Generados' : 'Leads Generated'}
+              </span>
               <span className="font-black text-xl text-zinc-800">0</span>
             </div>
             
@@ -101,9 +114,13 @@ export const BuildTab = () => {
               <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mb-2">
                 <TrendingUp className="w-4 h-4 text-purple-600" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">Weekly Output Score</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                {isEs ? 'Score de Output Semanal' : 'Weekly Output Score'}
+              </span>
               <span className="font-black text-2xl text-zinc-800">C+</span>
-              <p className="text-xs text-zinc-500 mt-1">Start executing to raise your score.</p>
+              <p className="text-xs text-zinc-500 mt-1">
+                {isEs ? 'Comienza a ejecutar para subir tu score.' : 'Start executing to raise your score.'}
+              </p>
             </div>
           </div>
         </section>
@@ -118,7 +135,7 @@ export const BuildTab = () => {
             <div className="absolute inset-0 bg-[#CC5C00] rounded-2xl translate-y-1.5" />
             <div className="relative bg-[#FF7300] border-2 border-[#FF7300] rounded-2xl p-4 flex items-center justify-center gap-2 text-white font-black uppercase text-sm tracking-widest">
               <Plus className="w-5 h-5" />
-              Launch New Project
+              {isEs ? 'Lanzar Nuevo Proyecto' : 'Launch New Project'}
             </div>
           </button>
         </section>

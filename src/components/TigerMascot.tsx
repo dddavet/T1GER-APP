@@ -26,8 +26,8 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
   pose = 'welcome',
   size = 'md',
   className = '',
-  // Default placeholder to a public Spline URL for testing (User must replace this with their generated Tiger)
-  splineUrl = 'https://prod.spline.design/6Wq1Q7YGyM-iab9i/scene.splinecode',
+  // User-provided Spline URL
+  splineUrl = 'https://prod.spline.design/Rsv4-Dqr7h26roMh/scene.splinecode',
 }) => {
   const avatarDimension = {
     sm: 'w-16 h-16',
@@ -57,7 +57,7 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
               className="w-full h-full object-cover transform scale-105"
             />
           }>
-            <div className="absolute inset-0 scale-[1.5] origin-center pointer-events-none">
+            <div className="absolute inset-0 w-[120%] h-[120%] -left-[10%] -top-[10%] pointer-events-none flex items-center justify-center">
                <Spline scene={splineUrl} />
             </div>
           </Suspense>
