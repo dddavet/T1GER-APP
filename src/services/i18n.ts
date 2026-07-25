@@ -70,6 +70,7 @@ export const TRANSLATIONS = {
     guest_mode: 'Modo Invitado',
     tap_dev: 'Modo Dev (5x)',
     dev_on: 'Dev Activado',
+    reset_onboarding: 'Ver Onboarding con Mascota 3D (Reiniciar)',
 
     // Demo Presets
     preset_founder_label: 'Fundador & Admin',
@@ -88,9 +89,29 @@ export const TRANSLATIONS = {
     xp_coins: 'Puntos XP',
     current_level: 'Nivel Actual',
     quick_start: 'Comenzar Lección',
-    phase_learn: 'Aprender',
-    phase_apply: 'Aplicar',
-    phase_repeat: 'Repetir',
+    phase_learn: 'Fase 01: Aprender (Micro-lecciones)',
+    phase_apply: 'Fase 02: Aplicar (Evidencia fotográfica)',
+    phase_repeat: 'Fase 03: Repetir (Racha de 7 días)',
+
+    // Modals
+    gems_shop_title: 'Tienda de Gemas',
+    gems_balance: 'Saldo de Gemas',
+    power_ups: 'Potenciadores',
+    streak_freeze: 'Escudo de Racha',
+    streak_freeze_desc: 'Protege tu racha si pierdes un día de misiones',
+    hearts_title: 'Vidas',
+    full_hearts: 'Vidas Llenas',
+    refill_hearts: 'Restaurar Vidas',
+    refill_hearts_desc: 'Recarga tus 5 vidas al instante',
+    streak_title: 'Racha Diaria',
+    personal_tab: 'Personal',
+    friends_tab: 'Amigos',
+    day_streak_suffix: '¡días de racha!',
+
+    // Coach & Mentor
+    coach_title: 'Mentor T1GER',
+    coach_status: 'Activado',
+    coach_placeholder: 'Enviar mensaje a T1GER...',
   },
   en: {
     // NavDock
@@ -106,7 +127,7 @@ export const TRANSLATIONS = {
     day: 'DAY',
     start_lesson: 'START (+100 XP)!',
     track_completed: 'TRACK COMPLETED!',
-    track_completed_sub: 'You mastered all lessons in this module.',
+    track_completed_sub: 'You have mastered all lessons in this module.',
     select_track: 'Select Track',
     levels_count: 'Levels',
     soon: 'Coming Soon',
@@ -119,22 +140,22 @@ export const TRANSLATIONS = {
     track_ai: 'Artificial Intelligence',
 
     // MissionEngine / Lessons
-    mission_complete: 'LESSON COMPLETE',
+    mission_complete: 'LESSON COMPLETED',
     continue: 'CONTINUE ➔',
     view_takeaway: 'VIEW TAKEAWAY ➔',
     complete_lesson: 'COMPLETE LESSON 🟢',
     skip: 'SKIP',
     verified_source: 'Verified Source',
-    why_it_matters: 'Why it matters today',
+    why_it_matters: 'Why It Matters Today',
     executive_knowledge: 'EXECUTIVE KNOWLEDGE',
-    read_carefully: 'Read condensed lesson carefully:',
-    tactical_conclusion: 'TACTICAL TAKEAWAY',
+    read_carefully: 'Read the condensed lesson carefully:',
+    tactical_conclusion: 'TACTICAL CONCLUSION',
     decision_rule: 'Executive Decision Rule',
     reward: 'Reward',
     hearts: '❤️ 5 Hearts',
     check_answer: 'Check Answer',
     correct: 'Excellent!',
-    incorrect: 'Not quite.',
+    incorrect: 'Close, but not quite.',
     understood: 'Understood',
 
     // Profile & Settings
@@ -142,44 +163,65 @@ export const TRANSLATIONS = {
     language_setting: 'App Language',
     spanish: 'Español 🇪🇸',
     english: 'English 🇺🇸',
-    switch_account_title: 'Switch Account (5 Profiles)',
-    switch_account_sub: 'Instantly switch between 5 test users with different levels, competencies, and onboarding states:',
-    switch_account_btn: 'Switch Account / Log In',
+    switch_account_title: 'Switch Account (5 Presets)',
+    switch_account_sub: 'Instantly toggle between 5 test users with different skill levels and onboarding status:',
+    switch_account_btn: 'Switch Account / Sign In',
     privacy_policy: 'Privacy Policy',
     terms_of_service: 'Terms of Service',
     delete_account: 'Delete Account & Data',
-    legal_compliance: 'Google Play Store & Apple App Store Compliance',
+    legal_compliance: 'Google Play & Apple App Store Legal Compliance',
     streak_days: 'Streak Days',
     tactical_score: 'Tactical Score',
     total_xp: 'Total XP',
     active: 'ACTIVE',
     guest_mode: 'Guest Mode',
     tap_dev: 'Dev Mode (5x)',
-    dev_on: 'Dev Enabled',
+    dev_on: 'Dev Mode On',
+    reset_onboarding: 'Preview 3D Mascot Onboarding (Reset)',
 
     // Demo Presets
     preset_founder_label: 'Founder & Admin',
-    preset_founder_desc: 'Full admin access, 67-day streak, advanced masteries',
+    preset_founder_desc: 'Full admin access, 67-day streak, advanced skill mastery',
     preset_investor_label: 'Executive Investor',
-    preset_investor_desc: 'Angel investor profile, focused on valuation & finance',
+    preset_investor_desc: 'Angel investor profile focused on valuation & capital allocation',
     preset_ai_label: 'AI Engineer',
-    preset_ai_desc: 'Focused on prompt engineering, LLMs & automation',
+    preset_ai_desc: 'Focused on prompt engineering, LLMs & workflow automation',
     preset_growth_label: 'Growth Executive',
     preset_growth_desc: 'Focused on acquisition, retention, unit economics & CAC',
     preset_newbie_label: 'New User (Onboarding)',
-    preset_newbie_desc: '0-day streak, ready to experience full onboarding flow',
+    preset_newbie_desc: '0-day streak, ready to experience the full onboarding flow',
 
     // Dashboard
     daily_streak: 'Daily Streak',
     xp_coins: 'XP Points',
     current_level: 'Current Level',
     quick_start: 'Start Lesson',
-    phase_learn: 'Learn',
-    phase_apply: 'Apply',
-    phase_repeat: 'Repeat',
-  }
-} as const;
+    phase_learn: 'Phase 01: Learn (Micro-lessons)',
+    phase_apply: 'Phase 02: Apply (Photo Proof)',
+    phase_repeat: 'Phase 03: Repeat (7-Day Streak)',
 
-export const t = (key: keyof typeof TRANSLATIONS['es'], lang: Language = 'es'): string => {
+    // Modals
+    gems_shop_title: 'Gems Shop',
+    gems_balance: 'Gems Balance',
+    power_ups: 'Power-Ups',
+    streak_freeze: 'Streak Freeze',
+    streak_freeze_desc: 'Protect your streak if you miss a mission day',
+    hearts_title: 'Hearts',
+    full_hearts: 'Full Hearts',
+    refill_hearts: 'Refill Hearts',
+    refill_hearts_desc: 'Instantly refill all 5 hearts',
+    streak_title: 'Daily Streak',
+    personal_tab: 'Personal',
+    friends_tab: 'Friends',
+    day_streak_suffix: 'day streak!',
+
+    // Coach & Mentor
+    coach_title: 'T1GER Mentor',
+    coach_status: 'Activated',
+    coach_placeholder: 'Message T1GER...',
+  }
+};
+
+export const t = (key: keyof typeof TRANSLATIONS['es'], lang: Language): string => {
   return TRANSLATIONS[lang]?.[key] || TRANSLATIONS['es'][key] || key;
 };

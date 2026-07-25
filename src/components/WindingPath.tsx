@@ -76,8 +76,12 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
           className="w-full max-w-sm text-center mb-6 p-5 rounded-3xl border-2 border-[#58CC02] bg-[#58CC02]/10 border-b-4 border-b-[#58A700]"
         >
           <p className="text-3xl mb-1">🎓</p>
-          <h3 className="font-black text-lg text-[#58CC02] uppercase tracking-tight">¡TRACK COMPLETADO!</h3>
-          <p className="text-xs font-bold text-zinc-600 mt-1">Has dominado todas las lecciones de {pathData.track.title}.</p>
+          <h3 className="font-black text-lg text-[#58CC02] uppercase tracking-tight">
+            {language === 'es' ? '¡RUTA COMPLETADA!' : 'TRACK COMPLETED!'}
+          </h3>
+          <p className="text-xs font-bold text-zinc-600 mt-1">
+            {language === 'es' ? `Has dominado todas las lecciones de ${pathData.track.title}.` : `You have mastered all lessons in ${pathData.track.title}.`}
+          </p>
         </motion.div>
       )}
 
