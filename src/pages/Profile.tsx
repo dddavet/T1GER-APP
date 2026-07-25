@@ -1360,6 +1360,20 @@ quizQuestions:
 
         <div className="bg-white border border-zinc-200 rounded-3xl p-4 space-y-2 shadow-sm">
           <button
+            onClick={() => {
+              updateAppUser({ onboardingComplete: false, onboardingStep: 'splash' });
+              window.location.href = '/?forceOnboarding=1';
+            }}
+            className="w-full py-3.5 px-4 rounded-2xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-left font-black text-xs text-[#FF7300] flex items-center justify-between transition cursor-pointer"
+          >
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-4 h-4 text-[#FF7300]" />
+              <span>Ver Onboarding con Mascota 3D (Reiniciar)</span>
+            </div>
+            <span className="text-[9px] font-mono uppercase bg-[#FF7300] text-white px-2.5 py-0.5 rounded-full font-black">RESET 🐅</span>
+          </button>
+
+          <button
             onClick={() => setShowPrivacyModal(true)}
             className="w-full py-3 px-4 rounded-2xl bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 text-left font-bold text-xs text-zinc-700 flex items-center justify-between transition cursor-pointer"
           >
