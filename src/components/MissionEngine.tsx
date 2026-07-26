@@ -12,6 +12,7 @@ import { COMPETENCY_LABELS } from '../services/missionBank';
 import { getCharacterForTrack, getRandomPhrase } from '../services/characterStateEngine';
 import { executePromptChallenge } from '../services/gemini';
 import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
+import { fireRewardConfetti } from './ui/confetti';
 
 interface MissionEngineProps {
   mission: any;
@@ -263,6 +264,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   };
 
   const handleSuccess = async () => {
+    fireRewardConfetti();
     completeMission(mission.id, 100);
     await addXP(mission.xpReward || 20, true);
     setStepIndex(steps.length); // show success screen

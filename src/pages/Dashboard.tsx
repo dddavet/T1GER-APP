@@ -34,6 +34,9 @@ const DAILY_QUOTES_EN = [
   "Relentless innovation separates true leaders from followers."
 ];
 
+import { BorderBeam } from '../components/ui/border-beam';
+import { NumberFlow } from '../components/ui/number-flow';
+
 const MementoMoriWidget = ({ age, isEs }: { age?: number | null, isEs: boolean }) => {
   const currentAge = Math.max(18, Math.min(90, age || 22));
   const totalMonths = 90 * 12;
@@ -41,7 +44,7 @@ const MementoMoriWidget = ({ age, isEs }: { age?: number | null, isEs: boolean }
   const weeksLeft = Math.max(0, Math.round((90 - currentAge) * 52));
 
   return (
-    <section className="mx-5 bg-white shadow-sm rounded-[2rem] p-5 border border-zinc-200 relative overflow-hidden text-left">
+    <section className="mx-5 bg-white shadow-sm rounded-[2rem] p-5 border border-zinc-200 relative overflow-hidden text-left col-span-2">
       <div className="absolute -top-10 -right-8 w-28 h-28 rounded-full bg-red-500/10 blur-[48px] pointer-events-none" />
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
@@ -53,8 +56,11 @@ const MementoMoriWidget = ({ age, isEs }: { age?: number | null, isEs: boolean }
           </h2>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-black text-red-400 leading-none">{weeksLeft.toLocaleString()}</p>
-          <span className="text-[8px] font-black uppercase tracking-widest text-zinc-600">
+          <NumberFlow 
+            value={weeksLeft} 
+            className="text-2xl font-black text-red-400 leading-none" 
+          />
+          <span className="block text-[8px] font-black uppercase tracking-widest text-zinc-600 mt-1">
             {isEs ? 'semanas restantes' : 'weeks left'}
           </span>
         </div>
@@ -102,31 +108,36 @@ const PhaseSystem = ({ isPro, isEs }: { isPro?: boolean, isEs: boolean }) => {
     show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
   };
 
+  const phases = [
+    { label: isEs ? 'Aprender' : 'Learn', sub: isEs ? 'Micro-lecciones' : 'Micro-lessons', state: isEs ? 'Gratis' : 'Free', isLarge: true },
+    { label: isEs ? 'Aplicar' : 'Apply', sub: isEs ? 'Evidencia fotográfica' : 'Photo proof', state: isPro ? (isEs ? 'Desbloqueado' : 'Unlocked') : 'Premium', isLarge: false },
+    { label: isEs ? 'Repetir' : 'Repeat', sub: isEs ? 'Racha de 7 días' : '7-day hunt', state: isEs ? 'Activo' : 'Active', isActive: true, isLarge: false },
+  ];
+
   return (
     <motion.section 
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="px-5 grid grid-cols-3 gap-3 text-left"
+      className="px-5 grid grid-cols-2 gap-3 text-left"
     >
-      {[
-        { label: isEs ? 'Aprender' : 'Learn', sub: isEs ? 'Micro-lecciones' : 'Micro-lessons', state: isEs ? 'Gratis' : 'Free' },
-        { label: isEs ? 'Aplicar' : 'Apply', sub: isEs ? 'Evidencia fotográfica' : 'Photo proof', state: isPro ? (isEs ? 'Desbloqueado' : 'Unlocked') : 'Premium' },
-        { label: isEs ? 'Repetir' : 'Repeat', sub: isEs ? 'Racha de 7 días' : '7-day hunt', state: isEs ? 'Activo' : 'Active' },
-      ].map((phase, index) => (
+      {phases.map((phase, index) => (
         <motion.div 
           key={phase.label} 
           variants={itemVariants}
-          className="rounded-[1.25rem] border-2 border-zinc-200 border-b-4 border-b-zinc-300 bg-white p-3 min-h-[105px] flex flex-col justify-between hover:border-b-zinc-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer"
+          className={`relative rounded-[1.25rem] border-2 border-zinc-200 border-b-4 border-b-zinc-300 bg-white p-4 flex flex-col justify-between hover:border-b-zinc-300 active:border-b-2 active:translate-y-0.5 transition-all cursor-pointer overflow-hidden ${phase.isLarge ? 'col-span-2 min-h-[140px]' : 'col-span-1 min-h-[120px]'}`}
         >
-          <div>
+          {phase.isActive && (
+            <BorderBeam size={150} duration={8} delay={index} colorFrom="#FF7300" colorTo="#FFB03A" />
+          )}
+          <div className="relative z-10">
             <span className="text-[8px] font-black font-mono uppercase tracking-widest text-zinc-400">
               {isEs ? `Fase 0${index + 1}` : `Phase 0${index + 1}`}
             </span>
-            <h3 className="text-sm font-black uppercase tracking-tight text-zinc-800 mt-1.5">{phase.label}</h3>
+            <h3 className={`${phase.isLarge ? 'text-xl' : 'text-sm'} font-black uppercase tracking-tight text-zinc-800 mt-1.5`}>{phase.label}</h3>
             <p className="text-[9px] font-bold text-zinc-500 mt-0.5 leading-tight">{phase.sub}</p>
           </div>
-          <span className={`mt-2 inline-flex w-fit rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
+          <span className={`relative z-10 mt-2 inline-flex w-fit rounded-full px-2 py-1 text-[7px] font-black uppercase tracking-widest ${
             phase.state === 'Premium' ? 'bg-yellow-500/10 text-yellow-600 border border-yellow-500/30' : 'bg-[#FF7300]/10 text-[#FF7300] border border-[#FF7300]/20'
           }`}>
             {phase.state}

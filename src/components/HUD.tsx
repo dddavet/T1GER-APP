@@ -7,6 +7,7 @@ import { LineChart, BookOpen, Cpu } from 'lucide-react';
 import { StreakModal } from './StreakModal';
 import { GemsModal } from './GemsModal';
 import { HeartsModal } from './HeartsModal';
+import { NumberFlow } from './ui/number-flow';
 
 const trackMeta = {
   investing: { icon: LineChart, label: 'Investing', color: '#1CB0F6', flagColor: '#1CB0F6' }, // Duolingo blue
@@ -34,7 +35,7 @@ export const HUD = React.memo(() => {
     return (
       <div className="flex-none z-40 pt-[calc(0.75rem+var(--safe-top-inset,env(safe-area-inset-top)))] pb-3 px-5 flex items-center justify-between bg-transparent text-zinc-500 font-mono text-[9px] font-bold uppercase tracking-widest opacity-60">
         <span>Zen Workspace</span>
-        <span>Streak: {learnStreak}</span>
+        <span>Streak: <NumberFlow value={learnStreak} /></span>
       </div>
     );
   }
@@ -53,7 +54,7 @@ export const HUD = React.memo(() => {
           <TrackIcon className="w-5 h-5" style={{ color: meta.color }} strokeWidth={2.5} />
         </div>
         <span className="font-black text-[15px] text-zinc-700 font-mono">
-          {level}
+          <NumberFlow value={level} />
         </span>
       </div>
 
@@ -71,12 +72,11 @@ export const HUD = React.memo(() => {
             <path d="M12 22C16 22 19 18.5 19 14.5C19 10 16 7 14 3C13.5 2 12.5 2 12 3C12.5 6 13.5 8 13.5 10.5C13.5 12 12.5 13 11 13C9.5 13 8 11.5 8 9.5C6 11 5 13.5 5 15.5C5 19.5 8 22 12 22Z" fill="#E5E5E5" />
           )}
         </svg>
-        <span 
+        <NumberFlow 
+          value={learnStreak} 
           className="font-black text-[14px] font-mono"
           style={{ color: learnStreak > 0 ? '#FF9600' : '#AFAFAF' }}
-        >
-          {learnStreak}
-        </span>
+        />
       </div>
 
       {/* 3. Gems / Coins */}
@@ -94,9 +94,10 @@ export const HUD = React.memo(() => {
           <path d="M2 9L12 22L12 11L2 9Z" fill="#1899D6" />
           <path d="M22 9L12 22L12 11L22 9Z" fill="#1473A6" />
         </svg>
-        <span className="font-black text-[14px] font-mono text-[#1CB0F6]">
-          {coins}
-        </span>
+        <NumberFlow 
+          value={coins} 
+          className="font-black text-[14px] font-mono text-[#1CB0F6]" 
+        />
       </div>
 
       {/* 4. Hearts / Energy */}
@@ -109,9 +110,10 @@ export const HUD = React.memo(() => {
         <svg viewBox="0 0 24 24" fill="none" className="w-[20px] h-[20px]">
           <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.04L12 21.35Z" fill="#FF4B4B" />
         </svg>
-        <span className="font-black text-[14px] font-mono text-[#FF4B4B]">
-          {energy}
-        </span>
+        <NumberFlow 
+          value={energy} 
+          className="font-black text-[14px] font-mono text-[#FF4B4B]" 
+        />
       </div>
 
       <StreakModal 
