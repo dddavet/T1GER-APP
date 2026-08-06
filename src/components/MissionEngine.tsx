@@ -8,7 +8,7 @@ import {
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
-import { COMPETENCY_LABELS } from '../services/missionBank';
+import { COMPETENCY_LABELS, MISSION_BANK } from '../services/missionBank';
 import { getCharacterForTrack, getRandomPhrase } from '../services/characterStateEngine';
 import { executePromptChallenge } from '../services/gemini';
 import { T1gerInteractiveAvatar } from './T1gerInteractiveAvatar';
@@ -21,7 +21,7 @@ interface MissionEngineProps {
 
 export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplete }) => {
   const { addXP } = useT1ger();
-  const { completeMission, failMission, competencies, language } = useBrain();
+  const { completeMission, failMission, competencies, language, brainState } = useBrain();
   const { appUser, updateAppUser } = useAuth();
   const learningStyle = appUser?.learningStyle || 'text';
   
@@ -169,7 +169,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
     return 'RESTING';
   }, [quizResult, currentStep]);
 
-  const welcomePhrase = useMemo(() => getRandomPhrase(character.id, 'welcome'), [character.id]);
+  const isConsistent = brainState.learnStreak > 1;
+  const welcomePhrase = useMemo(() => getRandomPhrase(character.id, isConsistent ? 'welcome_consistent' : 'welcome_sporadic'), [character.id, isConsistent]);
   const successPhrase = useMemo(() => getRandomPhrase(character.id, 'success'), [character.id, quizResult]);
   const failPhrase = useMemo(() => getRandomPhrase(character.id, 'fail'), [character.id, quizResult]);
 
@@ -209,6 +210,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   // Book Reader & Framework States
   const [bookPage, setBookPage] = useState(0);
   const [frameworkStep, setFrameworkStep] = useState(0);
+  
+  // Verification Tier 2 States
+  const [missionStartTime] = useState<number>(Date.now());
+  const [reflectionText, setReflectionText] = useState('');
 
   // Curated AI Quiz Memos
   const isCuratedQuiz = useMemo(() => currentStep?.startsWith('curated_quiz_') || false, [currentStep]);
@@ -235,25 +240,23 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const handleCheckAnswer = () => {
     if (selectedOption === null) return;
 
-    if (isCuratedQuiz && currentCuratedQuiz) {
-      const isCorrect = currentCuratedQuiz.options[selectedOption]?.correct;
-      if (isCorrect) {
-        setQuizResult('correct');
-      } else {
-        setQuizResult('wrong');
-      }
-      setShowExplanation(true);
-      return;
-    }
+    let isCorrect = false;
 
-    const optionsList = mission.recallOptions || mission.options || [];
-    const isCorrect = optionsList[selectedOption]?.correct;
+    if (isCuratedQuiz && currentCuratedQuiz) {
+      isCorrect = currentCuratedQuiz.options[selectedOption]?.correct;
+    } else {
+      const optionsList = mission.recallOptions || mission.options || [];
+      isCorrect = optionsList[selectedOption]?.correct;
+    }
 
     if (isCorrect) {
       setQuizResult('correct');
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([15, 30, 15]);
     } else {
       setQuizResult('wrong');
+      if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate([50, 50, 50]);
     }
+    
     setShowExplanation(true);
   };
 
@@ -265,8 +268,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
   const handleSuccess = async () => {
     fireRewardConfetti();
-    completeMission(mission.id, 100);
-    await addXP(mission.xpReward || 20, true);
+    const finalScore = quizResult === 'wrong' ? 40 : 100;
+    completeMission(mission.id, finalScore);
+    await addXP(mission.xpReward || 20, mission.verificationTier);
     setStepIndex(steps.length); // show success screen
   };
 
@@ -431,8 +435,18 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </div>
 
               <button
-                onClick={onComplete}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
+                onClick={async () => {
+                  if (appUser && (!appUser.fcmTokens || appUser.fcmTokens.length === 0)) {
+                    try {
+                      const { requestPushNotificationsPermission } = await import('../services/fcmService');
+                      await requestPushNotificationsPermission(appUser.uid);
+                    } catch (e) {
+                      console.warn('Failed to request push permissions on complete', e);
+                    }
+                  }
+                  onComplete();
+                }}
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2"
               >
                 Continue <ArrowRight size={20} className="stroke-[3]" />
               </button>
@@ -470,7 +484,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               
               <button 
                 onClick={onComplete} 
-                className="w-full py-4 rounded-2xl bg-[#FF4B4B] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#EA1515] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-auto"
+                className="w-full py-4 rounded-2xl bg-[#FF4B4B] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#EA1515] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 mt-auto"
               >
                 Continue →
               </button>
@@ -581,7 +595,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 <Brain className="w-5 h-5 stroke-[3]" /> Got It, Take the Quiz
               </button>
@@ -669,7 +683,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
               <button
                 onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 <Cpu className="w-5 h-5 stroke-[3]" /> Go to Real Action
               </button>
@@ -776,7 +790,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {/* Start/Proceed button */}
               <button
                 onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 Registrar Prueba de Acción <ArrowRight size={20} className="stroke-[3]" />
               </button>
@@ -876,7 +890,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     (lessonAction.type === 'photo' && !proofPhoto) || 
                     (lessonAction.type === 'text' && !proofText.trim())
                   }
-                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed mt-4"
+                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed mt-4"
                 >
                   {isSubmittingProof ? (
                     <>
@@ -960,13 +974,13 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={advance}
-                  className="flex-1 py-4 bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all cursor-pointer border-b-4 border-zinc-200 active:border-b-0 active:translate-y-1"
+                  className="flex-1 py-4 bg-zinc-100 border border-zinc-200 hover:bg-zinc-200 text-zinc-500 hover:text-zinc-800 rounded-2xl font-black text-[15px] uppercase tracking-widest transition-all cursor-pointer border-b-4 border-zinc-200 active:border-b-0 active:translate-y-1 active:scale-95"
                 >
                   Skip
                 </button>
                 <button
                   onClick={advance}
-                  className="flex-[2] py-4 bg-[#58CC02] hover:bg-[#58CC02] text-white rounded-2xl font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-[2] py-4 bg-[#58CC02] hover:bg-[#58CC02] text-white rounded-2xl font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Brain className="w-5 h-5" /> Start Quick Quiz Pro
                 </button>
@@ -1081,7 +1095,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <button
                   onClick={handleExecuteSandbox}
                   disabled={sandboxLoading || !sandboxPrompt.trim()}
-                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed"
+                  className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:bg-[#E5E5E5] disabled:text-[#AFAFAF] disabled:border-[#C4C4C4] disabled:cursor-not-allowed"
                 >
                   {sandboxLoading ? (
                     <>
@@ -1476,7 +1490,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                     advance();
                   }
                 }}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer"
               >
                 {bookPage < lessonReading.paragraphs.length ? 'Next Page' : 'Finish Reading'}
               </button>
@@ -1494,9 +1508,20 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               exit={{ x: -50, opacity: 0 }}
               className="flex-1 flex flex-col justify-start pt-4 gap-4"
             >
-              <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 text-center mb-2">
+              <h1 className="text-2xl font-black italic uppercase tracking-tighter text-zinc-800 text-center mb-1">
                 Action Framework
               </h1>
+              <div className="flex justify-center mb-2">
+                {mission.verificationTier === 1 ? (
+                  <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Tier 1 — Verified Action
+                  </span>
+                ) : (
+                  <span className="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                    <Lightbulb className="w-3.5 h-3.5" /> Tier 2 — Personal Growth
+                  </span>
+                )}
+              </div>
               
               <div className="space-y-4 overflow-y-auto pb-4">
                 {(mission.frameworkSteps || [
@@ -1532,7 +1557,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                           ) : isActive ? (
                             <button
                               onClick={() => setFrameworkStep(prev => prev + 1)}
-                              className="px-5 py-3 rounded-xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[13px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all"
+                              className="px-5 py-3 rounded-xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[13px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all"
                             >
                               Done
                             </button>
@@ -1549,14 +1574,48 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               </div>
 
               {frameworkStep >= (mission.frameworkSteps?.length || 3) && (
-                <motion.button
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  onClick={advance}
-                  className="w-full py-4 mt-6 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2"
-                >
-                  <Crown className="w-5 h-5" /> Framework Completed
-                </motion.button>
+                <div className="mt-6 flex flex-col gap-4">
+                  {mission.verificationTier === 2 ? (
+                    <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5">
+                      <h4 className="font-bold text-sm text-zinc-800 mb-2">Required Reflection</h4>
+                      <p className="text-xs text-zinc-500 mb-4">{mission.reflectionPrompt || "What did you learn from this action, and how will you apply it?"}</p>
+                      <textarea
+                        value={reflectionText}
+                        onChange={(e) => setReflectionText(e.target.value)}
+                        placeholder="Write your reflection here..."
+                        className="w-full min-h-[120px] bg-white border border-zinc-300 rounded-xl p-3 text-sm focus:outline-none focus:border-[#FF7300] focus:ring-1 focus:ring-[#FF7300] resize-none"
+                      />
+                      {reflectionText.length < (mission.minReflectionLength || 50) && (
+                        <p className="text-[10px] text-red-500 mt-2 font-medium text-right">
+                          {reflectionText.length} / {mission.minReflectionLength || 50} characters minimum
+                        </p>
+                      )}
+                    </div>
+                  ) : null}
+
+                  <motion.button
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    onClick={() => {
+                      if (mission.verificationTier === 2) {
+                        if (reflectionText.length < (mission.minReflectionLength || 50)) return;
+                        if (Date.now() - missionStartTime < (mission.minTimeMinutes || 0) * 60000) {
+                          alert(`Please take at least ${mission.minTimeMinutes} minutes to complete this mission. Execution takes time.`);
+                          return;
+                        }
+                      }
+                      advance();
+                    }}
+                    className={`w-full py-4 rounded-2xl font-black text-[15px] uppercase tracking-widest border-b-4 active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 ${
+                      mission.verificationTier === 2 && (reflectionText.length < (mission.minReflectionLength || 50))
+                        ? 'bg-zinc-300 text-zinc-500 border-zinc-400 cursor-not-allowed'
+                        : 'bg-[#FF7300] text-white border-[#CC5C00]'
+                    }`}
+                    disabled={mission.verificationTier === 2 && (reflectionText.length < (mission.minReflectionLength || 50))}
+                  >
+                    <Crown className="w-5 h-5" /> Framework Completed
+                  </motion.button>
+                </div>
               )}
             </motion.div>
           )}
@@ -1825,7 +1884,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               
               <button
                 onClick={advance}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 Got It <ArrowRight className="w-5 h-5" />
               </button>
@@ -1841,7 +1900,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
         <div className="flex-none w-full max-w-md mx-auto bg-white border-t-2 border-zinc-200 p-4 pt-3 pb-6 rounded-t-3xl shadow-[0_-10px_25px_rgba(0,0,0,0.04)] z-30 flex items-center gap-3">
           <button
             onClick={() => { haptic(); advance(); }}
-            className="w-1/3 py-4 rounded-2xl bg-white border-2 border-zinc-200 border-b-4 border-zinc-300 active:border-b-0 active:translate-y-1 text-zinc-600 font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 hover:bg-zinc-50"
+            className="w-1/3 py-4 rounded-2xl bg-white border-2 border-zinc-200 border-b-4 border-zinc-300 active:border-b-0 active:translate-y-1 active:scale-95 text-zinc-600 font-black text-xs uppercase tracking-wider transition-all cursor-pointer flex items-center justify-center gap-1 hover:bg-zinc-50"
           >
             {language === 'es' ? 'SALTAR' : 'SKIP'}
           </button>
@@ -1849,7 +1908,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           {currentStep === 'daily_quote' && (
             <button
               onClick={() => { haptic(); advance(); }}
-              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
               {language === 'es' ? 'CONTINUAR' : 'CONTINUE'} <ArrowRight size={20} className="stroke-[3]" />
             </button>
@@ -1858,7 +1917,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           {(currentStep === 'teach' || currentStep === 'reading_chapter') && (
             <button
               onClick={() => { haptic(); advance(); }}
-              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
               {language === 'es' ? 'VER CONCLUSIÓN' : 'VIEW TAKEAWAY'} <ArrowRight size={20} className="stroke-[3]" />
             </button>
@@ -1867,7 +1926,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
           {currentStep === 'recall' && (
             <button
               onClick={() => { haptic(); handleSuccess(); }}
-              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
+              className="flex-1 py-4 rounded-2xl bg-[#58CC02] hover:bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
             >
               {language === 'es' ? 'COMPLETAR LECCIÓN 🟢' : 'COMPLETE LESSON 🟢'}
             </button>

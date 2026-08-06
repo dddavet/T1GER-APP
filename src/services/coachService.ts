@@ -3,101 +3,113 @@ import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebas
 import { getAi } from "./gemini";
 
 const COACH_SYSTEM_PROMPT = `
-You are a world-class mentor inside a learning app for entrepreneurs and founders. Your PRIMARY goal is to answer the user's questions about the educational content, concepts, and lessons they are learning in the app. Help them understand the theory deeply and how to apply it to their real-life business.
+You are T1GER, a world-class mentor and professor inside a Duolingo-style learning app.
+Your PRIMARY goal is to answer the user's questions clearly, warmly, and concisively.
 
-You have full context about this user:
-- Their business stage and goals from onboarding
-- Every book insight they have read and saved
-- Every exercise they completed or skipped
-- Their consistency patterns and streak history
-- Short summaries of every past coaching session
-
-Use this context in every response. Never give advice that ignores what you already know about them. If they ask you something you already have context on, reference it directly.
-
-YOUR GENERAL COACHING STYLE:
-- You are an expert at breaking down complex business, marketing, and finance concepts into easy-to-understand, actionable insights.
-- You ask before you advise. When a user brings you a problem, your first response is often a sharp clarifying question.
-- You connect dots. You reference specific insights the user has already read and show how they apply to their current problem.
-- You challenge lazy thinking. If their logic is flawed, you point it out directly.
-- You are direct and honest. You do not soften important truths.
-- If a user asks a question about a concept from the app (e.g., LTV, CAC, Offer Creation), explain it using real-world examples that apply to their specific business context.
-
-YOUR GENERAL TONE:
-Direct. Intelligent. High standards. You speak like a mentor who respects the user enough to tell them the truth. Short sentences. No filler words. No corporate language.
-
-WHAT YOU NEVER DO:
-- Never give generic advice that could apply to anyone.
-- Never answer a problem without first understanding the specific situation.
-- Never make a list of 10 things when one thing is what matters.
-- Never say "great question" or "absolutely" or any variation of empty affirmation.
-- Never let the user leave a session without one clear next action.
-
-FORMAT AND LANGUAGE:
-Keep responses concise. Think out loud when needed but only to show your reasoning, not to fill space. Use plain text. No bullet points unless listing genuinely parallel items. No headers inside a conversation.
-
-CRITICAL RULE: YOU MUST ALWAYS RESPOND IN ENGLISH, NO MATTER WHAT LANGUAGE THE USER SPEAKS.
+CRITICAL RESPONSE RULES:
+1. Keep responses EXTREMELY CONCISE: Maximum 2 to 3 short, punchy sentences. Never write long essays or bulleted lists.
+2. Speak warmly and encouragingly, like an expert professor who respects the student's time.
+3. NEVER use raw Markdown asterisks like **bold** or *italic* in your text.
+4. Provide a 1-sentence actionable tip or direct answer immediately.
+5. ALWAYS END your response with EXACTLY 3 short, highly relevant follow-up questions for the user to pick from. Format them sequentially, e.g., "1. [Question] 2. [Question] 3. [Question]".
 `;
 
 const COACH_PERSONALITIES: Record<string, string> = {
   t1ger: `
-You are T1GER, "El Mentor Alfa" (Alpha Strategy Mentor).
-YOUR PERSONALITY & TONE:
-- High standards, intense, demanding, sharp.
-- You focus on business structures, high-ticket offers, sales tactics, leadership, and entrepreneur mindset.
-- You speak directly and honestly. You challenge lazy thinking. Encouragement is earned.
-- You use strategic/tactical terminology and direct statements.
-- End sessions with one highly tactical strategy or mindset action.
-`,
-  l1ly: `
-You are L1LY, "AI Dev & Hacker" (AI & Tech Operations Mentor).
-YOUR PERSONALITY & TONE:
-- Logical, pragmatic, dry, analytical, data-driven.
-- You focus on AI engineering, prompt optimization, automations, operations, and technical bottlenecks.
-- You speak with developer precision. You hate hallucinations, inefficient workflows, and wasted resources.
-- You refer to inputs, outputs, processes, and optimization.
-- End sessions with one concrete technical automation or process action.
-`,
-  eddy: `
-You are EDDY, "Venture Capitalist" (Finance & Capital Scaling Mentor).
-YOUR PERSONALITY & TONE:
-- Focus on unit economics, EBITDA, CAC, LTV, CAGR, multiples, index funds, compound interest, and fundraising.
-- You analyze metrics with cold calculation and see high-growth potential.
-- You speak in investment metrics, scalability multiples, and capital efficiency.
-- End sessions with one financial audit, price model recalculation, or budget-focused action.
-`,
-  zar1: `
-You are ZAR1, "Growth Marketer" (Marketing & Copywriting Mentor).
-YOUR PERSONALITY & TONE:
-- High energy, punchy, customer psychology expert, creative.
-- You focus on copywriting hooks, landing page conversion, viral organic marketing, and positioning.
-- You speak with an eye for user attention, viral growth loops, brand charisma, and urgency.
-- End sessions with one copywriting tweak, campaign test, or customer profile action.
+You are T1GER, the lead Master Professor.
+You give clear, direct answers in 2-3 sentences max.
 `
 };
 
-export const getCoachResponse = async (userId: string, userMessage: string, history: any[], coachId = 't1ger') => {
+const callOpenRouterAPI = async (
+  systemPrompt: string,
+  userMessage: string,
+  history: any[],
+  apiKey: string
+): Promise<string> => {
+  const formattedMessages = [
+    { role: 'system', content: systemPrompt },
+    ...history.map(m => ({
+      role: m.role === 'model' || m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.text || m.content || ''
+    })),
+    { role: 'user', content: userMessage }
+  ];
+
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://t1ger.app',
+      'X-Title': 'T1GER APP',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      model: 'deepseek/deepseek-chat',
+      messages: formattedMessages,
+      temperature: 0.6,
+      max_tokens: 300
+    })
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`OpenRouter API Error (${response.status}): ${errText}`);
+  }
+
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content || 'Sin respuesta de DeepSeek';
+};
+
+export const getCoachResponse = async (userId: string, userMessage: string, history: any[], coachId = 't1ger', language: string = 'es') => {
+  // 1. Fetch user context
+  let userData = {};
+  if (userId && userId !== 'anonymous') {
+    try {
+      const userDoc = await getDoc(doc(db, "users", userId));
+      userData = userDoc.data() || {};
+    } catch (e) {
+      // ignore fallback
+    }
+  }
+
+  // 2. Fetch past sessions
+  let sessionHistory: any[] = [];
+  if (userId && userId !== 'anonymous') {
+    try {
+      const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(5));
+      const sessionsSnapshot = await getDocs(sessionsQ);
+      sessionHistory = sessionsSnapshot.docs.map(doc => doc.data());
+    } catch (e) {
+      // ignore fallback
+    }
+  }
+
+  // 3. Construct prompt
+  const context = `
+  User Context: ${JSON.stringify(userData)}
+  Session History: ${JSON.stringify(sessionHistory)}
+  `;
+
+  const personalityPrompt = COACH_PERSONALITIES[coachId] || COACH_PERSONALITIES.t1ger;
+  const languageInstruction = `CRITICAL RULE: YOU MUST RESPOND 100% IN ${language === 'en' ? 'ENGLISH' : 'SPANISH'}. NEVER USE OTHER LANGUAGES.`;
+  const fullSystemPrompt = COACH_SYSTEM_PROMPT + "\n\n" + languageInstruction + "\n\n" + personalityPrompt + "\n\n" + context;
+
+  // Priority 1: OpenRouter DeepSeek V4 / Flash API Key
+  const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  if (openRouterKey && openRouterKey.trim() !== '') {
+    try {
+      return await callOpenRouterAPI(fullSystemPrompt, userMessage, history, openRouterKey.trim());
+    } catch (openRouterErr) {
+      console.warn("OpenRouter DeepSeek failed, falling back to Gemini:", openRouterErr);
+    }
+  }
+
+  // Priority 2: Google Gemini API Key
   try {
-    // 1. Fetch user context
-    const userDoc = await getDoc(doc(db, "users", userId));
-    const userData = userDoc.data() || {};
-
-    // 2. Fetch past sessions
-    const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(5));
-    const sessionsSnapshot = await getDocs(sessionsQ);
-    const sessionHistory = sessionsSnapshot.docs.map(doc => doc.data());
-
-    // 3. Construct prompt
-    const context = `
-    User Context: ${JSON.stringify(userData)}
-    Session History: ${JSON.stringify(sessionHistory)}
-    `;
-
-    const personalityPrompt = COACH_PERSONALITIES[coachId] || COACH_PERSONALITIES.t1ger;
-
-    // 4. Call Gemini
     const model = getAi().getGenerativeModel({ 
       model: "gemini-1.5-flash",
-      systemInstruction: COACH_SYSTEM_PROMPT + "\n\n" + personalityPrompt + "\n\n" + context
+      systemInstruction: fullSystemPrompt
     });
 
     const chat = model.startChat({
@@ -109,9 +121,12 @@ export const getCoachResponse = async (userId: string, userMessage: string, hist
 
     const result = await chat.sendMessage(userMessage);
     return result.response.text();
-  } catch (error) {
+  } catch (error: any) {
     console.warn("Gemini API call error in coachService:", error);
-    // Graceful fallback response when API key is unconfigured or rate limited
-    return "Predator, estoy listo para guiarte. Revisa tu conexión o tu API Key para activar la inteligencia sináptica completa.";
+    if (language === 'en') {
+      return "Hello! I am ready to help. Please check your connection or configure your OpenRouter / Gemini API Key.";
+    }
+    return "¡Hola! Estoy listo para guiarte. Revisa tu conexión o tu API Key para continuar conversando.";
   }
 };
+

@@ -42,6 +42,7 @@ export interface AppUser {
   ageRange?: string;
   level: number;
   xp: number;
+  verifiedXP?: number; // NEW: Tracks Tier 1 Verified XP for the Leaderboard
   streak: number;
   isPro?: boolean;
   isSuperT1ger?: boolean;
@@ -64,6 +65,20 @@ export interface AppUser {
     focusAreas: string[];
   };
   acquisitionSource?: string;
+  fcmTokens?: string[];
+  notificationPreferences?: {
+    daily_reminder?: boolean; // daily lesson reminder
+    streak_risk?: boolean; // streak at risk warning
+    streak_lost?: boolean; // streak lost re-engagement
+    streak_milestones?: boolean; // streak milestones
+    level_up?: boolean; // level up
+    apply_reminder?: boolean; // Apply phase reminder
+    action_completed?: boolean; // action step completion
+    weekly_summary?: boolean; // weekly summary
+    leaderboard_drop?: boolean; // leaderboard movement
+    re_engagement?: boolean; // re-engagement
+    onboarding_nudge?: boolean; // onboarding nudge
+  };
 }
 
 export type DemoPreset = 'founder' | 'investor' | 'hacker' | 'growth' | 'newbie';

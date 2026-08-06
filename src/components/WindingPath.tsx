@@ -224,6 +224,86 @@ export const WindingPath = ({ onStart }: { onStart: (mission: any) => void }) =>
             </div>
           );
         })}
+
+        {/* APPLY NODE BLOCK (If the level has a required application step) */}
+        {activeLevel.applyNodeId && (() => {
+          const isApplyActive = pathData.isApplyNodePending;
+          const nodeSize = isApplyActive ? 84 : 68; // Bigger node for Apply
+          const { xOffset } = getNodePosition(activeLevel.days.length);
+
+          return (
+            <div
+              className="relative flex flex-col items-center z-10"
+              style={{
+                marginTop: 40,
+                marginLeft: `calc(50% + ${xOffset}px - ${nodeSize / 2}px)`,
+                width: nodeSize,
+              }}
+            >
+              {/* SVG path connecting the last day to the Apply node */}
+              <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ top: -40, left: -xOffset, width: 300, zIndex: -1 }}>
+                <path
+                  d={`M ${150 + getNodePosition(activeLevel.days.length - 1).xOffset} 0 C ${150 + getNodePosition(activeLevel.days.length - 1).xOffset} 20, ${150 + xOffset} 20, ${150 + xOffset} 40`}
+                  fill="none"
+                  stroke={isApplyActive ? '#58CC02' : '#E5E7EB'}
+                  strokeWidth="16"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+
+              {isApplyActive && (
+                <motion.div
+                  initial={{ y: -6, opacity: 0 }}
+                  animate={{ y: [0, -6, 0], opacity: 1 }}
+                  transition={{ repeat: Infinity, duration: 1.8, ease: "easeInOut" }}
+                  className="absolute -top-12 z-20 flex flex-col items-center pointer-events-none whitespace-nowrap"
+                >
+                  <div className="bg-[#FF7300] border-b-4 border-[#CC5C00] text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-2xl shadow-xl flex items-center gap-1.5">
+                    <span>{language === 'es' ? '¡VE A BUILDS!' : 'GO TO BUILDS!'}</span>
+                  </div>
+                  <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#FF7300] -mt-0.5" />
+                </motion.div>
+              )}
+
+              <div
+                className={`relative flex items-center justify-center transition-all outline-none rounded-2xl ${
+                  isApplyActive
+                    ? 'bg-[#FF7300] border-b-[8px] border-[#CC5C00] shadow-2xl'
+                    : 'bg-[#E5E7EB] border-b-[6px] border-[#C4C4C4] text-zinc-400 opacity-60 cursor-not-allowed'
+                }`}
+                style={{ width: nodeSize, height: nodeSize }}
+              >
+                {isApplyActive ? (
+                  <Building2 className="w-10 h-10 stroke-[2] text-white fill-none relative z-10 animate-pulse" />
+                ) : (
+                  <Lock className="w-6 h-6 stroke-[2.5] text-zinc-400" />
+                )}
+
+                {isApplyActive && (
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl pointer-events-none"
+                    style={{ border: `3px solid #FF7300` }}
+                    animate={{ scale: [1, 1.35, 1.35], opacity: [0.7, 0, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  />
+                )}
+              </div>
+
+              <div className="mt-2 text-center max-w-[120px]">
+                <p className={`text-[10px] font-black uppercase tracking-wider ${isApplyActive ? 'text-[#FF7300]' : 'text-zinc-400'}`}>
+                  {language === 'es' ? 'MISIÓN DE APLICACIÓN' : 'APPLY MISSION'}
+                </p>
+                {isApplyActive && (
+                  <p className="text-[9px] font-bold text-zinc-600 mt-0.5 leading-tight">
+                    {language === 'es' ? 'Requiere prueba real' : 'Requires real-world proof'}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
       </div>
     </div>
   );

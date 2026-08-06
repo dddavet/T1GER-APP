@@ -1,26 +1,22 @@
-import { LeagueHeader } from './LeagueHeader';
-import { FriendActivity } from './FriendActivity';
-import { PackQuest } from './PackQuest';
-import { WeeklyBoard } from './WeeklyBoard';
-import { InviteBanner } from './InviteBanner';
+import { useBrain } from '../../contexts/BrainContext';
+import { useT1ger } from '../../contexts/T1gerContext';
+import { EmptyState } from '../ui/EmptyState';
+import { Users } from 'lucide-react';
 
 export const SquadTab = () => {
+  const { language } = useBrain();
+  const { setActiveView } = useT1ger();
+  const isEs = language === 'es';
+
   return (
-    <div className="space-y-8 pb-12">
-      {/* 1. League Status — The #1 Duolingo hook */}
-      <LeagueHeader />
-
-      {/* 2. Friend Activity — Social proof */}
-      <FriendActivity />
-
-      {/* 3. Pack Quest — Shared goals */}
-      <PackQuest />
-
-      {/* 4. Weekly Board — Competition */}
-      <WeeklyBoard />
-
-      {/* 5. Invite — Growth */}
-      <InviteBanner />
+    <div className="h-full pt-12 pb-24">
+      <EmptyState 
+        icon={Users}
+        title={isEs ? "Añade a tu Squad" : "Build Your Squad"}
+        description={isEs ? "Añade amigos para competir en ligas y ver su actividad." : "Add friends to compete in leagues and track their activity."}
+        actionLabel={isEs ? "Buscar Amigos" : "Find Friends"}
+        onAction={() => setActiveView('profile')} 
+      />
     </div>
   );
 };

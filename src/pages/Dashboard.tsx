@@ -7,7 +7,7 @@ import {
   Flame, Zap, CheckCircle2, ChevronDown, BookOpen, Coffee, Target, 
   Settings2, Sparkles, Brain as BrainIcon, Home, Compass, Eye, EyeOff 
 } from 'lucide-react';
-import { type CurriculumTrack, CURRICULUM_TRACKS } from '../services/missionBank';
+import { type CurriculumTrack, CURRICULUM_TRACKS, MISSION_BANK } from '../services/missionBank';
 
 import { TacticalColumns } from '../components/TacticalColumns';
 import { DailyCommitment } from '../components/DailyCommitment';
@@ -240,6 +240,61 @@ const StoryBanner = ({ track, levelIndex, appUser, isEs }: { track: CurriculumTr
   );
 };
 
+const StepOneLesson = ({ onStart, isEs, title, isCompleted }: { onStart: () => void, isEs: boolean, title: string, isCompleted: boolean }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className={`bg-white shadow-sm rounded-[2rem] p-6 mx-5 mb-4 border transition-all ${isCompleted ? 'border-green-400 bg-green-50/50' : 'border-zinc-200'}`}
+  >
+    <div className="flex items-center justify-between mb-4">
+      <span className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-green-600' : 'text-[#FF7300]'}`}>
+        {isEs ? 'Paso 1: Aprender' : 'Step 1: Learn'}
+      </span>
+      {isCompleted ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <BookOpen className="w-5 h-5 text-zinc-400" />}
+    </div>
+    <h3 className="text-xl font-bold text-zinc-800 mb-4">{title}</h3>
+    <button 
+      onClick={onStart} 
+      disabled={isCompleted}
+      className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 ${
+        isCompleted 
+          ? 'bg-green-100 text-green-700 opacity-80 cursor-not-allowed' 
+          : 'bg-zinc-900 text-white active:scale-95 shadow-md hover:bg-zinc-800'
+      }`}
+    >
+      {isCompleted ? (isEs ? 'Completado' : 'Completed') : (isEs ? 'Iniciar Lección' : 'Start Lesson')}
+    </button>
+  </motion.div>
+);
+
+const StepTwoAction = ({ onStart, isEs, title, isCompleted }: { onStart: () => void, isEs: boolean, title: string, isCompleted: boolean }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: 0.1 }}
+    className={`bg-white shadow-sm rounded-[2rem] p-6 mx-5 mb-6 border transition-all ${isCompleted ? 'border-green-400 bg-green-50/50' : 'border-zinc-200'}`}
+  >
+    <div className="flex items-center justify-between mb-4">
+      <span className={`text-[10px] font-black uppercase tracking-widest ${isCompleted ? 'text-green-600' : 'text-blue-500'}`}>
+        {isEs ? 'Paso 2: Aplicar' : 'Step 2: Action'}
+      </span>
+      {isCompleted ? <CheckCircle2 className="w-5 h-5 text-green-500" /> : <Target className="w-5 h-5 text-zinc-400" />}
+    </div>
+    <h3 className="text-xl font-bold text-zinc-800 mb-4">{title}</h3>
+    <button 
+      onClick={onStart} 
+      disabled={isCompleted}
+      className={`w-full py-3.5 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all flex items-center justify-center gap-2 ${
+        isCompleted 
+          ? 'bg-green-100 text-green-700 opacity-80 cursor-not-allowed' 
+          : 'bg-zinc-100 text-zinc-900 border border-zinc-200 active:scale-95 hover:bg-zinc-200'
+      }`}
+    >
+      {isCompleted ? (isEs ? 'Completado' : 'Completed') : (isEs ? 'Ejecutar Acción' : 'Execute Action')}
+    </button>
+  </motion.div>
+);
+
 export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) => void }) => {
   const { setActiveView } = useT1ger();
   const { 
@@ -247,13 +302,30 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
     dailyTacticalStatus,
     setDayType,
     pathData,
-    language 
+    language,
+    brainState,
+    getDailyPipelineMissions
   } = useBrain();
   const { appUser } = useAuth();
   const isEs = language === 'es';
 
   const currentTrack = CURRICULUM_TRACKS[currentTrackId] || CURRICULUM_TRACKS.investing;
   const currentDayType = dailyTacticalStatus.dayType || 'normal';
+
+  const hasPlanned = (dailyTacticalStatus?.committedHabitIds?.length || 0) > 0 || 
+                     (dailyTacticalStatus?.committedWorkIds?.length || 0) > 0 || 
+                     (dailyTacticalStatus?.committedLessonIds?.length || 0) > 0;
+
+  const { pipeline, learnNode, applyNode } = getDailyPipelineMissions();
+  
+  const lessonCompleted = pipeline?.completedLearn ?? true;
+  const actionCompleted = pipeline?.completedApply ?? true;
+
+  const handleStartLesson = () => learnNode && onStartMission(learnNode);
+  const handleStartAction = () => {
+    if (applyNode) onStartMission(applyNode);
+    else setActiveView('tactical'); // Fallback to tactical planner if no specific curriculum action
+  };
 
   return (
     <div className="space-y-6 pb-28 min-h-full">
@@ -270,7 +342,19 @@ export const Dashboard = ({ onStartMission }: { onStartMission: (mission: any) =
         isEs={isEs}
       />
 
-      <PhaseSystem isPro={appUser?.isPro} isEs={isEs} />
+      <StepOneLesson 
+        onStart={handleStartLesson} 
+        isEs={isEs} 
+        title={learnNode?.title || (isEs ? 'Sin Lecciones Pendientes' : 'No Pending Lessons')} 
+        isCompleted={lessonCompleted} 
+      />
+      
+      <StepTwoAction 
+        onStart={handleStartAction} 
+        isEs={isEs} 
+        title={applyNode?.title || (isEs ? 'Planificar el Día' : 'Plan the Day')} 
+        isCompleted={actionCompleted && !hasPlanned} // if no action node, it relies on tactical tasks
+      />
 
       <TacticalColumns onTaskComplete={() => {}} />
 

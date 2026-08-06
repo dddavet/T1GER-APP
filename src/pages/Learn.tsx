@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { BookOpen, ChevronRight, Cpu, LineChart, X, Flame } from 'lucide-react';
+import { BookOpen, ChevronRight, Cpu, LineChart, X, Flame, Sparkles } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { WindingPath } from '../components/WindingPath';
+import { HexGridPath } from '../components/HexGridPath';
 import { CURRICULUM_TRACKS } from '../services/missionBank';
 
 const trackMeta = {
@@ -16,13 +17,15 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
   const { pathData, currentTrackId, selectTrack, brainState, language } = useBrain();
   const { appUser } = useAuth();
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [pathMode, setPathMode] = useState<'hex' | 'snake'>('hex');
+
   const meta = trackMeta[currentTrackId];
   const currentLevel = pathData.track.levels[pathData.currentLevelIndex] || pathData.track.levels[0];
 
   return (
     <div className="-mx-5 min-h-full bg-white pb-28 text-zinc-800">
-      {/* Duolingo-style Stage/Section Floating Header */}
-      <div className="sticky top-4 z-40 px-4 mb-8">
+      {/* Stage/Section Floating Header */}
+      <div className="sticky top-4 z-40 px-4 mb-4">
         <motion.button 
           whileTap={{ scale: 0.96 }}
           className="w-full px-5 py-4 shadow-xl rounded-3xl text-left outline-none border-b-4 border-black/20 backdrop-blur-md relative overflow-hidden cursor-pointer"
@@ -53,8 +56,39 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
         </motion.button>
       </div>
 
-      <main className="px-5 pt-5 flex justify-center">
-        <WindingPath onStart={onStartMission} />
+      {/* VIEW SWITCHER: KINNU HEX MATRIX VS DUOLINGO SNAKE */}
+      <div className="flex items-center justify-center px-4 mb-6">
+        <div className="bg-zinc-100 p-1.5 rounded-2xl flex items-center gap-1 border border-zinc-200 shadow-inner w-full max-w-xs">
+          <button
+            onClick={() => setPathMode('hex')}
+            className={`flex-1 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              pathMode === 'hex' 
+                ? 'bg-zinc-950 text-white shadow-md' 
+                : 'text-zinc-500 hover:text-zinc-900'
+            }`}
+          >
+            <span>⬢ Kinnu Matrix</span>
+            <span className="bg-amber-500 text-zinc-950 text-[8px] font-black px-1.5 py-0.2 rounded font-mono">NEW</span>
+          </button>
+          <button
+            onClick={() => setPathMode('snake')}
+            className={`flex-1 py-2 rounded-xl text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              pathMode === 'snake' 
+                ? 'bg-zinc-950 text-white shadow-md' 
+                : 'text-zinc-500 hover:text-zinc-900'
+            }`}
+          >
+            <span>🐍 Duolingo</span>
+          </button>
+        </div>
+      </div>
+
+      <main className="px-5 flex justify-center">
+        {pathMode === 'hex' ? (
+          <HexGridPath onStartMission={onStartMission || (() => {})} />
+        ) : (
+          <WindingPath onStart={onStartMission || (() => {})} />
+        )}
       </main>
 
       {/* Track Selector Modal */}

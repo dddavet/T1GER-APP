@@ -41,7 +41,7 @@ export const WeeklyBoard = () => {
         ...user,
         name: appUser?.displayName?.toUpperCase() || 'YOU',
         avatar: '🐅',
-        weeklyXP: stats.xp,
+        weeklyXP: stats.verifiedXP,
         streak: stats.streak,
       };
     }
@@ -51,9 +51,14 @@ export const WeeklyBoard = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
-        <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-2">
-          <TrendingUp className="w-3.5 h-3.5 text-accent" /> Weekly Race
-        </h3>
+        <div className="flex flex-col gap-1">
+          <h3 className="font-black text-[10px] uppercase tracking-[0.3em] text-zinc-500 flex items-center gap-2">
+            <TrendingUp className="w-3.5 h-3.5 text-accent" /> Weekly Race
+          </h3>
+          <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">
+            Ranks based on Verified Actions only.
+          </p>
+        </div>
         <span className="text-[10px] font-black text-zinc-700 uppercase tracking-widest">
           Resets Monday
         </span>

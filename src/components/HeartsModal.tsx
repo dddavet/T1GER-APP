@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Clock } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
+import { PaywallModal } from './PaywallModal';
 
 interface HeartsModalProps {
   isOpen: boolean;
@@ -12,6 +13,7 @@ interface HeartsModalProps {
 export const HeartsModal: React.FC<HeartsModalProps> = ({ isOpen, onClose, energy }) => {
   const { language } = useBrain();
   const isEs = language === 'es';
+  const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const maxHearts = 5;
   const isFull = energy >= maxHearts;
 
@@ -63,6 +65,31 @@ export const HeartsModal: React.FC<HeartsModalProps> = ({ isOpen, onClose, energ
                 <h3 className="text-lg font-black text-zinc-800 mb-4">
                   {isEs ? 'Recargar Vidas' : 'Refill Hearts'}
                 </h3>
+                
+                {/* Super T1GER Upsell */}
+                <button
+                  onClick={() => setIsPaywallOpen(true)}
+                  className="w-full p-4 mb-3 bg-gradient-to-r from-zinc-900 to-zinc-800 rounded-2xl border-2 border-b-4 border-zinc-900 border-b-black text-left flex items-center justify-between active:translate-y-1 active:scale-95 transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF7300] to-[#FFCA00] text-white flex items-center justify-center font-black text-xl shadow-[0_0_15px_rgba(255,115,0,0.5)]">
+                      💎
+                    </div>
+                    <div>
+                      <h4 className="font-black text-sm text-white uppercase italic tracking-tighter">
+                        Super T1GER
+                      </h4>
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                        {isEs ? 'Vidas Ilimitadas' : 'Unlimited Hearts'}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-black uppercase text-[#FFCA00] bg-white/10 px-2 py-1 rounded-lg">
+                    {isEs ? 'Gratis x 14 Días' : '14 Days Free'}
+                  </span>
+                </button>
+
+                {/* Standard Gem Refill */}
                 <div className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center">
@@ -72,16 +99,19 @@ export const HeartsModal: React.FC<HeartsModalProps> = ({ isOpen, onClose, energ
                       <h4 className="font-bold text-sm text-zinc-800">
                         {isEs ? 'Restaurar Vidas' : 'Full Refill'}
                       </h4>
-                      <p className="text-xs text-zinc-500">
-                        {isEs ? 'Recarga tus 5 vidas al instante' : 'Instantly refill all 5 hearts'}
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-0.5">
+                        {isEs ? 'Pagar con gemas' : 'Pay with gems'}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs font-black text-[#FF7300]">100 💎</span>
+                  <button className="px-4 py-2 bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-black text-xs rounded-xl transition-colors cursor-pointer flex items-center gap-1">
+                    <span className="text-sky-500">💎</span> 100
+                  </button>
                 </div>
               </div>
             </div>
           </motion.div>
+          <PaywallModal isOpen={isPaywallOpen} onClose={() => setIsPaywallOpen(false)} />
         </>
       )}
     </AnimatePresence>

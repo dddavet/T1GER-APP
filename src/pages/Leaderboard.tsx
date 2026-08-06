@@ -17,7 +17,7 @@ export const Leaderboard = () => {
       try {
         const q = query(
           collection(db, 'users_public'),
-          orderBy('xp', 'desc'),
+          orderBy('verifiedXP', 'desc'),
           limit(10)
         );
         const snapshot = await getDocs(q);
@@ -46,15 +46,20 @@ export const Leaderboard = () => {
 
   return (
     <div className="space-y-6 max-w-[430px] mx-auto">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black flex items-center gap-3 font-sans uppercase tracking-tight">
-          <Trophy className="w-8 h-8 text-[#FF6B00]" />
-          Global Pride
-        </h1>
-        <div className="flex items-center gap-2 bg-white border border-zinc-800 px-3 py-1.5 rounded-xl font-mono text-xs text-zinc-500">
-          <Clock className="w-4 h-4 text-[#FF6B00]" />
-          {timeRemaining} left
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-black flex items-center gap-3 font-sans uppercase tracking-tight">
+            <Trophy className="w-8 h-8 text-[#FF6B00]" />
+            Global Pride
+          </h1>
+          <div className="flex items-center gap-2 bg-white border border-zinc-800 px-3 py-1.5 rounded-xl font-mono text-xs text-zinc-500">
+            <Clock className="w-4 h-4 text-[#FF6B00]" />
+            {timeRemaining} left
+          </div>
         </div>
+        <p className="text-xs font-bold text-zinc-500 uppercase tracking-widest bg-zinc-100 rounded-lg p-3 border border-zinc-200">
+          Rankings are based on <span className="text-blue-600 font-black">Tier 1 Verified Actions</span> only. Personal Growth XP does not affect your rank.
+        </p>
       </div>
 
       <div className="bg-white border border-zinc-800 rounded-3xl overflow-hidden backdrop-blur-md">
@@ -95,7 +100,7 @@ export const Leaderboard = () => {
                   </div>
                   
                   <div className="text-right font-mono font-bold text-lg">
-                    {user.xp}
+                    {user.verifiedXP || 0}
                   </div>
                 </div>
               );

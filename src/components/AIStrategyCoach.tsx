@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bot, Send, Loader2, ThumbsUp, ThumbsDown, Mic, MicOff, Volume2 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '../contexts/AuthContext';
-import { getAi, generateSpeech } from '../services/gemini';
+import { getAi } from '../services/gemini';
 import { NICHES } from '../pages/Onboarding';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
@@ -67,11 +67,7 @@ export const AIStrategyCoach = () => {
       const assistantContent = result.response.text() || '...';
       setMessages(prev => [...prev, { id: crypto.randomUUID(), role: 'assistant', content: assistantContent }]);
       
-      // Speech Synthesis
-      const base64Audio = await generateSpeech(assistantContent);
-      if (base64Audio) {
-        await playAudio(base64Audio);
-      }
+      // Speech synthesis removed (YAGNI / dead code)
     } catch (error) {
       console.error(error);
     } finally {

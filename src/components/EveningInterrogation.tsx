@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mic, Square } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export const EveningInterrogation = ({ onComplete }: { onComplete: () => void }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -9,6 +10,7 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
   const [status, setStatus] = useState<'idle' | 'recording' | 'analyzing' | 'verdict'>('idle');
   const [verdict, setVerdict] = useState<string | null>(null);
   const { addXP } = useT1ger();
+  const { appUser, updateAppUser } = useAuth();
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
@@ -35,14 +37,21 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
     setIsRecording(false);
     setStatus('analyzing');
     
-    setTimeout(() => {
+    setTimeout(async () => {
       setStatus('verdict');
       const isSuccess = Math.random() > 0.3;
       setVerdict(isSuccess 
-        ? "Your hustle was relentless. The data confirms you dominated the day. +100 XP." 
-        : "Excuses are for prey. You missed the mark on the Grand Slam. -50 XP.");
-      if (isSuccess) addXP(100);
-      else addXP(-50);
+        ? "Tu disciplina fue implacable. Los datos confirman que dominaste el día. +100 XP. Ritmo táctico mantenido." 
+        : "Las excusas son para presas. Fallaste. -50 XP. Se aumentará la presión mañana.");
+      if (isSuccess) {
+        addXP(100);
+      } else {
+        addXP(-50);
+        // Increase daily time as a penalty (more pressure tomorrow)
+        if (appUser && typeof appUser.dailyTime === 'number') {
+           await updateAppUser({ dailyTime: Math.min(60, appUser.dailyTime + 5) });
+        }
+      }
     }, 2000);
   };
 

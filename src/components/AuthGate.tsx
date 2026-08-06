@@ -8,7 +8,12 @@ import { TermsOfService } from '../pages/TermsOfService';
 
 type AuthMode = 'sign-in' | 'sign-up' | 'email-link';
 
-export const AuthGate: React.FC = () => {
+interface AuthGateProps {
+  embedded?: boolean;
+  onAuthSuccess?: () => void;
+}
+
+export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
   const [mode, setMode] = useState<AuthMode>('sign-in');
@@ -41,6 +46,7 @@ export const AuthGate: React.FC = () => {
     setLoading(true);
     try {
       await action();
+      onAuthSuccess?.();
     } catch (error) {
       console.error('Auth failed', error);
       setNotice(getAuthMessage(error));
@@ -82,7 +88,9 @@ export const AuthGate: React.FC = () => {
   return (
     <div className="w-full h-full bg-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Gradient */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[50vh] bg-gradient-to-b from-[#FF6B00]/20 to-transparent blur-3xl opacity-50" />
+      {!embedded && (
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[50vh] bg-gradient-to-b from-[#FF6B00]/20 to-transparent blur-3xl opacity-50" />
+      )}
 
       <AnimatePresence mode="wait">
         {loading ? (
@@ -103,16 +111,18 @@ export const AuthGate: React.FC = () => {
             exit={{ opacity: 0, y: -20 }}
             className="w-full max-w-sm space-y-8 z-10"
           >
-            <div className="text-center space-y-2">
-              <motion.h1 
-                animate={{ scale: [1, 1.02, 1] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="text-6xl font-black italic tracking-tighter text-zinc-800"
-              >
-                T1GER
-              </motion.h1>
-              <p className="text-zinc-500 font-mono text-sm tracking-widest uppercase">Stop scrolling. Start hunting.</p>
-            </div>
+            {!embedded && (
+              <div className="text-center space-y-2">
+                <motion.h1 
+                  animate={{ scale: [1, 1.02, 1] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                  className="text-6xl font-black italic tracking-tighter text-zinc-800"
+                >
+                  T1GER
+                </motion.h1>
+                <p className="text-zinc-500 font-mono text-sm tracking-widest uppercase">Stop scrolling. Start hunting.</p>
+              </div>
+            )}
 
             <div className="space-y-4">
               <GlassButton

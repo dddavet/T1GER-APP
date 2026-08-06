@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { connectAuthEmulator, getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getMessaging, isSupported } from 'firebase/messaging';
 import firebaseConfig from '../firebase-applet-config.json';
 
 const finalConfig = {
@@ -17,6 +18,14 @@ const finalConfig = {
 const app = initializeApp(finalConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app, import.meta.env.VITE_FIRESTORE_DATABASE_ID || firebaseConfig.firestoreDatabaseId);
+
+// Initialize Messaging conditionally (not supported in all browsers)
+export let messaging: any = null;
+isSupported().then((supported) => {
+  if (supported) {
+    messaging = getMessaging(app);
+  }
+});
 
 if (import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true' && import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL) {
   connectAuthEmulator(auth, import.meta.env.VITE_FIREBASE_AUTH_EMULATOR_URL, {

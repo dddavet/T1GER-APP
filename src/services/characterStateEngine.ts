@@ -17,7 +17,8 @@ export interface CharacterConfig {
   speechBubbleText: {
     success: string[];
     fail: string[];
-    welcome: string[];
+    welcome_consistent: string[];
+    welcome_sporadic: string[];
   };
 }
 
@@ -37,13 +38,17 @@ export const CHARACTER_CAST: Record<CharacterId, CharacterConfig> = {
         "Esa es la ejecución de un verdadero Apex Predator. Impecable."
       ],
       fail: [
-        "Ese error te habría costado $50,000 USD en el mercado real. Concéntrate.",
-        "Tropiezo descuidado. Afila las garras, ajusta el plan y ataca de nuevo.",
-        "El mercado no paga por intenciones, paga por resultados. Enfoca tus garras."
+        "Un pequeño obstáculo. El aprendizaje real requiere fricción, ajusta y vuelve a intentar.",
+        "Esto es solo información nueva procesándose. Afina la precisión y vamos de nuevo.",
+        "Nadie acierta todo a la primera. El progreso está en la repetición y corrección."
       ],
-      welcome: [
-        "Predator, el mercado no perdona a los perezosos. ¿Listo para la caza de hoy?",
-        "Toma el control de tu racha diaria. El momentum es tu activo más valioso."
+      welcome_consistent: [
+        "¡Estás en racha! El momentum es nuestro mayor activo, sigamos construyendo.",
+        "La disciplina rinde frutos. Me encanta ver esta consistencia implacable."
+      ],
+      welcome_sporadic: [
+        "El mercado no espera, pero tu base sigue intacta. Retomemos el control.",
+        "Siempre es buen momento para volver a construir. Analicemos el siguiente paso."
       ]
     }
   },
@@ -57,18 +62,20 @@ export const CHARACTER_CAST: Record<CharacterId, CharacterConfig> = {
     focusedCompetencies: ['ai', 'operations'],
     speechBubbleText: {
       success: [
-        "Tu prompt no fue un desastre total. Lógico. Compilación correcta.",
-        "Patrón detectado. No está mal para un procesador biológico como tú.",
-        "Tokens bien gastados. Has optimizado el algoritmo de tu respuesta."
+        "Compilación correcta. Has optimizado el algoritmo de tu respuesta.",
+        "Patrón detectado. Tu red neuronal se está adaptando a la perfección."
       ],
       fail: [
-        "Alucinación grave detectada. Esa lógica está totalmente rota en producción.",
-        "Sintaxis inválida en tu toma de decisiones. Re-evalúa tus inputs.",
-        "Ejecución lenta. Tu prompt carece de parámetros o contexto estructurado."
+        "Sintaxis inválida. Re-evalúa tus inputs y vuelve a ejecutar el modelo.",
+        "Error de procesamiento. Calibremos los pesos e intentémoslo de nuevo."
       ],
-      welcome: [
-        "Cargando módulos de IA... Espero que tu prompt de hoy valga los tokens.",
-        "Sincronizando red neuronal. Mantenlo binario: ejecutas o fallas."
+      welcome_consistent: [
+        "Sincronización perfecta. Tu uptime está en 99.9%, sigamos escalando.",
+        "Tokens maximizados. El momentum de tu caché es brillante hoy."
+      ],
+      welcome_sporadic: [
+        "Reconexión exitosa. El servidor guardó tu estado, vamos a compilar.",
+        "Sistemas online. No te preocupes por el downtime, lo importante es iterar."
       ]
     }
   },
@@ -82,18 +89,20 @@ export const CHARACTER_CAST: Record<CharacterId, CharacterConfig> = {
     focusedCompetencies: ['investing', 'accounting'],
     speechBubbleText: {
       success: [
-        "¡Boom! ¡Eso es un retorno del 10x de valor! Rifa absoluta.",
-        "¡Sublime! Acabas de disparar el EBITDA de este concepto.",
-        "Valoración al cielo. Esta respuesta tiene múltiplos de unicornio."
+        "¡Boom! Acabas de disparar el valor de este concepto. Retorno sólido.",
+        "Valoración al cielo. Esta respuesta tiene fundamentos inquebrantables."
       ],
       fail: [
-        "Cuidado, ese apalancamiento es la vía directa al Capítulo 11 de quiebra.",
-        "Métricas infladas. Tu modelo financiero tiene fugas de flujo graves.",
-        "Esa jugada tiene un retorno de inversión negativo. Recalcula el CAC."
+        "Esa jugada tiene riesgo oculto. Analicemos los fundamentales de nuevo.",
+        "Métricas desajustadas. El aprendizaje es invertir tiempo en entender dónde perdimos."
       ],
-      welcome: [
-        "Hablemos de CAGR y flujos de efectivo. ¿Listo para escalar hoy?",
-        "El interés compuesto no duerme. Pongamos a trabajar tus ideas hoy."
+      welcome_consistent: [
+        "El interés compuesto no duerme, y tú tampoco. Tu portafolio mental crece.",
+        "Aportes consistentes generan rendimientos masivos. Sigamos invirtiendo."
+      ],
+      welcome_sporadic: [
+        "El mercado es paciente. El capital te espera, volvamos a operar.",
+        "Los retiros de capital pasan. Lo clave es volver a fondear la mente hoy."
       ]
     }
   },
@@ -107,18 +116,20 @@ export const CHARACTER_CAST: Record<CharacterId, CharacterConfig> = {
     focusedCompetencies: ['marketing'],
     speechBubbleText: {
       success: [
-        "¡OMG espectacular! ¡Esa oferta tiene tanto gancho que romperá el feed! ✨",
-        "K-factor por las nubes. Has desbloqueado tracción viral orgánica.",
-        "Psicología de urgencia perfecta. El cliente está listo para comprar ya."
+        "¡K-factor por las nubes! Has desbloqueado la tracción correcta.",
+        "Psicología perfecta. Esa respuesta tiene un embudo de conversión del 100%."
       ],
       fail: [
-        "Ay no... ese copy aburriría hasta a un bot de spam. Cero hook.",
-        "Objeción obvia no resuelta. Acabas de perder al prospecto en el segundo 1.",
-        "Campaña de marketing quemada. Falta una propuesta de valor única."
+        "Ese copy no convirtió. Ajustemos el ángulo y hagamos A/B testing de nuevo.",
+        "Objeción no resuelta. Identifiquemos la fricción y optimicemos el mensaje."
       ],
-      welcome: [
-        "¡Hola, hola! Vamos a reventar el algoritmo hoy con una marca personal magnética.",
-        "Tu audiencia está esperando. Diseñemos ganchos irresistibles hoy."
+      welcome_consistent: [
+        "¡Tracción diaria asegurada! Tu marca personal está acumulando autoridad.",
+        "Frecuencia de campaña óptima. El algoritmo premia a los que no paran."
+      ],
+      welcome_sporadic: [
+        "¡Hola! Tu audiencia te extrañaba. Lancemos la siguiente campaña hoy.",
+        "El reach orgánico se recupera rápido. Diseñemos el próximo gancho."
       ]
     }
   }
@@ -140,7 +151,7 @@ export const getCharacterForTrack = (trackId: string): CharacterConfig => {
  */
 export const getRandomPhrase = (
   characterId: CharacterId,
-  type: 'success' | 'fail' | 'welcome'
+  type: 'success' | 'fail' | 'welcome_consistent' | 'welcome_sporadic'
 ): string => {
   const char = CHARACTER_CAST[characterId];
   const list = char.speechBubbleText[type];

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { T1gerProvider, useT1ger } from './contexts/T1gerContext';
 import { BrainProvider, useBrain } from './contexts/BrainContext';
@@ -19,8 +19,10 @@ import { Coach } from './pages/Coach';
 import { MissionEngine } from './components/MissionEngine';
 import { SquadTab } from './components/social/SquadTab';
 import { EveningInterrogation } from './components/EveningInterrogation';
+import { Simulator } from './pages/Simulator';
+import { OfflineBanner } from './components/ui/OfflineBanner';
 
-import { InvestmentOnboarding } from './components/InvestmentOnboarding';
+import { OnboardingFlow } from './components/OnboardingFlow';
 import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
 import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
@@ -176,34 +178,32 @@ const AppContent = () => {
     return <AppSkeleton />;
   }
 
-  if (!user && !appUser) {
-    return <AuthGate />;
-  }
-
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
-  if (!appUser) {
-    return <AppSkeleton />;
-  }
-
-  if (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser.onboardingComplete) {
-    return <InvestmentOnboarding onComplete={() => setOnboardingBypassed(true)} />;
+  if (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser || !appUser.onboardingComplete) {
+    return <OnboardingFlow onComplete={() => setOnboardingBypassed(true)} />;
   }
 
   const isFullscreen = activeView === 'mission' || activeView === 'debrief' || activeView === 'coach';
 
+  // Simulator Mock Native Styles
+  const simPlatform = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('sim_platform') : null;
+  const platformClasses = simPlatform === 'ios' ? 'pt-14 pb-8 rounded-[40px] border border-black/10' : simPlatform === 'android' ? 'pt-8 pb-4 rounded-[30px] border border-black/10' : '';
+
   return (
     <div 
-      className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-zinc-200 sm:shadow-2xl relative flex flex-col bg-white text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType}`}
+      className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-zinc-200 sm:shadow-2xl relative flex flex-col bg-white text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType} ${platformClasses}`}
     >
       {/* Gamified clean background */}
       <div className="absolute inset-0 bg-[#F7F7F7] z-[-1]" />
       
+      <OfflineBanner />
+
       {/* HUD - visible on non-fullscreen views */}
       {!isFullscreen && <HUD />}
       
       {/* Main scrollable content area */}
-      <main className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-32'}`}
+      <main className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-[calc(8rem+env(safe-area-inset-bottom))]'}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
           <AnimatePresence mode="wait">
@@ -234,10 +234,7 @@ const AppContent = () => {
             )}
             {activeView === 'profile' && (
               <motion.div key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <Profile onPlayMission={(m) => {
-                  setActiveMission(m);
-                  setActiveView('mission');
-                }} />
+                <Profile />
               </motion.div>
             )}
             {activeView === 'coach' && (
@@ -265,13 +262,16 @@ const AppContent = () => {
 export default function App() {
   return (
     <AuthProvider>
-      <T1gerProvider>
-        <BrainProvider>
+      <BrainProvider>
+        <T1gerProvider>
           <BrowserRouter>
-            <AppContent />
+            <Routes>
+              <Route path="/sim" element={<Simulator />} />
+              <Route path="*" element={<AppContent />} />
+            </Routes>
           </BrowserRouter>
-        </BrainProvider>
-      </T1gerProvider>
+        </T1gerProvider>
+      </BrainProvider>
     </AuthProvider>
   );
 }

@@ -52,6 +52,9 @@ export const TRANSLATIONS = {
     understood: 'Entendido',
 
     // Profile & Settings
+    profile: 'Perfil',
+    statistics: 'Estadísticas',
+    achievements: 'Logros',
     profile_title: 'Perfil Ejecutivo',
     language_setting: 'Idioma de la Aplicación',
     spanish: 'Español 🇪🇸',
@@ -159,6 +162,9 @@ export const TRANSLATIONS = {
     understood: 'Understood',
 
     // Profile & Settings
+    profile: 'Profile',
+    statistics: 'Statistics',
+    achievements: 'Achievements',
     profile_title: 'Executive Profile',
     language_setting: 'App Language',
     spanish: 'Español 🇪🇸',

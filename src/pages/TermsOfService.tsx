@@ -76,7 +76,7 @@ export const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack }) => {
           <ShieldAlert className="w-4 h-4 text-[#FF7300]" /> {isEs ? '2. Inteligencia Artificial y Contenido Generado' : '2. Artificial Intelligence & Generated Content'}
         </h2>
         <div className="text-xs text-zinc-600 leading-relaxed space-y-2 pl-4 border-l-2 border-zinc-200">
-          <p>{isEs ? 'Nuestros módulos integran tecnología de Inteligencia Artificial de Google Gemini. Aunque nos esforzamos por ofrecer contenido de la más alta calidad y rigor ejecutivo, la IA puede generar imprecisiones ocasionales.' : 'Our modules integrate Google Gemini AI technology. While we strive for top executive rigor, AI models may produce occasional inaccuracies.'}</p>
+          <p>{isEs ? 'Nuestros módulos integran tecnología de Inteligencia Artificial de Google Gemini y OpenRouter / DeepSeek. Aunque nos esforzamos por ofrecer contenido de la más alta calidad y rigor ejecutivo, la IA puede generar imprecisiones ocasionales.' : 'Our modules integrate Google Gemini and OpenRouter / DeepSeek AI technology. While we strive for top executive rigor, AI models may produce occasional inaccuracies.'}</p>
           <p>{isEs ? 'T1GER APP no se hace responsable por decisiones tomadas basadas en respuestas automáticas del Coach de IA.' : 'T1GER APP is not liable for decisions made based on automated AI Coach responses.'}</p>
         </div>
       </div>

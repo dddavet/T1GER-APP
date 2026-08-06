@@ -25,7 +25,7 @@ const ICON_OPTIONS = [
   { name: 'Coffee', icon: Coffee },
 ];
 
-export const TacticalSetup = () => {
+export const TacticalSetup = ({ isEmbedded = false }: { isEmbedded?: boolean }) => {
   const { setActiveView } = useT1ger();
   const { 
     customHabits, 
@@ -34,7 +34,8 @@ export const TacticalSetup = () => {
     addHabit, 
     addWorkTask, 
     addLessonTask,
-    removeTacticalTask 
+    removeTacticalTask,
+    commitTactical
   } = useBrain();
   const [label, setLabel] = useState('');
   const [type, setType] = useState<'habit' | 'work' | 'lesson'>('habit');
@@ -116,7 +117,7 @@ export const TacticalSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white text-zinc-800 p-6 pb-32">
+    <div className={`${isEmbedded ? 'bg-white p-6 pb-12' : 'min-h-screen bg-white p-6 pb-32'} text-zinc-800`}>
       <div className="max-w-md mx-auto space-y-10">
         
         {/* HEADER */}
@@ -127,12 +128,14 @@ export const TacticalSetup = () => {
             </h1>
             <p className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest">Configure your 3-pillar daily protocol</p>
           </div>
-          <button 
-            onClick={() => { haptic(); setActiveView('home'); }}
-            className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border-zinc-200 hover:border-accent/30 transition-all active:scale-90"
-          >
-            <ArrowLeft className="w-5 h-5 text-zinc-500" />
-          </button>
+          {!isEmbedded && (
+            <button 
+              onClick={() => { haptic(); setActiveView('home'); }}
+              className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border-zinc-200 hover:border-accent/30 transition-all active:scale-90"
+            >
+              <ArrowLeft className="w-5 h-5 text-zinc-500" />
+            </button>
+          )}
         </header>
 
         {/* QUICK ADD / BUILDER */}
@@ -316,11 +319,19 @@ export const TacticalSetup = () => {
         <motion.button 
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={() => { haptic(); setActiveView('home'); }}
+          onClick={() => { 
+            haptic(); 
+            commitTactical(
+              customHabits.map(h => h.id),
+              customWorkTasks.map(w => w.id),
+              customLessonTasks.map(l => l.id)
+            );
+            setActiveView('home'); 
+          }}
           className="fixed bottom-10 left-6 right-6 z-50 bg-white shadow-sm border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-sm flex items-center justify-center gap-3 transition-all"
         >
           <Check className="w-5 h-5" strokeWidth={4} />
-          Lock Tactical Baseline
+          {isEmbedded ? 'Guardar y Volver a Inicio' : 'Lock Tactical Baseline'}
         </motion.button>
       </div>
     </div>

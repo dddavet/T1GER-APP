@@ -46,6 +46,14 @@ export interface MissionRecord {
   timestamp: number;
 }
 
+export interface DailyPipeline {
+  date: string;
+  learnNodeId: string | null;
+  applyNodeId: string | null;
+  completedLearn: boolean;
+  completedApply: boolean;
+}
+
 export interface DailySession {
   date: string;
   missionIds: string[];
@@ -80,6 +88,7 @@ export interface BrainState {
 
   // FSRS (Free Spaced Repetition Scheduler)
   fsrsCards: Record<string, Card>; // missionId -> FSRS Card
+  dailyPipeline?: DailyPipeline;
 }
 
 export interface TacticalTask {
@@ -200,31 +209,78 @@ export function buildRescueProtocolSelection({
 // ============================================================
 
 /**
+ * Applies time-based decay to competency scores (The "Memory Shield" mechanic).
+ * Returns the mutated state.
+ */
+export function calculateSkillDecay(state: BrainState): BrainState {
+  const now = Date.now();
+  const DECAY_RATE_PER_DAY = 5; // 5% decay per day of inactivity
+  const msPerDay = 24 * 60 * 60 * 1000;
+  
+  let hasDecayed = false;
+  const newCompetencies = { ...state.competencies };
+
+  for (const comp of ALL_COMPETENCIES) {
+    const lastActive = state.lastActiveDate[comp] || now;
+    const daysInactive = Math.floor((now - lastActive) / msPerDay);
+    
+    if (daysInactive > 1) {
+      // Apply decay for every day beyond the first day of inactivity
+      const penalty = (daysInactive - 1) * DECAY_RATE_PER_DAY;
+      if (penalty > 0) {
+        newCompetencies[comp] = Math.max(0, newCompetencies[comp] - penalty);
+        hasDecayed = true;
+      }
+    }
+  }
+
+  if (hasDecayed) {
+    return { ...state, competencies: newCompetencies };
+  }
+  return state;
+}
+
+/**
  * Given the current BrainState, retrieves the full selected Track
  * and calculates the user's progress through it.
  */
 export function getCurrentPathData(state: BrainState) {
   const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['investing'];
-  let currentLevelIndex = 0;
-  let currentDayIndex = 0;
   
-  // Find the first uncompleted Day in this Track
   for (let l = 0; l < track.levels.length; l++) {
     const level = track.levels[l];
+    
+    // Check if any day in this level is incomplete
     for (let d = 0; d < level.days.length; d++) {
       const day = level.days[d];
       if (!state.completedDayIds.includes(day.dayId)) {
-        return { track, currentLevelIndex: l, currentDayIndex: d, isFullyCompleted: false };
+        return { track, currentLevelIndex: l, currentDayIndex: d, isFullyCompleted: false, isApplyNodePending: false };
+      }
+    }
+
+    // All days in this level are done. Check if ApplyNode is pending.
+    if (level.applyNodeId) {
+      const applyNodeCompleted = state.missionHistory.some(r => r.missionId === level.applyNodeId && r.completed);
+      if (!applyNodeCompleted) {
+        // Stuck at the end of this level until ApplyNode is done
+        return { 
+          track, 
+          currentLevelIndex: l, 
+          currentDayIndex: level.days.length - 1, // Stay on the last day visually
+          isFullyCompleted: false, 
+          isApplyNodePending: true 
+        };
       }
     }
   }
 
-  // If all completed, return end state
+  // If all levels and their apply nodes are completed, return end state
   return { 
     track, 
     currentLevelIndex: track.levels.length - 1, 
     currentDayIndex: track.levels[track.levels.length - 1].days.length - 1,
-    isFullyCompleted: true
+    isFullyCompleted: true,
+    isApplyNodePending: false
   };
 }
 
@@ -273,6 +329,61 @@ export function buildCurriculumSession(state: BrainState): DailySession {
     date: today,
     missionIds: finalMissionIds,
     completedIds: completedInDay,
+  };
+}
+
+export function generateDailyPipeline(state: BrainState): DailyPipeline {
+  const today = new Date().toISOString().split('T')[0];
+  const pathData = getCurrentPathData(state);
+  
+  let learnNodeId: string | null = null;
+  let applyNodeId: string | null = null;
+  
+  // 1. Determine Apply Node
+  if (pathData.isApplyNodePending) {
+    const activeLevel = pathData.track.levels[pathData.currentLevelIndex];
+    applyNodeId = activeLevel.applyNodeId || null;
+  }
+  
+  // 2. Determine Learn Node (Adaptive Engine)
+  const now = new Date();
+  const dueMissions = Object.keys(state.fsrsCards || {}).filter(missionId => {
+      const card = state.fsrsCards[missionId];
+      return card.state !== 0 && new Date(card.due) <= now;
+  });
+  
+  if (dueMissions.length > 0) {
+    // Serve a refresher (Decay rate is high)
+    learnNodeId = dueMissions[0];
+  } else {
+    // Advance curriculum (Decay rate is low)
+    if (!pathData.isFullyCompleted && !pathData.isApplyNodePending) {
+      const activeLevel = pathData.track.levels[pathData.currentLevelIndex];
+      const activeDay = activeLevel.days[pathData.currentDayIndex];
+      if (activeDay.missionIds.length > 0) {
+         learnNodeId = activeDay.missionIds[0];
+      }
+    } else if (pathData.isApplyNodePending) {
+       // If stuck on Apply, give them the last concept as a refresher
+       const activeLevel = pathData.track.levels[pathData.currentLevelIndex];
+       const activeDay = activeLevel.days[activeLevel.days.length - 1];
+       if (activeDay.missionIds.length > 0) {
+         learnNodeId = activeDay.missionIds[0];
+       }
+    }
+  }
+
+  // Check if they completed them today
+  const todayStart = new Date(today).getTime();
+  const completedLearn = learnNodeId ? state.missionHistory.some(r => r.missionId === learnNodeId && r.completed && r.timestamp >= todayStart) : true;
+  const completedApply = applyNodeId ? state.missionHistory.some(r => r.missionId === applyNodeId && r.completed) : true;
+
+  return {
+    date: today,
+    learnNodeId,
+    applyNodeId,
+    completedLearn,
+    completedApply
   };
 }
 

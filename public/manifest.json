@@ -1,0 +1,33 @@
+{
+  "name": "T1GER",
+  "short_name": "T1GER",
+  "description": "El simulador ejecutivo de negocios e inversiones.",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "background_color": "#F7F7F7",
+  "theme_color": "#FF7300",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["education", "business", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Daily Mission",
+      "short_name": "Mission",
+      "description": "Start your daily executive mission",
+      "url": "/?view=mission",
+      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,14 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Hammer, Briefcase, TrendingUp, DollarSign, Target, Plus, ChevronRight } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
+import { getCurrentPathData } from '../services/brainService';
+import { MISSION_BANK } from '../services/missionBank';
 import { MagneticButton } from './ui/magnetic-button';
+import { WagerMode } from './WagerMode';
 
 export const BuildTab = () => {
   const { setActiveView } = useT1ger();
-  const { language } = useBrain();
+  const { language, brainState } = useBrain();
   const isEs = language === 'es';
+  const [activeWager, setActiveWager] = useState<{minutes: number, wager: number} | null>(null);
+
+  const pathData = getCurrentPathData(brainState);
+  const activeLevel = pathData.track.levels[pathData.currentLevelIndex];
+  const applyMission = activeLevel?.applyNodeId ? MISSION_BANK.find(m => m.id === activeLevel.applyNodeId) : null;
+  const isPending = pathData.isApplyNodePending;
+
+  const handleWagerCommit = (minutes: number, wager: number) => {
+    setActiveWager({ minutes, wager });
+  };
 
   return (
     <div className="-mx-5 min-h-full bg-[#F7F7F7] pb-28 text-zinc-800">
@@ -39,47 +52,64 @@ export const BuildTab = () => {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-black uppercase tracking-widest text-zinc-400">
-              {isEs ? 'Frameworks Activos' : 'Active Frameworks'}
+              {isEs ? 'Misión de Aplicación' : 'Apply Mission'}
             </h2>
-            <span className="text-xs font-bold text-[#FF7300]">
-              {isEs ? '1 en progreso' : '1 in progress'}
-            </span>
+            {isPending && (
+              <span className="text-[10px] font-black uppercase tracking-widest text-white bg-[#FF7300] px-2 py-1 rounded-full animate-pulse">
+                {isEs ? 'ACCIÓN REQUERIDA' : 'ACTION REQUIRED'}
+              </span>
+            )}
           </div>
           
-          <motion.div 
-            whileTap={{ scale: 0.98 }}
-            className="bg-white rounded-3xl p-5 border-2 border-zinc-200 shadow-sm relative overflow-hidden group cursor-pointer"
-          >
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-[#FF7300]/10 rounded-xl flex items-center justify-center border border-[#FF7300]/20">
-                  <Briefcase className="w-5 h-5 text-[#FF7300]" />
+          {applyMission ? (
+            <motion.div 
+              whileTap={{ scale: 0.98 }}
+              className={`bg-white rounded-3xl p-5 border-2 shadow-sm relative overflow-hidden group cursor-pointer ${isPending ? 'border-[#FF7300]' : 'border-zinc-200'}`}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${isPending ? 'bg-[#FF7300] border-[#CC5C00]' : 'bg-zinc-100 border-zinc-200'}`}>
+                    <Briefcase className={`w-6 h-6 ${isPending ? 'text-white' : 'text-zinc-400'}`} />
+                  </div>
+                  <div>
+                    <h3 className={`font-black uppercase tracking-tight leading-tight ${isPending ? 'text-zinc-800 text-lg' : 'text-zinc-500 text-base'}`}>
+                      {applyMission.title}
+                    </h3>
+                    <p className="text-xs text-zinc-500 font-bold uppercase tracking-wider mt-0.5">
+                      {pathData.track.title} • {isEs ? 'Nivel' : 'Level'} {activeLevel.levelNumber}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-black text-zinc-800 uppercase tracking-tight">
-                    {isEs ? 'Setup Paper Trading' : 'Paper Trading Setup'}
-                  </h3>
-                  <p className="text-xs text-zinc-500 font-medium">
-                    {isEs ? 'Ruta de Inversión • Paso 1' : 'Investing Track • Step 1'}
-                  </p>
+              </div>
+              
+              <div className="bg-zinc-50 border border-zinc-100 rounded-2xl p-4 mb-4">
+                <p className="text-sm font-medium text-zinc-600">
+                  {applyMission.taskBrief}
+                </p>
+              </div>
+
+              {!isPending ? (
+                <div className="w-full bg-green-100 text-green-700 font-black text-center py-3 rounded-xl uppercase tracking-widest text-sm">
+                  {isEs ? 'MISIÓN COMPLETADA' : 'MISSION COMPLETED'}
                 </div>
-              </div>
-              <div className="bg-zinc-100 p-2 rounded-full group-hover:bg-[#FF7300]/10 transition-colors">
-                <ChevronRight className="w-4 h-4 text-zinc-400 group-hover:text-[#FF7300]" />
-              </div>
+              ) : (
+                <MagneticButton>
+                  <button className="w-full relative group active:scale-95 transition-transform">
+                    <div className="absolute inset-0 bg-[#CC5C00] rounded-xl translate-y-1" />
+                    <div className="relative bg-[#FF7300] border-2 border-[#FF7300] rounded-xl p-3 flex items-center justify-center text-white font-black uppercase text-sm tracking-widest">
+                      {isEs ? 'EJECUTAR AHORA' : 'EXECUTE NOW'}
+                    </div>
+                  </button>
+                </MagneticButton>
+              )}
+            </motion.div>
+          ) : (
+            <div className="bg-white rounded-3xl p-5 border-2 border-zinc-200 shadow-sm text-center">
+              <p className="text-sm font-bold text-zinc-400">
+                {isEs ? 'No hay misiones de aplicación activas en este nivel.' : 'No active apply missions in this level.'}
+              </p>
             </div>
-            
-            {/* Progress Bar */}
-            <div className="w-full bg-zinc-100 h-3 rounded-full overflow-hidden border border-zinc-200/50">
-              <div className="h-full bg-[#FF7300] w-1/3 rounded-full relative">
-                <div className="absolute inset-0 bg-white/20 w-full h-1" />
-              </div>
-            </div>
-            <div className="flex justify-between items-center mt-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
-              <span>{isEs ? 'Progreso' : 'Progress'}</span>
-              <span>33%</span>
-            </div>
-          </motion.div>
+          )}
         </section>
 
         {/* Business Metrics Section */}
@@ -126,21 +156,34 @@ export const BuildTab = () => {
           </div>
         </section>
 
-        {/* CTA Button */}
+        {/* Wager Mode CTA Section */}
         <section className="pt-4 pb-8">
-          <MagneticButton>
-            <button 
-              className="w-full relative group active:scale-95 transition-transform"
-              onClick={() => setActiveView('learn')}
-            >
-              {/* Duolingo style 3D button */}
-              <div className="absolute inset-0 bg-[#CC5C00] rounded-2xl translate-y-1.5" />
-              <div className="relative bg-[#FF7300] border-2 border-[#FF7300] rounded-2xl p-4 flex items-center justify-center gap-2 text-white font-black uppercase text-sm tracking-widest">
-                <Plus className="w-5 h-5" />
-                {isEs ? 'Lanzar Nuevo Proyecto' : 'Launch New Project'}
+          {activeWager ? (
+            <div className="bg-white rounded-[2rem] p-6 text-center border-2 border-zinc-200 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+              <div className="w-16 h-16 bg-[#FF7300]/10 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-[#FF7300]/20">
+                <Target className="w-8 h-8 text-[#FF7300] animate-pulse" />
               </div>
-            </button>
-          </MagneticButton>
+              <h3 className="text-xl font-black uppercase tracking-widest text-zinc-800 mb-2">Session Active</h3>
+              <p className="text-sm font-bold text-zinc-500 mb-6">You wagered {activeWager.wager} T-Coins for {activeWager.minutes} minutes.</p>
+              <div className="text-5xl font-mono font-black text-[#FF7300] mb-8 tracking-tighter">
+                {activeWager.minutes}:00
+              </div>
+              
+              <MagneticButton>
+                <button 
+                  className="w-full relative group active:scale-95 transition-transform"
+                  onClick={() => setActiveWager(null)}
+                >
+                  <div className="absolute inset-0 bg-[#CC0000] rounded-2xl translate-y-1.5" />
+                  <div className="relative bg-[#FF3333] border-2 border-[#FF3333] rounded-2xl p-4 flex items-center justify-center gap-2 text-white font-black uppercase text-sm tracking-widest">
+                    FORFEIT WAGER
+                  </div>
+                </button>
+              </MagneticButton>
+            </div>
+          ) : (
+            <WagerMode onCommit={handleWagerCommit} />
+          )}
         </section>
       </div>
     </div>

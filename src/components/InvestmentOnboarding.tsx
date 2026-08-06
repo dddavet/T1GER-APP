@@ -15,6 +15,7 @@ type OnboardingStep =
   | 'motivation'
   | 'pace'
   | 'notifications'
+  | 'data_consent'
   | 'paywall'
   | 'ready';
 
@@ -39,7 +40,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
   }, [currentStep]);
 
   useEffect(() => {
-    const steps: OnboardingStep[] = ['mascot_intro', 'source', 'topic', 'building_course', 'experience', 'motivation', 'pace', 'notifications', 'paywall', 'ready'];
+    const steps: OnboardingStep[] = ['mascot_intro', 'source', 'topic', 'building_course', 'experience', 'motivation', 'pace', 'notifications', 'data_consent', 'paywall', 'ready'];
     const index = steps.indexOf(currentStep);
     if (index >= 0) {
       setProgress(((index + 1) / steps.length) * 100);
@@ -99,7 +100,8 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
         motivation: 'experience',
         pace: 'motivation',
         notifications: 'pace',
-        paywall: 'notifications',
+        data_consent: 'notifications',
+        paywall: 'data_consent',
         ready: 'paywall',
         splash: 'splash'
       };
@@ -127,7 +129,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
   const OptionButton = ({ onClick, icon: Icon, label, description, selected, badgeBg }: any) => (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-b-4 transition-all duration-200 active:translate-y-1 text-left cursor-pointer
+      className={`w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-b-4 transition-all duration-200 active:translate-y-1 active:scale-95 text-left cursor-pointer
         ${selected 
           ? 'border-[#CC5C00] bg-[#FF7300] text-white shadow-lg' 
           : 'border-zinc-200 border-b-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800'
@@ -172,7 +174,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
             <div className="w-full pb-8 flex flex-col gap-3">
               <button 
                 onClick={() => setCurrentStep('mascot_intro')}
-                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all cursor-pointer shadow-lg"
+                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg"
               >
                 {isEs ? 'Comenzar' : 'Get Started'}
               </button>
@@ -203,7 +205,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
 
             <button 
               onClick={() => setCurrentStep('source')}
-              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all cursor-pointer shadow-lg mt-8"
+              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg mt-8"
             >
               {isEs ? 'Continuar ➔' : 'Continue ➔'}
             </button>
@@ -474,7 +476,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
 
             <button 
               onClick={() => setCurrentStep('notifications')}
-              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all cursor-pointer shadow-lg mt-6"
+              className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg mt-6"
             >
               {isEs ? 'Continuar ➔' : 'Continue ➔'}
             </button>
@@ -498,17 +500,53 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
 
             <div className="space-y-3 mt-8">
               <button 
-                onClick={() => setCurrentStep('paywall')}
-                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+                onClick={() => setCurrentStep('data_consent')}
+                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
               >
                 <Bell size={20} />
                 {isEs ? 'Activar Recordatorios' : 'Enable Reminders'}
               </button>
               <button 
-                onClick={() => setCurrentStep('paywall')}
+                onClick={() => setCurrentStep('data_consent')}
                 className="w-full py-3.5 text-zinc-400 font-bold text-sm hover:text-zinc-600 transition-colors cursor-pointer"
               >
                 {isEs ? 'Ahora no' : 'Not now'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* STEP 8.5: DATA CONSENT (GDPR) */}
+        {currentStep === 'data_consent' && (
+          <motion.div 
+            key="data_consent"
+            initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }}
+            className="flex-1 flex flex-col pt-24 p-6 justify-between text-center"
+          >
+            <div className="my-auto flex flex-col items-center">
+              <TigerMascot
+                pose="thinking"
+                size="lg"
+                speech={isEs ? "Una cosa más. Usamos tus datos para personalizar tus misiones. Puedes borrarlos cuando quieras." : "One last thing. We use your data to personalize your path. You can delete it anytime."}
+              />
+            </div>
+            
+            <div className="text-center mt-6">
+              <p className="text-[11px] font-semibold text-zinc-500 mb-6 leading-relaxed">
+                {isEs 
+                  ? "Al continuar, aceptas nuestros Términos de Servicio y confirmas que has leído nuestra Política de Privacidad, incluyendo el uso de cookies para análisis y personalización. Eres dueño de tus datos y puedes eliminar tu cuenta y progreso permanentemente desde Configuración en cualquier momento."
+                  : "By continuing, you agree to our Terms of Service and acknowledge you have read our Privacy Policy, including our use of cookies for analytics and personalization. You own your data and can permanently delete your account and progress from Settings at any time."
+                }
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button 
+                onClick={() => setCurrentStep('paywall')}
+                className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg flex items-center justify-center gap-2"
+              >
+                <ShieldAlert size={20} />
+                {isEs ? 'Acepto y Continuar' : 'I Agree & Continue'}
               </button>
             </div>
           </motion.div>
@@ -547,7 +585,7 @@ export const InvestmentOnboarding: React.FC<{ onComplete: () => void }> = ({ onC
             <div className="space-y-3 pt-6">
               <button 
                 onClick={() => handleFinish(true)}
-                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#46A302] active:border-b-0 active:translate-y-1 transition-all cursor-pointer shadow-lg"
+                className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#46A302] active:border-b-0 active:translate-y-1 active:scale-95 transition-all cursor-pointer shadow-lg"
               >
                 {isEs ? 'Probar 7 Días Gratis' : 'Start 7-Day Free Trial'}
               </button>

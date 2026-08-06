@@ -13,6 +13,7 @@ import {
   type CompetencyProfile,
   type TopicProgress,
   type NicheType,
+  type DailyPipeline,
   DEFAULT_BRAIN_STATE,
   processMissionResult,
   applyDecay,
@@ -20,6 +21,8 @@ import {
   getTopicProgress,
   getCurrentPathData,
   processTacticalResult,
+  calculateSkillDecay,
+  generateDailyPipeline,
 } from '../services/brainService';
 import { type BankMission, type TrackType, MISSION_BANK, CURRICULUM_TRACKS } from '../services/missionBank';
 import { calculateT1gerEmotion, getT1gerVisualConfig, type T1gerEmotion, type T1gerVisualConfig } from '../services/t1gerStateEngine';
@@ -29,6 +32,7 @@ interface BrainContextType {
   /** Get the current active Session missions based on Curriculum placement */
   getSessionMissions: () => BankMission[];
   /** Report a mission as completed */
+  getDailyPipelineMissions: () => { pipeline: DailyPipeline | null, learnNode: BankMission | null, applyNode: BankMission | null };
   completeMission: (missionId: string, score?: number) => void;
   /** Report a mission as failed */
   failMission: (missionId: string) => void;
@@ -192,12 +196,23 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [brainState, setBrainState] = useState<BrainState>(DEFAULT_BRAIN_STATE);
 
   const [language, setLanguageState] = useState<Language>(() => {
-    return (localStorage.getItem('t1ger_app_language') as Language) || 'es';
+    const saved = typeof window !== 'undefined' ? (localStorage.getItem('t1ger_app_language') as Language) : null;
+    if (saved === 'es' || saved === 'en') return saved;
+
+    // Automatic Device / Browser Language Detection (Duolingo Style)
+    if (typeof navigator !== 'undefined' && navigator.language) {
+      const browserLang = navigator.language.toLowerCase();
+      if (browserLang.startsWith('es')) return 'es';
+      if (browserLang.startsWith('en')) return 'en';
+    }
+    return 'es';
   });
 
   const setLanguage = useCallback((lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem('t1ger_app_language', lang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('t1ger_app_language', lang);
+    }
   }, []);
 
   const LOCAL_STORAGE_ID = 'anonymous_local_user';
@@ -205,7 +220,9 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const uid = appUser?.uid || LOCAL_STORAGE_ID;
     const loaded = loadState(uid);
-    setBrainState(loaded);
+    // Apply Skill Decay (Memory Shield logic)
+    const decayedState = calculateSkillDecay(loaded);
+    setBrainState(decayedState);
 
     if (appUser?.uid && appUser.uid !== 'anonymous') {
       const fetchFromFirestore = async () => {
@@ -215,21 +232,24 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           if (snap.exists()) {
             const cloudData = snap.data().brainState as BrainState;
             if (cloudData) {
-              setBrainState(prev => ({
-                ...DEFAULT_BRAIN_STATE,
-                ...prev,
-                ...cloudData,
-                competencies: {
-                  ...DEFAULT_BRAIN_STATE.competencies,
-                  ...prev.competencies,
-                  ...cloudData?.competencies,
-                },
-                dailyTacticalStatus: {
-                  ...DEFAULT_BRAIN_STATE.dailyTacticalStatus,
-                  ...prev.dailyTacticalStatus,
-                  ...cloudData?.dailyTacticalStatus,
-                }
-              }));
+              setBrainState(prev => {
+                const merged = {
+                  ...DEFAULT_BRAIN_STATE,
+                  ...prev,
+                  ...cloudData,
+                  competencies: {
+                    ...DEFAULT_BRAIN_STATE.competencies,
+                    ...prev.competencies,
+                    ...cloudData?.competencies,
+                  },
+                  dailyTacticalStatus: {
+                    ...DEFAULT_BRAIN_STATE.dailyTacticalStatus,
+                    ...prev.dailyTacticalStatus,
+                    ...cloudData?.dailyTacticalStatus,
+                  }
+                };
+                return calculateSkillDecay(merged);
+              });
             }
           }
         } catch (err) {
@@ -260,22 +280,41 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [brainState, appUser?.uid]);
 
-  // Ensure daily curriculum session is built
+  // Ensure daily curriculum pipeline is built
   useEffect(() => {
-    const session = buildCurriculumSession(brainState);
-    if (!brainState.dailySession || session.date !== brainState.dailySession.date || session.missionIds.join(',') !== brainState.dailySession.missionIds.join(',')) {
-      setBrainState(prev => ({ ...prev, dailySession: session }));
+    const pipeline = generateDailyPipeline(brainState);
+    if (!brainState.dailyPipeline || 
+        pipeline.date !== brainState.dailyPipeline.date || 
+        pipeline.learnNodeId !== brainState.dailyPipeline.learnNodeId ||
+        pipeline.applyNodeId !== brainState.dailyPipeline.applyNodeId ||
+        pipeline.completedLearn !== brainState.dailyPipeline.completedLearn ||
+        pipeline.completedApply !== brainState.dailyPipeline.completedApply) {
+      setBrainState(prev => ({ ...prev, dailyPipeline: pipeline }));
     }
-  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory]);
+  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards]);
 
   const competencies = useMemo(() => applyDecay(brainState), [brainState]);
 
   const getSessionMissions = useCallback((): BankMission[] => {
+    // Legacy support for things still using this
     if (!brainState.dailySession) return [];
     return brainState.dailySession.missionIds
       .map(id => MISSION_BANK.find(m => m.id === id))
       .filter(Boolean) as BankMission[];
   }, [brainState.dailySession]);
+
+  const getDailyPipelineMissions = useCallback(() => {
+    if (!brainState.dailyPipeline) return { learnNode: null, applyNode: null, pipeline: null };
+    
+    const learnNode = brainState.dailyPipeline.learnNodeId ? MISSION_BANK.find(m => m.id === brainState.dailyPipeline?.learnNodeId) || null : null;
+    const applyNode = brainState.dailyPipeline.applyNodeId ? MISSION_BANK.find(m => m.id === brainState.dailyPipeline?.applyNodeId) || null : null;
+    
+    return {
+      pipeline: brainState.dailyPipeline,
+      learnNode,
+      applyNode
+    };
+  }, [brainState.dailyPipeline]);
 
   const completeMission = useCallback((missionId: string, score: number = 100) => {
     setBrainState(prev => processMissionResult(prev, missionId, true, score));
@@ -397,6 +436,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const value = useMemo(() => ({
     competencies,
     getSessionMissions,
+    getDailyPipelineMissions,
     completeMission,
     failMission,
     brainState,

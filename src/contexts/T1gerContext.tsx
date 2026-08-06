@@ -1,8 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import { useBrain } from './BrainContext';
+import { MISSION_BANK } from '../services/missionBank';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
-type Stats = { xp: number; coins: number; streak: number; health: number; rank: string };
+type Stats = { xp: number; verifiedXP: number; coins: number; streak: number; health: number; rank: string };
 type View = 'onboarding' | 'home' | 'proof' | 'learn' | 'build' | 'compete' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
 type Animation = 'none' | 'level-up' | 'streak-death';
 
@@ -15,7 +17,7 @@ interface T1gerContextType {
   setStats: React.Dispatch<React.SetStateAction<Stats>>;
   setActiveView: React.Dispatch<React.SetStateAction<View>>;
   setTriggerAnimation: React.Dispatch<React.SetStateAction<Animation>>;
-  addXP: (amount: number, isMissionComplete?: boolean) => Promise<void>;
+  addXP: (amount: number, tier?: 1 | 2) => Promise<void>;
   spendCoins: (amount: number) => Promise<void>;
 }
 
@@ -23,8 +25,9 @@ const T1gerContext = createContext<T1gerContextType | undefined>(undefined);
 
 export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   const { appUser, updateAppUser } = useAuth();
+  const { brainState } = useBrain();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
-  const [stats, setStats] = useState<Stats>({ xp: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
+  const [stats, setStats] = useState<Stats>({ xp: 0, verifiedXP: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
   const [activeView, setActiveView] = useState<View>('learn');
   const [triggerAnimation, setTriggerAnimation] = useState<Animation>('none');
 
@@ -41,6 +44,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
       setStats(prev => ({
         ...prev,
         xp: appUser.xp,
+        verifiedXP: appUser.verifiedXP || 0,
         coins: appUser.coins || 0,
         streak: appUser.streak,
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
@@ -51,33 +55,47 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [appUser]);
 
-  const addXP = React.useCallback(async (amount: number) => {
+  const addXP = React.useCallback(async (amount: number, tier?: 1 | 2) => {
+    const applyMissionsCompleted = brainState?.missionHistory?.filter(r => r.completed && MISSION_BANK.find(m => m.id === r.missionId)?.type === 'real_world_task').length || 0;
+    
     let calculatedXP = 0;
+    let calculatedVerifiedXP = 0;
     let calculatedLevel = 1;
     let earnedCoins = Math.floor(amount / 2);
     let calculatedCoins = 0;
 
     setStats(prev => {
       calculatedXP = prev.xp + amount;
-      calculatedLevel = Math.floor(calculatedXP / 100) + 1;
+      calculatedVerifiedXP = prev.verifiedXP + (tier === 1 ? amount : 0);
+      
+      // NEW LEVELING ALGORITHM (Requires BOTH XP and Apply Missions)
+      // Every 200 XP grants a potential level, but it is capped by Apply Missions
+      const xpLevel = Math.floor(calculatedXP / 200) + 1;
+      const applyLevel = applyMissionsCompleted + 1;
+      calculatedLevel = Math.min(xpLevel, applyLevel);
+
       calculatedCoins = prev.coins + earnedCoins;
 
       if (calculatedLevel > (appUser?.level || 1)) {
         setTriggerAnimation('level-up');
+        import('../components/ui/confetti').then(({ fireConfetti }) => {
+          fireConfetti();
+        });
         setTimeout(() => setTriggerAnimation('none'), 3000);
       }
 
       return {
         ...prev,
         xp: calculatedXP,
+        verifiedXP: calculatedVerifiedXP,
         coins: calculatedCoins,
       };
     });
 
     if (appUser) {
-      await updateAppUser({ xp: calculatedXP, level: calculatedLevel, coins: calculatedCoins });
+      await updateAppUser({ xp: calculatedXP, verifiedXP: calculatedVerifiedXP, level: calculatedLevel, coins: calculatedCoins });
     }
-  }, [appUser, updateAppUser]);
+  }, [appUser, updateAppUser, brainState]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
     let finalCoins = 0;

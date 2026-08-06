@@ -28,6 +28,19 @@ const withRetry = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 1000): 
   }
 };
 
+const extractBase64Data = (base64Image: string, mimeType: string) => {
+  let finalMimeType = mimeType;
+  let finalBase64 = base64Image;
+  if (base64Image.startsWith('data:')) {
+    const match = base64Image.match(/^data:([^;]+);base64,(.+)$/);
+    if (match) {
+      finalMimeType = match[1];
+      finalBase64 = match[2];
+    }
+  }
+  return { finalBase64, finalMimeType };
+};
+
 // HELPER TO GET MODEL WITH STABLE API VERSION AND LATEST IDENTIFIERS
 const getModel = (modelName: string, systemInstruction?: string) => {
   let modelId = modelName;
@@ -156,15 +169,7 @@ export const verifyMissionProof = async (missionType: string, missionTitle: stri
   }.`;
 
   // Detect mimeType and clean base64
-  let finalMimeType = mimeType;
-  let finalBase64 = base64Image;
-  if (base64Image.startsWith('data:')) {
-    const match = base64Image.match(/^data:([^;]+);base64,(.+)$/);
-    if (match) {
-      finalMimeType = match[1];
-      finalBase64 = match[2];
-    }
-  }
+  const { finalBase64, finalMimeType } = extractBase64Data(base64Image, mimeType);
 
   const result = await withRetry(() => model.generateContent({
     contents: [{
@@ -195,15 +200,7 @@ export const requestSeniorReview = async (missionType: string, missionTitle: str
   }.`;
 
   // Detect mimeType and clean base64
-  let finalMimeType = mimeType;
-  let finalBase64 = base64Image;
-  if (base64Image.startsWith('data:')) {
-    const match = base64Image.match(/^data:([^;]+);base64,(.+)$/);
-    if (match) {
-      finalMimeType = match[1];
-      finalBase64 = match[2];
-    }
-  }
+  const { finalBase64, finalMimeType } = extractBase64Data(base64Image, mimeType);
 
   const result = await withRetry(() => model.generateContent({
     contents: [{
@@ -227,8 +224,6 @@ export const requestSeniorReview = async (missionType: string, missionTitle: str
 
 export const reviewMissionProof = requestSeniorReview;
 
-export const generateSpeech = async (text: string) => null;
-
 export const generateBadgeIcon = async (title: string) => {
   return `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(title)}&backgroundColor=050505&fontFamily=monospace`;
 };
@@ -244,6 +239,10 @@ export const generateAdaptiveLesson = async (
 ) => {
   const model = getModel('gemini-1.5-flash');
   
+  // Sanitize user inputs to prevent basic prompt injections
+  const safeNiche = niche.replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  const safeLearningStyle = learningStyle.replace(/[^a-zA-Z0-9 ]/g, '').trim();
+  
   const compContext = weaknesses.map(w => `${w.competency} (score: ${w.score}/100)`).join(', ');
   const failuresContext = recentFailures.length > 0 ? `Recent mistakes/failures the user made: ${recentFailures.join(', ')}.` : 'No recent mistakes.';
   
@@ -252,12 +251,12 @@ export const generateAdaptiveLesson = async (
   if (dailyTime >= 10) questionCount = 5;
   if (dailyTime >= 15) questionCount = 7;
 
-  const prompt = `You are the T1GER BirdBrain AI Generator. Your goal is to generate a personalized, custom Duolingo-style lesson for an entrepreneur with a niche in "${niche}" who is level ${level}.
+  const prompt = `You are the T1GER BirdBrain AI Generator. Your goal is to generate a personalized, custom Duolingo-style lesson for an entrepreneur with a niche in "${safeNiche}" who is level ${level}.
   
   Current base topic of the lesson: "${baseMission.title}"
   Concept of the topic: "${baseMission.concept_flashcard || baseMission.concept || ''}"
   Mission Type: "${baseMission.type || 'flashcard'}"
-  User Learning Style: "${learningStyle}"
+  User Learning Style: "${safeLearningStyle}"
   User Daily Time Commitment: ${dailyTime} minutes (Generate exactly ${questionCount} quiz questions)
   
   User Competency Weaknesses to strengthen: ${compContext}

@@ -14,11 +14,11 @@ interface TigerMascotProps {
 
 // Fallback images in case Spline isn't ready or fails
 const POSE_IMAGES: Record<MascotPose, string> = {
-  welcome: '/tiger_3d_happy.jpg',
-  celebrating: '/tiger_3d_apex.jpg',
-  coaching: '/tiger_3d_coach.jpg',
-  thinking: '/tiger_3d_thinking.jpg',
-  proud: '/tiger_3d_apex.jpg',
+  welcome: '/tiger_3d_clay.jpg',
+  celebrating: '/tiger_3d_clay.jpg',
+  coaching: '/tiger_3d_clay.jpg',
+  thinking: '/tiger_3d_clay.jpg',
+  proud: '/tiger_3d_clay.jpg',
 };
 
 export const TigerMascot: React.FC<TigerMascotProps> = ({
@@ -26,13 +26,12 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
   pose = 'welcome',
   size = 'md',
   className = '',
-  // User-provided Spline URL
-  splineUrl = 'https://prod.spline.design/Rsv4-Dqr7h26roMh/scene.splinecode',
+  splineUrl,
 }) => {
   const avatarDimension = {
-    sm: 'w-16 h-16',
-    md: 'w-24 h-24',
-    lg: 'w-32 h-32',
+    sm: 'w-14 h-14',
+    md: 'w-20 h-20',
+    lg: 'w-28 h-28',
   }[size];
 
   const speechTextSize = {
@@ -43,24 +42,32 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
 
   return (
     <div className={`flex items-center gap-3.5 max-w-md mx-auto w-full ${className}`}>
-      {/* 3D Spline Character Container */}
+      {/* 3D Character Container */}
       <motion.div
         animate={{ y: [0, -5, 0] }}
         transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-        className={`relative ${avatarDimension} rounded-3xl bg-gradient-to-b from-[#FF8800] to-[#FF7300] p-1 shadow-[0_10px_25px_rgba(255,115,0,0.35)] shrink-0 overflow-hidden group cursor-pointer border-2 border-white/80 flex items-center justify-center bg-white`}
+        className={`relative ${avatarDimension} rounded-2xl bg-[#FF7300] p-0.5 shadow-[0_8px_20px_rgba(255,115,0,0.3)] shrink-0 overflow-hidden group cursor-pointer border-2 border-white flex items-center justify-center`}
       >
-        <div className="w-full h-full rounded-2xl overflow-hidden bg-white relative">
-          <Suspense fallback={
+        <div className="w-full h-full rounded-xl overflow-hidden bg-white relative flex items-center justify-center">
+          {splineUrl ? (
+            <Suspense fallback={
+              <img
+                src={POSE_IMAGES[pose]}
+                alt="T1GER 3D Mascot"
+                className="w-full h-full object-cover transform scale-105"
+              />
+            }>
+              <div className="absolute inset-0 w-[120%] h-[120%] -left-[10%] -top-[10%] pointer-events-none flex items-center justify-center">
+                <Spline scene={splineUrl} />
+              </div>
+            </Suspense>
+          ) : (
             <img
               src={POSE_IMAGES[pose]}
-              alt="T1GER 3D Mascot Fallback"
+              alt="T1GER 3D Mascot"
               className="w-full h-full object-cover transform scale-105"
             />
-          }>
-            <div className="absolute inset-0 w-[120%] h-[120%] -left-[10%] -top-[10%] pointer-events-none flex items-center justify-center">
-               <Spline scene={splineUrl} />
-            </div>
-          </Suspense>
+          )}
         </div>
       </motion.div>
 
