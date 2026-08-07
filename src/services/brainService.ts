@@ -245,7 +245,8 @@ export function calculateSkillDecay(state: BrainState): BrainState {
  * and calculates the user's progress through it.
  */
 export function getCurrentPathData(state: BrainState) {
-  const track = CURRICULUM_TRACKS[state.currentTrackId] || CURRICULUM_TRACKS['investing'];
+  const requestedTrack = CURRICULUM_TRACKS[state.currentTrackId];
+  const track = requestedTrack?.levels?.length ? requestedTrack : CURRICULUM_TRACKS.investing;
   
   for (let l = 0; l < track.levels.length; l++) {
     const level = track.levels[l];
@@ -275,10 +276,11 @@ export function getCurrentPathData(state: BrainState) {
   }
 
   // If all levels and their apply nodes are completed, return end state
+  const lastLevel = track.levels[track.levels.length - 1];
   return { 
     track, 
     currentLevelIndex: track.levels.length - 1, 
-    currentDayIndex: track.levels[track.levels.length - 1].days.length - 1,
+    currentDayIndex: Math.max(0, lastLevel.days.length - 1),
     isFullyCompleted: true,
     isApplyNodePending: false
   };
@@ -288,7 +290,7 @@ export function getCurrentPathData(state: BrainState) {
  * Builds the current "Daily Session" based on the user's Curriculum position.
  */
 export function buildCurriculumSession(state: BrainState): DailySession {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
 
   // We map the active 'Day' inside the Curriculum to the 'dailySession'
   const pathData = getCurrentPathData(state);
@@ -333,7 +335,7 @@ export function buildCurriculumSession(state: BrainState): DailySession {
 }
 
 export function generateDailyPipeline(state: BrainState): DailyPipeline {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const pathData = getCurrentPathData(state);
   
   let learnNodeId: string | null = null;
@@ -428,6 +430,12 @@ export function processMissionResult(
 ): BrainState {
   const mission = MISSION_BANK.find(m => m.id === missionId);
   if (!mission) return state;
+
+  // Curriculum rewards and progress are idempotent. Reviews need a dedicated
+  // review event instead of replaying the original mission completion.
+  if (completed && state.missionHistory.some(record => record.missionId === missionId && record.completed)) {
+    return state;
+  }
 
   const competency = mission.competency;
 
@@ -632,7 +640,7 @@ export function removeTacticalTask(state: BrainState, id: string, type: 'habit' 
 }
 
 export function setDayType(state: BrainState, type: DayType): BrainState {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const currentStatus = state.dailyTacticalStatus[today] || { 
     dayType: 'normal', 
     committedHabitIds: [], 
@@ -652,7 +660,7 @@ export function setDayType(state: BrainState, type: DayType): BrainState {
 }
 
 export function commitDailyTactical(state: BrainState, habitIds: string[], workIds: string[], lessonIds: string[]): BrainState {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const currentStatus = state.dailyTacticalStatus[today] || { 
     dayType: 'normal', 
     committedHabitIds: [], 
@@ -677,7 +685,7 @@ export function commitDailyTactical(state: BrainState, habitIds: string[], workI
 }
 
 export function completeTacticalTask(state: BrainState, id: string, proofUrl?: string, proofText?: string, verified: boolean = true): BrainState {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getLocalDateString();
   const currentStatus = state.dailyTacticalStatus[today] || { 
     dayType: 'normal', 
     committedHabitIds: [], 

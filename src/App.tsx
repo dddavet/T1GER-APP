@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { T1gerProvider, useT1ger } from './contexts/T1gerContext';
 import { BrainProvider, useBrain } from './contexts/BrainContext';
@@ -7,13 +6,9 @@ import { useAuth, AuthProvider } from './contexts/AuthContext';
 import { AuthGate } from './components/AuthGate';
 import { HUD } from './components/HUD';
 import { NavDock } from './components/NavDock';
-import { CoachFAB } from './components/CoachFAB';
-import { Loader2 } from 'lucide-react';
 import { BuildTab } from './components/BuildTab';
 import { Dashboard } from './pages/Dashboard';
-import { TacticalSetup } from './pages/TacticalSetup';
 import { Learn } from './pages/Learn';
-import { Friends } from './pages/Friends';
 import { Profile } from './pages/Profile';
 import { Coach } from './pages/Coach';
 import { MissionEngine } from './components/MissionEngine';
@@ -36,6 +31,7 @@ const AppContent = () => {
   const { dailyTacticalStatus, brainState } = useBrain();
   const { user, appUser, loading } = useAuth();
   const [activeMission, setActiveMission] = useState<any>(null);
+  const mainRef = useRef<HTMLElement>(null);
   
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
@@ -44,9 +40,21 @@ const AppContent = () => {
 
   useEffect(() => {
     if (!activeView) {
-      setActiveView('learn');
+      setActiveView('home');
     }
   }, [activeView, setActiveView]);
+
+  useEffect(() => {
+    const requestedView = new URLSearchParams(window.location.search).get('view');
+    const allowedViews = ['home', 'learn', 'build', 'compete', 'profile', 'coach'];
+    if (requestedView && allowedViews.includes(requestedView)) {
+      setActiveView(requestedView as any);
+    }
+  }, [setActiveView]);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeView]);
 
   const startMission = async (baseMission: any) => {
     setLoadingMission(true);
@@ -192,10 +200,10 @@ const AppContent = () => {
 
   return (
     <div 
-      className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-zinc-200 sm:shadow-2xl relative flex flex-col bg-white text-zinc-800 font-sans font-medium overflow-hidden transition-colors duration-1000 theme-${dayType} ${platformClasses}`}
+      className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-white/5 sm:shadow-[0_0_90px_rgba(0,20,16,.55)] relative flex flex-col bg-[#071C19] text-[#EAF4F1] font-sans font-medium overflow-hidden theme-${dayType} ${platformClasses}`}
     >
-      {/* Gamified clean background */}
-      <div className="absolute inset-0 bg-[#F7F7F7] z-[-1]" />
+      <a href="#main-content" className="skip-link">Skip to content</a>
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_-10%,rgba(239,112,48,.11),transparent_32%),linear-gradient(180deg,#071C19_0%,#061815_100%)]" />
       
       <OfflineBanner />
 
@@ -203,13 +211,13 @@ const AppContent = () => {
       {!isFullscreen && <HUD />}
       
       {/* Main scrollable content area */}
-      <main className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-[calc(8rem+env(safe-area-inset-bottom))]'}`}
+      <main ref={mainRef} id="main-content" className={`flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))]'}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
           <AnimatePresence mode="wait">
             {activeView === 'mission' && activeMission && (
               <motion.div key="mission" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                <MissionEngine mission={activeMission} onComplete={() => setActiveView('learn')} />
+                <MissionEngine mission={activeMission} onComplete={() => setActiveView('home')} />
               </motion.div>
             )}
             {activeView === 'debrief' && (
@@ -219,7 +227,12 @@ const AppContent = () => {
             )}
             {activeView === 'build' && (
               <motion.div key="build" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-                <BuildTab />
+                <BuildTab onStartMission={startMission} />
+              </motion.div>
+            )}
+            {activeView === 'home' && (
+              <motion.div key="home" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
+                <Dashboard onStartMission={startMission} />
               </motion.div>
             )}
             {activeView === 'learn' && (
@@ -245,8 +258,6 @@ const AppContent = () => {
           </AnimatePresence>
       </main>
 
-      {/* Bottom Nav + Coach FAB */}
-      {!isFullscreen && <CoachFAB />}
       {!isFullscreen && <NavDock />}
 
       {/* Tactical Loading Overlay */}
@@ -260,16 +271,15 @@ const AppContent = () => {
 };
 
 export default function App() {
+  if (typeof window !== 'undefined' && window.location.pathname === '/sim') {
+    return <Simulator />;
+  }
+
   return (
     <AuthProvider>
       <BrainProvider>
         <T1gerProvider>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/sim" element={<Simulator />} />
-              <Route path="*" element={<AppContent />} />
-            </Routes>
-          </BrowserRouter>
+          <AppContent />
         </T1gerProvider>
       </BrainProvider>
     </AuthProvider>

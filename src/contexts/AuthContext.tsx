@@ -290,7 +290,7 @@ function buildLocalSignedInUser(firebaseUser: User): AppUser {
     level: localData?.level || 1,
     xp: localData?.xp || 0,
     streak: localData?.streak || 0,
-    isPro: true,
+    isPro: localData?.isPro ?? false,
     streakShields: localData?.streakShields || 0,
     lastMissionDate: localData?.lastMissionDate,
     createdAt: localData?.createdAt,
@@ -413,6 +413,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await user.delete();
       } catch (err) {
         console.warn('Error deleting cloud user account:', err);
+        throw err;
       }
     }
 
@@ -439,7 +440,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     setAppUser(prev => {
       const base = prev || { uid: user.uid, email: user.email || '', niche: 'none', level: 1, xp: 0, streak: 0 };
-      const next = { ...base, ...data, isPro: true } as AppUser;
+      const next = { ...base, ...data } as AppUser;
       saveLocalAppUser(next);
       return next;
     });
@@ -450,10 +451,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userRef = doc(db, 'users', user.uid);
-      const cleanData = Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined));
-      await setDoc(userRef, cleanData, { merge: true });
+      const serverOwnedFields = new Set(['xp', 'verifiedXP', 'level', 'coins', 'isPro', 'isSuperT1ger', 'role', 'isFounder']);
+      const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
+      if (Object.keys(cleanData).length > 0) await setDoc(userRef, cleanData, { merge: true });
 
-      const publicFields = ['displayName', 'photoURL', 'niche', 'level', 'xp', 'streak'];
+      const publicFields = ['displayName', 'photoURL', 'niche'];
       const publicUpdate: any = {};
       let hasPublicUpdate = false;
 
@@ -514,7 +516,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           level: localData?.level || 1,
           xp: localData?.xp || 0,
           streak: localData?.streak || 0,
-          isPro: true,
+          isPro: false,
           streakShields: 0,
           lastMissionDate: serverTimestamp(),
           createdAt: serverTimestamp(),
@@ -530,9 +532,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           displayName: newUser.displayName || '',
           photoURL: newUser.photoURL || '',
           niche: newUser.niche || 'none',
-          level: newUser.level || 1,
-          xp: newUser.xp || 0,
-          streak: newUser.streak || 0,
           ...accountRole,
         }, { merge: true });
         setAppUser(newUser);

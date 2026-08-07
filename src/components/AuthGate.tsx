@@ -209,13 +209,13 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                 </p>
               )}
 
-              {/* Localhost 5 Preset Test Accounts */}
-              <div className="pt-3 border-t border-zinc-200/80 space-y-2.5 text-center">
+              {/* Preview accounts are compiled only into local development. */}
+              {import.meta.env.DEV && <div className="pt-3 border-t border-zinc-200/80 space-y-2.5 text-center">
                 <span className="text-[10px] font-black font-mono text-zinc-500 uppercase tracking-widest block">
                   ⚡ ACCESO RÁPIDO A 5 PERFILES DE PRUEBA
                 </span>
                 <div className="flex flex-col gap-1.5">
-                  {(Object.keys(DEMO_PRESET_USERS) as DemoPreset[]).map((key) => {
+                  {(['founder', 'investor', 'newbie'] as DemoPreset[]).map((key) => {
                     const preset = DEMO_PRESET_USERS[key];
                     return (
                       <button
@@ -242,7 +242,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                     );
                   })}
                 </div>
-              </div>
+              </div>}
 
               {/* Legal Compliance Footer Links (Required for App Store & Play Store) */}
               <div className="pt-2 text-center flex items-center justify-center gap-3 text-[10px] text-zinc-500 font-semibold">

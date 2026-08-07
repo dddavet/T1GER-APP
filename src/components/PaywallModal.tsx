@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Star, Zap, Crown, Shield, RefreshCcw } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
-import confetti from 'canvas-confetti';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -12,11 +10,11 @@ interface PaywallModalProps {
 }
 
 export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, source }) => {
-  const { appUser, updateAppUser } = useAuth();
   const { language } = useBrain();
   const isEs = language === 'es';
   const [selectedPlan, setSelectedPlan] = useState<'annual' | 'monthly'>('annual');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [purchaseMessage, setPurchaseMessage] = useState('');
 
   if (!isOpen) return null;
 
@@ -28,44 +26,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
   ];
 
   const handleSubscribe = () => {
-    setIsProcessing(true);
-    // Mock processing delay
-    setTimeout(() => {
-      setIsProcessing(false);
-      updateAppUser({ isPro: true, isSuperT1ger: true });
-      fireConfetti();
-      setTimeout(onClose, 1500);
-    }, 1500);
+    setPurchaseMessage(isEs
+      ? 'Las compras están desactivadas en el preview local. No se realizó ningún cobro.'
+      : 'Purchases are disabled in the local preview. No charge was made.');
   };
 
   const handleRestore = () => {
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      alert(isEs ? 'No se encontraron compras para restaurar.' : 'No previous purchases found to restore.');
-    }, 800);
-  };
-
-  const fireConfetti = () => {
-    const end = Date.now() + 1.5 * 1000;
-    const colors = ['#FF7300', '#FFB800', '#ffffff'];
-    (function frame() {
-      confetti({
-        particleCount: 3,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: colors
-      });
-      confetti({
-        particleCount: 3,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: colors
-      });
-      if (Date.now() < end) requestAnimationFrame(frame);
-    }());
+    setPurchaseMessage(isEs
+      ? 'No hay compras asociadas a este preview local.'
+      : 'No purchases are associated with this local preview.');
   };
 
   return (
@@ -178,6 +147,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
                 isEs ? 'Probar 14 días gratis' : 'Start 14-Day Free Trial'
               )}
             </button>
+
+            {purchaseMessage && (
+              <p role="status" className="rounded-xl border border-[#EF7030]/25 bg-[#EF7030]/10 p-3 text-center text-xs leading-5 text-[#F4B08D]">
+                {purchaseMessage}
+              </p>
+            )}
 
             {/* Restore Purchases */}
             <div className="flex flex-col items-center gap-2 pb-2">

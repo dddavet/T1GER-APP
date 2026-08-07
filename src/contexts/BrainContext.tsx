@@ -220,9 +220,10 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const uid = appUser?.uid || LOCAL_STORAGE_ID;
     const loaded = loadState(uid);
-    // Apply Skill Decay (Memory Shield logic)
-    const decayedState = calculateSkillDecay(loaded);
-    setBrainState(decayedState);
+    // Keep persisted competency scores immutable on load. Decay is presented as
+    // a derived value by applyDecay, avoiding a second permanent deduction on
+    // every app launch.
+    setBrainState(loaded);
 
     if (appUser?.uid && appUser.uid !== 'anonymous') {
       const fetchFromFirestore = async () => {
@@ -248,7 +249,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                     ...cloudData?.dailyTacticalStatus,
                   }
                 };
-                return calculateSkillDecay(merged);
+                return merged;
               });
             }
           }
@@ -290,6 +291,17 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         pipeline.completedLearn !== brainState.dailyPipeline.completedLearn ||
         pipeline.completedApply !== brainState.dailyPipeline.completedApply) {
       setBrainState(prev => ({ ...prev, dailyPipeline: pipeline }));
+    }
+  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards]);
+
+  // Keep the legacy session consumers on the same durable curriculum position.
+  useEffect(() => {
+    const session = buildCurriculumSession(brainState);
+    const current = brainState.dailySession;
+    if (!current || current.date !== session.date ||
+        current.missionIds.join('|') !== session.missionIds.join('|') ||
+        current.completedIds.join('|') !== session.completedIds.join('|')) {
+      setBrainState(prev => ({ ...prev, dailySession: session }));
     }
   }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards]);
 
@@ -409,7 +421,9 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setBrainState(DEFAULT_BRAIN_STATE);
   }, []);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric', month: '2-digit', day: '2-digit'
+  }).format(new Date());
   const dailyTacticalStatus = useMemo(() => {
     return brainState.dailyTacticalStatus[today] || ({ 
       dayType: 'normal' as DayType, 
@@ -449,8 +463,8 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     pathData,
     t1gerEmotion,
     t1gerVisualConfig,
-    learnStreak: 67, // hardcoded for demo
-    tacticalStreak: 67, // hardcoded for demo
+    learnStreak: brainState.learnStreak,
+    tacticalStreak: brainState.tacticalStreak,
     completeHabit,
     customHabits: brainState.customHabits,
     customWorkTasks: brainState.customWorkTasks,

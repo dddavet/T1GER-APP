@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { motion } from 'motion/react';
 import Spline from '@splinetool/react-spline';
+import { T1gerMascot3D } from './T1gerMascot3D';
 
 export type MascotPose = 'welcome' | 'celebrating' | 'coaching' | 'thinking' | 'proud';
 
@@ -10,6 +11,7 @@ interface TigerMascotProps {
   size?: 'sm' | 'md' | 'lg';
   className?: string;
   splineUrl?: string;
+  use3DCanvas?: boolean;
 }
 
 // Fallback images in case Spline isn't ready or fails
@@ -27,6 +29,7 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
   size = 'md',
   className = '',
   splineUrl,
+  use3DCanvas = true,
 }) => {
   const avatarDimension = {
     sm: 'w-14 h-14',
@@ -40,16 +43,26 @@ export const TigerMascot: React.FC<TigerMascotProps> = ({
     lg: 'text-base',
   }[size];
 
+  const moodMap: Record<MascotPose, 'idle' | 'happy' | 'warning' | 'beast'> = {
+    welcome: 'idle',
+    celebrating: 'happy',
+    coaching: 'beast',
+    thinking: 'idle',
+    proud: 'happy',
+  };
+
   return (
     <div className={`flex items-center gap-3.5 max-w-md mx-auto w-full ${className}`}>
       {/* 3D Character Container */}
       <motion.div
-        animate={{ y: [0, -5, 0] }}
+        animate={{ y: [0, -4, 0] }}
         transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }}
-        className={`relative ${avatarDimension} rounded-2xl bg-[#FF7300] p-0.5 shadow-[0_8px_20px_rgba(255,115,0,0.3)] shrink-0 overflow-hidden group cursor-pointer border-2 border-white flex items-center justify-center`}
+        className={`relative ${avatarDimension} shrink-0 flex items-center justify-center pointer-events-none`}
       >
-        <div className="w-full h-full rounded-xl overflow-hidden bg-white relative flex items-center justify-center">
-          {splineUrl ? (
+        <div className="w-full h-full relative flex items-center justify-center">
+          {use3DCanvas ? (
+            <T1gerMascot3D mood={moodMap[pose]} className="w-full h-full" />
+          ) : splineUrl ? (
             <Suspense fallback={
               <img
                 src={POSE_IMAGES[pose]}

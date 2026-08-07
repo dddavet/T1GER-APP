@@ -305,33 +305,33 @@ const OnboardingShell: React.FC<ShellProps> = ({ step, direction, onBack, childr
   );
 };
 
-const TigerGuide: React.FC<{ mood?: 'ready' | 'thinking' | 'celebrate' | 'calm'; message?: string }> = ({ mood = 'ready', message }) => {
-  const reduceMotion = useReducedMotion();
-  const mouth = mood === 'celebrate' ? 'h-3 w-6 rounded-b-full' : mood === 'thinking' ? 'h-1.5 w-5 rounded-full' : 'h-2 w-5 rounded-b-full';
+import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
+
+const TigerGuide: React.FC<{ mood?: 'ready' | 'thinking' | 'celebrate' | 'calm' | 'beast' | 'warning'; message?: string }> = ({ mood = 'ready', message }) => {
+  const reactionMap: Record<string, MascotReaction> = {
+    ready: 'idle',
+    thinking: 'thinking',
+    celebrate: 'celebrate',
+    calm: 'idle',
+    beast: 'beast',
+    warning: 'warning',
+  };
 
   return (
-    <div className="flex items-end gap-3">
-      <motion.div
-        aria-hidden="true"
-        animate={reduceMotion ? undefined : { y: [0, -4, 0] }}
-        transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
-        className="relative h-24 w-24 shrink-0 rounded-[1.8rem] bg-[#E98532] shadow-[inset_0_-10px_0_rgba(115,54,15,.2),0_18px_40px_rgba(0,0,0,.28)]"
-      >
-        <span className="absolute -left-2 top-3 h-8 w-8 rotate-[-28deg] rounded-xl bg-[#E98532]" />
-        <span className="absolute -right-2 top-3 h-8 w-8 rotate-[28deg] rounded-xl bg-[#E98532]" />
-        <span className="absolute left-5 top-0 h-12 w-2 rotate-[24deg] rounded-full bg-[#15110D]" />
-        <span className="absolute left-11 top-0 h-12 w-2 rounded-full bg-[#15110D]" />
-        <span className="absolute right-5 top-0 h-12 w-2 rotate-[-24deg] rounded-full bg-[#15110D]" />
-        <span className="absolute bottom-4 left-1/2 h-12 w-16 -translate-x-1/2 rounded-[1.4rem] bg-[#FFE2C3]" />
-        <span className="absolute left-7 top-10 h-3 w-3 rounded-full bg-[#12110F]" />
-        <span className="absolute right-7 top-10 h-3 w-3 rounded-full bg-[#12110F]" />
-        <span className="absolute bottom-10 left-1/2 h-3 w-4 -translate-x-1/2 rounded-full bg-[#3A2015]" />
-        <span className={`absolute bottom-6 left-1/2 -translate-x-1/2 bg-[#3A2015] ${mouth}`} />
-      </motion.div>
+    <div className="flex items-center gap-3">
+      <div className="relative h-28 w-28 shrink-0 flex items-center justify-center pointer-events-none">
+        <T1gerMascot3D mood={reactionMap[mood] || 'idle'} className="w-28 h-28" />
+      </div>
       {message && (
-        <div className="mb-2 max-w-[13rem] rounded-[1.25rem] border border-white/10 bg-white/[.07] px-4 py-3 text-sm font-medium leading-5 text-[#DCEAE7] shadow-[0_16px_36px_rgba(0,0,0,.18)]">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9, x: -10 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          className="relative max-w-[14rem] rounded-[1.25rem] border border-amber-500/30 bg-zinc-900/90 px-4 py-3 text-sm font-semibold leading-5 text-white shadow-[0_16px_36px_rgba(0,0,0,.25)] backdrop-blur-md"
+        >
+          {/* Speech Bubble Tail */}
+          <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-y-8 border-y-transparent border-r-8 border-r-zinc-900/90" />
           {message}
-        </div>
+        </motion.div>
       )}
     </div>
   );
@@ -493,6 +493,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   const [draft, setDraft] = useState<OnboardingDraft>(() => loadDraft());
   const [direction, setDirection] = useState(1);
   const [calibrationIndex, setCalibrationIndex] = useState(0);
+  const [splashRevealed, setSplashRevealed] = useState(false);
   const [error, setError] = useState('');
   const [finalizing, setFinalizing] = useState(false);
   const [authAdvanced, setAuthAdvanced] = useState(false);
@@ -651,18 +652,60 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     switch (step) {
       case 'arrival':
         return (
-          <div className="flex min-h-full flex-col justify-end pb-2 pt-[calc(2rem+env(safe-area-inset-top))]">
-            <div className="flex-1 pt-8">
-              <TigerGuide mood="ready" />
-              <div className="mt-10">
+          <div className="relative flex min-h-full flex-col justify-end pb-2 pt-[calc(1.5rem+env(safe-area-inset-top))]">
+            {/* FULLSCREEN MASK FACE SPLASH (Duolingo Step 1) */}
+            <AnimatePresence>
+              {!splashRevealed && (
+                <motion.div
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.55, ease: 'easeInOut' }}
+                  onClick={() => setSplashRevealed(true)}
+                  className="fixed inset-0 z-[600] bg-gradient-to-b from-[#09090B] via-[#0F1117] to-black flex flex-col items-center justify-between py-12 px-6 cursor-pointer select-none overflow-hidden"
+                >
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="flex-1 w-full flex flex-col items-center justify-center relative z-10">
+                    <motion.div 
+                      animate={{ scale: [1, 1.03, 1] }} 
+                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                      className="w-full h-80 sm:h-96 flex items-center justify-center"
+                    >
+                      <T1gerMascot3D mood="idle" closeUp={true} className="w-full h-full" />
+                    </motion.div>
+                  </div>
+                  
+                  {/* DUOLINGO BOTTOM BRANDING LOGO */}
+                  <div className="flex flex-col items-center gap-3 relative z-10">
+                    <h2 className="text-4xl font-black italic tracking-tighter text-white uppercase drop-shadow-[0_4px_12px_rgba(255,115,0,0.4)]">
+                      t1ger
+                    </h2>
+                    <span className="text-xs font-mono font-bold uppercase tracking-widest text-amber-300 bg-amber-950/80 border border-amber-500/30 px-4 py-1.5 rounded-full shadow-lg backdrop-blur-md">
+                      Tap anywhere to start
+                    </span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="flex-1 flex flex-col items-center justify-center pt-2"
+            >
+              <div className="relative w-64 h-64 flex items-center justify-center pointer-events-none">
+                <T1gerMascot3D mood="idle" closeUp={false} className="w-64 h-64" />
+              </div>
+              <div className="mt-8 text-center px-2">
                 <p className="font-mono text-xs font-black uppercase tracking-[.18em] text-[#FFB17B]">T1GER Investing</p>
-                <h1 tabIndex={-1} className="mt-4 text-[3.15rem] font-black leading-[.92] text-white outline-none">Learn it. Apply it. Prove it.</h1>
-                <p className="mt-5 max-w-sm text-base font-medium leading-7 text-[#9DBAB4]">
+                <h1 tabIndex={-1} className="mt-3 text-[3.15rem] font-black leading-[.92] text-white outline-none">Learn it. Apply it. Prove it.</h1>
+                <p className="mt-4 max-w-sm text-base font-medium leading-7 text-[#9DBAB4]">
                   Build an investing path that starts with short lessons and ends in real-world practice.
                 </p>
               </div>
-            </div>
-            <div className="space-y-3">
+            </motion.div>
+            <div className="space-y-3 relative z-10">
               <PrimaryAction onClick={() => goTo('guide')}>Build my path <ChevronRight size={18} /></PrimaryAction>
               <PrimaryAction onClick={() => goTo('save_progress')} variant="secondary">I already have an account</PrimaryAction>
             </div>

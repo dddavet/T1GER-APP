@@ -51,11 +51,22 @@ Create `.env.local` with:
 - **TacticalSetup.tsx** - Daily task configuration
 
 ### Key Components
-- **MissionEngine.tsx** - Mission display and proof submission flow
+- **T1gerMascot3D.tsx** - 3D Reactive Tiger Mascot built with Three.js (`three`, `@react-three/fiber`, `@react-three/drei`). Features procedural multi-joint skeletal physics (breathing, ear twitches, tail wagging, eye blinking) and a 6-state reactive animation state machine (`idle`, `happy`, `celebrate`, `mistake`, `thinking`, `beast`, `warning`). Includes anti-clipping camera framing (`closeUp` mode for face close-ups and `fullBody` mode for pedestals).
+- **OnboardingFlow.tsx** - Duolingo-exact frame-by-frame onboarding sequence. Begins with a full-screen 3D Mascot Face Splash with `t1ger` bottom branding, followed by a camera zoom-out reveal into personalized path setup and interactive 3D `TigerGuide` speech dialogues.
+- **MissionEngine.tsx** - Mission display and proof submission flow with integrated reactive 3D mascot header reacting to correct/incorrect quiz answers in real time.
 - **HUD.tsx** - Heads-up display for stats
 - **NavDock.tsx** - Bottom navigation
 - **BlackMarket.tsx** - XP spending shop
 - **EveningInterrogation.tsx** - End-of-day reflection
+
+## 🎨 3D Mascot & Brand Design Architecture
+
+1. **3D Character Stack**: `@react-three/fiber` + `@react-three/drei` rendering `ReactiveTiger3D` procedurally. Supports TRELLIS.2 3D `.glb` model loading via `GLBModel`.
+2. **Camera Anti-Clipping Standard**:
+   - `closeUp=true`: Camera position `[0, 0.55, 1.65]` (FOV 40), target Y `0.65`.
+   - `closeUp=false`: Camera position `[0, 0.2, 3.2]` (FOV 42), target Y `-0.45`.
+   - **Rule**: Never wrap the 3D canvas in square boxes or flat clashing orange backgrounds. The 3D canvas must bleed 100% transparently over obsidian dark backgrounds (`#09090B`).
+3. **Brand Manual Guidelines**: See [`t1ger_brand_manual.md`](file:///C:/Users/david/.gemini/antigravity/brain/151e3ebc-acde-499c-83d3-35ee92dbf449/t1ger_brand_manual.md) and [`t1ger_brand_manual.html`](file:///C:/Users/david/.gemini/antigravity/brain/151e3ebc-acde-499c-83d3-35ee92dbf449/t1ger_brand_manual.html) for calibrated color tokens (`#09090B`, `#FF7300`, `#F59E0B`, `#06B6D4`, `#10B981`) and typography rules.
 
 ## Data Flow
 
@@ -78,3 +89,4 @@ See `firestore.rules` for security rules and data schemas.
 ## Styling
 
 Tailwind CSS v4 with custom theme variables (`--accent-main`, `--accent-glow`) for dynamic color themes based on day type (focus, beast, relaxed, rest).
+

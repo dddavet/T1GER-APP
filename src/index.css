@@ -1,15 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Kanit:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 :root {
-  --accent-main: #FF7300; /* Vibrant Orange */
-  --accent-glow: rgba(255, 115, 0, 0.4);
-  --bg-glow-1: rgba(255, 115, 0, 0.08);
-  --bg-glow-2: rgba(255, 115, 0, 0.05);
+  --accent-main: #EF7030;
+  --accent-glow: rgba(239, 112, 48, 0.28);
+  --bg-glow-1: rgba(239, 112, 48, 0.09);
+  --bg-glow-2: rgba(57, 184, 137, 0.05);
+  --t1ger-orange: #EF7030;
+  --t1ger-ink: #071C19;
+  --t1ger-panel: #0B2925;
   
   /* Emil Kowalski Motion Easing */
   --ease-out-custom: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* T1GER Investing product system */
+.t1ger-panel {
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 1.55rem;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(239, 112, 48, 0.055), transparent 34%),
+    #0b2925;
+  box-shadow: 0 18px 44px rgba(0, 20, 16, 0.2), inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.t1ger-mission-shell {
+  background:
+    radial-gradient(circle at 86% -6%, rgba(239, 112, 48, 0.14), transparent 30%),
+    linear-gradient(180deg, #071c19 0%, #051815 100%);
+  color: #eaf4f1;
+}
+
+.t1ger-kicker {
+  color: #789b93;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .13em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.t1ger-primary-button,
+.t1ger-secondary-button {
+  display: inline-flex;
+  min-height: 3.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  border-radius: 1rem;
+  padding: .8rem 1.1rem;
+  font-size: .875rem;
+  font-weight: 600;
+}
+
+.t1ger-primary-button {
+  background: #ef7030;
+  color: #122b26;
+  box-shadow: 0 12px 26px rgba(239,112,48,.18);
+}
+
+.t1ger-primary-button:not(:disabled):hover { background: #f68147; transform: translateY(-1px); }
+.t1ger-primary-button:not(:disabled):active { transform: scale(.985); }
+
+.t1ger-secondary-button {
+  border: 1px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.045);
+  color: #dbe9e6;
+}
+
+.t1ger-secondary-button:not(:disabled):hover { border-color: rgba(239,112,48,.35); background: rgba(239,112,48,.08); }
+.t1ger-secondary-button:not(:disabled):active { transform: scale(.985); }
+
+.t1ger-icon-button {
+  display: inline-flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: .9rem;
+  background: rgba(255,255,255,.04);
+  color: #b9cfca;
+}
+
+.t1ger-icon-button:hover { border-color: rgba(239,112,48,.35); color: #fff; }
+
+.t1ger-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  color: #789b93;
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+}
+
+.t1ger-input {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: .85rem;
+  background: rgba(255,255,255,.045);
+  color: #eaf4f1;
+  padding: .78rem .85rem;
+  font-size: .82rem;
+  line-height: 1.45;
+  outline: none;
+}
+
+.t1ger-input::placeholder { color: #557970; }
+.t1ger-input:focus { border-color: #ef7030; box-shadow: 0 0 0 3px rgba(239,112,48,.12); }
+.t1ger-input option { background: #0b2925; color: #eaf4f1; }
+
+.skip-link {
+  position: fixed;
+  left: 1rem;
+  top: -5rem;
+  z-index: 80;
+  border-radius: .75rem;
+  background: #ef7030;
+  color: #102622;
+  padding: .7rem 1rem;
+  font-weight: 600;
+}
+.skip-link:focus { top: 1rem; }
+
+:focus-visible {
+  outline: 2px solid #f49361;
+  outline-offset: 3px;
+}
+
+h1, h2, h3, p { text-wrap: pretty; }
+.font-mono, [class*="font-mono"] { font-variant-numeric: tabular-nums; }
+html { scroll-behavior: smooth; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
 }
 
 @keyframes shimmer {
@@ -107,8 +239,8 @@
       offset-distance: 100%;
     }
   }
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: "Kanit", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Outfit", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
   --color-accent: var(--accent-main);
   --color-accent-glow: var(--accent-glow);
@@ -139,15 +271,9 @@
     overscroll-behavior: none;
   }
 
-  #root {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-
   body {
-    @apply text-zinc-800 font-sans antialiased bg-[#F7F7F7];
+    @apply font-sans antialiased bg-[#041411];
+    color: #EAF4F1;
     background-image: 
       radial-gradient(circle at 15% 50%, var(--bg-glow-1) 0%, transparent 50%),
       radial-gradient(circle at 85% 30%, var(--bg-glow-2) 0%, transparent 50%);
@@ -201,7 +327,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #000;
+      background: #041411;
       background-image: 
         radial-gradient(ellipse at 30% 50%, var(--bg-glow-1) 0%, transparent 60%),
         radial-gradient(ellipse at 70% 50%, var(--bg-glow-2) 0%, transparent 60%);
@@ -211,16 +337,12 @@
       --safe-top-inset: 36px;
       --safe-bottom-inset: 24px;
       position: relative;
-      width: 393px;
-      height: 852px;
-      max-height: 95vh;
-      border-radius: 50px;
-      border: 1px solid rgba(255,255,255,0.1);
-      box-shadow: 
-        0 0 0 10px #1a1a1a,
-        0 0 0 12px #2a2a2a,
-        0 40px 80px rgba(0,0,0,0.8),
-        inset 0 0 1px rgba(255,255,255,0.05);
+      width: min(430px, 100vw);
+      height: min(900px, 100dvh);
+      max-height: 96vh;
+      border-radius: 28px;
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 36px 100px rgba(0,20,16,0.58);
       overflow: hidden;
       background: #020203;
       background-image: 
@@ -237,34 +359,7 @@
       overflow: hidden !important;
     }
 
-    /* Dynamic Island */
-    #root::before {
-      content: '';
-      position: absolute;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      height: 35px;
-      background: #000;
-      border-radius: 20px;
-      z-index: 9999;
-      box-shadow: inset 0 0 4px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.03);
-    }
-
-    /* Home indicator bar */
-    #root::after {
-      content: '';
-      position: absolute;
-      bottom: 8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 134px;
-      height: 5px;
-      background: rgba(255,255,255,0.25);
-      border-radius: 3px;
-      z-index: 9999;
-    }
+    #root::before, #root::after { display: none; }
   }
 
   /* Scrollbar styling inside the phone */

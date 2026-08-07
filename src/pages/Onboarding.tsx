@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,7 +22,6 @@ const GOALS = [
 
 export const Onboarding = () => {
   const { user, appUser, refreshAppUser } = useAuth();
-  const navigate = useNavigate();
   const [step, setStep] = useState<'identity' | 'ambition' | 'contract'>('identity');
   const [niche, setNiche] = useState<string | null>(null);
   const [goal, setGoal] = useState<string | null>(null);
@@ -45,7 +43,7 @@ export const Onboarding = () => {
       await updateDoc(userRef, { ...data, onboardingStep: nextStep });
       await refreshAppUser();
       if (nextStep === 'completed') {
-        navigate('/');
+        window.location.assign('/');
       } else {
         setStep(nextStep);
       }

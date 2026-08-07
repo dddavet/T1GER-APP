@@ -1,251 +1,102 @@
 import React, { useState } from 'react';
+import { Bell, Bot, Check, ChevronRight, Download, Globe2, LogOut, ShieldCheck, Trash2, UserRound } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useT1ger } from '../contexts/T1gerContext';
 import { useBrain } from '../contexts/BrainContext';
-import { 
-  User, Mail, Lock, Shield, Bell, Crown, RefreshCcw, 
-  BookOpen, Target, HelpCircle, FileText, Scale, LogOut, 
-  AlertTriangle, ChevronRight, Flame
-} from 'lucide-react';
-import { motion } from 'motion/react';
-import { NotificationSettings } from '../components/NotificationSettings';
+import { useT1ger } from '../contexts/T1gerContext';
+import { downloadT1gerDataExport } from '../services/dataPortability';
+import { PrivacyPolicy } from './PrivacyPolicy';
+import { TermsOfService } from './TermsOfService';
+
+type LegalView = 'privacy' | 'terms' | null;
 
 export const Profile = () => {
   const { appUser, updateAppUser, logout, deleteAccountAndData } = useAuth();
-  const { language, brainState, resetBrain, selectTrack } = useBrain();
+  const { language, setLanguage, brainState, learnStreak } = useBrain();
+  const { stats, setActiveView } = useT1ger();
   const isEs = language === 'es';
+  const [name, setName] = useState(appUser?.displayName || '');
+  const [editingName, setEditingName] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [status, setStatus] = useState('');
+  const [legalView, setLegalView] = useState<LegalView>(null);
+  const notificationsEnabled = appUser?.notificationPreferences?.daily_reminder ?? false;
 
-  const [notificationModalOpen, setNotificationModalOpen] = useState(false);
-
-  // Deriving variables
-  const username = appUser?.displayName || 'T1GER Hunter';
-  const handleName = username.toLowerCase().replace(/\s+/g, '_');
-  const level = appUser?.level || 1;
-  const streak = appUser?.streak || 0;
-  const currentTopic = brainState.currentTrackId || 'investing';
-  const isPro = appUser?.isPro || false;
-
-  // Actions
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (e) {
-      console.error(e);
-    }
+  const saveName = async () => {
+    const cleanName = name.trim();
+    if (cleanName.length < 2) return;
+    await updateAppUser({ displayName: cleanName });
+    setEditingName(false);
+    setStatus(isEs ? 'Nombre actualizado.' : 'Name updated.');
   };
 
-  const handleDeleteAccount = async () => {
-    const confirm1 = window.confirm(
-      isEs 
-        ? "⚠️ ALERTA: ¿Estás seguro de que deseas eliminar permanentemente tu cuenta?" 
-        : "⚠️ ALERT: Are you sure you want to permanently delete your account?"
-    );
-    if (!confirm1) return;
-    
-    const confirm2 = window.confirm(
-      isEs
-        ? "⚠️ Confirmación final: Esta acción borrará todas tus misiones, nivel, XP y racha de forma irreversible."
-        : "⚠️ Final Confirmation: This will irreversibly delete all missions, levels, XP, and streaks."
-    );
-    if (!confirm2) return;
+  const toggleNotifications = async () => {
+    if (!notificationsEnabled && typeof Notification !== 'undefined') {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        setStatus(isEs ? 'El sistema no concedió permiso para notificaciones.' : 'Notification permission was not granted.');
+        return;
+      }
+    }
+    await updateAppUser({ notificationPreferences: { ...appUser?.notificationPreferences, daily_reminder: !notificationsEnabled, apply_reminder: !notificationsEnabled } });
+    setStatus(isEs ? 'Preferencias guardadas.' : 'Preferences saved.');
+  };
 
+  const removeAccount = async () => {
     try {
       await deleteAccountAndData();
-      alert(isEs ? "Tu cuenta ha sido eliminada." : "Your account has been deleted.");
-    } catch (e) {
-      console.error(e);
-      alert("Error.");
+    } catch {
+      setStatus(isEs ? 'No pudimos eliminar la cuenta. Vuelve a iniciar sesión e inténtalo de nuevo.' : 'We could not delete the account. Sign in again and retry.');
+      setDeleteConfirm(false);
     }
   };
 
-  const SectionHeader = ({ title }: { title: string }) => (
-    <h3 className="text-xs font-black uppercase tracking-widest text-zinc-400 mb-2 mt-6 px-4">
-      {title}
-    </h3>
-  );
-
-  const SettingsRow = ({ 
-    icon: Icon, 
-    label, 
-    value, 
-    onClick, 
-    danger = false 
-  }: { 
-    icon: any, 
-    label: string, 
-    value?: string | React.ReactNode, 
-    onClick?: () => void,
-    danger?: boolean
-  }) => (
-    <div 
-      onClick={onClick}
-      className={`flex items-center justify-between p-4 bg-white border-b border-zinc-100 last:border-b-0 ${onClick ? 'cursor-pointer active:bg-zinc-50' : ''}`}
-    >
-      <div className="flex items-center gap-3">
-        <Icon className={`w-5 h-5 ${danger ? 'text-red-500' : 'text-[#009999]'}`} />
-        <span className={`text-[15px] font-extrabold ${danger ? 'text-red-600' : 'text-zinc-800'}`}>
-          {label}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        {value && <span className="text-sm font-bold text-zinc-500">{value}</span>}
-        {onClick && <ChevronRight className="w-5 h-5 text-zinc-300" />}
-      </div>
-    </div>
-  );
+  if (legalView === 'privacy') return <PrivacyPolicy onBack={() => setLegalView(null)} />;
+  if (legalView === 'terms') return <TermsOfService onBack={() => setLegalView(null)} />;
 
   return (
-    <div className="pb-28 bg-[#F7F7F9] min-h-screen font-sans text-zinc-900 select-none">
-      
-      {/* 1. PROFILE HEADER */}
-      <div className="bg-white border-b-4 border-b-zinc-200 p-6 flex flex-col items-center justify-center space-y-3 sticky top-0 z-10 shadow-xs">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center border-4 border-[#009999] shadow-sm overflow-hidden bg-teal-50 relative p-0.5">
-          <img 
-            src={appUser?.photoURL || '/tiger_3d_clay.jpg'} 
-            alt={username} 
-            className="w-full h-full object-cover rounded-full" 
-          />
+    <div className="space-y-5 pb-8 pt-5">
+      <header className="flex items-center gap-4">
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.35rem] bg-[var(--t1ger-orange)] text-xl font-semibold text-[#102622]">
+          {appUser?.photoURL ? <img src={appUser.photoURL} alt={`${appUser.displayName || 'T1GER'} profile`} className="h-full w-full object-cover" /> : (appUser?.displayName || 'T').charAt(0)}
         </div>
-        
-        <div className="text-center">
-          <h1 className="text-2xl font-black uppercase tracking-tight text-zinc-900">
-            {username}
-          </h1>
-          <div className="flex items-center justify-center gap-2 text-xs font-bold text-zinc-500 mt-1">
-            <span className="flex items-center gap-1"><Target className="w-3.5 h-3.5 text-[#FF7300]" /> Lvl {level}</span>
-            <span>•</span>
-            <span className="flex items-center gap-1 uppercase">{currentTopic}</span>
-            <span>•</span>
-            <span className="flex items-center gap-1 text-[#FF7300]"><Flame className="w-3.5 h-3.5" /> {streak}</span>
-          </div>
+        <div className="min-w-0 flex-1">
+          <p className="t1ger-kicker">{isEs ? 'Perfil Investing' : 'Investing profile'}</p>
+          {editingName ? <div className="mt-2 flex gap-2"><input autoFocus value={name} onChange={event => setName(event.target.value)} className="t1ger-input min-w-0" /><button onClick={saveName} className="t1ger-icon-button"><Check size={18} /></button></div> : <button onClick={() => setEditingName(true)} className="mt-1 truncate text-left text-xl font-semibold text-white hover:text-[var(--t1ger-orange)]">{appUser?.displayName || (isEs ? 'Añadir nombre' : 'Add your name')}</button>}
+          <p className="mt-1 truncate text-xs text-[#6F918A]">{appUser?.email || (isEs ? 'Perfil local de preview' : 'Local preview profile')}</p>
         </div>
+      </header>
+
+      <section className="grid grid-cols-3 gap-2">
+        {[{ value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' }, { value: learnStreak, label: isEs ? 'racha' : 'streak' }, { value: stats.verifiedXP, label: 'vXP' }].map(item => <div key={item.label} className="rounded-[1.15rem] bg-[#0B2925] p-4 text-center"><span className="block font-mono text-lg font-semibold text-white">{item.value}</span><span className="mt-1 block text-[11px] text-[#6F918A]">{item.label}</span></div>)}
+      </section>
+
+      <section className="t1ger-panel overflow-hidden">
+        <div className="border-b border-white/7 p-5"><p className="t1ger-kicker">{isEs ? 'Cuenta y experiencia' : 'Account and experience'}</p></div>
+        <SettingRow icon={Globe2} title={isEs ? 'Idioma' : 'Language'} detail={language === 'es' ? 'Español' : 'English'} onClick={() => setLanguage(language === 'es' ? 'en' : 'es')} />
+        <SettingRow icon={Bell} title={isEs ? 'Recordatorios' : 'Reminders'} detail={notificationsEnabled ? (isEs ? 'Activados' : 'Enabled') : (isEs ? 'Desactivados' : 'Disabled')} onClick={toggleNotifications} />
+        <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de inversión' : 'Investing guidance'} onClick={() => setActiveView('coach')} />
+        <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Plan gratuito' : 'Free plan')} />
+      </section>
+
+      <section className="t1ger-panel overflow-hidden">
+        <div className="border-b border-white/7 p-5"><p className="t1ger-kicker">{isEs ? 'Datos y privacidad' : 'Data and privacy'}</p></div>
+        <SettingRow icon={Download} title={isEs ? 'Exportar mis datos' : 'Export my data'} detail="JSON" onClick={() => { downloadT1gerDataExport(appUser, brainState); setStatus(isEs ? 'Exportación creada.' : 'Export created.'); }} />
+        <SettingRow icon={UserRound} title={isEs ? 'Política de privacidad' : 'Privacy policy'} onClick={() => setLegalView('privacy')} />
+        <SettingRow icon={ShieldCheck} title={isEs ? 'Términos de servicio' : 'Terms of service'} onClick={() => setLegalView('terms')} />
+      </section>
+
+      {status && <p role="status" className="rounded-xl bg-white/[.04] p-3 text-center text-xs text-[#9DBAB4]">{status}</p>}
+
+      <div className="grid grid-cols-2 gap-3">
+        <button onClick={logout} className="t1ger-secondary-button"><LogOut size={17} />{isEs ? 'Salir' : 'Sign out'}</button>
+        {!deleteConfirm ? <button onClick={() => setDeleteConfirm(true)} className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-[#E56A65]/25 bg-[#E56A65]/7 px-4 text-sm font-semibold text-[#F0AAA6]"><Trash2 size={17} />{isEs ? 'Eliminar' : 'Delete'}</button> : <button onClick={removeAccount} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-[#E56A65] px-4 text-sm font-semibold text-[#1F1918]">{isEs ? 'Confirmar' : 'Confirm delete'}</button>}
       </div>
-
-      <div className="max-w-lg mx-auto pb-8">
-        {/* 2. ACCOUNT */}
-        <SectionHeader title={isEs ? 'Cuenta' : 'Account'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={User} 
-            label={isEs ? 'Editar Perfil' : 'Edit Profile'} 
-            value={`@${handleName}`}
-            onClick={() => alert('WIP: Edit Profile')} 
-          />
-          <SettingsRow 
-            icon={Mail} 
-            label={isEs ? 'Correo Electrónico' : 'Email Address'} 
-            value={appUser?.email}
-            onClick={() => alert('WIP: Change Email')} 
-          />
-          <SettingsRow 
-            icon={Lock} 
-            label={isEs ? 'Contraseña' : 'Password'} 
-            onClick={() => alert('WIP: Change Password')} 
-          />
-          <SettingsRow 
-            icon={Shield} 
-            label={isEs ? 'Seguridad' : 'Security'} 
-            onClick={() => alert('WIP: Security')} 
-          />
-        </div>
-
-        {/* 3. NOTIFICATIONS */}
-        <SectionHeader title={isEs ? 'Notificaciones' : 'Notifications'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={Bell} 
-            label={isEs ? 'Preferencias de Notificación' : 'Notification Preferences'} 
-            onClick={() => setNotificationModalOpen(true)} 
-          />
-        </div>
-
-        {/* 4. SUBSCRIPTION */}
-        <SectionHeader title={isEs ? 'Suscripción' : 'Subscription'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={Crown} 
-            label={isEs ? 'Plan Actual' : 'Current Plan'} 
-            value={isPro 
-              ? <span className="text-[#FF7300] flex items-center gap-1"><Crown className="w-4 h-4" /> PREMIUM</span> 
-              : 'FREE'}
-            onClick={() => alert('WIP: Manage Subscription')}
-          />
-          <SettingsRow 
-            icon={RefreshCcw} 
-            label={isEs ? 'Restaurar Compras' : 'Restore Purchases'} 
-            onClick={() => alert('WIP: Restore')} 
-          />
-        </div>
-
-        {/* 5. LEARNING */}
-        <SectionHeader title={isEs ? 'Aprendizaje' : 'Learning'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={Target} 
-            label={isEs ? 'Cambiar Tema Activo' : 'Change Active Topic'} 
-            value={currentTopic.toUpperCase()}
-            onClick={() => selectTrack(currentTopic === 'investing' ? 'business' : 'investing')} 
-          />
-          <SettingsRow 
-            icon={BookOpen} 
-            label={isEs ? 'Revisar Misiones de Acción' : 'Review Apply Missions'} 
-            onClick={() => alert('WIP: Review')} 
-          />
-          <SettingsRow 
-            icon={RefreshCcw} 
-            label={isEs ? 'Reiniciar Progreso' : 'Reset Progress'} 
-            onClick={() => {
-              if (window.confirm(isEs ? '¿Reiniciar el cerebro a cero?' : 'Reset brain to zero?')) resetBrain();
-            }} 
-          />
-        </div>
-
-        {/* 6. SUPPORT & LEGAL */}
-        <SectionHeader title={isEs ? 'Soporte y Legal' : 'Support & Legal'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={HelpCircle} 
-            label={isEs ? 'Centro de Ayuda' : 'Help Center'} 
-            onClick={() => alert('WIP: Help Center')} 
-          />
-          <SettingsRow 
-            icon={FileText} 
-            label={isEs ? 'Política de Privacidad' : 'Privacy Policy'} 
-            onClick={() => alert('WIP: Privacy')} 
-          />
-          <SettingsRow 
-            icon={Scale} 
-            label={isEs ? 'Términos de Servicio' : 'Terms of Service'} 
-            onClick={() => alert('WIP: TOS')} 
-          />
-        </div>
-
-        {/* 7. ACCOUNT ACTIONS */}
-        <SectionHeader title={isEs ? 'Acciones de Cuenta' : 'Account Actions'} />
-        <div className="bg-white border-2 border-zinc-200 rounded-3xl overflow-hidden shadow-xs">
-          <SettingsRow 
-            icon={LogOut} 
-            label={isEs ? 'Cerrar Sesión' : 'Log Out'} 
-            onClick={handleLogout} 
-          />
-          <SettingsRow 
-            icon={AlertTriangle} 
-            label={isEs ? 'Eliminar Cuenta' : 'Delete Account'} 
-            danger={true}
-            onClick={handleDeleteAccount} 
-          />
-        </div>
-
-        {/* 8. APP VERSION */}
-        <div className="mt-8 text-center text-xs font-bold text-zinc-400">
-          T1GER APP v2.0.4 (Build 492)
-        </div>
-      </div>
-
-      <NotificationSettings 
-        isOpen={notificationModalOpen} 
-        onClose={() => setNotificationModalOpen(false)} 
-      />
+      <p className="text-center text-[11px] text-[#496C64]">T1GER local preview · Investing foundation</p>
     </div>
   );
+};
+
+const SettingRow = ({ icon: Icon, title, detail, onClick }: { icon: any; title: string; detail?: string; onClick?: () => void }) => {
+  const Component = onClick ? 'button' : 'div';
+  return <Component onClick={onClick} className="flex w-full items-center gap-3 border-b border-white/6 px-5 py-4 text-left last:border-b-0"><span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[.045] text-[#7EA39B]"><Icon size={17} /></span><span className="flex-1 text-sm font-medium text-[#E2EFEC]">{title}</span>{detail && <span className="text-xs text-[#6F918A]">{detail}</span>}{onClick && <ChevronRight className="text-[#4F746C]" size={16} />}</Component>;
 };

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useBrain } from './BrainContext';
 import { MISSION_BANK } from '../services/missionBank';
+import { fireConfetti } from '../components/ui/confetti';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
 type Stats = { xp: number; verifiedXP: number; coins: number; streak: number; health: number; rank: string };
@@ -17,7 +18,7 @@ interface T1gerContextType {
   setStats: React.Dispatch<React.SetStateAction<Stats>>;
   setActiveView: React.Dispatch<React.SetStateAction<View>>;
   setTriggerAnimation: React.Dispatch<React.SetStateAction<Animation>>;
-  addXP: (amount: number, tier?: 1 | 2) => Promise<void>;
+  addXP: (amount: number, tier?: 1 | 2, rewardId?: string) => Promise<void>;
   spendCoins: (amount: number) => Promise<void>;
 }
 
@@ -28,7 +29,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   const { brainState } = useBrain();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
   const [stats, setStats] = useState<Stats>({ xp: 0, verifiedXP: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
-  const [activeView, setActiveView] = useState<View>('learn');
+  const [activeView, setActiveView] = useState<View>('home');
   const [triggerAnimation, setTriggerAnimation] = useState<Animation>('none');
 
   // Sync with AuthContext
@@ -50,13 +51,24 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
       }));
       if (activeView === 'onboarding') {
-        setActiveView('learn');
+        setActiveView('home');
       }
     }
   }, [appUser]);
 
-  const addXP = React.useCallback(async (amount: number, tier?: 1 | 2) => {
-    const applyMissionsCompleted = brainState?.missionHistory?.filter(r => r.completed && MISSION_BANK.find(m => m.id === r.missionId)?.type === 'real_world_task').length || 0;
+  const addXP = React.useCallback(async (amount: number, tier?: 1 | 2, rewardId?: string) => {
+    if (rewardId && typeof window !== 'undefined') {
+      const ledgerKey = `t1ger_reward_${appUser?.uid || 'local'}_${rewardId}`;
+      if (localStorage.getItem(ledgerKey)) return;
+      localStorage.setItem(ledgerKey, String(Date.now()));
+    }
+    const rewardedMissionId = rewardId?.startsWith('mission:') ? rewardId.slice('mission:'.length) : undefined;
+    const rewardedMission = rewardedMissionId ? MISSION_BANK.find(mission => mission.id === rewardedMissionId) : undefined;
+    const rewardAlreadyInHistory = rewardedMissionId
+      ? brainState?.missionHistory?.some(record => record.missionId === rewardedMissionId && record.completed)
+      : false;
+    const applyMissionsCompleted = (brainState?.missionHistory?.filter(record => record.completed && MISSION_BANK.find(mission => mission.id === record.missionId)?.type === 'real_world_task').length || 0)
+      + (rewardedMission?.type === 'real_world_task' && !rewardAlreadyInHistory ? 1 : 0);
     
     let calculatedXP = 0;
     let calculatedVerifiedXP = 0;
@@ -78,9 +90,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (calculatedLevel > (appUser?.level || 1)) {
         setTriggerAnimation('level-up');
-        import('../components/ui/confetti').then(({ fireConfetti }) => {
-          fireConfetti();
-        });
+        fireConfetti();
         setTimeout(() => setTriggerAnimation('none'), 3000);
       }
 

@@ -21,6 +21,29 @@ You give clear, direct answers in 2-3 sentences max.
 `
 };
 
+const getLocalCoachResponse = (message: string, language: string) => {
+  const normalized = message.toLowerCase();
+  const isEn = language === 'en';
+  if (normalized.includes('compound') || normalized.includes('interés compuesto')) {
+    return isEn
+      ? 'Compound growth needs three inputs: time, recurring contributions, and a reasonable return assumption. Use a conservative rate, then compare what changes when you start five years later. 1. Run an example 2. Review assumptions 3. Open today’s lesson'
+      : 'El crecimiento compuesto necesita tiempo, aportes periódicos y una tasa razonable. Usa una tasa conservadora y compara qué cambia si empiezas cinco años después. 1. Ver un ejemplo 2. Revisar supuestos 3. Abrir la lección de hoy';
+  }
+  if (normalized.includes('risk') || normalized.includes('riesgo')) {
+    return isEn
+      ? 'Risk is the chance that an outcome prevents you from reaching your goal, not just price movement. Set the time horizon and maximum acceptable loss before choosing an asset. 1. Define my horizon 2. Size a position 3. Compare asset classes'
+      : 'El riesgo es la posibilidad de que un resultado te impida cumplir tu objetivo, no solo la volatilidad. Define horizonte y pérdida tolerable antes de elegir un activo. 1. Definir horizonte 2. Calcular posición 3. Comparar activos';
+  }
+  if (normalized.includes('portfolio') || normalized.includes('cartera') || normalized.includes('divers')) {
+    return isEn
+      ? 'A simple portfolio starts with roles: growth, diversification, and stability. Pick weights you can hold through a downturn before choosing specific funds. 1. Build three funds 2. Check concentration 3. Plan rebalancing'
+      : 'Una cartera simple empieza por funciones: crecimiento, diversificación y estabilidad. Elige pesos que puedas mantener durante una caída antes de escoger fondos. 1. Crear tres fondos 2. Revisar concentración 3. Planear rebalanceo';
+  }
+  return isEn
+    ? 'Start with the decision you need to make, then name the evidence you have and what is still uncertain. I can help you turn that into a small, testable investing action. 1. Review a company 2. Build a paper trade 3. Explain a concept'
+    : 'Empieza por la decisión que necesitas tomar, luego separa la evidencia de lo que aún es incierto. Puedo convertirlo en una acción de inversión pequeña y comprobable. 1. Analizar una empresa 2. Crear una operación simulada 3. Explicar un concepto';
+};
+
 const callOpenRouterAPI = async (
   systemPrompt: string,
   userMessage: string,
@@ -62,6 +85,12 @@ const callOpenRouterAPI = async (
 };
 
 export const getCoachResponse = async (userId: string, userMessage: string, history: any[], coachId = 't1ger', language: string = 'es') => {
+  // Billable provider keys must not ship in the browser by default. The local
+  // mentor keeps the preview useful; production AI should be proxied by a
+  // server endpoint with authentication, quotas, and redaction.
+  if (import.meta.env.VITE_ENABLE_CLIENT_AI !== 'true') {
+    return getLocalCoachResponse(userMessage, language);
+  }
   // 1. Fetch user context
   let userData = {};
   if (userId && userId !== 'anonymous') {
@@ -129,4 +158,3 @@ export const getCoachResponse = async (userId: string, userMessage: string, hist
     return "¡Hola! Estoy listo para guiarte. Revisa tu conexión o tu API Key para continuar conversando.";
   }
 };
-
