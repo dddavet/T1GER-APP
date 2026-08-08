@@ -129,7 +129,7 @@ export const TacticalSetup = ({ isEmbedded = false }: { isEmbedded?: boolean }) 
           </div>
           {!isEmbedded && (
             <button 
-              onClick={() => { haptic(); setActiveView('home'); }}
+              onClick={() => { haptic(); setActiveView('learn'); }}
               className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center border-zinc-200 hover:border-accent/30 transition-all active:scale-90"
             >
               <ArrowLeft className="w-5 h-5 text-zinc-500" />
@@ -325,7 +325,7 @@ export const TacticalSetup = ({ isEmbedded = false }: { isEmbedded?: boolean }) 
               customWorkTasks.map(w => w.id),
               customLessonTasks.map(l => l.id)
             );
-            setActiveView('home'); 
+            setActiveView('learn');
           }}
           className="fixed bottom-10 left-6 right-6 z-50 bg-white shadow-sm border-accent/20 py-6 rounded-full font-black uppercase tracking-widest text-sm text-accent shadow-sm flex items-center justify-center gap-3 transition-all"
         >

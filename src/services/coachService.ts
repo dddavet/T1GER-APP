@@ -34,10 +34,10 @@ const getLocalCoachResponse = (message: string, language: string) => {
       ? 'Risk is the chance that an outcome prevents you from reaching your goal, not just price movement. Set the time horizon and maximum acceptable loss before choosing an asset. 1. Define my horizon 2. Size a position 3. Compare asset classes'
       : 'El riesgo es la posibilidad de que un resultado te impida cumplir tu objetivo, no solo la volatilidad. Define horizonte y pérdida tolerable antes de elegir un activo. 1. Definir horizonte 2. Calcular posición 3. Comparar activos';
   }
-  if (normalized.includes('portfolio') || normalized.includes('cartera') || normalized.includes('divers')) {
+  if (normalized.includes('portfolio') || normalized.includes('portafolio') || normalized.includes('cartera') || normalized.includes('divers')) {
     return isEn
       ? 'A simple portfolio starts with roles: growth, diversification, and stability. Pick weights you can hold through a downturn before choosing specific funds. 1. Build three funds 2. Check concentration 3. Plan rebalancing'
-      : 'Una cartera simple empieza por funciones: crecimiento, diversificación y estabilidad. Elige pesos que puedas mantener durante una caída antes de escoger fondos. 1. Crear tres fondos 2. Revisar concentración 3. Planear rebalanceo';
+      : 'Un portafolio simple empieza por funciones: crecimiento, diversificación y estabilidad. Elige pesos que puedas mantener durante una caída antes de escoger fondos. 1. Crear tres fondos 2. Revisar concentración 3. Planear rebalanceo';
   }
   return isEn
     ? 'Start with the decision you need to make, then name the evidence you have and what is still uncertain. I can help you turn that into a small, testable investing action. 1. Review a company 2. Build a paper trade 3. Explain a concept'

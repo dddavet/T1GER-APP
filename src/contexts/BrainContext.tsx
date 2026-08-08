@@ -25,7 +25,7 @@ import {
   generateDailyPipeline,
 } from '../services/brainService';
 import { type BankMission, type TrackType, MISSION_BANK, CURRICULUM_TRACKS } from '../services/missionBank';
-import { calculateT1gerEmotion, getT1gerVisualConfig, type T1gerEmotion, type T1gerVisualConfig } from '../services/t1gerStateEngine';
+import { calculateT1gerEmotion, type T1gerEmotion } from '../services/t1gerStateEngine';
 
 interface BrainContextType {
   competencies: CompetencyProfile;
@@ -50,7 +50,6 @@ interface BrainContextType {
   skipDaysForPlacement: (trackId: TrackType, targetLevelNumber: number) => void;
   pathData: ReturnType<typeof getCurrentPathData>;
   t1gerEmotion: T1gerEmotion;
-  t1gerVisualConfig: T1gerVisualConfig;
 
   // Dual Streaks
   learnStreak: number;
@@ -214,6 +213,10 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       localStorage.setItem('t1ger_app_language', lang);
     }
   }, []);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') document.documentElement.lang = language;
+  }, [language]);
 
   const LOCAL_STORAGE_ID = 'anonymous_local_user';
 
@@ -443,10 +446,6 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return calculateT1gerEmotion(brainState);
   }, [brainState]);
 
-  const t1gerVisualConfig = useMemo(() => {
-    return getT1gerVisualConfig(t1gerEmotion);
-  }, [t1gerEmotion]);
-
   const value = useMemo(() => ({
     competencies,
     getSessionMissions,
@@ -462,7 +461,6 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     skipDaysForPlacement,
     pathData,
     t1gerEmotion,
-    t1gerVisualConfig,
     learnStreak: brainState.learnStreak,
     tacticalStreak: brainState.tacticalStreak,
     completeHabit,
@@ -480,7 +478,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     language,
     setLanguage,
     resetBrain,
-  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, selectTrack, skipDaysForPlacement, t1gerEmotion, t1gerVisualConfig, resetBrain, language, setLanguage]);
+  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, selectTrack, skipDaysForPlacement, t1gerEmotion, resetBrain, language, setLanguage]);
 
   return (
     <BrainContext.Provider value={value}>

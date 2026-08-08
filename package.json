@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite --port=3000 --host=127.0.0.1",
     "dev:prototype": "vite --mode prototype --port=3000 --host=127.0.0.1",
+    "generate:mascot": "node scripts/generate-t1ger-mascot.mjs",
     "build": "vite build",
     "build:production": "vite build --mode production",
     "preview": "vite preview",

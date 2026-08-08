@@ -77,15 +77,15 @@ export const Coach = () => {
   };
 
   const prompts = isEs
-    ? ['¿Cómo defino mi tolerancia al riesgo?', 'Ayúdame a construir una cartera de tres fondos', 'Explícame el interés compuesto sin exageraciones']
+    ? ['¿Cómo defino mi tolerancia al riesgo?', 'Ayúdame a construir un portafolio de tres fondos', 'Explícame el interés compuesto sin exageraciones']
     : ['How do I define my risk tolerance?', 'Help me build a three-fund portfolio', 'Explain compound growth without hype'];
 
   return (
     <main className="t1ger-mission-shell absolute inset-0 z-50 flex flex-col overflow-hidden">
       <header className="flex items-center gap-3 border-b border-white/7 px-4 pb-3 pt-[calc(.85rem+env(safe-area-inset-top))]">
-        <button onClick={() => setActiveView('home')} className="t1ger-icon-button" aria-label={isEs ? 'Volver' : 'Back'}><ArrowLeft size={19} /></button>
+        <button onClick={() => setActiveView('learn')} className="t1ger-icon-button" aria-label={isEs ? 'Volver' : 'Back'}><ArrowLeft size={19} /></button>
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--t1ger-orange)] text-[#102622]"><Bot size={20} /></div>
-        <div className="min-w-0 flex-1"><h1 className="text-sm font-semibold text-white">T1GER Mentor</h1><p className="text-[11px] text-[#6F918A]">{isEs ? 'Guía educativa local' : 'Local educational guidance'}</p></div>
+        <div className="min-w-0 flex-1"><h1 className="text-sm font-semibold text-white">T1GER Mentor</h1><p className="text-[11px] text-[#6F918A]">{isEs ? 'Mentor educativo' : 'Educational mentor'}</p></div>
         <span className="rounded-lg bg-[#3FC78E]/10 px-2 py-1 text-[10px] font-semibold text-[#78DDB0]">{isEs ? 'Disponible' : 'Available'}</span>
       </header>
 

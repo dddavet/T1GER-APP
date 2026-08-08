@@ -6,7 +6,7 @@ import { fireConfetti } from '../components/ui/confetti';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
 type Stats = { xp: number; verifiedXP: number; coins: number; streak: number; health: number; rank: string };
-type View = 'onboarding' | 'home' | 'proof' | 'learn' | 'build' | 'compete' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
+type View = 'onboarding' | 'proof' | 'learn' | 'build' | 'compete' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
 type Animation = 'none' | 'level-up' | 'streak-death';
 
 interface T1gerContextType {
@@ -29,7 +29,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   const { brainState } = useBrain();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
   const [stats, setStats] = useState<Stats>({ xp: 0, verifiedXP: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
-  const [activeView, setActiveView] = useState<View>('home');
+  const [activeView, setActiveView] = useState<View>('learn');
   const [triggerAnimation, setTriggerAnimation] = useState<Animation>('none');
 
   // Sync with AuthContext
@@ -51,7 +51,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
       }));
       if (activeView === 'onboarding') {
-        setActiveView('home');
+        setActiveView('learn');
       }
     }
   }, [appUser]);

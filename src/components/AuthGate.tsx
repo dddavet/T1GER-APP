@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth, DEMO_PRESET_USERS, type DemoPreset } from '../contexts/AuthContext';
+import { useBrain } from '../contexts/BrainContext';
 import { GlassButton } from './ui/apple-tahoe-liquid-glass-button';
 
 import { PrivacyPolicy } from '../pages/PrivacyPolicy';
@@ -14,6 +15,9 @@ interface AuthGateProps {
 }
 
 export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSuccess }) => {
+  const { language } = useBrain();
+  const isEs = language === 'es';
+  const tr = (es: string, en: string) => isEs ? es : en;
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
   const [mode, setMode] = useState<AuthMode>('sign-in');
@@ -32,13 +36,13 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
 
   const getAuthMessage = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
-    if (message.includes('auth/invalid-credential') || message.includes('auth/wrong-password')) return 'Email or password is incorrect.';
-    if (message.includes('auth/email-already-in-use')) return 'That email already has an account.';
-    if (message.includes('auth/weak-password')) return 'Password needs at least 6 characters.';
-    if (message.includes('auth/popup-closed-by-user')) return 'Sign-in was cancelled.';
-    if (message.includes('auth/configuration-not-found')) return 'Enable Firebase Authentication for this project first.';
-    if (message.includes('auth/operation-not-allowed')) return 'Enable this provider in Firebase Authentication first.';
-    return 'Authentication failed. Check Firebase provider setup and try again.';
+    if (message.includes('auth/invalid-credential') || message.includes('auth/wrong-password')) return tr('El correo o la contraseña no son correctos.', 'Email or password is incorrect.');
+    if (message.includes('auth/email-already-in-use')) return tr('Ya existe una cuenta con ese correo.', 'That email already has an account.');
+    if (message.includes('auth/weak-password')) return tr('La contraseña debe tener al menos 6 caracteres.', 'Password needs at least 6 characters.');
+    if (message.includes('auth/popup-closed-by-user')) return tr('Cancelaste el inicio de sesión.', 'Sign-in was cancelled.');
+    if (message.includes('auth/configuration-not-found')) return tr('El acceso todavía no está configurado.', 'Sign-in is not configured yet.');
+    if (message.includes('auth/operation-not-allowed')) return tr('Este método de acceso todavía no está disponible.', 'This sign-in method is not available yet.');
+    return tr('No pudimos iniciar sesión. Inténtalo de nuevo.', 'We could not sign you in. Try again.');
   };
 
   const runAuth = async (action: () => Promise<void>) => {
@@ -59,21 +63,21 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
     event.preventDefault();
 
     if (!email.trim()) {
-      setNotice('Enter your email first.');
+      setNotice(tr('Escribe primero tu correo.', 'Enter your email first.'));
       return;
     }
 
     if (mode === 'email-link') {
       await runAuth(async () => {
         await sendEmailSignInLink(email);
-        setNotice('Magic link sent. Check your email on this device.');
+        setNotice(tr('Enlace enviado. Revisa tu correo en este dispositivo.', 'Link sent. Check your email on this device.'));
         setLoading(false);
       });
       return;
     }
 
     if (password.length < 6) {
-      setNotice('Password needs at least 6 characters.');
+      setNotice(tr('La contraseña debe tener al menos 6 caracteres.', 'Password needs at least 6 characters.'));
       return;
     }
 
@@ -101,7 +105,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
             exit={{ opacity: 0 }}
             className="text-[#FF7300] font-mono text-xl tracking-widest"
           >
-            [ AUTHENTICATING PREDATOR_ID... ]
+            {tr('CREANDO TU SESIÓN…', 'CREATING YOUR SESSION…')}
           </motion.div>
         ) : (
           <motion.div
@@ -120,7 +124,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                 >
                   T1GER
                 </motion.h1>
-                <p className="text-zinc-500 font-mono text-sm tracking-widest uppercase">Stop scrolling. Start hunting.</p>
+                <p className="text-zinc-500 font-mono text-sm tracking-widest uppercase">{tr('Aprende. Aplica. Avanza.', 'Learn. Apply. Progress.')}</p>
               </div>
             )}
 
@@ -133,7 +137,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                 disabled={loading}
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                Authenticate via Google
+                {tr('Continuar con Google', 'Continue with Google')}
               </GlassButton>
               <GlassButton
                 onClick={() => runAuth(appleSignIn)}
@@ -143,15 +147,15 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                 disabled={loading}
               >
                 <svg className="w-6 h-6" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98 1.4-2.05 2.72-3.68 2.72-1.63 0-2.12-.96-3.95-.96-1.83 0-2.37.96-3.95.96-1.63 0-2.8-1.46-3.95-3.36-1.15-1.9-2.05-5.38-2.05-8.38 0-4.32 2.8-6.62 5.58-6.62 1.63 0 3.03 1.1 4.05 1.1 1.03 0 2.75-1.1 4.58-1.1 1.1 0 3.95.13 5.8 2.88-0.15.1-2.55 1.46-2.55 4.53 0 3.55 3.05 4.88 3.2 4.96-0.03.06-0.5 1.78-1.7 3.58zM12.55 4.5c0-2.1 1.5-4.1 3.75-4.35-0.2 0.9-0.7 2.1-2.05 3.65-1.35 1.55-2.9 2.3-4.45 2.15 0.15-0.9 0.7-2.1 2.05-3.65z" fill="white"/></svg>
-                Authenticate via Apple
+                {tr('Continuar con Apple', 'Continue with Apple')}
               </GlassButton>
 
               <form onSubmit={handleEmailAuth} className="space-y-3 rounded-[2rem] border border-zinc-200 bg-zinc-50 p-3 shadow-2xl shadow-black/40 backdrop-blur">
                 <div className="grid grid-cols-3 gap-1 rounded-full bg-zinc-50 p-1">
                   {[
-                    ['sign-in', 'Sign in'],
-                    ['sign-up', 'Create'],
-                    ['email-link', 'Link'],
+                    ['sign-in', tr('Entrar', 'Sign in')],
+                    ['sign-up', tr('Crear', 'Create')],
+                    ['email-link', tr('Enlace', 'Link')],
                   ].map(([key, label]) => (
                     <button
                       key={key}
@@ -187,7 +191,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                     className={inputClassName}
                     type="password"
                     autoComplete={mode === 'sign-up' ? 'new-password' : 'current-password'}
-                    placeholder="Password"
+                  placeholder={tr('Contraseña', 'Password')}
                     disabled={loading}
                   />
                 )}
@@ -199,7 +203,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                   intensity="quiet"
                   disabled={loading}
                 >
-                  {mode === 'email-link' ? 'Send email link' : mode === 'sign-up' ? 'Create account' : 'Continue'}
+                  {mode === 'email-link' ? tr('Enviar enlace', 'Send email link') : mode === 'sign-up' ? tr('Crear cuenta', 'Create account') : tr('Continuar', 'Continue')}
                 </GlassButton>
               </form>
 
@@ -212,7 +216,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
               {/* Preview accounts are compiled only into local development. */}
               {import.meta.env.DEV && <div className="pt-3 border-t border-zinc-200/80 space-y-2.5 text-center">
                 <span className="text-[10px] font-black font-mono text-zinc-500 uppercase tracking-widest block">
-                  ⚡ ACCESO RÁPIDO A 5 PERFILES DE PRUEBA
+                  {tr('ACCESO A PERFILES DE PRUEBA', 'TEST PROFILE ACCESS')}
                 </span>
                 <div className="flex flex-col gap-1.5">
                   {(['founder', 'investor', 'newbie'] as DemoPreset[]).map((key) => {
@@ -251,7 +255,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                   onClick={() => setShowPrivacyModal(true)}
                   className="hover:underline cursor-pointer"
                 >
-                  Política de Privacidad
+                  {tr('Política de privacidad', 'Privacy policy')}
                 </button>
                 <span>•</span>
                 <button
@@ -259,7 +263,7 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
                   onClick={() => setShowTermsModal(true)}
                   className="hover:underline cursor-pointer"
                 >
-                  Términos y Condiciones
+                  {tr('Términos de servicio', 'Terms of service')}
                 </button>
               </div>
             </div>

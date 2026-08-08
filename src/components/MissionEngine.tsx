@@ -20,6 +20,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import type { BankMission, QuizOption } from '../services/missionBank';
+import { localizeMission } from '../services/contentLocalization';
 import { fireRewardConfetti } from './ui/confetti';
 import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
 
@@ -33,20 +34,21 @@ type ApplyStage = 'brief' | 'execute' | 'evidence';
 type PaperTrade = { ticker: string; amount: number; thesis: string };
 
 const PAPER_ASSETS = [
-  { ticker: 'VTI', label: 'US total market' },
-  { ticker: 'VXUS', label: 'International equity' },
-  { ticker: 'BND', label: 'US bond market' },
-  { ticker: 'AAPL', label: 'Apple' },
-  { ticker: 'MSFT', label: 'Microsoft' },
+  { ticker: 'VTI', label: { es: 'Mercado total de EE. UU.', en: 'US total market' } },
+  { ticker: 'VXUS', label: { es: 'Acciones internacionales', en: 'International equity' } },
+  { ticker: 'BND', label: { es: 'Bonos de EE. UU.', en: 'US bond market' } },
+  { ticker: 'AAPL', label: { es: 'Apple', en: 'Apple' } },
+  { ticker: 'MSFT', label: { es: 'Microsoft', en: 'Microsoft' } },
 ];
-const formatMoney = (value: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+const formatMoney = (value: number, language: 'es' | 'en') =>
+  new Intl.NumberFormat(language === 'es' ? 'es-CO' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
-export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplete }) => {
+export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMission, onComplete }) => {
   const { addXP } = useT1ger();
   const { completeMission, language, brainState } = useBrain();
   const { appUser } = useAuth();
   const isEs = language === 'es';
+  const mission = useMemo(() => localizeMission(sourceMission, language), [language, sourceMission]);
   const isApply = mission.nodeType === 'apply' || mission.type === 'real_world_task';
   const alreadyCompleted = brainState.missionHistory.some(record => record.missionId === mission.id && record.completed);
 
@@ -65,17 +67,6 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   const [complete, setComplete] = useState(alreadyCompleted);
   const [submitting, setSubmitting] = useState(false);
 
-  // COMPUTED DUOLINGO-STYLE REACTIVE MASCOT MOOD
-  const mascotMood = useMemo<MascotReaction>(() => {
-    if (complete) return 'celebrate';
-    if (!isApply) {
-      if (learnStage === 'concept') return 'thinking';
-      if (answerChecked) return selectedOption === options.findIndex(o => o.correct) ? 'celebrate' : 'mistake';
-      return 'idle';
-    }
-    return applyStage === 'execute' ? 'beast' : 'idle';
-  }, [applyStage, answerChecked, complete, isApply, learnStage, selectedOption]);
-
   const options = useMemo<QuizOption[]>(() => {
     if (mission.recallOptions?.length) return mission.recallOptions;
     if (mission.options?.length) return mission.options;
@@ -88,6 +79,20 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
 
   const correctOption = options.findIndex(option => option.correct);
   const answerIsCorrect = selectedOption === correctOption;
+
+  const mascotMood = useMemo<MascotReaction>(() => {
+    if (complete) return 'celebrate';
+    if (error) return 'warning';
+    if (!isApply) {
+      if (learnStage === 'concept') return 'thinking';
+      if (!answerChecked) return 'idle';
+      return selectedOption === correctOption ? 'celebrate' : 'mistake';
+    }
+    if (applyStage === 'brief') return 'thinking';
+    if (applyStage === 'execute') return 'beast';
+    return 'idle';
+  }, [applyStage, answerChecked, complete, correctOption, error, isApply, learnStage, selectedOption]);
+
   const framework = mission.frameworkSteps || [];
   const frameworkReady = framework.length === 0 || completedFramework.length === framework.length;
   const minimumReflection = mission.minReflectionLength || 80;
@@ -127,7 +132,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
       return;
     }
     if (tradeTotal + amount > 100000) {
-      setError(isEs ? 'La cartera simulada no puede superar $100,000.' : 'The simulated portfolio cannot exceed $100,000.');
+      setError(isEs ? 'El portafolio simulado no puede superar los $100.000.' : 'The simulated portfolio cannot exceed $100,000.');
       return;
     }
     setTrades(current => [...current, { ticker: tradeTicker, amount, thesis: tradeThesis.trim() }]);
@@ -157,7 +162,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
   };
 
   const eyebrow = isApply
-    ? (isEs ? 'Misión de aplicación' : 'Apply mission')
+    ? (isEs ? 'Misión práctica' : 'Practice mission')
     : (isEs ? 'Lección diaria' : 'Daily lesson');
 
   if (complete) {
@@ -170,10 +175,12 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
             </div>
             <p className="t1ger-kicker">{mission.verificationTier === 1 ? (isEs ? 'Progreso verificado' : 'Verified progress') : (isEs ? 'Progreso personal' : 'Personal progress')}</p>
             <h1 className="mt-2 text-balance text-3xl font-semibold tracking-[-0.04em] text-white">
-              {isEs ? 'La evidencia convierte conocimiento en habilidad.' : 'Evidence turns knowledge into skill.'}
+              {isApply
+                ? (isEs ? 'Convertiste una idea en acción.' : 'You turned an idea into action.')
+                : (isEs ? 'Aprendiste una idea clave.' : 'You learned a key idea.')}
             </h1>
             <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-[#9DBAB4]">
-              {isEs ? `Guardamos tu avance y sumamos ${mission.xpReward} XP.` : `Your progress is saved and ${mission.xpReward} XP was added.`}
+              {isEs ? `Progreso guardado: +${mission.xpReward} XP.` : `Progress saved: +${mission.xpReward} XP.`}
             </p>
             <button onClick={onComplete} className="t1ger-primary-button mt-8 w-full">
               {isEs ? 'Volver al plan' : 'Return to plan'} <ArrowRight size={18} />
@@ -290,7 +297,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
                 <div className="mt-7 rounded-2xl bg-[#082C27] p-4 text-sm leading-6 text-[#9DBAB4]">
                   <strong className="block text-[#EAF4F1]">{isEs ? 'Qué cuenta como evidencia' : 'What counts as evidence'}</strong>
                   {mission.verificationMethod === 'paper_trade'
-                    ? (isEs ? `${requiredTrades} operación simulada registrada dentro de T1GER con monto y tesis.` : `${requiredTrades} simulated trade recorded inside T1GER with an amount and thesis.`)
+                    ? (isEs ? `${requiredTrades} ${requiredTrades === 1 ? 'operación simulada registrada' : 'operaciones simuladas registradas'} en T1GER, con monto y tesis.` : `${requiredTrades} simulated ${requiredTrades === 1 ? 'trade' : 'trades'} recorded in T1GER with an amount and thesis.`)
                     : (isEs ? 'Una reflexión específica que incluya datos, fuente y una decisión siguiente.' : 'A specific reflection containing data, a source, and a next decision.')}
                 </div>
               </article>
@@ -333,14 +340,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission, onComplet
               {mission.verificationMethod === 'paper_trade' ? (
                 <div className="t1ger-panel p-5">
                   <div className="flex items-center justify-between">
-                    <div><p className="t1ger-kicker">{isEs ? 'Cartera simulada' : 'Paper portfolio'}</p><p className="mt-1 font-mono text-lg text-white">{formatMoney(100000 - tradeTotal)} <span className="text-xs text-[#6F9990]">cash</span></p></div>
+                  <div><p className="t1ger-kicker">{isEs ? 'Portafolio simulado' : 'Paper portfolio'}</p><p className="mt-1 font-mono text-lg text-white">{formatMoney(100000 - tradeTotal, language)} <span className="text-xs text-[#6F9990]">{isEs ? 'disponible' : 'cash'}</span></p></div>
                     <TrendingUp className="text-[var(--t1ger-orange)]" />
                   </div>
-                  {trades.length > 0 && <div className="mt-5 space-y-2">{trades.map(trade => <div key={trade.ticker} className="flex items-center justify-between rounded-xl bg-white/[.045] px-4 py-3"><span className="font-mono text-sm font-semibold text-white">{trade.ticker}</span><span className="font-mono text-xs text-[#9DBAB4]">{formatMoney(trade.amount)}</span></div>)}</div>}
+                  {trades.length > 0 && <div className="mt-5 space-y-2">{trades.map(trade => <div key={trade.ticker} className="flex items-center justify-between rounded-xl bg-white/[.045] px-4 py-3"><span className="font-mono text-sm font-semibold text-white">{trade.ticker}</span><span className="font-mono text-xs text-[#9DBAB4]">{formatMoney(trade.amount, language)}</span></div>)}</div>}
                   {trades.length < requiredTrades && (
                     <div className="mt-5 space-y-3 border-t border-white/8 pt-5">
                       <div className="grid grid-cols-2 gap-3">
-                        <label className="t1ger-field-label">{isEs ? 'Activo' : 'Asset'}<select value={tradeTicker} onChange={event => setTradeTicker(event.target.value)} className="t1ger-input">{PAPER_ASSETS.map(asset => <option key={asset.ticker} value={asset.ticker}>{asset.ticker} · {asset.label}</option>)}</select></label>
+                        <label className="t1ger-field-label">{isEs ? 'Activo' : 'Asset'}<select value={tradeTicker} onChange={event => setTradeTicker(event.target.value)} className="t1ger-input">{PAPER_ASSETS.map(asset => <option key={asset.ticker} value={asset.ticker}>{asset.ticker} · {asset.label[language]}</option>)}</select></label>
                         <label className="t1ger-field-label">{isEs ? 'Monto' : 'Amount'}<input value={tradeAmount} onChange={event => setTradeAmount(event.target.value)} inputMode="numeric" className="t1ger-input" /></label>
                       </div>
                       <label className="t1ger-field-label">{isEs ? 'Tesis de inversión' : 'Investment thesis'}<textarea value={tradeThesis} onChange={event => setTradeThesis(event.target.value)} className="t1ger-input min-h-24 resize-none" placeholder={isEs ? 'Por qué encaja esta posición y cuál es el riesgo principal…' : 'Why this position fits and its main risk…'} /></label>

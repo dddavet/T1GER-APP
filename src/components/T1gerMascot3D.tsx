@@ -1,306 +1,252 @@
-import React, { Suspense, useRef } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useGLTF, Float } from '@react-three/drei';
+import React, { Suspense, useEffect, useMemo, useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useGLTF } from '@react-three/drei';
+import { useInView, useReducedMotion } from 'motion/react';
 import * as THREE from 'three';
+import type { MascotReaction } from '../services/mascotGuide';
 
-export type MascotReaction = 'idle' | 'happy' | 'celebrate' | 'mistake' | 'thinking' | 'beast' | 'warning';
+export type { MascotReaction } from '../services/mascotGuide';
 
 interface MascotProps {
   modelPath?: string;
   mood?: MascotReaction;
   className?: string;
-  allowOrbitControls?: boolean;
   closeUp?: boolean;
 }
 
-// 3D Procedural Tiger with Duolingo-style Reactive Skeletal Animations
-function ReactiveTiger3D({ mood = 'idle' }: { mood: MascotReaction }) {
-  const groupRef = useRef<THREE.Group>(null);
-  const headRef = useRef<THREE.Group>(null);
-  const bodyRef = useRef<THREE.Mesh>(null);
-  const leftArmRef = useRef<THREE.Mesh>(null);
-  const rightArmRef = useRef<THREE.Mesh>(null);
-  const leftEarRef = useRef<THREE.Group>(null);
-  const rightEarRef = useRef<THREE.Group>(null);
-  const leftEyeRef = useRef<THREE.Mesh>(null);
-  const rightEyeRef = useRef<THREE.Mesh>(null);
-  const tailRef = useRef<THREE.Group>(null);
+type Point3 = [number, number, number];
 
-  useFrame((state) => {
-    if (!groupRef.current || !headRef.current) return;
-    const t = state.clock.getElapsedTime();
+const DEFAULT_MODEL = '/mascot/t1ger-head-v1.glb';
+const MODEL_ASPECT_X = 0.94;
 
-    // 1. NATURAL BREATHING & SECONDARY BODY PHYSICS
-    const breath = Math.sin(t * 2.5);
-    if (bodyRef.current) {
-      bodyRef.current.scale.y = 1 + breath * 0.025;
-      bodyRef.current.scale.x = 1 - breath * 0.015;
-    }
+interface ModelMotion {
+  y: number;
+  rotationX: number;
+  rotationY: number;
+  rotationZ: number;
+  scale: number;
+  eyeScale: number;
+  browLeft: number;
+  browRight: number;
+}
 
-    // 2. INDEPENDENT EAR TWITCH PHYSICS
-    const earTwitchL = Math.sin(t * 6.5) > 0.95 ? 0.25 : 0;
-    const earTwitchR = Math.cos(t * 5.2) > 0.95 ? -0.25 : 0;
-    if (leftEarRef.current) leftEarRef.current.rotation.z = Math.sin(t * 1.5) * 0.05 + earTwitchL;
-    if (rightEarRef.current) rightEarRef.current.rotation.z = -Math.sin(t * 1.5) * 0.05 + earTwitchR;
-
-    // 3. TAIL SWAYING
-    if (tailRef.current) {
-      tailRef.current.rotation.z = Math.sin(t * 3.5) * 0.25;
-      tailRef.current.rotation.y = Math.cos(t * 2.5) * 0.15;
-    }
-
-    // 4. EYES BLINK CYCLE
-    const blinkCycle = Math.sin(t * 1.8);
-    const isBlinking = blinkCycle > 0.96;
-    const eyeScaleY = isBlinking ? 0.08 : 1;
-    if (leftEyeRef.current) leftEyeRef.current.scale.y = eyeScaleY;
-    if (rightEyeRef.current) rightEyeRef.current.scale.y = eyeScaleY;
-
-    // 5. MOOD REACTION STATE MACHINE
-    switch (mood) {
-      case 'happy':
-      case 'celebrate':
-        // DUOLINGO VICTORY BOUNCE & CHEERFUL WIGGLE
-        const jumpY = Math.abs(Math.sin(t * 7)) * 0.28;
-        groupRef.current.position.y = -0.45 + jumpY;
-        headRef.current.rotation.z = Math.sin(t * 10) * 0.18;
-        headRef.current.rotation.y = Math.sin(t * 5) * 0.12;
-        headRef.current.rotation.x = -Math.abs(Math.sin(t * 7)) * 0.1;
-        if (leftArmRef.current) leftArmRef.current.rotation.z = 1.1 + Math.sin(t * 9) * 0.4;
-        if (rightArmRef.current) rightArmRef.current.rotation.z = -1.1 - Math.sin(t * 9) * 0.4;
-        break;
-
-      case 'mistake':
-      case 'warning':
-        // DUOLINGO SAD DROOP & HEAD SHAKE NO
-        groupRef.current.position.y = -0.48 + Math.sin(t * 1.5) * 0.015;
-        headRef.current.rotation.y = Math.sin(t * 9) * 0.28; // Shaking head NO
-        headRef.current.rotation.x = 0.25; // Drooping head forward
-        headRef.current.rotation.z = -0.08;
-        if (leftArmRef.current) leftArmRef.current.rotation.z = 0.15;
-        if (rightArmRef.current) rightArmRef.current.rotation.z = -0.15;
-        break;
-
-      case 'thinking':
-        // PONDER & CHIN TAP
-        groupRef.current.position.y = -0.45 + Math.sin(t * 1.8) * 0.02;
-        headRef.current.rotation.z = 0.28; // Tilt head
-        headRef.current.rotation.x = -0.12;
-        headRef.current.rotation.y = 0.15;
-        if (leftArmRef.current) leftArmRef.current.rotation.z = 0.25;
-        if (rightArmRef.current) rightArmRef.current.rotation.z = -1.45 + Math.sin(t * 4) * 0.08; // Tap chin
-        break;
-
-      case 'beast':
-        // HIGH ENERGY POWER STANCE
-        groupRef.current.position.y = -0.45 + Math.sin(t * 4) * 0.05;
-        groupRef.current.rotation.y = Math.sin(t * 2) * 0.1;
-        headRef.current.rotation.x = -0.15;
-        if (leftArmRef.current) leftArmRef.current.rotation.z = 1.3;
-        if (rightArmRef.current) rightArmRef.current.rotation.z = -1.3;
-        break;
-
-      case 'idle':
-      default:
-        // NATURAL LIFELIKE IDLE
-        groupRef.current.position.y = -0.45 + Math.sin(t * 2) * 0.03;
-        headRef.current.rotation.y = Math.sin(t * 1.2) * 0.09;
-        headRef.current.rotation.z = Math.sin(t * 0.9) * 0.04;
-        headRef.current.rotation.x = Math.sin(t * 1.5) * 0.03;
-        if (leftArmRef.current) leftArmRef.current.rotation.z = 0.35 + Math.sin(t * 2) * 0.04;
-        if (rightArmRef.current) rightArmRef.current.rotation.z = -0.35 - Math.sin(t * 2) * 0.04;
-        break;
-    }
-  });
-
-  const getTigerBodyColor = () => {
-    if (mood === 'beast') return '#FF7300';
-    if (mood === 'warning' || mood === 'mistake') return '#EF4444';
-    if (mood === 'happy' || mood === 'celebrate') return '#10B981';
-    return '#FF7300';
+function getModelMotion(mood: MascotReaction, elapsed: number): ModelMotion {
+  const breath = Math.sin(elapsed * 1.35);
+  const blink = Math.sin(elapsed * 1.48) > 0.986 ? 0.08 : 1;
+  const idle: ModelMotion = {
+    y: breath * 0.014,
+    rotationX: Math.sin(elapsed * 0.62) * 0.008,
+    rotationY: Math.sin(elapsed * 0.52) * 0.035,
+    rotationZ: Math.sin(elapsed * 0.76) * 0.01,
+    scale: 1 + breath * 0.004,
+    eyeScale: blink,
+    browLeft: 0,
+    browRight: 0,
   };
 
+  switch (mood) {
+    case 'happy':
+      return {
+        ...idle,
+        y: Math.abs(Math.sin(elapsed * 3.2)) * 0.045,
+        rotationY: Math.sin(elapsed * 1.7) * 0.045,
+        rotationZ: Math.sin(elapsed * 2.6) * 0.018,
+        scale: 1.012,
+        eyeScale: Math.min(blink, 0.82),
+        browLeft: 0.08,
+        browRight: -0.08,
+      };
+    case 'celebrate':
+      return {
+        ...idle,
+        y: Math.abs(Math.sin(elapsed * 4.5)) * 0.085,
+        rotationY: Math.sin(elapsed * 2.4) * 0.065,
+        rotationZ: Math.sin(elapsed * 4.5) * 0.035,
+        scale: 1.025,
+        eyeScale: Math.min(blink, 0.78),
+        browLeft: 0.1,
+        browRight: -0.1,
+      };
+    case 'thinking':
+      return {
+        ...idle,
+        rotationX: -0.018,
+        rotationY: -0.075,
+        rotationZ: 0.055,
+        browLeft: 0.12,
+        browRight: -0.02,
+      };
+    case 'mistake':
+      return {
+        ...idle,
+        y: -0.03,
+        rotationX: 0.025,
+        rotationY: -0.025,
+        rotationZ: -0.035,
+        scale: 0.986,
+        eyeScale: Math.min(blink, 0.72),
+        browLeft: -0.14,
+        browRight: 0.14,
+      };
+    case 'warning':
+      return {
+        ...idle,
+        y: -0.018,
+        rotationX: 0.018,
+        rotationY: Math.sin(elapsed * 8) * 0.035,
+        rotationZ: Math.sin(elapsed * 8) * 0.008,
+        scale: 0.992,
+        eyeScale: Math.min(blink, 0.78),
+        browLeft: -0.16,
+        browRight: 0.16,
+      };
+    case 'beast':
+      return {
+        ...idle,
+        y: Math.sin(elapsed * 2.2) * 0.015,
+        rotationX: -0.018,
+        rotationY: Math.sin(elapsed * 1.2) * 0.022,
+        scale: 1.032,
+        eyeScale: Math.min(blink, 0.86),
+        browLeft: -0.2,
+        browRight: 0.2,
+      };
+    default:
+      return idle;
+  }
+}
+
+interface ReactiveModelProps {
+  url: string;
+  mood: MascotReaction;
+  closeUp: boolean;
+  reducedMotion: boolean;
+}
+
+function ReactiveTigerModel({ url, mood, closeUp, reducedMotion }: ReactiveModelProps) {
+  const { scene } = useGLTF(url);
+  const model = useMemo(() => scene.clone(true), [scene]);
+  const rootRef = useRef<THREE.Group>(null);
+
+  const expressionNodes = useMemo(() => ({
+    leftEye: model.getObjectByName('leftEye'),
+    rightEye: model.getObjectByName('rightEye'),
+    leftBrow: model.getObjectByName('leftBrow'),
+    rightBrow: model.getObjectByName('rightBrow'),
+    leftEar: model.getObjectByName('leftEar'),
+    rightEar: model.getObjectByName('rightEar'),
+  }), [model]);
+
+  const baseRotations = useMemo(() => ({
+    leftBrow: expressionNodes.leftBrow?.rotation.z ?? 0,
+    rightBrow: expressionNodes.rightBrow?.rotation.z ?? 0,
+    leftEar: expressionNodes.leftEar?.rotation.z ?? 0,
+    rightEar: expressionNodes.rightEar?.rotation.z ?? 0,
+  }), [expressionNodes]);
+
+  useFrame((state, delta) => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const elapsed = state.clock.getElapsedTime();
+    const target = getModelMotion(mood, elapsed);
+    const smooth = (current: number, next: number, speed: number) => reducedMotion ? next : THREE.MathUtils.damp(current, next, speed, delta);
+    root.position.y = smooth(root.position.y, target.y, 7);
+    root.rotation.x = smooth(root.rotation.x, target.rotationX, 7);
+    root.rotation.y = smooth(root.rotation.y, target.rotationY, 7);
+    root.rotation.z = smooth(root.rotation.z, target.rotationZ, 8);
+    const nextScale = smooth(root.scale.y, target.scale, 8);
+    root.scale.set(nextScale * MODEL_ASPECT_X, nextScale, nextScale);
+
+    const { leftEye, rightEye, leftBrow, rightBrow, leftEar, rightEar } = expressionNodes;
+    if (leftEye) leftEye.scale.y = smooth(leftEye.scale.y, target.eyeScale, 22);
+    if (rightEye) rightEye.scale.y = smooth(rightEye.scale.y, target.eyeScale, 22);
+    if (leftBrow) leftBrow.rotation.z = smooth(leftBrow.rotation.z, baseRotations.leftBrow + target.browLeft, 9);
+    if (rightBrow) rightBrow.rotation.z = smooth(rightBrow.rotation.z, baseRotations.rightBrow + target.browRight, 9);
+
+    const earPulse = Math.sin(elapsed * 1.12) * 0.014;
+    const leftTwitch = Math.sin(elapsed * 5.6) > 0.985 ? 0.06 : 0;
+    const rightTwitch = Math.cos(elapsed * 5.2) > 0.985 ? -0.06 : 0;
+    if (leftEar) leftEar.rotation.z = smooth(leftEar.rotation.z, baseRotations.leftEar + earPulse + leftTwitch, 9);
+    if (rightEar) rightEar.rotation.z = smooth(rightEar.rotation.z, baseRotations.rightEar - earPulse + rightTwitch, 9);
+  });
+
   return (
-    <group ref={groupRef} position={[0, -0.45, 0]}>
-      {/* 🐯 HEAD GROUP */}
-      <group ref={headRef} position={[0, 0.65, 0]}>
-        {/* Main Tiger Head Sphere */}
-        <mesh position={[0, 0, 0]}>
-          <sphereGeometry args={[0.55, 32, 32]} />
-          <meshStandardMaterial color={getTigerBodyColor()} roughness={0.3} metalness={0.05} />
-        </mesh>
-
-        {/* 3D TIGER STRIPES (Forehead & Cheeks) */}
-        <mesh position={[0, 0.4, 0.3]} rotation={[0.4, 0, 0]}>
-          <boxGeometry args={[0.08, 0.2, 0.04]} />
-          <meshStandardMaterial color="#1C1917" roughness={0.2} />
-        </mesh>
-        <mesh position={[-0.18, 0.36, 0.28]} rotation={[0.3, 0, -0.3]}>
-          <boxGeometry args={[0.06, 0.16, 0.04]} />
-          <meshStandardMaterial color="#1C1917" roughness={0.2} />
-        </mesh>
-        <mesh position={[0.18, 0.36, 0.28]} rotation={[0.3, 0, 0.3]}>
-          <boxGeometry args={[0.06, 0.16, 0.04]} />
-          <meshStandardMaterial color="#1C1917" roughness={0.2} />
-        </mesh>
-
-        <mesh position={[-0.42, 0.05, 0.2]} rotation={[0, -0.4, 0.2]}>
-          <boxGeometry args={[0.16, 0.05, 0.04]} />
-          <meshStandardMaterial color="#1C1917" />
-        </mesh>
-        <mesh position={[0.42, 0.05, 0.2]} rotation={[0, 0.4, -0.2]}>
-          <boxGeometry args={[0.16, 0.05, 0.04]} />
-          <meshStandardMaterial color="#1C1917" />
-        </mesh>
-
-        {/* Cream Snout */}
-        <mesh position={[0, -0.1, 0.4]}>
-          <sphereGeometry args={[0.26, 32, 32]} />
-          <meshStandardMaterial color="#FEF3C7" roughness={0.4} />
-        </mesh>
-
-        {/* Dark Nose */}
-        <mesh position={[0, 0.02, 0.62]}>
-          <sphereGeometry args={[0.075, 16, 16]} />
-          <meshStandardMaterial color="#1C1917" roughness={0.1} />
-        </mesh>
-
-        {/* Whiskers */}
-        <mesh position={[-0.3, -0.06, 0.5]} rotation={[0, 0, 0.1]}>
-          <boxGeometry args={[0.2, 0.015, 0.015]} />
-          <meshStandardMaterial color="#1C1917" />
-        </mesh>
-        <mesh position={[0.3, -0.06, 0.5]} rotation={[0, 0, -0.1]}>
-          <boxGeometry args={[0.2, 0.015, 0.015]} />
-          <meshStandardMaterial color="#1C1917" />
-        </mesh>
-
-        {/* Eyes */}
-        <mesh ref={leftEyeRef} position={[-0.2, 0.12, 0.45]}>
-          <sphereGeometry args={[0.085, 16, 16]} />
-          <meshStandardMaterial color="#09090B" roughness={0.05} />
-        </mesh>
-        <mesh ref={rightEyeRef} position={[0.2, 0.12, 0.45]}>
-          <sphereGeometry args={[0.085, 16, 16]} />
-          <meshStandardMaterial color="#09090B" roughness={0.05} />
-        </mesh>
-
-        {/* Eye Shine */}
-        <mesh position={[-0.23, 0.15, 0.52]}>
-          <sphereGeometry args={[0.026, 8, 8]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0} />
-        </mesh>
-        <mesh position={[0.17, 0.15, 0.52]}>
-          <sphereGeometry args={[0.026, 8, 8]} />
-          <meshStandardMaterial color="#FFFFFF" roughness={0} />
-        </mesh>
-
-        {/* Outer & Inner Left Ear with Twitch Ref */}
-        <group ref={leftEarRef} position={[-0.42, 0.45, 0]}>
-          <mesh position={[0, 0, 0]}>
-            <sphereGeometry args={[0.18, 16, 16]} />
-            <meshStandardMaterial color="#1C1917" />
-          </mesh>
-          <mesh position={[0.02, 0, 0.07]}>
-            <sphereGeometry args={[0.11, 16, 16]} />
-            <meshStandardMaterial color="#FEF3C7" />
-          </mesh>
-        </group>
-
-        {/* Outer & Inner Right Ear with Twitch Ref */}
-        <group ref={rightEarRef} position={[0.42, 0.45, 0]}>
-          <mesh position={[0, 0, 0]}>
-            <sphereGeometry args={[0.18, 16, 16]} />
-            <meshStandardMaterial color="#1C1917" />
-          </mesh>
-          <mesh position={[-0.02, 0, 0.07]}>
-            <sphereGeometry args={[0.11, 16, 16]} />
-            <meshStandardMaterial color="#FEF3C7" />
-          </mesh>
-        </group>
-      </group>
-
-      {/* 🧥 BODY GROUP */}
-      <mesh ref={bodyRef} position={[0, -0.15, 0]}>
-        <capsuleGeometry args={[0.35, 0.45, 16, 32]} />
-        <meshStandardMaterial color={getTigerBodyColor()} roughness={0.3} />
-      </mesh>
-
-      {/* Cream Belly */}
-      <mesh position={[0, -0.15, 0.2]}>
-        <sphereGeometry args={[0.26, 32, 32]} />
-        <meshStandardMaterial color="#FEF3C7" roughness={0.4} />
-      </mesh>
-
-      {/* Gold T1GER Badge */}
-      <mesh position={[0, -0.05, 0.35]} rotation={[0, 0, Math.PI / 4]}>
-        <boxGeometry args={[0.075, 0.075, 0.04]} />
-        <meshStandardMaterial color="#F59E0B" metalness={0.8} roughness={0.2} />
-      </mesh>
-
-      {/* 🐾 ARMS */}
-      <mesh ref={leftArmRef} position={[-0.4, -0.05, 0]}>
-        <capsuleGeometry args={[0.1, 0.3, 8, 16]} />
-        <meshStandardMaterial color={getTigerBodyColor()} />
-      </mesh>
-      <mesh ref={rightArmRef} position={[0.4, -0.05, 0]}>
-        <capsuleGeometry args={[0.1, 0.3, 8, 16]} />
-        <meshStandardMaterial color={getTigerBodyColor()} />
-      </mesh>
-
-      {/* 🐾 TAIL WITH WAG PHYSICS */}
-      <group ref={tailRef} position={[0, -0.38, -0.25]}>
-        <mesh position={[0, -0.12, -0.15]} rotation={[-0.5, 0, 0]}>
-          <capsuleGeometry args={[0.06, 0.35, 8, 16]} />
-          <meshStandardMaterial color={getTigerBodyColor()} />
-        </mesh>
-      </group>
-
-      {/* Feet */}
-      <mesh position={[-0.18, -0.5, 0.08]}>
-        <sphereGeometry args={[0.13, 16, 16]} />
-        <meshStandardMaterial color="#1C1917" />
-      </mesh>
-      <mesh position={[0.18, -0.5, 0.08]}>
-        <sphereGeometry args={[0.13, 16, 16]} />
-        <meshStandardMaterial color="#1C1917" />
-      </mesh>
+    <group ref={rootRef} position={[0, closeUp ? -0.015 : -0.03, 0]} scale={[MODEL_ASPECT_X, 1, 1]}>
+      <primitive object={model} />
     </group>
   );
 }
 
-// GLTF Loader Component for real TRELLIS.2 GLB Models
-function GLBModel({ url }: { url: string }) {
-  const { scene } = useGLTF(url);
-  return <primitive object={scene} scale={1.8} position={[0, -0.8, 0]} />;
+function DemandFrameDriver({ paused }: { paused: boolean }) {
+  const invalidate = useThree(state => state.invalidate);
+
+  useEffect(() => {
+    invalidate();
+    if (paused) return;
+
+    const interval = window.setInterval(() => {
+      if (!document.hidden) invalidate();
+    }, 1000 / 30);
+
+    const refresh = () => invalidate();
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, [invalidate, paused]);
+
+  return null;
 }
 
 export const T1gerMascot3D: React.FC<MascotProps> = ({
-  modelPath,
+  modelPath = DEFAULT_MODEL,
   mood = 'idle',
-  className = 'w-44 h-44',
+  className = 'h-44 w-44',
   closeUp = false,
 }) => {
-  // ANTI-CLIPPING CAMERA FRAMING WITH 25% SAFETY PADDING
-  const cameraPos: [number, number, number] = closeUp ? [0, 0.55, 1.65] : [0, 0.2, 3.2];
+  const cameraPosition: Point3 = closeUp ? [0, 0.04, 3.58] : [0, 0.03, 3.34];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { amount: .1 });
+  const prefersReducedMotion = Boolean(useReducedMotion());
 
   return (
-    <div className={`relative ${className} select-none flex items-center justify-center pointer-events-none`}>
+    <div
+      ref={containerRef}
+      className={`relative flex select-none items-center justify-center pointer-events-none ${className}`}
+      aria-hidden="true"
+    >
       <Canvas
-        camera={{ position: cameraPos, fov: closeUp ? 40 : 42 }}
-        gl={{ antialias: true, alpha: true }}
+        frameloop="demand"
+        camera={{ position: cameraPosition, fov: closeUp ? 35 : 36, near: 0.1, far: 20 }}
+        dpr={[1, 1.35]}
+        performance={{ min: .65 }}
+        gl={{
+          antialias: true,
+          alpha: true,
+          powerPreference: 'high-performance',
+          toneMapping: THREE.NeutralToneMapping,
+          toneMappingExposure: 1,
+        }}
+        onCreated={({ camera, gl }) => {
+          camera.lookAt(0, -0.02, 0);
+          gl.outputColorSpace = THREE.SRGBColorSpace;
+        }}
       >
-        <ambientLight intensity={1.1} />
-        <directionalLight position={[4, 8, 6]} intensity={1.6} color="#FFF7ED" />
-        <pointLight position={[-4, -2, -2]} intensity={0.6} color="#FF7300" />
-        <pointLight position={[0, 2, 2]} intensity={0.5} color="#FFD700" />
+        <DemandFrameDriver paused={!isInView || prefersReducedMotion} />
+        <ambientLight intensity={0.58} color="#FFF6EC" />
+        <hemisphereLight args={['#FFF2DF', '#30241E', 0.9]} />
+        <directionalLight position={[3.2, 4.8, 5.5]} intensity={1.72} color="#FFF1DE" />
+        <directionalLight position={[-3.8, 1.4, 4]} intensity={0.46} color="#DBEEE9" />
+        <pointLight position={[1.8, -2.2, 3.2]} intensity={0.22} color="#F3A169" />
 
-        <Suspense fallback={<ReactiveTiger3D mood={mood} />}>
-          <Float speed={closeUp ? 0.8 : 1.5} rotationIntensity={closeUp ? 0.02 : 0.08} floatIntensity={closeUp ? 0.02 : 0.12}>
-            {modelPath ? <GLBModel url={modelPath} /> : <ReactiveTiger3D mood={mood} />}
-          </Float>
+        <Suspense fallback={null}>
+          <ReactiveTigerModel url={modelPath} mood={mood} closeUp={closeUp} reducedMotion={prefersReducedMotion} />
         </Suspense>
       </Canvas>
     </div>
   );
 };
+
+useGLTF.preload(DEFAULT_MODEL);
