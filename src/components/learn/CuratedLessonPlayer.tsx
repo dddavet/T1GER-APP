@@ -22,6 +22,9 @@ import { getMissionPlaybook } from '../../services/missionBank';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { useBrain } from '../../contexts/BrainContext';
 
+import { LessonSummaryModal } from './LessonSummaryModal';
+import { StreakCelebrationModal } from '../StreakCelebrationModal';
+
 interface CuratedLessonPlayerProps {
   mission: BankMission;
   onClose: () => void;
@@ -34,8 +37,14 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   onExecuteApplyMission,
 }) => {
   const { addXP } = useT1ger();
-  const { completeMission } = useBrain();
+  const { completeMission, language, learnStreak } = useBrain();
+  const isEs = language === 'es';
   const playbook = getMissionPlaybook(mission);
+
+  const startTimeRef = React.useRef(Date.now());
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [showSummary, setShowSummary] = useState(false);
+  const [showStreakModal, setShowStreakModal] = useState(false);
 
   // 4 Cards: 1. Source & Mental Model, 2. Tools Comparison, 3. Step-by-Step Protocol, 4. Action Bridge
   const totalCards = 4;
@@ -45,16 +54,28 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
     if (currentCard < totalCards - 1) {
       setCurrentCard((prev) => prev + 1);
     } else {
-      // Complete lesson reading phase and bridge to the Real Apply Mission
+      // Calculate elapsed time
+      const seconds = Math.max(15, Math.round((Date.now() - startTimeRef.current) / 1000));
+      setElapsedSeconds(seconds);
       completeMission(mission.id, mission.competency, 100);
-      addXP(60);
-      onExecuteApplyMission(mission);
+      addXP(mission.xpReward || 100);
+      setShowSummary(true);
     }
+  };
+
+  const handleSummaryContinue = () => {
+    setShowSummary(false);
+    setShowStreakModal(true);
+  };
+
+  const handleStreakClose = () => {
+    setShowStreakModal(false);
+    onExecuteApplyMission(mission);
   };
 
   const handlePrev = () => {
     if (currentCard > 0) {
-      setCurrentCard((prev) => prev - 1);
+      setCurrentCard((prev) => prev + 1);
     }
   };
 
@@ -362,6 +383,25 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
           </button>
         </div>
       </div>
+
+      {/* DUOLINGO LESSON SUMMARY MODAL (Time, Accuracy, Total XP, Mascot celebration) */}
+      <LessonSummaryModal
+        isOpen={showSummary}
+        onContinue={handleSummaryContinue}
+        xpEarned={mission.xpReward || 100}
+        timeSpentSeconds={elapsedSeconds}
+        accuracyPercentage={100}
+        lessonTitle={mission.title}
+        isEs={isEs}
+      />
+
+      {/* STREAK CELEBRATION MODAL */}
+      <StreakCelebrationModal
+        isOpen={showStreakModal}
+        onClose={handleStreakClose}
+        previousStreak={Math.max(0, learnStreak - 1)}
+        newStreak={learnStreak}
+      />
     </div>
   );
 };

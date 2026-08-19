@@ -24,6 +24,7 @@ import { localizeMission } from '../services/contentLocalization';
 import { fireRewardConfetti } from './ui/confetti';
 import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
 import { StreakCelebrationModal } from './StreakCelebrationModal';
+import { LessonSummaryModal } from './learn/LessonSummaryModal';
 
 interface MissionEngineProps {
   mission: BankMission;
@@ -53,6 +54,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   const isApply = mission.nodeType === 'apply' || mission.type === 'real_world_task';
   const alreadyCompleted = brainState.missionHistory.some(record => record.missionId === mission.id && record.completed);
 
+  const startTimeRef = React.useRef(Date.now());
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [learnStage, setLearnStage] = useState<LearnStage>('concept');
   const [applyStage, setApplyStage] = useState<ApplyStage>('brief');
   const [completedFramework, setCompletedFramework] = useState<number[]>([]);
@@ -67,6 +70,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   const [error, setError] = useState('');
   const [complete, setComplete] = useState(alreadyCompleted);
   const [submitting, setSubmitting] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
 
   const options = useMemo<QuizOption[]>(() => {
@@ -154,11 +158,10 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           ...trades.map(trade => ({ ...trade, missionId: mission.id, createdAt: Date.now(), environment: 'simulation' })),
         ]));
       }
-      completeMission(mission.id, 100);
-      await addXP(mission.xpReward || 100, mission.verificationTier, `mission:${mission.id}`);
-      fireRewardConfetti();
+      const seconds = Math.max(20, Math.round((Date.now() - startTimeRef.current) / 1000));
+      setElapsedSeconds(seconds);
       setComplete(true);
-      setShowStreakCelebration(true);
+      setShowSummaryModal(true);
     } finally {
       setSubmitting(false);
     }
@@ -171,28 +174,21 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   if (complete) {
     return (
       <>
-        <main className="t1ger-mission-shell min-h-[100dvh] px-5 pb-8 pt-[calc(1.25rem+env(safe-area-inset-top))]">
-          <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-md flex-col justify-center">
-            <motion.section initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} className="t1ger-panel p-7 text-center">
-              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-[1.4rem] bg-[var(--t1ger-orange)] text-white shadow-[0_14px_32px_rgba(239,112,48,.28)]">
-                {mission.verificationTier === 1 ? <ShieldCheck size={32} /> : <CheckCircle2 size={32} />}
-              </div>
-              <p className="t1ger-kicker">{mission.verificationTier === 1 ? (isEs ? 'Progreso verificado' : 'Verified progress') : (isEs ? 'Progreso personal' : 'Personal progress')}</p>
-              <h1 className="mt-2 text-balance text-3xl font-semibold tracking-[-0.04em] text-white">
-                {isApply
-                  ? (isEs ? 'Convertiste una idea en acción.' : 'You turned an idea into action.')
-                  : (isEs ? 'Aprendiste una idea clave.' : 'You learned a key idea.')}
-              </h1>
-              <p className="mx-auto mt-4 max-w-sm text-sm leading-6 text-[#9DBAB4]">
-                {isEs ? `Progreso guardado: +${mission.xpReward} XP.` : `Progress saved: +${mission.xpReward} XP.`}
-              </p>
-              <button onClick={() => setShowStreakCelebration(true)} className="t1ger-primary-button mt-8 w-full">
-                {isEs ? 'Ver Racha' : 'View Streak'} <ArrowRight size={18} />
-              </button>
-            </motion.section>
-          </div>
-        </main>
+        {/* DUOLINGO STATS SUMMARY MODAL (Time, Accuracy, Total XP, Mascot Celebration) */}
+        <LessonSummaryModal
+          isOpen={showSummaryModal}
+          onContinue={() => {
+            setShowSummaryModal(false);
+            setShowStreakCelebration(true);
+          }}
+          xpEarned={mission.xpReward || 100}
+          timeSpentSeconds={elapsedSeconds}
+          accuracyPercentage={100}
+          lessonTitle={mission.title}
+          isEs={isEs}
+        />
 
+        {/* STREAK CELEBRATION MODAL */}
         <StreakCelebrationModal
           isOpen={showStreakCelebration}
           onClose={() => {
