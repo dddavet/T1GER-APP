@@ -28,7 +28,6 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
   const { brainState, language, pathData, switchTrack } = useBrain();
   const isEs = language === 'es';
 
-  const [activePlaybookMission, setActivePlaybookMission] = useState<BankMission | null>(null);
   const [activeRewardChest, setActiveRewardChest] = useState<{ title: string; badge: string } | null>(null);
 
   const completedMissionIds = useMemo(
@@ -40,15 +39,6 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
   );
 
   const handleNodeClick = (mission: BankMission) => {
-    if (mission.nodeType === 'learn' || !mission.verificationMethod || mission.verificationMethod === 'honor_system') {
-      setActivePlaybookMission(mission);
-    } else {
-      onStartMission?.(mission);
-    }
-  };
-
-  const handleExecuteApply = (mission: BankMission) => {
-    setActivePlaybookMission(null);
     onStartMission?.(mission);
   };
 
@@ -208,18 +198,7 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
         })}
       </div>
 
-      {/* 4. CURATED EXECUTIVE PLAYBOOK READER (Learn -> Apply) */}
-      <AnimatePresence>
-        {activePlaybookMission && (
-          <CuratedLessonPlayer
-            mission={activePlaybookMission}
-            onClose={() => setActivePlaybookMission(null)}
-            onExecuteApplyMission={handleExecuteApply}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* 5. BOOK COMPLETION TREASURE CHEST MODAL */}
+      {/* 4. BOOK COMPLETION TREASURE CHEST MODAL */}
       <BookChestRewardModal
         isOpen={Boolean(activeRewardChest)}
         onClose={() => setActiveRewardChest(null)}

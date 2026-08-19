@@ -16,6 +16,7 @@ import { EveningInterrogation } from './components/EveningInterrogation';
 import { Simulator } from './pages/Simulator';
 import { OfflineBanner } from './components/ui/OfflineBanner';
 import { CoachFAB } from './components/CoachFAB';
+import { CuratedLessonPlayer } from './components/learn/CuratedLessonPlayer';
 
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { generateAdaptiveLesson } from './services/gemini';
@@ -262,7 +263,18 @@ const AppContent = () => {
   const transitionContext = { direction, isTab: isTabTransition };
 
   const activeContent = (() => {
-    if (activeView === 'mission' && activeMission) return <MissionEngine mission={activeMission} onComplete={() => setActiveView('learn')} />;
+    if (activeView === 'mission' && activeMission) {
+      if (activeMission.type === 'book_lesson' || activeMission.nodeType === 'learn') {
+        return (
+          <CuratedLessonPlayer
+            mission={activeMission}
+            onClose={() => setActiveView('learn')}
+            onExecuteApplyMission={(applyMission) => startMission(applyMission)}
+          />
+        );
+      }
+      return <MissionEngine mission={activeMission} onComplete={() => setActiveView('learn')} />;
+    }
     if (activeView === 'debrief') return <EveningInterrogation onComplete={() => setActiveView('learn')} />;
     if (activeView === 'build') return <BuildTab onStartMission={startMission} />;
     if (activeView === 'learn') return <Learn onStartMission={startMission} />;

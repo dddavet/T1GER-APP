@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
@@ -38,27 +39,28 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   onExecuteApplyMission,
 }) => {
   const { addXP } = useT1ger();
-  const { completeMission, language, learnStreak } = useBrain();
+  const { language, completeMissionStep, brainState } = useBrain();
   const isEs = language === 'es';
-  const playbook = getMissionPlaybook(mission);
 
-  const startTimeRef = React.useRef(Date.now());
+  const playbook = getMissionPlaybook(mission);
+  const [currentCard, setCurrentCard] = useState(0); // 0 to 3 (4 cards)
+  const totalCards = 4;
+
+  const [startTime] = useState<number>(() => Date.now());
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
 
-  // 4 Cards: 1. Source & Mental Model, 2. Tools Comparison, 3. Step-by-Step Protocol, 4. Action Bridge
-  const totalCards = 4;
-  const [currentCard, setCurrentCard] = useState(0);
+  const learnStreak = brainState.learnStreak?.current || brainState.streak?.current || 1;
 
   const handleNext = () => {
     if (currentCard < totalCards - 1) {
       setCurrentCard((prev) => prev + 1);
     } else {
-      // Calculate elapsed time
-      const seconds = Math.max(15, Math.round((Date.now() - startTimeRef.current) / 1000));
-      setElapsedSeconds(seconds);
-      completeMission(mission.id, mission.competency, 100);
+      // Completed all 4 cards -> Show Duolingo celebratory summary!
+      const totalTime = Math.max(12, Math.round((Date.now() - startTime) / 1000));
+      setElapsedSeconds(totalTime);
+      completeMissionStep(mission.id);
       addXP(mission.xpReward || 100);
       setShowSummary(true);
     }
@@ -76,12 +78,12 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
 
   const handlePrev = () => {
     if (currentCard > 0) {
-      setCurrentCard((prev) => prev + 1);
+      setCurrentCard((prev) => prev - 1);
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-[#09090B] text-zinc-100 select-none overflow-hidden">
+  const content = (
+    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#09090B] text-zinc-100 select-none overflow-hidden">
       {/* Top Header & Segmented Progress Bar */}
       <div className="safe-top px-4 pt-4 pb-2 border-b border-white/8 bg-[#09090B]/90 backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 mb-3">
@@ -367,21 +369,23 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
 
-        {/* Bottom Navigation Buttons */}
-        <div className="pt-6 pb-2 flex items-center gap-3">
+      {/* Fixed Bottom Navigation Buttons */}
+      <div className="safe-bottom p-4 border-t border-white/8 bg-[#09090B]/95 backdrop-blur-md max-w-lg mx-auto w-full">
+        <div className="flex items-center gap-3">
           {currentCard > 0 && (
             <button
               onClick={handlePrev}
-              className="flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
             >
-              <ArrowLeft size={20} />
+              <ArrowLeft size={18} />
             </button>
           )}
 
           <button
             onClick={handleNext}
-            className="flex-1 py-4 rounded-2xl font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 bg-[var(--ob-accent)] hover:brightness-110 text-black shadow-[0_0_30px_rgba(255,115,0,0.35)] transition-all active:scale-98 cursor-pointer"
+            className="flex-1 py-3.5 rounded-2xl font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 bg-[var(--ob-accent)] hover:brightness-110 text-black shadow-[0_0_25px_rgba(255,115,0,0.35)] transition-all active:scale-98 cursor-pointer"
           >
             {currentCard < totalCards - 1 ? (
               <>
@@ -418,4 +422,6 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
       />
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
 };

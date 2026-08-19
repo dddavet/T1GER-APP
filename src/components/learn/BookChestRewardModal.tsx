@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Trophy, Gift, ArrowRight, Award, Download, Check, Coins } from 'lucide-react';
 import { T1gerMascot3D } from '../T1gerMascot3D';
@@ -41,13 +42,13 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[1000] flex flex-col items-center justify-between bg-gradient-to-b from-[#1C0F05] via-[#0D0907] to-[#09090B] px-6 py-8 font-sans text-white select-none overflow-y-auto"
+        className="fixed inset-0 z-[10000] flex flex-col items-center justify-between bg-gradient-to-b from-[#1C0F05] via-[#0D0907] to-[#09090B] px-6 py-8 font-sans text-white select-none overflow-y-auto"
       >
         {/* Header */}
         <div className="w-full max-w-sm text-center pt-4">
@@ -58,22 +59,17 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
             {isEs ? `¡Completaste ${bookTitle}!` : `You Mastered ${bookTitle}!`}
           </h1>
           <p className="text-xs text-zinc-400 mt-1 font-medium">
-            {isEs ? 'Desbloqueaste el cofre de recompensas de este libro.' : 'You unlocked the master treasure chest.'}
+            {isEs ? 'Has desbloqueado el botín de maestría de este libro.' : 'You unlocked the mastery loot for this book.'}
           </p>
         </div>
 
-        {/* Center: Interactive Chest or 3D Mascot with Badge */}
-        <div className="my-auto relative flex flex-col items-center justify-center">
+        {/* 3D Chest & Mascot Core */}
+        <div className="my-auto flex flex-col items-center justify-center relative w-full max-w-xs">
           {!chestOpened ? (
             <motion.div
-              initial={{ scale: 0.8 }}
-              animate={{ scale: [1, 1.05, 1], rotate: [-1, 1, -1] }}
-              transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.92 }}
               onClick={handleOpenChest}
-              className="cursor-pointer group flex flex-col items-center"
-            >
-              {/* Glowing Aura */}
-              <div className="absolute h-56 w-56 rounded-full bg-[radial-gradient(circle,#FF7300_0%,transparent_70%)] opacity-50 blur-3xl" />
               
               <div className="relative flex h-40 w-40 items-center justify-center rounded-3xl bg-gradient-to-b from-amber-400 to-[var(--ob-accent)] text-black shadow-[0_0_50px_rgba(255,115,0,0.5),0_12px_0_#994700] group-hover:scale-105 active:translate-y-2 active:shadow-[0_2px_0_#994700] transition-all">
                 <Gift size={72} className="stroke-[2.5]" />
@@ -139,4 +135,6 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
       </motion.div>
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
