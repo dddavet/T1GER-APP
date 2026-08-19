@@ -25,7 +25,7 @@ export const HUD = React.memo(() => {
 
   return (
     <>
-      <header className="z-40 flex w-full flex-none items-center justify-between border-b border-white/6 bg-[#071C19]/92 px-4 pb-3 pt-[calc(.8rem+env(safe-area-inset-top))] backdrop-blur-xl select-none">
+      <header className="z-40 flex w-full flex-none items-center justify-between border-b border-white/8 bg-[#09090B]/95 px-3.5 pb-3 pt-[calc(.8rem+env(safe-area-inset-top))] backdrop-blur-xl select-none">
         {/* Left: T1GER Logo & Level */}
         <div className="flex items-center gap-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-transparent">

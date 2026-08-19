@@ -24,7 +24,7 @@ export const NavDock = React.memo(() => {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[calc(.65rem+env(safe-area-inset-bottom))]">
       <nav
         aria-label={isEs ? 'Navegación principal' : 'Primary navigation'}
-        className="pointer-events-auto flex w-full max-w-[25rem] items-center gap-1 rounded-[1.65rem] border border-white/[.09] bg-[#0A2722]/98 p-1.5 shadow-[0_20px_52px_rgba(0,16,13,.48),inset_0_1px_0_rgba(255,255,255,.055)]"
+        className="pointer-events-auto flex w-full max-w-[25rem] items-center gap-1 rounded-[1.65rem] border border-white/12 bg-[#121216]/95 backdrop-blur-xl p-1.5 shadow-[0_20px_52px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,.05)]"
       >
         {tabs.map(tab => {
           const active = activeView === tab.id;

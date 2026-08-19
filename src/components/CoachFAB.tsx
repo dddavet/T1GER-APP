@@ -7,7 +7,7 @@ export const CoachFAB = React.memo(() => {
   const { setActiveView, activeView } = useT1ger();
   const [isHovered, setIsHovered] = React.useState(false);
 
-  if (activeView === 'coach' || activeView === 'mission' || activeView === 'debrief') {
+  if (activeView === 'coach' || activeView === 'mission' || activeView === 'debrief' || activeView === 'learn') {
     return null;
   }
 
