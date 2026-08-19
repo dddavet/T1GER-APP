@@ -82,8 +82,8 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
     }
   };
 
-  const content = (
-    <div className="fixed inset-0 z-[9999] flex flex-col bg-[#09090B] text-zinc-100 select-none overflow-hidden">
+  return (
+    <div className="flex-1 flex flex-col h-full min-h-[100dvh] bg-[#09090B] text-zinc-100 select-none overflow-hidden">
       {/* Top Header & Segmented Progress Bar */}
       <div className="safe-top px-4 pt-4 pb-2 border-b border-white/8 bg-[#09090B]/90 backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 mb-3">
@@ -422,6 +422,4 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
       />
     </div>
   );
-
-  return typeof document !== 'undefined' ? createPortal(content, document.body) : content;
 };
