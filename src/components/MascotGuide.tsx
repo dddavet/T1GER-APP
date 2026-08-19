@@ -49,10 +49,10 @@ export const MascotGuide = React.memo(({
       {/* Duolingo Speech Bubble with Left Tail Pointer */}
       <motion.div
         layout
-        className="relative flex-1 rounded-[1.4rem] border border-white/10 bg-[#0B2925] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_24px_rgba(0,0,0,0.3)]"
+        className="relative flex-1 rounded-[1.4rem] border border-white/12 bg-[#141418] px-4 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_8px_24px_rgba(0,0,0,0.4)]"
       >
         {/* Pointer Arrow Tail */}
-        <span className="absolute left-[-0.45rem] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rotate-45 border-b border-l border-white/10 bg-[#0B2925]" />
+        <span className="absolute left-[-0.45rem] top-1/2 h-3.5 w-3.5 -translate-y-1/2 rotate-45 border-b border-l border-white/12 bg-[#141418]" />
 
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
