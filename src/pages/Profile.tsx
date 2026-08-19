@@ -81,8 +81,38 @@ export const Profile = () => {
       <MascotGuide surface="profile" />
 
       <motion.section initial="hidden" animate="shown" variants={{ hidden: {}, shown: { transition: { staggerChildren: .045 } } }} className="grid grid-cols-3 gap-2">
-        {[{ value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' }, { value: learnStreak, label: isEs ? 'racha' : 'streak' }, { value: stats.verifiedXP, label: 'vXP' }].map(item => <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 10 }, shown: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 30 } } }} className="transform-gpu rounded-[1.15rem] bg-[#0B2925] p-4 text-center"><span className="block font-mono text-lg font-semibold text-white">{item.value}</span><span className="mt-1 block text-[11px] text-[#6F918A]">{item.label}</span></motion.div>)}
+        {[{ value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' }, { value: learnStreak, label: isEs ? 'racha' : 'streak' }, { value: stats.verifiedXP, label: 'vXP' }].map(item => <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 10 }, shown: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 30 } } }} className="transform-gpu rounded-[1.15rem] bg-[#121216] border border-white/8 p-4 text-center"><span className="block font-mono text-lg font-semibold text-white">{item.value}</span><span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span></motion.div>)}
       </motion.section>
+
+      {/* Direct Wireless APK Download Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="rounded-2xl border border-[var(--ob-accent)]/30 bg-[var(--ob-accent)]/[0.06] p-4 flex items-center justify-between gap-3 shadow-lg"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ob-accent)] text-black">
+            <Smartphone size={20} />
+          </div>
+          <div>
+            <h3 className="text-xs font-bold text-white uppercase tracking-wide">
+              {isEs ? 'App Nativa para tu Celular' : 'Native Android App'}
+            </h3>
+            <p className="text-[11px] text-zinc-400 mt-0.5">
+              {isEs ? 'Descarga directa sin conectar cables' : 'Direct wireless APK download'}
+            </p>
+          </div>
+        </div>
+        <a
+          href="https://github.com/dddavet/T1GER-APP/raw/codex/t1ger-onboarding-redesign/releases/t1ger.apk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-3.5 py-2 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-black tracking-wide flex items-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer shrink-0"
+        >
+          <Download size={14} />
+          <span>{isEs ? 'DESCARGAR' : 'DOWNLOAD'}</span>
+        </a>
+      </motion.div>
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .08 }} className="t1ger-panel transform-gpu overflow-hidden">
         <div className="border-b border-white/7 p-5"><p className="t1ger-kicker">{isEs ? 'Cuenta y experiencia' : 'Account and experience'}</p></div>
