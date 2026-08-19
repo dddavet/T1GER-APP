@@ -7,20 +7,37 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:263001013008:android:11d151e0e5abfeef614395",
+        "mobilesdk_app_id": "1:263001013008:android:302c5783dc2595b6614395",
         "android_client_info": {
           "package_name": "com.dddavet.tiger"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "263001013008-9imoa14v2i9qlg7uupgf8rmeufuoa024.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyA5otjKee-NDSHRuQwPfgP7sDfbqOXFYFc"
+          "current_key": "AIzaSyBGLY2GEnnuORnWGR1FHgV8kuPjhe32JVY"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "263001013008-9imoa14v2i9qlg7uupgf8rmeufuoa024.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "263001013008-up9hcg1ec0ssotrvqj1lj6c28f6gar8j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dddavet.tiger"
+              }
+            }
+          ]
         }
       }
     }

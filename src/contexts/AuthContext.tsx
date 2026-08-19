@@ -496,7 +496,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userRef = doc(db, 'users', firebaseUser.uid);
-      const userSnap = await getDoc(userRef);
+      const userSnap = await Promise.race([
+        getDoc(userRef),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('Firestore profile fetch timeout')), 2000))
+      ]);
 
       if (userSnap.exists()) {
         const existingUser = userSnap.data() as AppUser;
@@ -598,6 +601,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 1200);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
       try {
@@ -611,10 +618,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error('Auth initialization failed:', err);
       } finally {
         setLoading(false);
+        clearTimeout(safetyTimer);
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      clearTimeout(safetyTimer);
+    };
   }, [fetchAppUser]);
 
   const value = React.useMemo(() => ({
