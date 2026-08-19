@@ -38,6 +38,23 @@ export interface LearningSource {
   url?: string;
 }
 
+export interface MicroLessonCard {
+  id: string;
+  type: 'concept' | 'diagram' | 'dilemma' | 'recall';
+  title: string;
+  subtitle?: string;
+  content: string;
+  highlight?: string;
+  tags?: string[];
+  visual?: {
+    type: 'metric' | 'comparison' | 'formula' | 'checklist';
+    items?: { label: string; value: string; desc?: string; positive?: boolean }[];
+    equation?: { left: string; operator: string; right: string; result: string };
+  };
+  options?: QuizOption[];
+  feedback?: { correct: string; incorrect: string };
+}
+
 export interface BankMission {
   id: string;
   nodeType?: 'learn' | 'apply'; // NEW: Distinguishes between theory and practice
@@ -68,6 +85,69 @@ export interface BankMission {
   minTimeMinutes?: number; // NEW: Validation for minimum time spent
   requiredTrades?: number;
   xpReward: number;
+  microCards?: MicroLessonCard[];
+}
+
+/**
+ * Builds a structured Kinnu-style 4-card sequence from any BankMission.
+ */
+export function getMissionMicroCards(mission: BankMission): MicroLessonCard[] {
+  if (mission.microCards?.length) return mission.microCards;
+
+  const concept = mission.concept || 'Master the core foundational principle.';
+  const takeaway = mission.keyTakeaway || 'Apply this model in your next business decision.';
+  const question = mission.recallQuestion || mission.scenario || 'What is the core strategic takeaway?';
+  const options = mission.recallOptions || mission.options || [
+    { text: takeaway, correct: true },
+    { text: 'Short-term outcomes always justify improper risk.', correct: false },
+    { text: 'More complexity is always better than execution.', correct: false }
+  ];
+
+  return [
+    {
+      id: `${mission.id}-card-1`,
+      type: 'concept',
+      title: mission.title,
+      subtitle: 'MODELO MENTAL',
+      content: concept,
+      highlight: takeaway,
+      tags: [mission.competency.toUpperCase(), `${mission.xpReward} XP`]
+    },
+    {
+      id: `${mission.id}-card-2`,
+      type: 'diagram',
+      title: 'Desglose Táctico',
+      subtitle: 'FRAMEWORK VISUAL',
+      content: takeaway,
+      visual: {
+        type: 'metric',
+        items: [
+          { label: 'Impacto', value: '+35%', desc: 'Claridad en toma de decisiones', positive: true },
+          { label: 'Riesgo', value: '-60%', desc: 'Reducción de errores impulsivos', positive: true }
+        ]
+      }
+    },
+    {
+      id: `${mission.id}-card-3`,
+      type: 'dilemma',
+      title: 'Simulación de Caso Real',
+      subtitle: 'DECISIÓN EN ALTO RIESGO',
+      content: mission.scenario || `Estás evaluando una oportunidad en ${mission.competency}. Un socio te propone una táctica rápida pero con fundamentos dudosos.`,
+      highlight: '¿Cuál es la decisión táctica correcta?'
+    },
+    {
+      id: `${mission.id}-card-4`,
+      type: 'recall',
+      title: 'Active Recall Check',
+      subtitle: 'COMPROBACIÓN DE RETENCIÓN',
+      content: question,
+      options,
+      feedback: {
+        correct: mission.recallExplanation || '¡Exacto! Tienes el criterio blindado.',
+        incorrect: mission.failureCritique || 'Recuerda: la base siempre es la consistencia y la evidencia.'
+      }
+    }
+  ];
 }
 
 const createInformationalLesson = (id: string, title: string, concept: string, keyTakeaway: string): BankMission => ({

@@ -771,3 +771,116 @@ export function getUserWeaknesses(state: BrainState): UserWeaknesses {
     recentFailedMissions
   };
 }
+
+// ============================================================
+// MEMORY SHIELD SYSTEM (Kinnu-Inspired Cognitive Engine)
+// ============================================================
+
+export interface NodeMemoryShield {
+  missionId: string;
+  percentage: number; // 0 to 100
+  status: 'locked' | 'unstarted' | 'optimum' | 'decaying' | 'vulnerable';
+  daysSinceReview: number;
+  stabilityDays: number;
+  dueDate: Date | null;
+}
+
+/**
+ * Calculates the exact Memory Shield retention curve for a specific mission.
+ * Uses FSRS card stability if available, or fallback decay time.
+ */
+export function getNodeMemoryShield(missionId: string, state: BrainState): NodeMemoryShield {
+  const card = state.fsrsCards?.[missionId];
+  const history = state.missionHistory.filter(r => r.missionId === missionId && r.completed);
+  
+  if (history.length === 0 && !card) {
+    return {
+      missionId,
+      percentage: 0,
+      status: 'unstarted',
+      daysSinceReview: 0,
+      stabilityDays: 0,
+      dueDate: null,
+    };
+  }
+
+  const lastReviewTime = card?.last_review ? new Date(card.last_review).getTime() : (history[history.length - 1]?.timestamp || Date.now());
+  const elapsedMs = Math.max(0, Date.now() - lastReviewTime);
+  const elapsedDays = elapsedMs / (1000 * 60 * 60 * 24);
+
+  // FSRS stability or default baseline of 3 days for first review
+  const stability = card?.stability || Math.max(1, history.length * 2.5);
+
+  // FSRS Retention Formula: R = (1 + factor * t / S)^power or exponential approx: R = e^(-ln(0.9) * t / S)
+  // Standard approximation: R = 0.9 ^ (elapsedDays / stability)
+  const retention = Math.pow(0.9, elapsedDays / stability);
+  const percentage = Math.max(5, Math.min(100, Math.round(retention * 100)));
+
+  let status: NodeMemoryShield['status'] = 'optimum';
+  if (percentage < 50) {
+    status = 'vulnerable';
+  } else if (percentage < 80) {
+    status = 'decaying';
+  }
+
+  const dueDate = card?.due ? new Date(card.due) : new Date(lastReviewTime + stability * 24 * 60 * 60 * 1000);
+
+  return {
+    missionId,
+    percentage,
+    status,
+    daysSinceReview: Math.round(elapsedDays * 10) / 10,
+    stabilityDays: Math.round(stability * 10) / 10,
+    dueDate,
+  };
+}
+
+/**
+ * Calculates the global memory shield index across all learned nodes (0 - 100%).
+ */
+export function getGlobalMemoryHealth(state: BrainState): { score: number; totalNodesLearned: number; vulnerableCount: number } {
+  const completedIds = Array.from(new Set(state.missionHistory.filter(r => r.completed).map(r => r.missionId)));
+  if (completedIds.length === 0) {
+    return { score: 100, totalNodesLearned: 0, vulnerableCount: 0 };
+  }
+
+  let totalScore = 0;
+  let vulnerableCount = 0;
+
+  for (const id of completedIds) {
+    const shield = getNodeMemoryShield(id, state);
+    totalScore += shield.percentage;
+    if (shield.status === 'vulnerable' || shield.status === 'decaying') {
+      vulnerableCount += 1;
+    }
+  }
+
+  return {
+    score: Math.round(totalScore / completedIds.length),
+    totalNodesLearned: completedIds.length,
+    vulnerableCount,
+  };
+}
+
+/**
+ * Retrieves the list of missions that need immediate shield recharging.
+ */
+export function getVulnerableShieldNodes(state: BrainState): BankMission[] {
+  const completedIds = Array.from(new Set(state.missionHistory.filter(r => r.completed).map(r => r.missionId)));
+  const vulnerableMissions: { mission: BankMission; percentage: number }[] = [];
+
+  for (const id of completedIds) {
+    const shield = getNodeMemoryShield(id, state);
+    if (shield.percentage < 80) {
+      const mission = MISSION_BANK.find(m => m.id === id);
+      if (mission) {
+        vulnerableMissions.push({ mission, percentage: shield.percentage });
+      }
+    }
+  }
+
+  return vulnerableMissions
+    .sort((a, b) => a.percentage - b.percentage)
+    .map(item => item.mission);
+}
+
