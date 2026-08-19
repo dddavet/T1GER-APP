@@ -238,8 +238,11 @@ export const Coach: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="h-2 w-2 rounded-full bg-[#10B981] animate-pulse" />
-          <span className="text-xs font-bold tracking-wider uppercase text-zinc-300">
+          <div className="relative w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+            <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
+            <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse border border-[#09090B]" />
+          </div>
+          <span className="text-sm font-bold tracking-wider uppercase text-zinc-200">
             T1GER AI
           </span>
           <span className="px-1.5 py-0.5 rounded bg-[var(--ob-accent)]/20 text-[9px] font-black text-[var(--ob-accent)] uppercase">
@@ -324,63 +327,72 @@ export const Coach: React.FC = () => {
                   transition={{ duration: 0.2 }}
                   className={`flex flex-col w-full ${isUser ? 'items-end' : 'items-start'}`}
                 >
-                  <div
-                    className={`max-w-[88%] text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] ${
-                      isUser
-                        ? 'rounded-2xl rounded-br-xs bg-white/[.08] border border-white/12 px-4 py-3 text-zinc-100 shadow-md backdrop-blur-md'
-                        : 'text-zinc-200 px-1 py-1 w-full'
-                    }`}
-                  >
-                    {message.image && (
-                      <img
-                        src={message.image}
-                        alt="Uploaded"
-                        className="mb-2 max-h-48 rounded-xl object-cover border border-white/10 max-w-full"
-                      />
-                    )}
-                    <p className="whitespace-pre-line leading-relaxed">{message.text}</p>
-
-                    {/* Interactive Action Checklist (If applicable) */}
-                    {message.checklist && message.checklist.length > 0 && (
-                      <div className="mt-3 space-y-1.5 rounded-2xl border border-white/8 bg-white/[.02] p-3">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--ob-accent)] mb-2">
-                          <ShieldCheck size={14} /> {isEs ? 'Acciones Clave' : 'Key Actions'}
-                        </div>
-                        {message.checklist.map((item, cIdx) => (
-                          <button
-                            key={cIdx}
-                            onClick={() => toggleChecklistItem(index, cIdx)}
-                            className="flex items-start gap-2.5 w-full text-left p-1.5 rounded-lg hover:bg-white/5 transition cursor-pointer text-xs"
-                          >
-                            {item.done ? (
-                              <CheckCircle2 size={16} className="text-[#3FC78E] shrink-0 mt-0.5" />
-                            ) : (
-                              <Circle size={16} className="text-zinc-500 shrink-0 mt-0.5" />
-                            )}
-                            <span className={item.done ? 'line-through text-zinc-500' : 'text-zinc-200'}>
-                              {item.text}
-                            </span>
-                          </button>
-                        ))}
+                  <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start gap-3'}`}>
+                    {!isUser && (
+                      <div className="shrink-0 mt-0.5 relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+                        <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
                       </div>
                     )}
-                  </div>
+                    <div className={`flex flex-col gap-2 ${isUser ? 'max-w-[88%]' : 'max-w-[calc(100%-2.5rem)]'}`}>
+                      <div
+                        className={`text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] ${
+                          isUser
+                            ? 'rounded-2xl rounded-br-xs bg-white/[.08] border border-white/12 px-4 py-3 text-zinc-100 shadow-md backdrop-blur-md'
+                            : 'text-zinc-200 py-1'
+                        }`}
+                      >
+                        {message.image && (
+                          <img
+                            src={message.image}
+                            alt="Uploaded"
+                            className="mb-2 max-h-48 rounded-xl object-cover border border-white/10 max-w-full"
+                          />
+                        )}
+                        <p className="whitespace-pre-line leading-relaxed">{message.text}</p>
 
-                  {/* Tactical Action Chips */}
-                  {!isUser && message.options && message.options.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2 pt-1 max-w-full">
-                      {message.options.map((opt, optIdx) => (
-                        <button
-                          key={optIdx}
-                          onClick={() => handleSend(opt)}
-                          disabled={loading || streamingText !== null}
-                          className="rounded-full border border-white/12 bg-white/[.04] px-3.5 py-1.5 text-left text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[.08] hover:border-[var(--ob-accent)]/50 transition-all cursor-pointer active:scale-95 shadow-xs break-words [overflow-wrap:anywhere]"
-                        >
-                          {opt}
-                        </button>
-                      ))}
+                        {/* Interactive Action Checklist (If applicable) */}
+                        {message.checklist && message.checklist.length > 0 && (
+                          <div className="mt-3 space-y-1.5 rounded-2xl border border-white/8 bg-white/[.02] p-3">
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[var(--ob-accent)] mb-2">
+                              <ShieldCheck size={14} /> {isEs ? 'Acciones Clave' : 'Key Actions'}
+                            </div>
+                            {message.checklist.map((item, cIdx) => (
+                              <button
+                                key={cIdx}
+                                onClick={() => toggleChecklistItem(index, cIdx)}
+                                className="flex items-start gap-2.5 w-full text-left p-1.5 rounded-lg hover:bg-white/5 transition cursor-pointer text-xs"
+                              >
+                                {item.done ? (
+                                  <CheckCircle2 size={16} className="text-[#3FC78E] shrink-0 mt-0.5" />
+                                ) : (
+                                  <Circle size={16} className="text-zinc-500 shrink-0 mt-0.5" />
+                                )}
+                                <span className={item.done ? 'line-through text-zinc-500' : 'text-zinc-200'}>
+                                  {item.text}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Tactical Action Chips */}
+                      {!isUser && message.options && message.options.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-2 pt-1 max-w-full">
+                          {message.options.map((opt, optIdx) => (
+                            <button
+                              key={optIdx}
+                              onClick={() => handleSend(opt)}
+                              disabled={loading || streamingText !== null}
+                              className="rounded-full border border-white/12 bg-white/[.04] px-3.5 py-1.5 text-left text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[.08] hover:border-[var(--ob-accent)]/50 transition-all cursor-pointer active:scale-95 shadow-xs break-words [overflow-wrap:anywhere]"
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </motion.div>
               );
             })}
@@ -390,13 +402,18 @@ export const Coach: React.FC = () => {
               <motion.div
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="flex flex-col items-start w-full"
+                className="flex items-start gap-3 w-full"
               >
-                <div className="w-full text-zinc-100 text-[14px] leading-relaxed px-1 py-1 break-words [overflow-wrap:anywhere]">
-                  <p className="whitespace-pre-line">
-                    {streamingText}
-                    <span className="inline-block w-2 h-4 ml-1 bg-[var(--ob-accent)] animate-pulse align-middle rounded-xs" />
-                  </p>
+                <div className="shrink-0 mt-0.5 relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+                  <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
+                </div>
+                <div className="flex flex-col gap-2 max-w-[calc(100%-2.5rem)]">
+                  <div className="text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] text-zinc-200 py-1">
+                    <p className="whitespace-pre-line">
+                      {streamingText}
+                      <span className="inline-block w-2 h-4 ml-1 bg-[var(--ob-accent)] animate-pulse align-middle rounded-xs" />
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             )}

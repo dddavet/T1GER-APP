@@ -15,13 +15,13 @@ export const AIOrb: React.FC<AIOrbProps> = ({
   const sizeClasses = {
     sm: 'w-16 h-16',
     md: 'w-32 h-32',
-    lg: 'w-48 h-48',
+    lg: 'w-64 h-64',
   }[size];
 
   const imageScale = {
-    sm: 'w-10 h-10',
-    md: 'w-20 h-20',
-    lg: 'w-32 h-32',
+    sm: 'w-14 h-14',
+    md: 'w-24 h-24',
+    lg: 'w-64 h-64',
   }[size];
 
   return (
