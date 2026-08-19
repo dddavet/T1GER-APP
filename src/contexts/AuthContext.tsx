@@ -9,7 +9,9 @@ import {
   sendSignInLinkToEmail,
   signInWithEmailAndPassword,
   signInWithEmailLink,
-  signInWithPopup
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -358,7 +360,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const googleSignIn = useCallback(async () => {
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    await signInWithPopup(auth, provider);
+    
+    // Check if we are in a mobile/tablet environment where popups often fail
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    if (isMobile) {
+      // Use redirect on mobile browsers to avoid popup blockers and COOP issues
+      await signInWithRedirect(auth, provider);
+    } else {
+      // Use popup on desktop
+      await signInWithPopup(auth, provider);
+    }
   }, []);
 
   const appleSignIn = useCallback(async () => {

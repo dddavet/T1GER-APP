@@ -15,6 +15,7 @@ import { SquadTab } from './components/social/SquadTab';
 import { EveningInterrogation } from './components/EveningInterrogation';
 import { Simulator } from './pages/Simulator';
 import { OfflineBanner } from './components/ui/OfflineBanner';
+import { CoachFAB } from './components/CoachFAB';
 
 import { OnboardingFlow } from './components/OnboardingFlow';
 import { generateAdaptiveLesson } from './services/gemini';
@@ -23,20 +24,28 @@ import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 
 import { AppSkeleton } from './components/ui/AppSkeleton';
 import { MissionSkeleton } from './components/ui/MissionSkeleton';
+import { OneSignalService } from './services/oneSignalService';
+import { MISSION_BANK } from './services/missionBank';
+
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { AndroidDeviceSimulator } from './components/AndroidDeviceSimulator';
 
 const TAB_VIEW_ORDER = ['learn', 'build', 'compete', 'profile'] as const;
-const PAGE_SPRING = { type: 'spring' as const, stiffness: 360, damping: 34, mass: .72 };
 const PAGE_VARIANTS = {
   initial: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
-    x: isTab ? direction * 18 : 0,
-    scale: isTab ? .992 : 1,
+    y: isTab ? 6 : 0,
   }),
-  animate: { opacity: 1, x: 0, scale: 1 },
+  animate: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.14, ease: [0.25, 1, 0.5, 1] }
+  },
   exit: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
-    x: isTab ? direction * -12 : 0,
-    scale: isTab ? .996 : 1,
+    y: isTab ? -4 : 0,
+    transition: { duration: 0.08, ease: 'easeOut' }
   }),
 };
 
@@ -53,6 +62,46 @@ const AppContent = () => {
   const [onboardingBypassed, setOnboardingBypassed] = useState(false);
   const forceOnboardingFromUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('forceOnboarding') === '1';
   const previewAppFromUrl = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('previewApp') === '1';
+
+  // Initialize OneSignal Push Notification Controller with Deep-Linking
+  useEffect(() => {
+    OneSignalService.init((data) => {
+      if (data.screen === 'daily_mission' || data.view === 'learn') {
+        setActiveView('learn');
+        if (data.missionId) {
+          const found = MISSION_BANK.find(m => m.id === data.missionId);
+          if (found) setActiveMission(found);
+        }
+      } else if (data.view) {
+        setActiveView(data.view);
+      }
+    });
+
+    const handlePushDeepLink = (event: any) => {
+      const data = event.detail;
+      if (data?.screen === 'daily_mission' || data?.view === 'learn') {
+        setActiveView('learn');
+        if (data?.missionId) {
+          const found = MISSION_BANK.find(m => m.id === data.missionId);
+          if (found) setActiveMission(found);
+        }
+      } else if (data?.view) {
+        setActiveView(data.view);
+      }
+    };
+
+    window.addEventListener('t1ger_push_deeplink', handlePushDeepLink);
+    return () => window.removeEventListener('t1ger_push_deeplink', handlePushDeepLink);
+  }, [setActiveView]);
+
+  useEffect(() => {
+    if (appUser?.uid) {
+      OneSignalService.identifyUser(appUser.uid, {
+        streak_days: brainState.learnStreak,
+        language: language,
+      });
+    }
+  }, [appUser?.uid, brainState.learnStreak, language]);
 
   useEffect(() => {
     if (!activeView) {
@@ -182,9 +231,18 @@ const AppContent = () => {
 
   const dayType = dailyTacticalStatus.dayType || 'focus';
 
+  const viewFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('view') : null;
+  if (viewFromUrl === 'privacy') return <PrivacyPolicy onBack={() => window.history.back()} />;
+  if (viewFromUrl === 'terms') return <TermsOfService onBack={() => window.history.back()} />;
+
   if (loading) {
     return <AppSkeleton />;
   }
+
+  const isSimulator = typeof window !== 'undefined' && (
+    new URLSearchParams(window.location.search).get('simulator') === 'true' || 
+    (window.innerWidth > 640 && new URLSearchParams(window.location.search).get('simulator') !== 'false' && !new URLSearchParams(window.location.search).get('sim_platform'))
+  );
 
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
@@ -214,11 +272,11 @@ const AppContent = () => {
     return null;
   })();
 
-  return (
+  const mainLayout = (
     <MotionConfig reducedMotion="user">
-    <div className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-white/5 sm:shadow-[0_0_90px_rgba(0,20,16,.55)] relative flex flex-col bg-[#071C19] text-[#EAF4F1] font-sans font-medium overflow-hidden theme-${dayType} ${platformClasses}`}>
+    <div className={`h-[100dvh] w-full max-w-md mx-auto sm:border-x sm:border-white/5 sm:shadow-[0_0_90px_rgba(0,0,0,.8)] relative flex flex-col bg-[#09090B] text-[#FFFFFF] font-sans font-medium overflow-hidden theme-${dayType} ${platformClasses}`}>
       <a href="#main-content" className="skip-link">{language === 'es' ? 'Saltar al contenido' : 'Skip to content'}</a>
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_-10%,rgba(239,112,48,.11),transparent_32%),linear-gradient(180deg,#071C19_0%,#061815_100%)]" />
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_-10%,rgba(255,115,0,.12),transparent_35%),linear-gradient(180deg,#09090B_0%,#050507_100%)]" />
       
       <OfflineBanner />
 
@@ -229,7 +287,7 @@ const AppContent = () => {
       <main ref={mainRef} id="main-content" className={`t1ger-scroll-area flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))]'}`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-          <AnimatePresence initial={false} mode="popLayout" custom={transitionContext}>
+          <AnimatePresence initial={false} mode="wait" custom={transitionContext}>
             {activeContent && (
               <motion.div
                 key={activeView}
@@ -238,8 +296,7 @@ const AppContent = () => {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ ...PAGE_SPRING, opacity: { duration: .16, ease: [0.22, 1, 0.36, 1] } }}
-                className="min-h-full transform-gpu"
+                className="min-h-full will-change-transform"
               >
                 {activeContent}
               </motion.div>
@@ -247,6 +304,7 @@ const AppContent = () => {
           </AnimatePresence>
       </main>
 
+      {!isFullscreen && <CoachFAB />}
       {!isFullscreen && <NavDock />}
 
       {/* Tactical Loading Overlay */}
@@ -258,6 +316,8 @@ const AppContent = () => {
     </div>
     </MotionConfig>
   );
+
+  return mainLayout;
 };
 
 export default function App() {

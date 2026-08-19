@@ -51,7 +51,7 @@ export const BuildTab = ({ onStartMission }: { onStartMission?: (mission: any) =
         </div>
         <div className="p-5">
           {mission?.frameworkSteps?.map((step, index) => <div key={step.title} className="flex gap-3 py-2.5"><span className="font-mono text-xs text-[var(--t1ger-orange)]">0{index + 1}</span><div><strong className="block text-sm font-medium text-[#EAF4F1]">{step.title}</strong><p className="mt-1 text-xs leading-5 text-[#6F918A]">{step.desc}</p></div></div>)}
-          <button disabled={!mission || !lessonsReady || completed} onClick={() => mission && onStartMission?.(mission)} className="t1ger-primary-button mt-5 w-full disabled:opacity-35">
+          <button disabled={!mission || !lessonsReady} onClick={() => mission && onStartMission?.(mission)} className="t1ger-primary-button mt-5 w-full disabled:opacity-35">
             {completed ? (isEs ? 'Misión completada' : 'Mission completed') : lessonsReady ? (isEs ? 'Ejecutar ahora' : 'Execute now') : (isEs ? 'Termina las lecciones primero' : 'Finish lessons first')} {lessonsReady && !completed && <ArrowRight size={18} />}
           </button>
         </div>

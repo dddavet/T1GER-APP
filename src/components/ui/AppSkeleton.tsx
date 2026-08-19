@@ -1,48 +1,20 @@
 import React from 'react';
-import { Skeleton } from './Skeleton';
 import { Loader2 } from 'lucide-react';
 
 export const AppSkeleton = () => {
   return (
-    <div className="flex flex-col h-screen bg-[#F7F7F7] overflow-hidden">
-      {/* Top Header Mockup */}
-      <div className="flex justify-between items-center p-4 mt-8">
-        <Skeleton className="w-32 h-8 rounded-full" />
-        <Skeleton className="w-24 h-8 rounded-full" />
-      </div>
-
-      {/* Main Content Area */}
-      <div className="flex-1 px-4 py-8 space-y-6">
-        <Skeleton className="w-3/4 h-10 rounded-xl" />
-        <Skeleton className="w-1/2 h-6 rounded-md mb-8" />
-        
-        {/* Mockup Cards */}
-        <div className="space-y-4">
-          <Skeleton className="w-full h-32 rounded-3xl" />
-          <Skeleton className="w-full h-32 rounded-3xl" />
-          <Skeleton className="w-full h-32 rounded-3xl" />
+    <div className="flex flex-col h-screen w-full bg-[#09090B] text-white items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,115,0,0.18),transparent_55%)]" />
+      <div className="relative flex flex-col items-center gap-5 z-10">
+        <div className="h-20 w-20 rounded-3xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-orange-500/30 flex items-center justify-center p-3 shadow-[0_0_40px_rgba(255,115,0,0.25)]">
+          <img src="/t1ger-avatar.png" alt="T1GER" className="h-full w-full object-contain animate-pulse" />
         </div>
-      </div>
-
-      {/* NavDock Mockup */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-2">
-        <div className="flex justify-around items-center p-2.5 bg-white rounded-[2.5rem] shadow-sm border border-zinc-200">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="flex flex-col items-center gap-1 w-18 p-2.5">
-              <Skeleton className="w-6 h-6 rounded-full" />
-              <Skeleton className="w-8 h-2 rounded-full" />
-            </div>
-          ))}
+        <div className="flex items-center gap-2 text-zinc-400 font-mono text-xs uppercase tracking-widest">
+          <Loader2 className="w-4 h-4 text-[#FF7300] animate-spin" />
+          <span>Iniciando T1GER...</span>
         </div>
-      </div>
-
-      {/* Subtle Loading Text */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50 mix-blend-multiply">
-         <div className="flex items-center gap-2 text-zinc-400">
-           <Loader2 className="w-5 h-5 animate-spin" />
-           <span className="text-xs font-mono font-bold uppercase tracking-widest">Iniciando Motor T1GER</span>
-         </div>
       </div>
     </div>
   );
 };
+

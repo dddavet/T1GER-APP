@@ -12,7 +12,7 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
   const completedMissionIds = new Set(brainState.missionHistory.filter(record => record.completed).map(record => record.missionId));
 
   return (
-    <div className="pb-8 pt-5">
+    <div className="pb-8 pt-5 font-sans select-none">
       <header className="mb-7">
         <p className="t1ger-kicker">{isEs ? 'Ruta de inversión' : 'Investing path'}</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.045em] text-white">{isEs ? 'Aprende a invertir con criterio.' : 'Learn to invest with evidence.'}</h1>
@@ -43,30 +43,109 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true, amount: .15, margin: '0px 0px -42px' }}
               transition={{ type: 'spring', stiffness: 280, damping: 30, mass: .8, delay: Math.min(levelIndex * .035, .12) }}
-              className={`t1ger-content-auto transform-gpu overflow-hidden rounded-[1.6rem] border ${levelComplete ? 'border-[#3FC78E]/25 bg-[#0D302B]' : priorLevelsComplete ? 'border-white/10 bg-[#0B2925]' : 'border-white/5 bg-[#09231F] opacity-55'}`}
+              className={`t1ger-content-auto transform-gpu overflow-hidden rounded-[1.6rem] border ${
+                levelComplete
+                  ? 'border-[#3FC78E]/30 bg-[#3FC78E]/10'
+                  : priorLevelsComplete
+                  ? 'border-white/12 bg-[#121216]'
+                  : 'border-white/6 bg-white/[.02] opacity-50'
+              }`}
             >
               <div className="flex items-start gap-4 p-5">
-                <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-semibold ${levelComplete ? 'bg-[#3FC78E] text-[#06241F]' : priorLevelsComplete ? 'bg-[var(--t1ger-orange)] text-[#152A25]' : 'bg-white/6 text-[#64867F]'}`}>{levelComplete ? <Check size={18} /> : level.levelNumber}</div>
-                <div><p className="t1ger-kicker">{isEs ? `Módulo ${level.levelNumber}` : `Module ${level.levelNumber}`}</p><h2 className="mt-1 text-base font-semibold text-white">{level.title}</h2><p className="mt-1 text-xs leading-5 text-[#789B93]">{level.subtitle}</p></div>
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl font-mono text-sm font-semibold ${
+                    levelComplete
+                      ? 'bg-[#3FC78E] text-black'
+                      : priorLevelsComplete
+                      ? 'bg-[var(--ob-accent)] text-black'
+                      : 'bg-white/10 text-zinc-400'
+                  }`}
+                >
+                  {levelComplete ? <Check size={18} /> : level.levelNumber}
+                </div>
+                <div>
+                  <p className="t1ger-kicker">{isEs ? `Módulo ${level.levelNumber}` : `Module ${level.levelNumber}`}</p>
+                  <h2 className="mt-1 text-base font-semibold text-white">{level.title}</h2>
+                  <p className="mt-1 text-xs leading-5 text-zinc-400">{level.subtitle}</p>
+                </div>
               </div>
 
               {priorLevelsComplete && (
-                <div className="border-t border-white/7 px-4 pb-4 pt-3">
+                <div className="border-t border-white/8 px-4 pb-4 pt-3">
                   {level.days.map((day, dayIndex) => {
-                    const sourceMission = MISSION_BANK.find(item => item.id === day.missionIds[0]);
+                    const sourceMission = MISSION_BANK.find((item) => item.id === day.missionIds[0]);
                     const mission = sourceMission ? localizeMission(sourceMission, language) : undefined;
                     const done = brainState.completedDayIds.includes(day.dayId);
                     const unlocked = dayIndex === 0 || brainState.completedDayIds.includes(level.days[dayIndex - 1].dayId);
                     return (
-                      <button key={day.dayId} disabled={!unlocked || done} onClick={() => mission && onStartMission?.(mission)} className="t1ger-tap-row flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left hover:bg-white/[.035] disabled:cursor-default">
-                        <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${done ? 'bg-[#3FC78E]/12 text-[#67D5A4]' : unlocked ? 'bg-white/6 text-[var(--t1ger-orange)]' : 'bg-white/[.025] text-[#4D6F68]'}`}>{done ? <Check size={15} /> : unlocked ? <BookOpen size={15} /> : <LockKeyhole size={14} />}</span>
-                        <span className="flex-1"><strong className={`block text-sm font-medium ${unlocked ? 'text-[#EAF4F1]' : 'text-[#5E7F78]'}`}>{mission?.title}</strong><span className="text-[11px] text-[#668980]">{done ? (isEs ? 'Completada' : 'Completed') : `${mission?.xpReward || 0} XP · 4 min`}</span></span>
+                      <button
+                        key={day.dayId}
+                        disabled={!unlocked}
+                        onClick={() => mission && onStartMission?.(mission)}
+                        className="t1ger-tap-row flex w-full items-center gap-3 rounded-xl px-2 py-3 text-left hover:bg-white/[.04] disabled:cursor-default"
+                      >
+                        <span
+                          className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                            done
+                              ? 'bg-[#3FC78E]/15 text-[#3FC78E]'
+                              : unlocked
+                              ? 'bg-[var(--ob-accent)]/15 text-[var(--ob-accent)]'
+                              : 'bg-white/[.04] text-zinc-600'
+                          }`}
+                        >
+                          {done ? <Check size={15} /> : unlocked ? <BookOpen size={15} /> : <LockKeyhole size={14} />}
+                        </span>
+                        <span className="flex-1">
+                          <strong className={`block text-sm font-medium ${unlocked ? 'text-white' : 'text-zinc-500'}`}>
+                            {mission?.title}
+                          </strong>
+                          <span className="text-[11px] text-zinc-400">
+                            {done ? (isEs ? 'Completada' : 'Completed') : `${mission?.xpReward || 0} XP · 4 min`}
+                          </span>
+                        </span>
                       </button>
                     );
                   })}
-                  <button disabled={!lessonsComplete || applyComplete} onClick={() => applyMission && onStartMission?.(applyMission)} className={`t1ger-tap-row mt-2 flex w-full items-center gap-3 rounded-xl border p-4 text-left ${applyComplete ? 'border-[#3FC78E]/20 bg-[#3FC78E]/7' : lessonsComplete ? 'border-[var(--t1ger-orange)]/35 bg-[var(--t1ger-orange)]/8 hover:bg-[var(--t1ger-orange)]/12' : 'border-white/6 bg-white/[.02]'}`}>
-                    <span className={`${applyComplete ? 'text-[#67D5A4]' : lessonsComplete ? 'text-[var(--t1ger-orange)]' : 'text-[#4D6F68]'}`}>{applyComplete ? <ShieldCheck size={20} /> : lessonsComplete ? <Target size={20} /> : <LockKeyhole size={18} />}</span>
-                    <span className="flex-1"><strong className={`block text-sm font-semibold ${lessonsComplete ? 'text-white' : 'text-[#5E7F78]'}`}>{applyMission?.title}</strong><span className="text-[11px] text-[#668980]">{applyComplete ? (isEs ? 'Evidencia guardada' : 'Evidence saved') : lessonsComplete ? (isEs ? 'Práctica desbloqueada' : 'Practice unlocked') : (isEs ? 'Completa primero las lecciones' : 'Complete the lessons first')}</span></span>
+                  <button
+                    disabled={!lessonsComplete}
+                    onClick={() => applyMission && onStartMission?.(applyMission)}
+                    className={`t1ger-tap-row mt-2 flex w-full items-center gap-3 rounded-xl border p-4 text-left ${
+                      applyComplete
+                        ? 'border-[#3FC78E]/30 bg-[#3FC78E]/10'
+                        : lessonsComplete
+                        ? 'border-[var(--ob-accent)]/40 bg-[var(--ob-accent)]/10 hover:bg-[var(--ob-accent)]/15'
+                        : 'border-white/6 bg-white/[.02]'
+                    }`}
+                  >
+                    <span
+                      className={`${
+                        applyComplete
+                          ? 'text-[#3FC78E]'
+                          : lessonsComplete
+                          ? 'text-[var(--ob-accent)]'
+                          : 'text-zinc-600'
+                      }`}
+                    >
+                      {applyComplete ? <ShieldCheck size={20} /> : lessonsComplete ? <Target size={20} /> : <LockKeyhole size={18} />}
+                    </span>
+                    <span className="flex-1">
+                      <strong className={`block text-sm font-semibold ${lessonsComplete ? 'text-white' : 'text-zinc-500'}`}>
+                        {applyMission?.title}
+                      </strong>
+                      <span className="text-[11px] text-zinc-400">
+                        {applyComplete
+                          ? isEs
+                            ? 'Evidencia guardada'
+                            : 'Evidence saved'
+                          : lessonsComplete
+                          ? isEs
+                            ? 'Práctica desbloqueada'
+                            : 'Practice unlocked'
+                          : isEs
+                          ? 'Completa primero las lecciones'
+                          : 'Complete the lessons first'}
+                      </span>
+                    </span>
                   </button>
                 </div>
               )}
@@ -74,7 +153,6 @@ export const Learn = ({ onStartMission }: { onStartMission?: (mission: any) => v
           );
         })}
       </div>
-
     </div>
   );
 };

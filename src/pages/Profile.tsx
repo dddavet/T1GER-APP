@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Bell, Bot, Check, ChevronRight, Download, Globe2, LogOut, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import { Bell, Bot, Check, ChevronRight, Download, Globe2, LogOut, ShieldCheck, Smartphone, Trash2, UserRound } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
@@ -8,6 +8,9 @@ import { downloadT1gerDataExport } from '../services/dataPortability';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import { TermsOfService } from './TermsOfService';
 import { MascotGuide } from '../components/MascotGuide';
+import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
+import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
+import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
 
 type LegalView = 'privacy' | 'terms' | null;
 
@@ -22,6 +25,8 @@ export const Profile = () => {
   const [status, setStatus] = useState('');
   const [legalView, setLegalView] = useState<LegalView>(null);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [showScreenTimeModal, setShowScreenTimeModal] = useState(false);
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
   const notificationsEnabled = appUser?.notificationPreferences?.daily_reminder ?? false;
 
   const saveName = async () => {
@@ -33,15 +38,19 @@ export const Profile = () => {
   };
 
   const toggleNotifications = async () => {
-    if (!notificationsEnabled && typeof Notification !== 'undefined') {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        setStatus(isEs ? 'El sistema no concedió permiso para notificaciones.' : 'Notification permission was not granted.');
-        return;
-      }
+    if (!notificationsEnabled) {
+      setShowPermissionModal(true);
+    } else {
+      await updateAppUser({
+        notificationPreferences: {
+          ...appUser?.notificationPreferences,
+          daily_reminder: false,
+          streak_risk: false,
+          apply_reminder: false,
+        },
+      });
+      setStatus(isEs ? 'Alertas desactivadas.' : 'Alerts disabled.');
     }
-    await updateAppUser({ notificationPreferences: { ...appUser?.notificationPreferences, daily_reminder: !notificationsEnabled, apply_reminder: !notificationsEnabled } });
-    setStatus(isEs ? 'Preferencias guardadas.' : 'Preferences saved.');
   };
 
   const removeAccount = async () => {
@@ -98,8 +107,18 @@ export const Profile = () => {
           )}
         </AnimatePresence>
         <SettingRow icon={Bell} title={isEs ? 'Recordatorios' : 'Reminders'} detail={notificationsEnabled ? (isEs ? 'Activados' : 'Enabled') : (isEs ? 'Desactivados' : 'Disabled')} onClick={toggleNotifications} />
-        <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de inversión' : 'Investing guidance'} onClick={() => setActiveView('coach')} />
+        <SettingRow icon={Smartphone} title={isEs ? 'Redes vs Libertad' : 'Screen Time vs Wealth'} detail={isEs ? 'Calculadora' : 'Calculator'} onClick={() => setShowScreenTimeModal(true)} />
+        <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de aprendizaje' : 'Learning guidance'} onClick={() => setActiveView('coach')} />
         <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Plan gratuito' : 'Free plan')} />
+        <SettingRow
+          icon={UserRound}
+          title={isEs ? 'Reiniciar Onboarding (Pruebas)' : 'Replay Onboarding (Testing)'}
+          detail={isEs ? 'Probar 18 pasos' : 'Test 18 steps'}
+          onClick={() => {
+            localStorage.removeItem('t1ger_onboarding_draft_v2');
+            updateAppUser({ onboardingComplete: false });
+          }}
+        />
       </motion.section>
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .12 }} className="t1ger-panel transform-gpu overflow-hidden">
@@ -118,6 +137,17 @@ export const Profile = () => {
         {!deleteConfirm ? <button onClick={() => setDeleteConfirm(true)} className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-[#E56A65]/25 bg-[#E56A65]/7 px-4 text-sm font-semibold text-[#F0AAA6]"><Trash2 size={17} />{isEs ? 'Eliminar' : 'Delete'}</button> : <button onClick={removeAccount} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-[#E56A65] px-4 text-sm font-semibold text-[#1F1918]">{isEs ? 'Confirmar' : 'Confirm delete'}</button>}
       </div>
       <p className="text-center text-[11px] text-[#496C64]">{isEs ? 'Vista previa local de T1GER · Fundamentos de inversión' : 'T1GER local preview · Investing foundations'}</p>
+
+      <ScreenTimeFreedomModal
+        isOpen={showScreenTimeModal}
+        onClose={() => setShowScreenTimeModal(false)}
+      />
+
+      <NotificationPermissionModal
+        isOpen={showPermissionModal}
+        onClose={() => setShowPermissionModal(false)}
+        onGranted={() => setStatus(isEs ? '¡Alertas de racha activadas!' : 'Streak alerts enabled!')}
+      />
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrainCircuit, Sparkles } from 'lucide-react';
+import { Bot, Sparkles } from 'lucide-react';
 import { useT1ger } from '../contexts/T1gerContext';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -7,65 +7,35 @@ export const CoachFAB = React.memo(() => {
   const { setActiveView, activeView } = useT1ger();
   const [isHovered, setIsHovered] = React.useState(false);
 
-  if (activeView === 'coach') return null;
+  if (activeView === 'coach' || activeView === 'mission' || activeView === 'debrief') {
+    return null;
+  }
 
   return (
-    <div className="fixed bottom-28 right-5 z-40 pointer-events-none">
+    <div className="absolute bottom-[calc(5.2rem+env(safe-area-inset-bottom))] right-4 z-40 pointer-events-none">
       <motion.button
         onClick={() => setActiveView('coach')}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        initial={{ scale: 0, rotate: -180 }}
-        animate={{ scale: 1, rotate: 0 }}
-        exit={{ scale: 0, rotate: 180 }}
-        whileHover={{ scale: 1.08, rotate: 0 }}
+        initial={{ scale: 0, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0, opacity: 0 }}
+        whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 18 }}
-        className="pointer-events-auto relative w-14 h-14 rounded-[1.75rem] flex items-center justify-center text-zinc-800 shadow-sm-strong overflow-hidden"
-        style={{
-          background: 'linear-gradient(135deg, #FF8C33 0%, #FF6B00 50%, #FF4500 100%)',
-        }}
+        transition={{ type: 'spring', stiffness: 380, damping: 20 }}
+        className="pointer-events-auto relative flex h-13 w-13 items-center justify-center rounded-2xl bg-[var(--t1ger-orange)] text-[#102622] shadow-[0_4px_20px_rgba(255,115,0,0.4)] cursor-pointer"
+        aria-label="Abrir Profesor T1GER AI"
       >
-        {/* Animated glow ring */}
-        <motion.div
-          className="absolute inset-0 rounded-[1.75rem]"
-          animate={{
-            boxShadow: isHovered
-              ? '0 0 40px rgba(255, 107, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.3)'
-              : '0 0 24px rgba(255, 107, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.2)',
-          }}
-          transition={{ duration: 0.3 }}
-        />
+        {/* Glowing aura */}
+        <div className="absolute inset-0 rounded-2xl bg-[#FFB700] opacity-40 blur-md animate-pulse" />
 
-        {/* Shimmer effect */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"
-          animate={{ x: isHovered ? ['100%', '-100%'] : '100%' }}
-          transition={{ duration: isHovered ? 0.6 : 1.5, repeat: isHovered ? 0 : Infinity }}
-        />
+        {/* Floating sparkles badge */}
+        <div className="absolute -top-1 -right-1 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#FF4500] text-white shadow-sm">
+          <Sparkles size={11} />
+        </div>
 
-        {/* Icon with subtle pulse */}
-        <motion.div
-          animate={{ scale: isHovered ? 1.1 : 1 }}
-          transition={{ duration: 0.2 }}
-          className="relative z-10"
-        >
-          <BrainCircuit className="w-7 h-7" strokeWidth={2} />
-        </motion.div>
-
-        {/* Sparkle indicator */}
-        <AnimatePresence>
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0 }}
-              className="absolute -top-1 -right-1"
-            >
-              <Sparkles className="w-4 h-4 text-[#FFD700] drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]" />
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Bot Icon */}
+        <Bot size={26} className="relative z-10" />
       </motion.button>
     </div>
   );

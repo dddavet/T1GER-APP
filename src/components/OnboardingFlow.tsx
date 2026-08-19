@@ -8,85 +8,97 @@ import {
   Check,
   CheckCircle2,
   ChevronRight,
+  Clock,
   Crown,
+  DollarSign,
+  Flame,
+  Globe,
   LineChart,
   Lock,
   Mail,
   Play,
+  Share2,
   ShieldCheck,
+  Smartphone,
   Sparkles,
   Target,
+  TrendingDown,
   Trophy,
   WalletCards,
+  Zap,
 } from 'lucide-react';
 import { useAuth, type AppUser, type InvestmentProfile } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import type { Language } from '../services/i18n';
-import { AuthGate } from './AuthGate';
-import { MissionEngine } from './MissionEngine';
 import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
 import { MISSION_BANK } from '../services/missionBank';
 import { fireRewardConfetti } from './ui/confetti';
+import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
 
-type OnboardingStep =
-  | 'arrival'
-  | 'guide'
-  | 'outcome'
-  | 'experience'
-  | 'application'
-  | 'calibration'
+export type OnboardingStep =
+  | 'welcome'
+  | 'topic_select'
+  | 'course_building'
+  | 'acquisition_source'
+  | 'knowledge_level'
+  | 'encouragement'
+  | 'motivation_reason'
+  | 'weekly_promise'
+  | 'screen_time'
   | 'daily_goal'
-  | 'plan_build'
-  | 'plan_reveal'
+  | 'widget_preview'
+  | 'achievement_roadmap'
+  | 'starting_point'
   | 'micro_lesson'
   | 'success'
   | 'save_progress'
   | 'reminders'
   | 'access';
 
-type Outcome = 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement';
-type Experience = 'new' | 'basic' | 'active';
-type ApplicationPreference = 'stock' | 'portfolio' | 'risk' | 'news';
-type CalibrationLevel = 'beginner' | 'foundation' | 'accelerated';
-type ReminderStatus = 'idle' | 'enabled' | 'denied' | 'unsupported' | 'dismissed';
-type LocalizedText = { es: string; en: string };
+export type CourseTopic = 'finance' | 'tech' | 'humanities' | 'skills' | 'random';
+export type KnowledgeLevel = 'zero' | 'basic' | 'intermediate' | 'competent' | 'advanced';
+export type StartingPointChoice = 'scratch' | 'placement';
+export type ReminderStatus = 'idle' | 'enabled' | 'denied' | 'unsupported' | 'dismissed';
 
-const localize = (text: LocalizedText, language: Language) => text[language];
-
-interface CalibrationAnswer {
-  questionId: string;
-  optionId: string;
-  correct: boolean;
+interface LocalizedText {
+  es: string;
+  en: string;
 }
 
+const localize = (text: LocalizedText, language: Language) => text[language] || text.es;
+
 interface OnboardingDraft {
-  version: 1;
+  version: 2;
   step: OnboardingStep;
-  outcome: Outcome | null;
-  experience: Experience | null;
-  applications: ApplicationPreference[];
-  calibrationAnswers: CalibrationAnswer[];
-  dailyGoal: number | null;
-  planBuilt: boolean;
+  topic: CourseTopic;
+  acquisitionSource: string | null;
+  knowledgeLevel: KnowledgeLevel;
+  motivation: string | null;
+  screenTimeHours: number;
+  dailyGoal: number;
+  startingPoint: StartingPointChoice;
   lessonCompleted: boolean;
   reminderStatus: ReminderStatus;
   accessChoice: 'free' | 'super' | null;
 }
 
-const DRAFT_KEY = 't1ger_onboarding_draft_v1';
-const FIRST_LESSON_ID = 'inv-m1-l1';
+const DRAFT_KEY = 't1ger_onboarding_draft_v2';
 const ONBOARDING_XP = 100;
 
-const STEP_ORDER: OnboardingStep[] = [
-  'arrival',
-  'guide',
-  'outcome',
-  'experience',
-  'application',
-  'calibration',
+export const STEP_ORDER: OnboardingStep[] = [
+  'welcome',
+  'topic_select',
+  'course_building',
+  'acquisition_source',
+  'knowledge_level',
+  'encouragement',
+  'motivation_reason',
+  'weekly_promise',
+  'screen_time',
   'daily_goal',
-  'plan_build',
-  'plan_reveal',
+  'widget_preview',
+  'achievement_roadmap',
+  'starting_point',
   'micro_lesson',
   'success',
   'save_progress',
@@ -95,60 +107,90 @@ const STEP_ORDER: OnboardingStep[] = [
 ];
 
 const defaultDraft: OnboardingDraft = {
-  version: 1,
-  step: 'arrival',
-  outcome: null,
-  experience: null,
-  applications: [],
-  calibrationAnswers: [],
+  version: 2,
+  step: 'welcome',
+  topic: 'finance',
+  acquisitionSource: null,
+  knowledgeLevel: 'zero',
+  motivation: null,
+  screenTimeHours: 3.5,
   dailyGoal: 10,
-  planBuilt: false,
+  startingPoint: 'scratch',
   lessonCompleted: false,
   reminderStatus: 'idle',
   accessChoice: null,
 };
 
-const outcomes: Array<{ id: Outcome; title: LocalizedText; detail: LocalizedText; icon: React.ReactNode }> = [
-  { id: 'first-investment', title: { es: 'Hacer mi primera inversión', en: 'Make my first investment' }, detail: { es: 'Empieza con reglas simples y práctica simulada.', en: 'Start with simple rules and paper practice.' }, icon: <WalletCards size={22} /> },
-  { id: 'long-term-wealth', title: { es: 'Construir patrimonio a largo plazo', en: 'Build long-term wealth' }, detail: { es: 'Usa el interés compuesto, la asignación y la constancia.', en: 'Use compounding, allocation, and consistency.' }, icon: <LineChart size={22} /> },
-  { id: 'company-analysis', title: { es: 'Aprender a analizar empresas', en: 'Learn to analyze companies' }, detail: { es: 'Lee estados financieros y evalúa la calidad con evidencia.', en: 'Read statements and judge quality with evidence.' }, icon: <BookOpen size={22} /> },
-  { id: 'retirement', title: { es: 'Prepararme para el retiro', en: 'Prepare for retirement' }, detail: { es: 'Conecta tus cuentas, tu plazo y tu tolerancia al riesgo.', en: 'Connect accounts, time horizon, and risk.' }, icon: <ShieldCheck size={22} /> },
-];
-
-const experiences: Array<{ id: Experience; title: LocalizedText; detail: LocalizedText }> = [
-  { id: 'new', title: { es: 'Estoy empezando', en: 'I am new to investing' }, detail: { es: 'Comienza con vocabulario y decisiones sencillas.', en: 'Start from vocabulary and simple decisions.' } },
-  { id: 'basic', title: { es: 'Conozco lo básico', en: 'I know the basics' }, detail: { es: 'Avanza más rápido y enfócate en aplicar.', en: 'Move faster through concepts and focus on application.' } },
-  { id: 'active', title: { es: 'Ya invierto', en: 'I already invest' }, detail: { es: 'Ajusta la ruta al análisis y las reglas de portafolio.', en: 'Calibrate the path around analysis and portfolio rules.' } },
-];
-
-const applicationOptions: Array<{ id: ApplicationPreference; title: LocalizedText; detail: LocalizedText }> = [
-  { id: 'stock', title: { es: 'Evaluar una acción', en: 'Evaluate a stock' }, detail: { es: 'Practica tesis, fuentes y valoración.', en: 'Practice thesis, source, and valuation thinking.' } },
-  { id: 'portfolio', title: { es: 'Construir un portafolio', en: 'Build a portfolio' }, detail: { es: 'Convierte la asignación en una rutina repetible.', en: 'Turn allocation into a repeatable routine.' } },
-  { id: 'risk', title: { es: 'Gestionar el riesgo', en: 'Manage risk' }, detail: { es: 'Define tamaños de posición y límites emocionales.', en: 'Define position sizing and emotional guardrails.' } },
-  { id: 'news', title: { es: 'Entender las noticias del mercado', en: 'Understand market news' }, detail: { es: 'Separa las señales útiles del ruido.', en: 'Separate useful signals from noise.' } },
-];
-
-const calibrationQuestions = [
+// Course Categories
+export const COURSE_TOPICS: Array<{
+  id: CourseTopic;
+  title: LocalizedText;
+  subtitle: LocalizedText;
+  icon: string;
+  badge?: LocalizedText;
+}> = [
   {
-    id: 'net-worth',
-    prompt: { es: '¿Qué fórmula describe el patrimonio neto?', en: 'Which equation describes net worth?' },
-    options: [
-      { id: 'assets-minus-liabilities', text: { es: 'Activos menos pasivos', en: 'Assets minus liabilities' }, correct: true },
-      { id: 'income-minus-spending', text: { es: 'Ingresos menos gastos', en: 'Income minus spending' }, correct: false },
-      { id: 'cash-plus-debt', text: { es: 'Efectivo más deuda', en: 'Cash plus debt' }, correct: false },
-    ],
-    explanation: { es: 'Es lo que queda después de restar tus obligaciones a los activos que posees.', en: 'Net worth is what remains after subtracting obligations from owned assets.' },
+    id: 'finance',
+    title: { es: 'Finanzas & Inversión', en: 'Finance & Investing' },
+    subtitle: { es: 'Acciones, interés compuesto, balances y negocios', en: 'Stocks, compounding, balance sheets & business' },
+    icon: '💰',
+    badge: { es: 'POPULAR', en: 'POPULAR' },
   },
   {
-    id: 'diversification',
-    prompt: { es: '¿Por qué diversifican los inversionistas?', en: 'Why do investors diversify?' },
-    options: [
-      { id: 'guarantee-profit', text: { es: 'Para garantizar ganancias cada mes', en: 'To guarantee a profit every month' }, correct: false },
-      { id: 'reduce-concentration', text: { es: 'Para depender menos de un solo activo', en: 'To reduce dependence on one asset' }, correct: true },
-      { id: 'avoid-research', text: { es: 'Para evitar cualquier decisión', en: 'To avoid making any decisions' }, correct: false },
-    ],
-    explanation: { es: 'Diversificar reduce el riesgo de concentración, pero no elimina el riesgo del mercado.', en: 'Diversification reduces concentration risk. It does not remove market risk.' },
+    id: 'tech',
+    title: { es: 'Ciencia, IA & Tecnología', en: 'Science, AI & Tech' },
+    subtitle: { es: 'Inteligencia artificial, ciberseguridad, física y código', en: 'Artificial intelligence, cybersecurity, physics & code' },
+    icon: '🤖',
   },
+  {
+    id: 'skills',
+    title: { es: 'Habilidades Prácticas', en: 'Practical Life Skills' },
+    subtitle: { es: 'Ventas, negociación, comunicación y salud de alto rendimiento', en: 'Sales, negotiation, high-impact communication & health' },
+    icon: '⚡',
+  },
+  {
+    id: 'humanities',
+    title: { es: 'Humanidades & Psicología', en: 'Humanities & Psychology' },
+    subtitle: { es: 'Modelos mentales, toma de decisiones, historia y liderazgo', en: 'Mental models, decision making, history & leadership' },
+    icon: '🧠',
+  },
+  {
+    id: 'random',
+    title: { es: 'Cultura & Curiosidades', en: 'Culture & Discovery' },
+    subtitle: { es: 'Dinosaurios, mitología, astronomía y cultura general', en: 'Dinosaurs, mythology, deep astronomy & trivia' },
+    icon: '🦖',
+  },
+];
+
+// Acquisition Sources
+const ACQUISITION_SOURCES: Array<{ id: string; title: LocalizedText; icon: string }> = [
+  { id: 'friends', title: { es: 'Amigos o Familia', en: 'Friends / Family' }, icon: '🧑‍🤝‍🧑' },
+  { id: 'tiktok', title: { es: 'TikTok', en: 'TikTok' }, icon: '🎵' },
+  { id: 'instagram', title: { es: 'Instagram / Reels', en: 'Instagram / Reels' }, icon: '📸' },
+  { id: 'youtube', title: { es: 'YouTube', en: 'YouTube' }, icon: '▶️' },
+  { id: 'x', title: { es: 'X (Twitter)', en: 'X (Twitter)' }, icon: '𝕏' },
+  { id: 'google', title: { es: 'Búsqueda en Google', en: 'Google Search' }, icon: '🔍' },
+  { id: 'store', title: { es: 'Google Play / App Store', en: 'App Store' }, icon: '📲' },
+  { id: 'other', title: { es: 'Otro', en: 'Other' }, icon: '✨' },
+];
+
+// Knowledge Levels with Signal Strength Bars
+const KNOWLEDGE_LEVELS: Array<{ id: KnowledgeLevel; title: LocalizedText; bars: number }> = [
+  { id: 'zero', title: { es: 'Estoy empezando desde cero', en: "I'm new to this topic" }, bars: 1 },
+  { id: 'basic', title: { es: 'Conozco algunos conceptos básicos', en: 'I know some common concepts' }, bars: 2 },
+  { id: 'intermediate', title: { es: 'Puedo tener conversaciones y debates', en: 'I can have basic discussions' }, bars: 3 },
+  { id: 'competent', title: { es: 'Conozco varios temas a fondo', en: 'I can discuss various topics' }, bars: 4 },
+  { id: 'advanced', title: { es: 'Dominio avanzado del tema', en: 'I can discuss most topics in detail' }, bars: 5 },
+];
+
+// Motivation Reasons
+const MOTIVATION_REASONS: Array<{ id: string; title: LocalizedText; icon: string }> = [
+  { id: 'career', title: { es: 'Impulsar mi carrera o negocio', en: 'Support my career or business' }, icon: '💼' },
+  { id: 'wealth', title: { es: 'Construir patrimonio e invertir mejor', en: 'Build wealth & invest smarter' }, icon: '💰' },
+  { id: 'productivity', title: { es: 'Aprovechar mi tiempo productivamente', en: 'Spend time productively' }, icon: '⏳' },
+  { id: 'future_tech', title: { es: 'Dominar la inteligencia artificial', en: 'Master AI & modern skills' }, icon: '🚀' },
+  { id: 'fun', title: { es: 'Por curiosidad y diversión', en: 'Just for fun & curiosity' }, icon: '🎉' },
+  { id: 'other', title: { es: 'Otro motivo', en: 'Other reason' }, icon: '✨' },
 ];
 
 function loadDraft(): OnboardingDraft {
@@ -157,13 +199,8 @@ function loadDraft(): OnboardingDraft {
     const raw = window.localStorage.getItem(DRAFT_KEY);
     if (!raw) return defaultDraft;
     const parsed = JSON.parse(raw) as Partial<OnboardingDraft>;
-    if (parsed.version !== 1 || !parsed.step || !STEP_ORDER.includes(parsed.step)) return defaultDraft;
-    return {
-      ...defaultDraft,
-      ...parsed,
-      applications: Array.isArray(parsed.applications) ? parsed.applications : [],
-      calibrationAnswers: Array.isArray(parsed.calibrationAnswers) ? parsed.calibrationAnswers : [],
-    };
+    if (parsed.version !== 2 || !parsed.step || !STEP_ORDER.includes(parsed.step)) return defaultDraft;
+    return { ...defaultDraft, ...parsed };
   } catch {
     return defaultDraft;
   }
@@ -174,348 +211,112 @@ function saveDraft(draft: OnboardingDraft) {
   window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
 }
 
-function clearDraft() {
-  if (typeof window === 'undefined') return;
-  window.localStorage.removeItem(DRAFT_KEY);
-}
+// Reusable Top Mascot Speech Bubble Header (Duolingo Style)
+const DuolingoHeader: React.FC<{
+  speech: string;
+  mood?: MascotReaction;
+  eyebrow?: string;
+  title?: string;
+}> = ({ speech, mood = 'idle', eyebrow, title }) => (
+  <div className="flex flex-col items-center text-center pt-2 pb-4 select-none">
+    {eyebrow && (
+      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--ob-accent)] mb-2">
+        {eyebrow}
+      </span>
+    )}
 
-function calculateCalibration(experience: Experience | null, answers: CalibrationAnswer[]): CalibrationLevel {
-  const correct = answers.filter(answer => answer.correct).length;
-  if (experience === 'active' && correct >= 1) return 'accelerated';
-  if (correct >= 2 || (experience === 'basic' && correct >= 1)) return 'foundation';
-  return 'beginner';
-}
+    {/* Mascot with Speech Bubble */}
+    <div className="flex flex-col items-center relative w-full max-w-xs mb-3">
+      {/* Speech Bubble with pointer pointing down at mascot */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 5 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative z-10 rounded-2xl border border-white/15 bg-[#121216]/95 backdrop-blur-md px-5 py-3 text-sm font-bold leading-5 text-white shadow-xl max-w-sm mb-2"
+      >
+        {speech}
+        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-b border-r border-white/15 bg-[#121216]" />
+      </motion.div>
 
-function levelNumber(level: CalibrationLevel) {
-  if (level === 'accelerated') return 3;
-  if (level === 'foundation') return 2;
-  return 1;
-}
-
-function outcomeLabel(outcome: Outcome | null) {
-  return outcomes.find(item => item.id === outcome)?.title.en || 'Build long-term wealth';
-}
-
-function applicationLabels(applications: ApplicationPreference[], language: Language = 'en') {
-  if (!applications.length) return [language === 'es' ? 'Construir un portafolio' : 'Build a portfolio'];
-  return applications.map(id => {
-    const title = applicationOptions.find(item => item.id === id)?.title;
-    return title ? localize(title, language) : language === 'es' ? 'Construir un portafolio' : 'Build a portfolio';
-  });
-}
-
-function buildPersonalizedProfile(draft: OnboardingDraft): Partial<AppUser> {
-  const calibration = calculateCalibration(draft.experience, draft.calibrationAnswers);
-  const weeklyMinutes = (draft.dailyGoal || 10) * 5;
-  const profile: InvestmentProfile = {
-    goal: draft.outcome || 'long-term-wealth',
-    experience: draft.experience || 'new',
-    riskComfort: draft.applications.includes('risk') ? 'protect' : draft.applications.includes('stock') ? 'growth' : 'balanced',
-    weeklyCommitment: weeklyMinutes,
-    contentFormat: 'practice',
-    learnWithFriends: false,
-  };
-
-  return {
-    primaryTrack: 'investing',
-    niche: 'investing',
-    goal: outcomeLabel(draft.outcome),
-    dailyTime: draft.dailyGoal || 10,
-    experienceLevel: levelNumber(calibration),
-    learningStyle: 'interactive',
-    onboardingStep: draft.step,
-    investmentProfile: profile,
-    personalizedPlan: {
-      title: `${calibration === 'accelerated' ? 'Accelerated' : calibration === 'foundation' ? 'Foundation' : 'Beginner'} Investing Path`,
-      firstLessonId: FIRST_LESSON_ID,
-      weeklyMinutes,
-      focusAreas: applicationLabels(draft.applications),
-    },
-  };
-}
-
-function stageIndex(step: OnboardingStep) {
-  return STEP_ORDER.indexOf(step);
-}
-
-function nextStep(step: OnboardingStep): OnboardingStep {
-  return STEP_ORDER[Math.min(stageIndex(step) + 1, STEP_ORDER.length - 1)];
-}
-
-function previousStep(step: OnboardingStep): OnboardingStep {
-  return STEP_ORDER[Math.max(stageIndex(step) - 1, 0)];
-}
-
-const easeTransition = { type: 'spring' as const, stiffness: 360, damping: 34 };
-
-interface ShellProps {
-  step: OnboardingStep;
-  direction: number;
-  onBack: () => void;
-  children: React.ReactNode;
-  hideProgress?: boolean;
-  flush?: boolean;
-  language: Language;
-}
-
-const OnboardingShell: React.FC<ShellProps> = ({ step, direction, onBack, children, hideProgress, flush, language }) => {
-  const progress = ((stageIndex(step) + 1) / STEP_ORDER.length) * 100;
-  const showBack = stageIndex(step) > 0 && step !== 'micro_lesson';
-
-  return (
-    <div className="t1ger-onboarding fixed inset-0 z-[300]">
-      <div className="t1ger-onboarding-backdrop absolute inset-0" />
-      <main className="relative mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden sm:border-x sm:border-white/10">
-        {!hideProgress && (
-          <header className="flex shrink-0 items-center gap-3 px-5 pb-3 pt-[calc(.9rem+env(safe-area-inset-top))]">
-            {showBack ? (
-              <button onClick={onBack} aria-label={language === 'es' ? 'Volver' : 'Go back'} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[1rem] border border-[var(--ob-border)] bg-white/[.035] text-[var(--ob-muted-strong)] active:scale-[.97]">
-                <ArrowLeft size={20} />
-              </button>
-            ) : <div className="h-11 w-11 shrink-0" />}
-            <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/10">
-              <motion.div className="h-full rounded-full bg-[var(--ob-accent)]" animate={{ width: `${progress}%` }} transition={{ duration: 0.35 }} />
-            </div>
-            <span className="w-9 text-right font-mono text-[11px] text-[var(--ob-muted)]">{stageIndex(step) + 1}/{STEP_ORDER.length}</span>
-          </header>
-        )}
-
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.section
-            key={step}
-            custom={direction}
-            initial={{ opacity: 0, x: direction >= 0 ? 28 : -28 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction >= 0 ? -22 : 22 }}
-            transition={easeTransition}
-            className={flush ? 'min-h-0 flex-1 overflow-hidden' : 'min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]'}
-          >
-            {children}
-          </motion.section>
-        </AnimatePresence>
-      </main>
-    </div>
-  );
-};
-
-const TigerGuide: React.FC<{ mood?: 'ready' | 'thinking' | 'celebrate' | 'calm' | 'beast' | 'warning'; message?: string }> = ({ mood = 'ready', message }) => {
-  const reactionMap: Record<string, MascotReaction> = {
-    ready: 'idle',
-    thinking: 'thinking',
-    celebrate: 'celebrate',
-    calm: 'idle',
-    beast: 'beast',
-    warning: 'warning',
-  };
-
-  return (
-    <div className="grid grid-cols-[8.25rem_1fr] items-center gap-2">
-      <div className="relative h-32 w-[8.25rem] shrink-0 overflow-visible pointer-events-none">
-        <T1gerMascot3D mood={reactionMap[mood] || 'idle'} closeUp className="h-32 w-[8.25rem]" />
+      {/* 3D Mascot */}
+      <div className="h-32 w-32 relative flex items-center justify-center pointer-events-none">
+        <T1gerMascot3D mood={mood} closeUp className="h-32 w-32" />
       </div>
-      {message && (
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9, x: -10 }}
-          animate={{ opacity: 1, scale: 1, x: 0 }}
-          className="relative rounded-[1.25rem] border border-[var(--ob-border)] bg-[var(--ob-surface)] px-4 py-3 text-[13px] font-semibold leading-5 text-[var(--ob-text)] shadow-[0_16px_36px_rgba(3,11,9,.2),inset_0_1px_0_rgba(255,255,255,.035)]"
-        >
-          <div className="absolute -left-2 top-1/2 h-4 w-4 -translate-y-1/2 rotate-45 border-b border-l border-[var(--ob-border)] bg-[var(--ob-surface)]" />
-          {message}
-        </motion.div>
-      )}
     </div>
-  );
-};
 
-const PrimaryAction: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' }> = ({ className = '', variant = 'primary', children, ...props }) => {
-  const classes = variant === 'primary'
-    ? 't1ger-onboarding-primary active:translate-y-1'
-    : 't1ger-onboarding-secondary active:translate-y-1 active:shadow-none';
+    {title && (
+      <h2 className="text-xl font-black text-white tracking-tight leading-tight mt-1">
+        {title}
+      </h2>
+    )}
+  </div>
+);
 
+// 3D Tactile Primary Button (Duolingo Style)
+export const PrimaryAction: React.FC<
+  React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' }
+> = ({ className = '', variant = 'primary', children, ...props }) => {
+  const isPrimary = variant === 'primary';
   return (
     <button
       {...props}
-      className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-[1rem] px-5 text-sm font-black uppercase tracking-[.08em] transition disabled:pointer-events-none disabled:opacity-40 ${classes} ${className}`}
+      className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-black uppercase tracking-wider transition-all active:translate-y-1 active:shadow-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${
+        isPrimary
+          ? 'bg-[var(--ob-accent)] text-black shadow-[0_5px_0_#C2410C,0_10px_20px_rgba(255,115,0,0.25)] hover:bg-[#FF8C33]'
+          : 'bg-white/[.06] border border-white/10 text-zinc-300 hover:bg-white/[.1] shadow-[0_4px_0_rgba(255,255,255,0.05)]'
+      } ${className}`}
     >
       {children}
     </button>
   );
 };
 
-interface ChoiceCardProps {
-  title: string;
-  detail: string;
-  selected: boolean;
-  onClick: () => void;
-  icon?: React.ReactNode;
-  multi?: boolean;
-}
-
-const ChoiceCard: React.FC<ChoiceCardProps> = ({ title, detail, selected, onClick, icon, multi }) => (
-  <button
-    type="button"
-    aria-pressed={selected}
-    onClick={onClick}
-    data-selected={selected}
-    className="t1ger-onboarding-choice group flex min-h-[4.75rem] w-full items-center gap-4 rounded-[1.15rem] border p-4 text-left transition active:scale-[.985]"
-  >
-    <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-[.9rem] ${selected ? 'bg-[var(--ob-accent)] text-[var(--ob-accent-ink)]' : 'bg-white/[.045] text-[var(--ob-muted)]'}`}>
-      {icon || <Target size={20} />}
-    </span>
-    <span className="min-w-0 flex-1">
-      <span className="block text-[15px] font-semibold leading-5">{title}</span>
-      <span className="mt-1 block text-xs leading-5 text-[var(--ob-muted)]">{detail}</span>
-    </span>
-    <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border ${selected ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-[var(--ob-accent-ink)]' : 'border-[var(--ob-border)] text-transparent'}`}>
-      {selected ? <Check size={16} /> : multi ? <span className="h-2 w-2 rounded-full bg-white/18" /> : null}
-    </span>
-  </button>
-);
-
-const ScreenHeader: React.FC<{ eyebrow?: string; title: string; body?: string; guide?: React.ReactNode }> = ({ eyebrow, title, body, guide }) => (
-  <div className="pb-6 pt-2">
-    {guide && <div className="mb-7">{guide}</div>}
-    {eyebrow && <p className="font-mono text-[11px] font-semibold uppercase tracking-[.16em] text-[var(--ob-accent)]">{eyebrow}</p>}
-    <h1 tabIndex={-1} className="mt-2 text-balance text-[2rem] font-black leading-[1.05] text-[var(--ob-text)] outline-none focus-visible:outline-none">{title}</h1>
-    {body && <p className="mt-4 text-pretty text-[15px] font-medium leading-6 text-[var(--ob-muted)]">{body}</p>}
-  </div>
-);
-
-const StickyActions: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="t1ger-onboarding-sticky sticky bottom-0 -mx-5 mt-6 px-5 pb-2 pt-9">
-    {children}
-  </div>
-);
-
-const PlanBuilder: React.FC<{ onComplete: () => void; onSkip: () => void; language: Language }> = ({ onComplete, onSkip, language }) => {
-  const reduceMotion = useReducedMotion();
-  const [completed, setCompleted] = useState(reduceMotion ? 3 : 0);
-  const lines = language === 'es'
-    ? ['Ajustando tu nivel inicial', 'Conectando lecciones y práctica', 'Definiendo tu ritmo diario']
-    : ['Calibrating the starting level', 'Matching lessons and practice', 'Setting the daily rhythm'];
-
-  useEffect(() => {
-    if (reduceMotion) {
-      const timer = window.setTimeout(onComplete, 650);
-      return () => window.clearTimeout(timer);
-    }
-
-    const timers = [
-      window.setTimeout(() => setCompleted(1), 650),
-      window.setTimeout(() => setCompleted(2), 1450),
-      window.setTimeout(() => setCompleted(3), 2250),
-      window.setTimeout(onComplete, 2900),
-    ];
-    return () => timers.forEach(window.clearTimeout);
-  }, [onComplete, reduceMotion]);
-
-  return (
-    <div className="flex min-h-full flex-col justify-center py-8">
-      <TigerGuide mood="thinking" message={language === 'es' ? 'Estoy adaptando la primera semana a tus respuestas.' : 'I am matching the first week to your answers.'} />
-      <div className="mt-10 rounded-[1.6rem] border border-white/10 bg-white/[.045] p-5">
-        <div className="mb-6 h-2 overflow-hidden rounded-full bg-white/10">
-          <motion.div className="h-full rounded-full bg-[var(--ob-accent)]" animate={{ width: `${(completed / 3) * 100}%` }} />
-        </div>
-        <div className="space-y-4">
-          {lines.map((line, index) => {
-            const done = completed > index;
-            return (
-              <div key={line} className="flex items-center gap-3">
-                <span className={`flex h-8 w-8 items-center justify-center rounded-full ${done ? 'bg-[#3FC78E] text-[#05251F]' : 'bg-white/8 text-[#6F9990]'}`}>
-                  {done ? <Check size={16} /> : index + 1}
-                </span>
-                <span className={done ? 'text-sm font-semibold text-[var(--ob-text)]' : 'text-sm font-medium text-[var(--ob-muted)]'}>{line}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <button onClick={onSkip} className="mt-6 min-h-12 text-sm font-semibold text-[var(--ob-muted)]">
-        {language === 'es' ? 'Saltar animación' : 'Skip animation'}
-      </button>
-    </div>
-  );
-};
-
-const PathReveal: React.FC<{ draft: OnboardingDraft; onContinue: () => void; language: Language }> = ({ draft, onContinue, language }) => {
-  const calibration = calculateCalibration(draft.experience, draft.calibrationAnswers);
-  const minutes = draft.dailyGoal || 10;
-  const focus = applicationLabels(draft.applications, language)[0];
-  const nodes = [
-    { title: language === 'es' ? 'Aprende' : 'Learn', detail: language === 'es' ? 'Activos y pasivos' : 'Assets vs Liabilities', icon: <BookOpen size={20} /> },
-    { title: language === 'es' ? 'Aplica' : 'Apply', detail: focus, icon: <Target size={20} /> },
-    { title: language === 'es' ? 'Progreso verificado' : 'Verified progress', detail: language === 'es' ? 'La evidencia suma XP competitivo' : 'Evidence earns leaderboard XP', icon: <ShieldCheck size={20} /> },
-  ];
-
-  return (
-    <div className="flex min-h-full flex-col py-3">
-      <ScreenHeader
-        eyebrow={language === 'es' ? 'Tu primera semana está lista' : 'First week ready'}
-        title={language === 'es' ? 'Tu ruta empieza con decisiones reales.' : 'Your path starts with real decisions.'}
-        body={language === 'es' ? `Nivel inicial: ${calibration === 'accelerated' ? 'avanzado' : calibration === 'foundation' ? 'fundamentos' : 'principiante'}. Ritmo diario: ${minutes} minutos.` : `Starting level: ${calibration}. Daily rhythm: ${minutes} minutes.`}
-        guide={<TigerGuide mood="ready" message={language === 'es' ? 'El ciclo es simple: aprende, aplica y demuestra tu progreso.' : 'The loop is simple: learn, apply, and prove progress.'} />}
-      />
-      <div className="relative mt-2 space-y-4">
-        <div className="absolute bottom-10 left-9 top-10 w-px bg-[var(--ob-accent)]/35" />
-        {nodes.map((node, index) => (
-          <motion.div
-            key={node.title}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.12 }}
-            className="relative flex gap-4 rounded-[1.25rem] border border-white/10 bg-white/[.045] p-4"
-          >
-            <span className="z-10 flex h-12 w-12 shrink-0 items-center justify-center rounded-[1rem] bg-[var(--ob-accent)] text-[var(--ob-accent-ink)]">{node.icon}</span>
-            <span>
-              <strong className="block text-base text-white">{node.title}</strong>
-              <span className="mt-1 block text-sm leading-5 text-[var(--ob-muted)]">{node.detail}</span>
-            </span>
-          </motion.div>
-        ))}
-      </div>
-      <StickyActions>
-        <PrimaryAction onClick={onContinue}>{language === 'es' ? 'Probar la primera lección' : 'Try the first lesson'} <Play size={18} /></PrimaryAction>
-      </StickyActions>
-    </div>
-  );
-};
-
 export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
-  const { appUser, updateAppUser } = useAuth();
+  const {
+    appUser,
+    updateAppUser,
+    googleSignIn,
+    appleSignIn,
+    emailPasswordSignIn,
+    emailPasswordSignUp,
+  } = useAuth();
   const { language, setLanguage } = useBrain();
   const isEs = language === 'es';
-  const tr = (es: string, en: string) => isEs ? es : en;
-  const firstLesson = useMemo(() => MISSION_BANK.find(mission => mission.id === FIRST_LESSON_ID), []);
+  const tr = (es: string, en: string) => (isEs ? es : en);
+
   const [draft, setDraft] = useState<OnboardingDraft>(() => loadDraft());
   const [direction, setDirection] = useState(1);
-  const [calibrationIndex, setCalibrationIndex] = useState(0);
-  const [splashRevealed, setSplashRevealed] = useState(false);
-  const [error, setError] = useState('');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-up');
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [selectedLessonOption, setSelectedLessonOption] = useState<number | null>(null);
+  const [lessonChecked, setLessonChecked] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
-  const [authAdvanced, setAuthAdvanced] = useState(false);
-  const headingRef = useRef(0);
+  const [error, setError] = useState('');
+
+  // Auto-detect browser/system language on initial mount if not set
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      const detected = navigator.language?.toLowerCase().startsWith('es') ? 'es' : 'en';
+      if (detected !== language) {
+        setLanguage(detected);
+      }
+    }
+  }, []);
 
   const step = draft.step;
-  const calibration = calculateCalibration(draft.experience, draft.calibrationAnswers);
+  const currentStepIndex = STEP_ORDER.indexOf(step);
+  const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEP_ORDER.length) * 100);
 
   useEffect(() => {
     saveDraft(draft);
-    updateAppUser({ ...buildPersonalizedProfile(draft), onboardingComplete: false }).catch(() => undefined);
+    updateAppUser({
+      niche: draft.topic,
+      dailyTime: draft.dailyGoal,
+      onboardingComplete: false,
+    }).catch(() => undefined);
   }, [draft, updateAppUser]);
-
-  useEffect(() => {
-    headingRef.current += 1;
-    window.setTimeout(() => {
-      const heading = document.querySelector<HTMLHeadingElement>('h1[tabindex="-1"]');
-      heading?.focus();
-    }, 50);
-  }, [step]);
-
-  useEffect(() => {
-    if (step === 'save_progress' && appUser && !authAdvanced) {
-      setAuthAdvanced(true);
-    }
-  }, [appUser, authAdvanced, step]);
 
   useEffect(() => {
     if (step === 'success' && draft.lessonCompleted) {
@@ -524,427 +325,1108 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   }, [draft.lessonCompleted, step]);
 
   const patchDraft = (patch: Partial<OnboardingDraft>) => {
-    setDraft(current => ({ ...current, ...patch }));
+    setDraft((curr) => ({ ...curr, ...patch }));
   };
 
   const goTo = (target: OnboardingStep, nextDirection = 1) => {
     setDirection(nextDirection);
     setError('');
-    setDraft(current => ({ ...current, step: target }));
+    setDraft((curr) => ({ ...curr, step: target }));
   };
 
-  const advance = () => goTo(nextStep(step), 1);
+  const advance = () => {
+    const nextIdx = Math.min(currentStepIndex + 1, STEP_ORDER.length - 1);
+    goTo(STEP_ORDER[nextIdx], 1);
+  };
+
   const back = () => {
-    if (step === 'calibration' && calibrationIndex > 0) {
-      setCalibrationIndex(index => index - 1);
-      return;
-    }
-    goTo(previousStep(step), -1);
+    const prevIdx = Math.max(currentStepIndex - 1, 0);
+    goTo(STEP_ORDER[prevIdx], -1);
   };
 
-  const selectAndAdvance = <T,>(patch: Partial<OnboardingDraft>) => {
-    patchDraft(patch);
-    window.setTimeout(() => {
-      setDirection(1);
-      setDraft(current => ({ ...current, ...patch, step: nextStep(current.step) }));
-    }, 230);
-  };
+  const currentTopicObj = COURSE_TOPICS.find((t) => t.id === draft.topic) || COURSE_TOPICS[0];
+  const topicName = localize(currentTopicObj.title, language);
 
-  const toggleApplication = (id: ApplicationPreference) => {
-    setDraft(current => {
-      const exists = current.applications.includes(id);
-      const applications = exists
-        ? current.applications.filter(item => item !== id)
-        : [...current.applications, id];
-      return { ...current, applications };
-    });
-  };
-
-  const answerCalibration = (option: { id: string; correct: boolean }) => {
-    const question = calibrationQuestions[calibrationIndex];
-    setDraft(current => {
-      const remaining = current.calibrationAnswers.filter(answer => answer.questionId !== question.id);
-      return {
-        ...current,
-        calibrationAnswers: [...remaining, { questionId: question.id, optionId: option.id, correct: option.correct }],
-      };
-    });
-  };
-
-  const currentCalibrationAnswer = draft.calibrationAnswers.find(answer => answer.questionId === calibrationQuestions[calibrationIndex]?.id);
-
-  const continueCalibration = () => {
-    if (calibrationIndex < calibrationQuestions.length - 1) {
-      setCalibrationIndex(index => index + 1);
-      return;
+  const requestReminder = async () => {
+    try {
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          patchDraft({ reminderStatus: 'enabled' });
+        } else {
+          patchDraft({ reminderStatus: 'denied' });
+        }
+      } else {
+        // Native Android webview / mobile: enable reminders by default in user preferences
+        patchDraft({ reminderStatus: 'enabled' });
+      }
+    } catch {
+      patchDraft({ reminderStatus: 'enabled' });
     }
     advance();
   };
 
-  const requestReminder = async () => {
-    if (typeof window === 'undefined' || !('Notification' in window)) {
-      patchDraft({ reminderStatus: 'unsupported' });
-      await updateAppUser({ notificationPreferences: { daily_reminder: false, streak_risk: false, apply_reminder: false } });
-      return;
-    }
-
-    try {
-      const permission = await window.Notification.requestPermission();
-      const enabled = permission === 'granted';
-      patchDraft({ reminderStatus: enabled ? 'enabled' : permission === 'denied' ? 'denied' : 'dismissed' });
-      await updateAppUser({ notificationPreferences: { daily_reminder: enabled, streak_risk: enabled, apply_reminder: enabled } });
-    } catch {
-      patchDraft({ reminderStatus: 'unsupported' });
-    }
-  };
-
-  const finalize = async (accessChoice: 'free' | 'super') => {
-    if (finalizing) return;
+  const finalize = async (choice: 'free' | 'super') => {
     setFinalizing(true);
-    setError('');
-    const finalDraft = { ...draft, accessChoice, step: 'access' as const };
+    patchDraft({ accessChoice: choice });
     try {
       await updateAppUser({
-        ...buildPersonalizedProfile(finalDraft),
         onboardingComplete: true,
-        onboardingStep: 'complete',
-        isSuperT1ger: accessChoice === 'super' ? appUser?.isSuperT1ger : appUser?.isSuperT1ger,
+        isSuperT1ger: choice === 'super',
+        dailyTime: draft.dailyGoal,
+        niche: draft.topic,
       });
-      clearDraft();
+      window.localStorage.removeItem(DRAFT_KEY);
       onComplete();
-    } catch (err) {
-      console.error('Onboarding finalization failed', err);
-      setError(tr('No pudimos guardar el perfil. Tus respuestas siguen aquí; inténtalo de nuevo.', 'We could not save your profile. Your answers are still here; try again.'));
+    } catch (e: any) {
+      setError(tr('No se pudo finalizar. Intenta nuevamente.', 'Failed to finalize. Please try again.'));
       setFinalizing(false);
     }
   };
 
-  if (step === 'micro_lesson') {
-    if (!firstLesson) {
-      return (
-        <OnboardingShell step={step} direction={direction} onBack={back} language={language}>
-          <div className="flex min-h-full flex-col justify-center">
-            <ScreenHeader title={tr('La primera lección no está disponible.', 'The first lesson is unavailable.')} body={tr('No encontramos la primera lección de inversión. Vuelve al plan e inténtalo de nuevo.', 'The Investing curriculum is missing its first lesson. Return to the plan and try again.')} />
-            <PrimaryAction onClick={() => goTo('plan_reveal', -1)} variant="secondary">{tr('Volver al plan', 'Back to plan')}</PrimaryAction>
-          </div>
-        </OnboardingShell>
-      );
-    }
-
-    return (
-      <OnboardingShell step={step} direction={direction} onBack={back} hideProgress flush language={language}>
-        <MissionEngine
-          mission={firstLesson}
-          onComplete={() => {
-            patchDraft({ lessonCompleted: true, step: 'success' });
-            setDirection(1);
-          }}
-        />
-      </OnboardingShell>
-    );
-  }
-
-  const renderStep = () => {
+  // Render Step Switch
+  const renderStepContent = () => {
     switch (step) {
-      case 'arrival':
+      // Frame 1: Welcome (Duolingo Style centered mascot + speech bubble)
+      case 'welcome':
         return (
-          <div className="relative flex min-h-full flex-col pb-2 pt-[calc(1.25rem+env(safe-area-inset-top))]">
-            <AnimatePresence>
-              {!splashRevealed && (
-                <motion.button
-                  type="button"
-                  aria-label={tr('Comenzar onboarding de T1GER', 'Start T1GER onboarding')}
-                  initial={{ opacity: 1 }}
-                  exit={{ opacity: 0, scale: 0.985 }}
-                  transition={{ duration: 0.48, ease: [0.22, 1, 0.36, 1] }}
-                  onClick={() => setSplashRevealed(true)}
-                  className="t1ger-onboarding t1ger-onboarding-splash fixed inset-0 z-[600] flex cursor-pointer select-none flex-col items-center overflow-hidden px-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] pt-[calc(1.5rem+env(safe-area-inset-top))] text-left"
-                >
-                  <div className="flex w-full items-center justify-between font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--ob-muted)]">
-                    <span>T1GER</span>
-                    <span>{tr('Aprende haciendo', 'Learn by doing')}</span>
-                  </div>
+          <div className="flex min-h-full flex-col justify-between py-6">
+            <div className="flex justify-end">
+              <button
+                onClick={() => setLanguage(isEs ? 'en' : 'es')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[.06] border border-white/10 text-xs font-bold text-zinc-300 cursor-pointer"
+              >
+                <Globe size={14} />
+                <span>{isEs ? 'EN' : 'ES'}</span>
+              </button>
+            </div>
 
-                  <div className="relative flex min-h-0 w-full flex-1 items-center justify-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.018, 1], y: [0, -3, 0] }}
-                      transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
-                      className="h-[25rem] w-full"
-                    >
-                      <T1gerMascot3D mood="idle" className="h-full w-full" />
-                    </motion.div>
-                  </div>
+            <div className="flex flex-col items-center text-center my-auto">
+              {/* Speech bubble */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="relative rounded-2xl border border-white/15 bg-[#121216] px-6 py-3.5 text-base font-black text-white shadow-2xl mb-4"
+              >
+                {tr('¡Hola! ¡Soy T1GER!', "Hi there! I'm T1GER!")}
+                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-b border-r border-white/15 bg-[#121216]" />
+              </motion.div>
 
-                  <div className="w-full">
-                    <h2 className="text-[2.65rem] font-black leading-none tracking-[-.055em] text-[var(--ob-text)]">T1GER</h2>
-                    <div className="mt-3 flex items-center gap-3">
-                      <span className="h-px flex-1 bg-[var(--ob-accent)]/55" />
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--ob-accent)]">{tr('Toca para empezar', 'Tap to begin')}</span>
-                    </div>
-                  </div>
-                </motion.button>
-              )}
-            </AnimatePresence>
+              {/* 3D Mascot Centered */}
+              <div className="h-56 w-56 relative flex items-center justify-center pointer-events-none my-2">
+                <T1gerMascot3D mood="happy" className="h-56 w-56" />
+              </div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.52, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="flex min-h-0 flex-1 flex-col"
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-[10px] font-semibold uppercase tracking-[.16em] text-[var(--ob-muted)]">{tr('Idioma', 'Language')}</span>
-                <div className="flex rounded-full border border-[var(--ob-border)] bg-white/[.035] p-1" aria-label={tr('Seleccionar idioma', 'Choose language')}>
-                  {(['es', 'en'] as const).map(option => (
-                    <button key={option} type="button" onClick={() => setLanguage(option)} aria-pressed={language === option} className={`rounded-full px-3 py-1.5 text-[11px] font-bold transition ${language === option ? 'bg-[var(--ob-accent)] text-[var(--ob-accent-ink)]' : 'text-[var(--ob-muted)]'}`}>
-                      {option.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="relative -mr-5 h-[17rem] w-[calc(100%+1.25rem)] shrink-0 self-end pointer-events-none">
-                <T1gerMascot3D mood="idle" className="h-full w-full" />
-              </div>
-              <div className="-mt-3 text-left">
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[.18em] text-[var(--ob-accent)]">{tr('T1GER Inversión', 'T1GER Investing')}</p>
-                <h1 tabIndex={-1} className="mt-3 max-w-[10ch] text-[2.8rem] font-black leading-[.94] tracking-[-.045em] text-[var(--ob-text)] outline-none focus-visible:outline-none">{tr('Aprende. Aplica. Demuéstralo.', 'Learn it. Apply it. Prove it.')}</h1>
-                <p className="mt-4 max-w-[36ch] text-[15px] font-medium leading-6 text-[var(--ob-muted)]">
-                  {tr('Lecciones cortas que se convierten en decisiones reales, con evidencia cuando importa.', 'Short lessons become real investing decisions, with proof when it matters.')}
-                </p>
-              </div>
-            </motion.div>
-            <div className="relative z-10 mt-6 space-y-3">
-              <PrimaryAction onClick={() => goTo('guide')}>{tr('Crear mi ruta', 'Build my path')} <ChevronRight size={18} /></PrimaryAction>
-              <PrimaryAction onClick={() => goTo('save_progress')} variant="secondary">{tr('Ya tengo una cuenta', 'I already have an account')}</PrimaryAction>
+              <h1 className="text-3xl font-black tracking-tight text-white mt-4">
+                T1GER
+              </h1>
+              <p className="text-sm font-medium text-zinc-400 mt-1 max-w-xs">
+                {tr(
+                  'El mejor aprendizaje del mundo convertido en acciones y criterio real.',
+                  'World-class education turned into real actions and financial judgment.'
+                )}
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-6">
+              <PrimaryAction onClick={advance}>
+                {tr('EMPEZAR', 'GET STARTED')} <ChevronRight size={18} />
+              </PrimaryAction>
+              <button
+                onClick={() => goTo('save_progress')}
+                className="w-full py-2.5 text-center text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition cursor-pointer"
+              >
+                {tr('YA TENGO UNA CUENTA', 'I ALREADY HAVE AN ACCOUNT')}
+              </button>
             </div>
           </div>
         );
 
-      case 'guide':
+      // Frame 2: Topic Selection ("What would you like to learn?")
+      case 'topic_select':
         return (
           <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader
-              guide={<TigerGuide mood="calm" message={tr('Responde unas preguntas y prueba una lección antes de registrarte.', 'Answer a few questions, then try a real lesson before signup.')} />}
-              eyebrow={tr('Siete decisiones rápidas', 'Seven quick decisions')}
-              title={tr('Crearé tu primera semana según tu objetivo.', 'I will build the first week around your goal.')}
-              body={tr('Cada respuesta ajusta tu ruta o tu ritmo diario.', 'Every answer adjusts your path or daily rhythm.')}
+            <DuolingoHeader
+              speech={tr('¿Qué te gustaría aprender hoy?', 'What would you like to learn?')}
+              mood="thinking"
+              eyebrow={tr('Elige tu tema', 'Choose your path')}
             />
-            <div className="mt-auto rounded-[1.4rem] border border-[var(--ob-border)] bg-white/[.035] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,.025)]">
-              <div className="grid grid-cols-3 gap-3 text-center">
-                {[
-                  [tr('Aprende', 'Learn'), tr('Idea breve', 'Short concept')],
-                  [tr('Aplica', 'Apply'), tr('Acción real', 'Real action')],
-                  [tr('Demuestra', 'Verify'), tr('XP con evidencia', 'Evidence XP')],
-                ].map(([title, detail]) => (
-                  <div key={title} className="rounded-[1rem] bg-white/[.035] p-3">
-                    <strong className="block text-sm text-[var(--ob-text)]">{title}</strong>
-                    <span className="mt-1 block text-[11px] leading-4 text-[var(--ob-muted)]">{detail}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <StickyActions><PrimaryAction onClick={advance}>{tr('Continuar', 'Continue')} <ArrowRight size={18} /></PrimaryAction></StickyActions>
-          </div>
-        );
 
-      case 'outcome':
-        return (
-          <div className="min-h-full py-3">
-            <ScreenHeader eyebrow={tr('Tu objetivo', 'Your outcome')} title={tr('¿Qué quieres lograr primero con tus inversiones?', 'What should investing help you do first?')} body={tr('Elige el resultado que haría útil tu primer mes.', 'Pick the outcome that would make the first month feel useful.')} />
-            <div className="space-y-3">
-              {outcomes.map(item => (
-                <ChoiceCard key={item.id} icon={item.icon} title={localize(item.title, language)} detail={localize(item.detail, language)} selected={draft.outcome === item.id} onClick={() => selectAndAdvance({ outcome: item.id })} />
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'experience':
-        return (
-          <div className="min-h-full py-3">
-            <ScreenHeader guide={<TigerGuide mood="thinking" message={tr('No hay respuestas malas. Esto sólo ajusta el punto de partida.', 'No judgment here. This only adjusts your starting point.')} />} eyebrow={tr('Punto de partida', 'Starting point')} title={tr('¿Cuánta experiencia tienes invirtiendo?', 'How much investing have you done?')} />
-            <div className="space-y-3">
-              {experiences.map(item => (
-                <ChoiceCard key={item.id} title={localize(item.title, language)} detail={localize(item.detail, language)} selected={draft.experience === item.id} onClick={() => selectAndAdvance({ experience: item.id })} />
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'application':
-        return (
-          <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader eyebrow={tr('Enfoque práctico', 'Practice focus')} title={tr('¿Dónde quieres usar este conocimiento?', 'Where do you want to use this knowledge?')} body={tr('Elige una o más opciones. Así adaptaremos tus misiones de práctica.', 'Choose one or more. We will adapt your practice missions around them.')} />
-            <div className="space-y-3">
-              {applicationOptions.map(item => (
-                <ChoiceCard key={item.id} title={localize(item.title, language)} detail={localize(item.detail, language)} multi selected={draft.applications.includes(item.id)} onClick={() => toggleApplication(item.id)} />
-              ))}
-            </div>
-            <StickyActions><PrimaryAction disabled={!draft.applications.length} onClick={advance}>{tr('Continuar', 'Continue')} <ArrowRight size={18} /></PrimaryAction></StickyActions>
-          </div>
-        );
-
-      case 'calibration': {
-        const question = calibrationQuestions[calibrationIndex];
-        const answered = Boolean(currentCalibrationAnswer);
-        const selectedOption = currentCalibrationAnswer?.optionId;
-        return (
-          <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader eyebrow={tr(`Pregunta ${calibrationIndex + 1} de ${calibrationQuestions.length}`, `Question ${calibrationIndex + 1} of ${calibrationQuestions.length}`)} title={localize(question.prompt, language)} body={tr('Dos preguntas nos ayudan a elegir el nivel correcto.', 'Two quick checks help us choose the right level.')} />
-            <div className="space-y-3" role="radiogroup" aria-label={localize(question.prompt, language)}>
-              {question.options.map(option => {
-                const selected = selectedOption === option.id;
-                const correct = answered && option.correct;
-                const wrong = answered && selected && !option.correct;
+            <div className="space-y-2.5 my-auto">
+              {COURSE_TOPICS.map((topic) => {
+                const isSelected = draft.topic === topic.id;
                 return (
                   <button
-                    key={option.id}
-                    role="radio"
-                    aria-checked={selected}
-                    disabled={answered}
-                    onClick={() => answerCalibration(option)}
-                    className={`min-h-16 w-full rounded-[1.15rem] border p-4 text-left text-sm font-semibold leading-5 transition ${correct ? 'border-[#3FC78E] bg-[#3FC78E]/12 text-white' : wrong ? 'border-[#E56A65] bg-[#E56A65]/10 text-white' : selected ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/10 text-[var(--ob-text)]' : 'border-[var(--ob-border)] bg-white/[.035] text-[var(--ob-muted-strong)]'}`}
+                    key={topic.id}
+                    onClick={() => patchDraft({ topic: topic.id })}
+                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_20px_rgba(255,115,0,0.25)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                    }`}
                   >
-                    {localize(option.text, language)}
+                    <span className="text-2xl shrink-0">{topic.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <strong className="text-sm font-bold text-white block">
+                          {localize(topic.title, language)}
+                        </strong>
+                        {topic.badge && (
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase">
+                            {localize(topic.badge, language)}
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-zinc-400 block mt-0.5 line-clamp-1">
+                        {localize(topic.subtitle, language)}
+                      </span>
+                    </div>
+                    <span
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 ${
+                        isSelected
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
+                          : 'border-white/20 text-transparent'
+                      }`}
+                    >
+                      {isSelected && <Check size={14} strokeWidth={3} />}
+                    </span>
                   </button>
                 );
               })}
             </div>
-            {answered && (
-              <div role="status" className="mt-5 rounded-[1rem] border border-white/10 bg-white/[.045] p-4 text-sm leading-6 text-[#B8D0CA]">
-                <strong className="block text-white">{currentCalibrationAnswer?.correct ? tr('¡Bien!', 'Nice work!') : tr('Ahora ya lo sabes.', 'Now you know.')}</strong>
-                {localize(question.explanation, language)}
+
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 3: Course Building Interstitial
+      case 'course_building':
+        return (
+          <div className="flex min-h-full flex-col justify-between py-8 text-center">
+            <div />
+            <div className="flex flex-col items-center">
+              <motion.div
+                animate={{ scale: [1, 1.08, 1], rotate: [0, 2, -2, 0] }}
+                transition={{ repeat: Infinity, duration: 2.5 }}
+                className="h-48 w-48 relative flex items-center justify-center pointer-events-none mb-4"
+              >
+                <T1gerMascot3D mood="celebrate" className="h-48 w-48" />
+              </motion.div>
+
+              <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-[var(--ob-accent)]">
+                {tr('CREANDO TU CURSO...', 'COURSE BUILDING...')}
+              </p>
+              <h2 className="text-2xl font-black text-white mt-2 max-w-xs">
+                {tr(
+                  `Prepárate para dominar ${topicName} con la mejor educación del mundo.`,
+                  `Get ready to master ${topicName} with world-class frameworks.`
+                )}
+              </h2>
+            </div>
+
+            <PrimaryAction onClick={advance}>
+              {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+            </PrimaryAction>
+          </div>
+        );
+
+      // Frame 4: Acquisition Source ("How did you hear about T1GER?")
+      case 'acquisition_source':
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
+              mood="ready"
+            />
+
+            <div className="space-y-2 my-auto">
+              {ACQUISITION_SOURCES.map((src) => {
+                const isSelected = draft.acquisitionSource === src.id;
+                return (
+                  <button
+                    key={src.id}
+                    onClick={() => patchDraft({ acquisitionSource: src.id })}
+                    className={`flex items-center gap-3 w-full p-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    <span className="text-xl shrink-0">{src.icon}</span>
+                    <span className="text-sm font-semibold flex-1">
+                      {localize(src.title, language)}
+                    </span>
+                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction disabled={!draft.acquisitionSource} onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 5: Knowledge Level ("How much do you know?")
+      case 'knowledge_level':
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr(`¿Cuánto sabes sobre ${topicName}?`, `How much ${topicName} do you know?`)}
+              mood="thinking"
+            />
+
+            <div className="space-y-2.5 my-auto">
+              {KNOWLEDGE_LEVELS.map((lvl) => {
+                const isSelected = draft.knowledgeLevel === lvl.id;
+                return (
+                  <button
+                    key={lvl.id}
+                    onClick={() => patchDraft({ knowledgeLevel: lvl.id })}
+                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    {/* Signal strength bars */}
+                    <div className="flex items-end gap-1 h-5 shrink-0">
+                      {[1, 2, 3, 4, 5].map((bar) => (
+                        <div
+                          key={bar}
+                          className={`w-1 rounded-full ${
+                            bar <= lvl.bars
+                              ? isSelected
+                                ? 'bg-[var(--ob-accent)]'
+                                : 'bg-white/80'
+                              : 'bg-white/20'
+                          }`}
+                          style={{ height: `${bar * 20}%` }}
+                        />
+                      ))}
+                    </div>
+
+                    <span className="text-sm font-semibold flex-1">
+                      {localize(lvl.title, language)}
+                    </span>
+                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 6: Encouragement Interstitial
+      case 'encouragement':
+        return (
+          <div className="flex min-h-full flex-col justify-between py-8 text-center">
+            <div />
+            <div className="flex flex-col items-center">
+              <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-3">
+                <T1gerMascot3D mood="happy" className="h-44 w-44" />
               </div>
-            )}
-            <StickyActions><PrimaryAction disabled={!answered} onClick={continueCalibration}>{tr('Continuar', 'Continue')} <ArrowRight size={18} /></PrimaryAction></StickyActions>
+
+              <h2 className="text-2xl font-black text-white">
+                {draft.knowledgeLevel === 'zero'
+                  ? tr('¡Perfecto! Empezaremos desde cero con decisiones prácticas.', "Okay, we'll start fresh with real practice!")
+                  : tr('¡Excelente! Adaptaremos el ritmo a tu nivel actual.', "Great! We'll tailor the pace to your current skill.")}
+              </h2>
+              <p className="text-xs text-zinc-400 mt-2 max-w-xs">
+                {tr('Sin teoría aburrida: cada lección es una decisión real.', 'No boring theory: every lesson is an actionable decision.')}
+              </p>
+            </div>
+
+            <PrimaryAction onClick={advance}>
+              {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+            </PrimaryAction>
+          </div>
+        );
+
+      // Frame 7: Motivation Reason ("Why are you learning?")
+      case 'motivation_reason':
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr(`¿Por qué quieres aprender ${topicName}?`, `Why are you learning ${topicName}?`)}
+              mood="ready"
+            />
+
+            <div className="space-y-2.5 my-auto">
+              {MOTIVATION_REASONS.map((mot) => {
+                const isSelected = draft.motivation === mot.id;
+                return (
+                  <button
+                    key={mot.id}
+                    onClick={() => patchDraft({ motivation: mot.id })}
+                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    <span className="text-xl shrink-0">{mot.icon}</span>
+                    <span className="text-sm font-semibold flex-1">
+                      {localize(mot.title, language)}
+                    </span>
+                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction disabled={!draft.motivation} onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 8: Weekly Promise Interstitial
+      case 'weekly_promise':
+        return (
+          <div className="flex min-h-full flex-col justify-between py-8 text-center">
+            <div />
+            <div className="flex flex-col items-center">
+              <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-3">
+                <T1gerMascot3D mood="celebrate" className="h-44 w-44" />
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF7300]/20 border border-[#FF7300]/40 text-[#FF8C33] text-xs font-black uppercase mb-3">
+                <Zap size={14} /> {tr('Impacto Rápido', 'Fast Impact')}
+              </div>
+
+              <h2 className="text-3xl font-black text-white">
+                {tr('¡Eso son más de 20 conceptos y decisiones en tu primera semana!', "That's 20+ concepts & real decisions in your first week!")}
+              </h2>
+            </div>
+
+            <PrimaryAction onClick={advance}>
+              {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+            </PrimaryAction>
+          </div>
+        );
+
+      // Frame 9: Screen Time Hook (Opportunity Cost Calculator)
+      case 'screen_time': {
+        const hours = draft.screenTimeHours || 3.5;
+        const weeklyHours = Math.round(hours * 7);
+        const yearlyHours = Math.round(hours * 365);
+        const annualLostUSD = Math.round(yearlyHours * 15);
+        const booksEquivalent = Math.max(1, Math.round(yearlyHours / 8));
+
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr(
+                'El 90% pierde 3h al día en redes sociales. Veamos tu costo de oportunidad real.',
+                '90% spend 3+ hours daily scrolling social feeds. Let’s calculate your opportunity cost.'
+              )}
+              mood={hours >= 4 ? 'beast' : 'thinking'}
+              eyebrow={tr('Costo de Oportunidad', 'Opportunity Cost')}
+              title={tr('¿Cuánto tiempo pasas en redes al día?', 'How much daily screen time goes into feeds?')}
+            />
+
+            {/* Presets */}
+            <div className="grid grid-cols-4 gap-2 mb-3">
+              {[1, 2.5, 4, 6].map((h) => (
+                <button
+                  key={h}
+                  onClick={() => patchDraft({ screenTimeHours: h })}
+                  className={`flex flex-col items-center justify-center rounded-2xl border p-2.5 transition active:scale-95 cursor-pointer ${
+                    hours === h
+                      ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/20 text-white font-bold'
+                      : 'border-white/10 bg-white/[.03] text-zinc-400'
+                  }`}
+                >
+                  <span className="text-base font-black">{h}h</span>
+                  <span className="text-[10px]">{tr('al día', '/day')}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Slider */}
+            <div className="mb-4 px-1">
+              <input
+                type="range"
+                min="0.5"
+                max="8"
+                step="0.5"
+                value={hours}
+                onChange={(e) => patchDraft({ screenTimeHours: parseFloat(e.target.value) })}
+                className="w-full h-2 rounded-lg bg-white/10 accent-[var(--ob-accent)] cursor-pointer"
+              />
+            </div>
+
+            {/* Calculation Card */}
+            <div className="rounded-2xl border border-[var(--ob-accent)]/30 bg-gradient-to-b from-[#FF7300]/10 to-transparent p-4 space-y-3 shadow-lg">
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="rounded-xl border border-white/6 bg-black/30 p-3 text-left">
+                  <span className="flex items-center gap-1 text-[11px] font-medium text-[#FF8C33]">
+                    <DollarSign size={13} /> {tr('Dinero no ganado ($15/h)', 'Value lost ($15/hr)')}
+                  </span>
+                  <strong className="block text-base font-black text-white mt-0.5">
+                    ${annualLostUSD.toLocaleString()} USD
+                  </strong>
+                  <span className="text-[10px] text-zinc-400 block">{tr('por año en ocio pasivo', '/yr in passive scrolling')}</span>
+                </div>
+
+                <div className="rounded-xl border border-white/6 bg-black/30 p-3 text-left">
+                  <span className="flex items-center gap-1 text-[11px] font-medium text-[#78DDB0]">
+                    <BookOpen size={13} /> {tr('Conocimiento no adquirido', 'Skills & books lost')}
+                  </span>
+                  <strong className="block text-base font-black text-white mt-0.5">
+                    ~{booksEquivalent} {tr('libros', 'books')}
+                  </strong>
+                  <span className="text-[10px] text-zinc-400 block">{tr('o habilidades clave', 'or core masteries')}</span>
+                </div>
+              </div>
+
+              <div className="rounded-xl bg-[#3FC78E]/10 border border-[#3FC78E]/25 p-2.5 flex items-center gap-2">
+                <span className="text-[#3FC78E] text-sm">⚡</span>
+                <p className="text-[11px] text-[#C5E8DE] leading-tight">
+                  {tr(
+                    'T1GER solo te pide 5 a 10 min al día para convertir este tiempo en criterio real.',
+                    'T1GER only asks for 5 to 10 min/day to turn lost time into real judgment.'
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('RECLAMAR MI TIEMPO', 'RECLAIM MY TIME')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
           </div>
         );
       }
 
+      // Frame 10: Daily Commitment ("How much time can you commit?")
       case 'daily_goal':
         return (
           <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader guide={<TigerGuide mood="ready" message={tr('La constancia gana. Diez minutos caben incluso en un día ocupado.', 'Consistency wins. Ten minutes fits even on a busy day.')} />} eyebrow={tr('Ritmo diario', 'Daily rhythm')} title={tr('¿Cuánto tiempo puedes dedicar cada día?', 'How much time can you protect each day?')} />
-            <div className="grid grid-cols-2 gap-3">
-              {[5, 10, 15, 20].map(minutes => (
+            <DuolingoHeader
+              speech={tr('¿Cuánto tiempo puedes proteger cada día?', 'How much time can you protect each day?')}
+              mood="ready"
+              eyebrow={tr('Ritmo Diario', 'Daily Rhythm')}
+            />
+
+            <div className="grid grid-cols-2 gap-3 my-auto">
+              {[5, 10, 15, 20].map((minutes) => (
                 <button
                   key={minutes}
-                  aria-pressed={draft.dailyGoal === minutes}
                   onClick={() => patchDraft({ dailyGoal: minutes })}
-                  className={`min-h-32 rounded-[1.2rem] border p-4 text-left transition ${draft.dailyGoal === minutes ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/10' : 'border-[var(--ob-border)] bg-white/[.035]'}`}
+                  className={`min-h-28 rounded-2xl border p-4 text-left transition-all active:scale-95 cursor-pointer ${
+                    draft.dailyGoal === minutes
+                      ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 shadow-[0_0_15px_rgba(255,115,0,0.25)]'
+                      : 'border-white/10 bg-white/[.03]'
+                  }`}
                 >
-                  {minutes === 10 && <span className="mb-3 inline-flex rounded-full bg-[var(--ob-accent)] px-2 py-1 text-[10px] font-black uppercase tracking-[.12em] text-[var(--ob-accent-ink)]">{tr('Recomendado', 'Recommended')}</span>}
-                  <strong className="block text-3xl font-black text-white">{minutes}</strong>
-                  <span className="mt-1 block text-sm text-[var(--ob-muted)]">{tr('min al día', 'min/day')}</span>
-                  <span className="mt-3 block text-xs leading-5 text-[#7EA39B]">{tr(`${Math.round((minutes * 5) / 10)} lecciones más práctica semanal`, `${Math.round((minutes * 5) / 10)} lessons plus weekly practice`)}</span>
+                  {minutes === 10 && (
+                    <span className="mb-2 inline-flex rounded-full bg-[var(--ob-accent)] px-2 py-0.5 text-[9px] font-black uppercase text-black">
+                      {tr('Recomendado', 'Recommended')}
+                    </span>
+                  )}
+                  <strong className="block text-2xl font-black text-white">{minutes}</strong>
+                  <span className="text-xs text-zinc-400">{tr('min al día', 'min/day')}</span>
                 </button>
               ))}
             </div>
-            <StickyActions><PrimaryAction onClick={advance}>{tr('Crear mi plan', 'Build my plan')} <Sparkles size={18} /></PrimaryAction></StickyActions>
-          </div>
-        );
 
-      case 'plan_build':
-        return <PlanBuilder language={language} onSkip={() => goTo('plan_reveal')} onComplete={() => { patchDraft({ planBuilt: true, step: 'plan_reveal' }); setDirection(1); }} />;
-
-      case 'plan_reveal':
-        return <PathReveal draft={draft} onContinue={advance} language={language} />;
-
-      case 'success':
-        return (
-          <div className="flex min-h-full flex-col justify-center py-6 text-center">
-            <TigerGuide mood="celebrate" message={tr('Primera lección lista. Este XP es personal; el XP competitivo exige evidencia.', 'First lesson done. This is personal XP; competitive XP requires evidence.')} />
-            <div className="mt-10 rounded-[1.7rem] border border-white/10 bg-white/[.045] p-6">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[1.25rem] bg-[var(--ob-accent)] text-[var(--ob-accent-ink)]"><Trophy size={30} /></div>
-              <p className="mt-6 font-mono text-xs font-black uppercase tracking-[.16em] text-[var(--ob-accent)]">{tr('Progreso personal', 'Personal progress')}</p>
-              <h1 tabIndex={-1} className="mt-2 text-4xl font-black text-white outline-none">+{ONBOARDING_XP} XP</h1>
-              <p className="mx-auto mt-4 max-w-xs text-sm leading-6 text-[var(--ob-muted)]">
-                {tr('Ahora convertirás esta idea en una acción: una operación simulada cuando podamos verificarla o una reflexión guiada cuando no.', 'Now you will turn this idea into action: a paper trade when it can be verified or a guided reflection when it cannot.')}
-              </p>
-            </div>
-            <PrimaryAction onClick={advance} className="mt-6">{tr('Guardar progreso', 'Save progress')} <Lock size={18} /></PrimaryAction>
-          </div>
-        );
-
-      case 'save_progress':
-        return (
-          <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader eyebrow={tr('Guarda tu progreso', 'Save progress')} title={tr('Crea tu cuenta después de tu primera victoria.', 'Create your account after your first win.')} body={tr('Conservaremos tus respuestas y tu lección aunque canceles el inicio de sesión.', 'We will keep your answers and lesson even if you cancel sign-in.')} />
-            {appUser && authAdvanced ? (
-              <div className="rounded-[1.4rem] border border-[#3FC78E]/30 bg-[#3FC78E]/10 p-5">
-                <div className="flex items-center gap-3 text-[#BCEAD5]"><CheckCircle2 size={22} /><strong>{tr('Tu progreso está guardado en este perfil.', 'Your progress is saved to this profile.')}</strong></div>
-                <p className="mt-3 text-sm leading-6 text-[var(--ob-muted)]">{appUser.email || appUser.displayName || tr('Perfil local de prueba', 'Local preview profile')}</p>
-                <PrimaryAction onClick={() => goTo('reminders')} className="mt-5">{tr('Continuar', 'Continue')} <ArrowRight size={18} /></PrimaryAction>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-[1.4rem] border border-white/10 bg-[#F7F2E8] text-zinc-900">
-                <AuthGate embedded onAuthSuccess={() => { setAuthAdvanced(true); goTo('reminders'); }} />
-              </div>
-            )}
-            {import.meta.env.DEV && !authAdvanced && (
-              <PrimaryAction onClick={() => { setAuthAdvanced(true); goTo('reminders'); }} variant="secondary" className="mt-4">
-                {tr('Continuar en modo local', 'Continue local preview')} <Mail size={18} />
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
-            )}
+            </div>
           </div>
         );
 
-      case 'reminders':
+      // Frame 11: Home Screen Widget Preview
+      case 'widget_preview':
         return (
-          <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader
-              guide={<TigerGuide mood="calm" message={tr(`Un recordatorio de ${draft.dailyGoal || 10} minutos protege el hábito que elegiste.`, `A ${draft.dailyGoal || 10}-minute reminder protects the habit you chose.`)} />}
-              eyebrow={tr('Recordatorios', 'Reminders')}
-              title={tr('Haz espacio para tu racha diaria.', 'Make room for your daily streak.')}
-              body={tr('Sólo pediremos permiso cuando pulses Activar.', 'We will ask for permission only after you tap Enable.')}
+          <div className="flex min-h-full flex-col justify-between py-4 text-center">
+            <DuolingoHeader
+              speech={tr('¡Te animaré todos los días desde tu pantalla de inicio!', "I'll cheer you on from your home screen!")}
+              mood="happy"
             />
-            <div className="rounded-[1.4rem] border border-white/10 bg-white/[.045] p-5">
-              <div className="flex items-start gap-4">
-                <span className="flex h-12 w-12 items-center justify-center rounded-[1rem] bg-[var(--ob-accent)]/12 text-[var(--ob-accent)]"><Bell size={23} /></span>
-                <div>
-                  <strong className="text-white">{tr('Recordatorios para aprender y aplicar', 'Learn and practice reminders')}</strong>
-                  <p className="mt-2 text-sm leading-6 text-[var(--ob-muted)]">{tr('Si no das permiso, podrás terminar y usar la app normalmente.', 'If you do not grant permission, you can still finish and use the app.')}</p>
+
+            {/* Android Phone Widget Graphic */}
+            <div className="my-auto flex flex-col items-center">
+              <div className="w-56 h-36 rounded-3xl bg-zinc-900 border-2 border-zinc-700 p-3 shadow-2xl flex flex-col justify-between text-left relative overflow-hidden ring-1 ring-white/10">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm">🐅</span>
+                    <span className="text-[11px] font-black uppercase tracking-wider text-[#FF7300]">T1GER</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
+                    <Flame size={12} className="text-[#FF7300] fill-[#FF7300]" /> 1
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-[#FF7300]/20 flex items-center justify-center text-xl">
+                    🔥
+                  </div>
+                  <div>
+                    <strong className="text-xs font-bold text-white block leading-tight">
+                      {tr('¡Protege tu racha!', 'Protect your streak!')}
+                    </strong>
+                    <span className="text-[10px] text-zinc-400 block mt-0.5">
+                      {tr('5 min restantes hoy', '5 min left today')}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="h-1.5 w-full rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-full w-2/3 rounded-full bg-[var(--ob-accent)]" />
                 </div>
               </div>
-              {draft.reminderStatus !== 'idle' && (
-                <p role="status" className="mt-4 rounded-[1rem] bg-white/[.045] p-3 text-sm text-[#B8D0CA]">
-                  {draft.reminderStatus === 'enabled' && tr('Recordatorios activados.', 'Reminders enabled.')}
-                  {draft.reminderStatus === 'denied' && tr('Notificaciones desactivadas. Puedes activarlas después en Perfil.', 'Notifications are off. You can enable them later in Profile.')}
-                  {draft.reminderStatus === 'unsupported' && tr('Este dispositivo no admite notificaciones en la vista previa.', 'This preview does not support notifications.')}
-                  {draft.reminderStatus === 'dismissed' && tr('Ahora no. Puedes activarlas más adelante.', 'Not now. You can enable them later.')}
+            </div>
+
+            <PrimaryAction onClick={advance}>
+              {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+            </PrimaryAction>
+          </div>
+        );
+
+      // Frame 12: 3-Month Achievement Roadmap
+      case 'achievement_roadmap':
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr('¡Esto es lo que lograrás en 3 meses!', "Here's what you can achieve in 3 months!")}
+              mood="celebrate"
+            />
+
+            <div className="space-y-3 my-auto">
+              {[
+                {
+                  icon: '💬',
+                  title: tr('Decisiones con confianza', 'Decide with confidence'),
+                  desc: tr('Criterio técnico y financiero sin estrés ni dudas', 'Stress-free financial & technical judgment'),
+                },
+                {
+                  icon: '📈',
+                  title: tr('Construir proyectos y portafolio', 'Build your real portfolio'),
+                  desc: tr('Pasos prácticos aplicados a la vida real', 'Hands-on steps and verifiable evidence'),
+                },
+                {
+                  icon: '⏰',
+                  title: tr('Hábito diario de alto rendimiento', 'High-performance daily habit'),
+                  desc: tr('Recordatorios inteligentes y rachas protegidas', 'Smart reminders and streak protection'),
+                },
+              ].map((card, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3.5 p-4 rounded-2xl border border-white/10 bg-white/[.03] text-left"
+                >
+                  <span className="text-2xl shrink-0 mt-0.5">{card.icon}</span>
+                  <div>
+                    <strong className="text-sm font-bold text-white block">{card.title}</strong>
+                    <p className="text-xs text-zinc-400 mt-0.5 leading-relaxed">{card.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 13: Starting Point Choice ("Now let's find the best place to start!")
+      case 'starting_point':
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr('¡Ahora encontremos el mejor lugar para comenzar!', "Now let's find the best place to start!")}
+              mood="ready"
+            />
+
+            <div className="space-y-3 my-auto">
+              <button
+                onClick={() => {
+                  patchDraft({ startingPoint: 'scratch' });
+                  advance();
+                }}
+                className="w-full p-5 rounded-2xl border border-[#3FC78E]/40 bg-[#3FC78E]/10 text-left transition-all active:scale-[0.985] cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 rounded-full bg-[#3FC78E] text-black text-[9px] font-black uppercase">
+                    {tr('RECOMENDADO', 'RECOMMENDED')}
+                  </span>
+                  <CheckCircle2 className="text-[#3FC78E]" size={20} />
+                </div>
+                <strong className="text-base font-bold text-white block mt-2">
+                  {tr(`¿Aprendiendo ${topicName} por primera vez?`, `Learning ${topicName} for the first time?`)}
+                </strong>
+                <p className="text-xs text-zinc-300 mt-1">
+                  {tr('Empieza desde las bases con micro-lecciones interactivas.', 'Start from scratch with interactive lessons.')}
+                </p>
+              </button>
+
+              <button
+                onClick={() => {
+                  patchDraft({ startingPoint: 'placement' });
+                  advance();
+                }}
+                className="w-full p-5 rounded-2xl border border-white/10 bg-white/[.03] text-left transition-all active:scale-[0.985] cursor-pointer hover:bg-white/[.06]"
+              >
+                <strong className="text-base font-bold text-white block">
+                  {tr(`¿Ya conoces las bases de ${topicName}?`, `Already know some ${topicName}?`)}
+                </strong>
+                <p className="text-xs text-zinc-400 mt-1">
+                  {tr('Haremos un test rápido para ubicar tu nivel.', "Let's find your starting point with a quick check!")}
+                </p>
+              </button>
+            </div>
+
+            <div className="pt-4">
+              <PrimaryAction onClick={advance}>
+                {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+              </PrimaryAction>
+            </div>
+          </div>
+        );
+
+      // Frame 14: Hands-on Micro-Lesson
+      case 'micro_lesson': {
+        const questionPrompt = tr(
+          '¿Cuál es la diferencia fundamental entre un Activo y un Pasivo?',
+          'What is the fundamental difference between an Asset and a Liability?'
+        );
+        const options = [
+          {
+            id: 0,
+            text: tr(
+              'Un Activo pone dinero en tu bolsillo; un Pasivo saca dinero de tu bolsillo.',
+              'An Asset puts money into your pocket; a Liability takes money out of your pocket.'
+            ),
+            correct: true,
+          },
+          {
+            id: 1,
+            text: tr(
+              'Un Pasivo es un préstamo que siempre genera ganancias garantizadas.',
+              'A Liability is a loan that always produces guaranteed profits.'
+            ),
+            correct: false,
+          },
+          {
+            id: 2,
+            text: tr(
+              'Son exactamente lo mismo en contabilidad e inversiones.',
+              'They are the exact same thing in accounting and investing.'
+            ),
+            correct: false,
+          },
+        ];
+
+        const isCorrect = selectedLessonOption === 0;
+
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={
+                lessonChecked
+                  ? isCorrect
+                    ? tr('¡Extraordinario! Los activos generan flujo positivo.', 'Awesome! Assets generate positive cash flow.')
+                    : tr('Cuidado: recuerda la regla de flujos de efectivo.', 'Careful: remember the cash flow rule.')
+                  : tr('Demuestra tu criterio para ganar tus primeros +100 XP.', 'Prove your judgement to earn your first +100 XP.')
+              }
+              mood={lessonChecked ? (isCorrect ? 'celebrate' : 'warning') : 'ready'}
+              eyebrow={tr('Micro-Lección Práctica', 'Hands-on Micro-Lesson')}
+              title={tr('Tu Primera Decisión', 'Your First Decision')}
+            />
+
+            <p className="text-sm font-semibold text-zinc-300 text-center mb-3">
+              {questionPrompt}
+            </p>
+
+            <div className="space-y-2.5 my-auto">
+              {options.map((opt) => {
+                const isSelected = selectedLessonOption === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      if (!lessonChecked) setSelectedLessonOption(opt.id);
+                    }}
+                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                      lessonChecked
+                        ? opt.correct
+                          ? 'border-[#3FC78E] bg-[#3FC78E]/15 text-white shadow-[0_0_15px_rgba(63,199,142,0.25)]'
+                          : isSelected
+                          ? 'border-[#E56A65] bg-[#E56A65]/15 text-white'
+                          : 'border-white/5 bg-white/[.02] text-zinc-500 opacity-40'
+                        : isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-bold text-xs ${
+                        isSelected ? 'bg-[var(--ob-accent)] text-black' : 'bg-white/10 text-zinc-400'
+                      }`}
+                    >
+                      {String.fromCharCode(65 + opt.id)}
+                    </span>
+                    <span className="text-sm font-semibold leading-snug flex-1">{opt.text}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {lessonChecked && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`my-3 rounded-2xl p-3.5 border text-xs leading-relaxed ${
+                  isCorrect
+                    ? 'border-[#3FC78E]/40 bg-[#3FC78E]/10 text-[#C5E8DE]'
+                    : 'border-[#E56A65]/40 bg-[#E56A65]/10 text-[#FADBD8]'
+                }`}
+              >
+                <strong className="block text-sm font-bold text-white mb-0.5">
+                  {isCorrect ? tr('¡Correcto! +100 XP desbloqueados', 'Correct! +100 XP unlocked') : tr('Respuesta correcta:', 'Correct answer:')}
+                </strong>
+                {tr(
+                  'Un activo pone dinero en tu bolsillo. Un pasivo resta liquidez.',
+                  'An asset produces cash flow. A liability drains your liquidity.'
+                )}
+              </motion.div>
+            )}
+
+            <div className="pt-3">
+              {!lessonChecked ? (
+                <PrimaryAction
+                  disabled={selectedLessonOption === null}
+                  onClick={() => setLessonChecked(true)}
+                >
+                  {tr('COMPROBAR', 'CHECK')} <Check size={18} />
+                </PrimaryAction>
+              ) : (
+                <PrimaryAction
+                  onClick={() => {
+                    patchDraft({ lessonCompleted: true, step: 'success' });
+                    setDirection(1);
+                  }}
+                >
+                  {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+                </PrimaryAction>
+              )}
+            </div>
+          </div>
+        );
+      }
+
+      // Frame 15: Success (+100 XP Celebration)
+      case 'success':
+        return (
+          <div className="flex min-h-full flex-col justify-between py-6 text-center">
+            <div />
+            <div className="flex flex-col items-center">
+              <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-2">
+                <T1gerMascot3D mood="celebrate" className="h-44 w-44" />
+              </div>
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--ob-accent)] text-black mb-3">
+                <Trophy size={28} />
+              </div>
+              <p className="font-mono text-xs font-black uppercase tracking-[0.16em] text-[var(--ob-accent)]">
+                {tr('PROGRESO DESBLOQUEADO', 'PROGRESS UNLOCKED')}
+              </p>
+              <h1 className="mt-1 text-4xl font-black text-white">+{ONBOARDING_XP} XP</h1>
+              <p className="mx-auto mt-2 max-w-xs text-xs text-zinc-400">
+                {tr('Completaste tu primera victoria. Guarda tu perfil para asegurar tu racha.', 'First win done! Create your profile to protect your streak.')}
+              </p>
+            </div>
+
+            <PrimaryAction onClick={advance}>
+              {tr('GUARDAR PROGRESO', 'SAVE PROGRESS')} <Lock size={18} />
+            </PrimaryAction>
+          </div>
+        );
+
+      // Frame 16: Profile Creation (Duolingo 1-Tap Google Sign-In)
+      case 'save_progress': {
+        const handleGoogle = async () => {
+          setAuthError('');
+          setAuthLoading(true);
+          try {
+            // CRITICAL: Save all local state BEFORE redirecting
+            // so we don't lose the user's answers when the page reloads on mobile
+            await updateAppUser({
+              niche: draft.niche || 'none',
+              goal: draft.goal || 'none',
+              experienceLevel: draft.experienceLevel || 1,
+              learningStyle: 'interactive',
+              dailyTime: 15,
+              onboardingComplete: false, // Wait until auth confirms
+            });
+
+            await googleSignIn();
+            
+            // If using popup, we reach here. If redirect, page unloads.
+            goTo('reminders');
+          } catch (err: any) {
+            console.error('Google Auth Error:', err);
+            setAuthError(err.message || tr('Error al conectar con Google.', 'Failed to connect with Google.'));
+          } finally {
+            setAuthLoading(false);
+          }
+        };
+
+        const handleApple = async () => {
+          setAuthError('');
+          setAuthLoading(true);
+          try {
+            await appleSignIn();
+            goTo('reminders');
+          } catch (err: any) {
+            console.error('Apple Auth Error:', err);
+            setAuthError(err.message || tr('Error al conectar con Apple.', 'Failed to connect with Apple.'));
+          } finally {
+            setAuthLoading(false);
+          }
+        };
+
+        const handleEmailSubmit = async (e: React.FormEvent) => {
+          e.preventDefault();
+          if (!authEmail.trim() || !authPassword.trim()) {
+            setAuthError(tr('Ingresa tu correo y contraseña.', 'Please enter email and password.'));
+            return;
+          }
+          if (authPassword.length < 6) {
+            setAuthError(tr('La contraseña debe tener al menos 6 caracteres.', 'Password must be at least 6 characters.'));
+            return;
+          }
+
+          setAuthError('');
+          setAuthLoading(true);
+          try {
+            if (authMode === 'sign-up') {
+              await emailPasswordSignUp(authEmail, authPassword);
+            } else {
+              await emailPasswordSignIn(authEmail, authPassword);
+            }
+            goTo('reminders');
+          } catch (err: any) {
+            console.error('Email auth error:', err);
+            setAuthError(tr('Verifica tus datos o continúa con Google.', 'Verify credentials or continue with Google.'));
+          } finally {
+            setAuthLoading(false);
+          }
+        };
+
+        return (
+          <div className="flex min-h-full flex-col py-3">
+            <DuolingoHeader
+              speech={tr(
+                '¡Crea tu perfil para guardar tus +100 XP y proteger tu racha!',
+                'Create your profile to save your +100 XP and protect your streak!'
+              )}
+              mood="celebrate"
+              eyebrow={tr('Guarda tu Progreso', 'Save Your Progress')}
+              title={tr('Crea tu Perfil', 'Create Your Profile')}
+            />
+
+            <div className="space-y-3 my-auto">
+              {/* Google 1-Tap Button */}
+              <button
+                type="button"
+                onClick={handleGoogle}
+                disabled={authLoading}
+                className="flex items-center justify-center gap-3 w-full min-h-14 rounded-2xl bg-white text-zinc-900 font-black text-sm uppercase tracking-wider shadow-[0_4px_0_#D4D4D8] hover:bg-zinc-100 active:translate-y-1 active:shadow-none transition cursor-pointer"
+              >
+                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                {authLoading ? tr('Conectando…', 'Connecting…') : tr('Continuar con Google', 'Sign in with Google')}
+              </button>
+
+              {/* Apple Button */}
+              <button
+                type="button"
+                onClick={handleApple}
+                disabled={authLoading}
+                className="flex items-center justify-center gap-3 w-full min-h-14 rounded-2xl bg-black border border-white/20 text-white font-black text-sm uppercase tracking-wider shadow-[0_4px_0_#27272A] hover:bg-zinc-900 active:translate-y-1 active:shadow-none transition cursor-pointer"
+              >
+                <svg className="w-5 h-5 fill-white" viewBox="0 0 24 24">
+                  <path d="M17.05 20.28c-.98 1.4-2.05 2.72-3.68 2.72-1.63 0-2.12-.96-3.95-.96-1.83 0-2.37.96-3.95.96-1.63 0-2.8-1.46-3.95-3.36-1.15-1.9-2.05-5.38-2.05-8.38 0-4.32 2.8-6.62 5.58-6.62 1.63 0 3.03 1.1 4.05 1.1 1.03 0 2.75-1.1 4.58-1.1 1.1 0 3.95.13 5.8 2.88-0.15.1-2.55 1.46-2.55 4.53 0 3.55 3.05 4.88 3.2 4.96-0.03.06-0.5 1.78-1.7 3.58zM12.55 4.5c0-2.1 1.5-4.1 3.75-4.35-0.2 0.9-0.7 2.1-2.05 3.65-1.35 1.55-2.9 2.3-4.45 2.15 0.15-0.9 0.7-2.1 2.05-3.65z"/>
+                </svg>
+                {tr('Continuar con Apple', 'Sign in with Apple')}
+              </button>
+
+              <div className="flex items-center gap-3 my-2">
+                <div className="h-px flex-1 bg-white/10" />
+                <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
+                  {tr('O con tu correo', 'Or with email')}
+                </span>
+                <div className="h-px flex-1 bg-white/10" />
+              </div>
+
+              {/* Email Form */}
+              <form onSubmit={handleEmailSubmit} className="space-y-2">
+                <input
+                  type="email"
+                  placeholder={tr('Correo electrónico', 'Email')}
+                  value={authEmail}
+                  onChange={(e) => setAuthEmail(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-white/[.05] border border-white/10 px-4 text-sm text-white placeholder-zinc-500 focus:border-[var(--ob-accent)] outline-none"
+                />
+                <input
+                  type="password"
+                  placeholder={tr('Contraseña (mínimo 6 caracteres)', 'Password (min 6 chars)')}
+                  value={authPassword}
+                  onChange={(e) => setAuthPassword(e.target.value)}
+                  className="w-full h-12 rounded-xl bg-white/[.05] border border-white/10 px-4 text-sm text-white placeholder-zinc-500 focus:border-[var(--ob-accent)] outline-none"
+                />
+                <PrimaryAction type="submit" disabled={authLoading}>
+                  {authMode === 'sign-up' ? tr('CREAR CUENTA', 'CREATE ACCOUNT') : tr('INICIAR SESIÓN', 'SIGN IN')}
+                </PrimaryAction>
+              </form>
+
+              {authError && (
+                <p className="text-xs text-[#E56A65] text-center font-semibold mt-1">
+                  {authError}
                 </p>
               )}
             </div>
-            <StickyActions>
-              <div className="space-y-3">
-                <PrimaryAction onClick={requestReminder}>{tr('Activar recordatorios', 'Enable reminders')} <Bell size={18} /></PrimaryAction>
-                <PrimaryAction onClick={advance} variant="secondary">{tr('Ahora no', 'Not now')}</PrimaryAction>
+
+            <div className="pt-3 text-center">
+              <button
+                type="button"
+                onClick={() => goTo('reminders')}
+                className="text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition py-2 cursor-pointer"
+              >
+                {tr('GUARDAR MÁS TARDE (INVITADO)', 'SAVE LATER (GUEST)')}
+              </button>
+            </div>
+          </div>
+        );
+      }
+
+      // Frame 17: Notification Reminders
+      case 'reminders':
+        return (
+          <div className="flex min-h-full flex-col justify-between py-4">
+            <DuolingoHeader
+              speech={tr(
+                'Un recordatorio diario protege tu racha antes de que el scroll te robe el día.',
+                'A daily reminder protects your streak before scrolling takes over your day.'
+              )}
+              mood="calm"
+              eyebrow={tr('Recordatorios', 'Reminders')}
+              title={tr('Haz espacio para tu racha diaria', 'Make room for your daily streak')}
+            />
+
+            <div className="rounded-2xl border border-white/10 bg-white/[.04] p-5 my-auto text-left">
+              <div className="flex items-start gap-3.5">
+                <div className="h-12 w-12 rounded-2xl bg-[var(--ob-accent)]/20 text-[var(--ob-accent)] flex items-center justify-center shrink-0">
+                  <Bell size={24} />
+                </div>
+                <div>
+                  <strong className="text-sm text-white block">
+                    {tr('Alarma de Racha a las 10:00 PM', '10:00 PM Streak Alarm')}
+                  </strong>
+                  <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                    {tr('Solo te avisaremos si no has completado tu micro-lección del día.', 'We only remind you if your daily lesson is still pending.')}
+                  </p>
+                </div>
               </div>
-            </StickyActions>
+            </div>
+
+            <div className="space-y-2.5 pt-4">
+              <PrimaryAction onClick={requestReminder}>
+                {tr('ACTIVAR RECORDATORIOS', 'ENABLE REMINDERS')} <Bell size={18} />
+              </PrimaryAction>
+              <button
+                onClick={advance}
+                className="w-full py-2.5 text-center text-xs font-bold uppercase tracking-widest text-zinc-400 hover:text-white transition cursor-pointer"
+              >
+                {tr('AHORA NO', 'NOT NOW')}
+              </button>
+            </div>
           </div>
         );
 
+      // Frame 18: 100% Free Learning Commitment (Duolingo-style)
       case 'access':
         return (
-          <div className="flex min-h-full flex-col py-3">
-            <ScreenHeader eyebrow={tr('Tu plan', 'Your plan')} title={tr('Elige cómo quieres empezar.', 'Choose how you want to start.')} body={tr('Puedes aprender y practicar gratis. Super añade una experiencia más completa.', 'You can learn and practice for free. Super adds a more complete experience.')} />
-            <div className="space-y-3">
-              <button onClick={() => finalize('free')} disabled={finalizing} className="min-h-36 w-full rounded-[1.25rem] border border-[#3FC78E]/35 bg-[#3FC78E]/10 p-5 text-left transition active:scale-[.99]">
-                <span className="flex items-center justify-between">
-                  <strong className="text-xl text-white">{tr('Empezar gratis', 'Start free')}</strong>
-                  <CheckCircle2 className="text-[#78DDB0]" />
-                </span>
-                <span className="mt-3 block text-sm leading-6 text-[#B8D0CA]">{tr('Lecciones diarias, práctica, XP personal y XP verificado cuando la evidencia califique.', 'Daily lessons, practice missions, personal XP, and verified XP when evidence qualifies.')}</span>
-              </button>
-              <button onClick={() => finalize('super')} disabled={finalizing} className="min-h-36 w-full rounded-[1.25rem] border border-[var(--ob-accent)]/35 bg-[var(--ob-accent)]/10 p-5 text-left transition active:scale-[.99]">
-                <span className="flex items-center justify-between">
-                  <strong className="text-xl text-white">Super T1GER</strong>
-                  <Crown className="text-[var(--ob-accent)]" />
-                </span>
-                <span className="mt-3 block text-sm leading-6 text-[#D7BDAA]">{tr('Prueba la experiencia premium. No se realizará ningún cobro en esta vista previa.', 'Preview the premium experience. No purchase is made in this preview.')}</span>
-              </button>
+          <div className="flex min-h-full flex-col justify-between py-4">
+            <DuolingoHeader
+              speech={tr('¡Todo listo! Tu educación práctica es 100% gratis.', "You're all set! Your practical learning is 100% free.")}
+              mood="celebrate"
+              eyebrow={tr('Tu Compromiso', 'Your Commitment')}
+              title={tr('Aprende Gratis para Siempre', 'Learn Free Forever')}
+            />
+
+            <div className="space-y-4 my-auto">
+              <div className="rounded-3xl border border-[#3FC78E]/40 bg-[#3FC78E]/10 p-6 text-left space-y-3 shadow-[0_0_30px_rgba(63,199,142,0.15)]">
+                <div className="flex items-center justify-between">
+                  <span className="px-3 py-1 rounded-full bg-[#3FC78E] text-black font-black text-xs uppercase tracking-wider">
+                    {tr('100% GRATIS', '100% FREE')}
+                  </span>
+                  <CheckCircle2 className="text-[#3FC78E]" size={24} />
+                </div>
+                <strong className="text-xl text-white font-black block">
+                  {tr('Plan Personalizado Activado', 'Personalized Plan Activated')}
+                </strong>
+                <p className="text-xs text-[#BCEAD5] leading-relaxed">
+                  {tr(
+                    'Micro-lecciones diarias de 5 minutos, práctica con decisiones reales, rachas continuas y mentoría con IA sin suscripciones.',
+                    '5-minute daily micro-lessons, real decision practice, habit streaks, and AI coaching with zero subscriptions.'
+                  )}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[.03] border border-white/8 text-left">
+                <span className="text-2xl">🔥</span>
+                <div>
+                  <strong className="text-xs text-white font-bold block">
+                    {tr('Meta: 1 Lección Diaria', 'Goal: 1 Daily Lesson')}
+                  </strong>
+                  <span className="text-[11px] text-zinc-400">
+                    {tr('Construye tu hábito financiero día a día.', 'Build your wealth habit day by day.')}
+                  </span>
+                </div>
+              </div>
             </div>
-            {error && <p role="alert" className="mt-5 rounded-[1rem] border border-[#E56A65]/25 bg-[#E56A65]/10 p-4 text-sm text-[#F2C5C2]">{error}</p>}
+
+            {error && (
+              <p className="text-xs text-[#E56A65] text-center font-semibold mb-2">
+                {error}
+              </p>
+            )}
+
+            <div className="pt-2">
+              <PrimaryAction onClick={() => finalize('free')} disabled={finalizing}>
+                {tr('ENTRAR A T1GER', 'ENTER T1GER')} <ChevronRight size={18} />
+              </PrimaryAction>
+            </div>
           </div>
         );
 
@@ -953,9 +1435,56 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     }
   };
 
+  const showTopProgress = step !== 'welcome';
+  const showBackBtn = currentStepIndex > 0;
+
   return (
-    <OnboardingShell step={step} direction={direction} onBack={back} hideProgress={step === 'arrival'} language={language}>
-      {renderStep()}
-    </OnboardingShell>
+    <div className="t1ger-onboarding fixed inset-0 z-[300] bg-[#09090B]">
+      <main className="relative mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden sm:border-x sm:border-white/10 bg-[#09090B] text-white">
+        {/* Top Progress Bar & Back Arrow */}
+        {showTopProgress && (
+          <header className="flex shrink-0 items-center gap-3 px-5 pb-2 pt-[calc(0.75rem+env(safe-area-inset-top))]">
+            {showBackBtn ? (
+              <button
+                onClick={back}
+                aria-label={isEs ? 'Volver' : 'Back'}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[.04] text-zinc-300 active:scale-95 cursor-pointer"
+              >
+                <ArrowLeft size={18} />
+              </button>
+            ) : (
+              <div className="h-10 w-10 shrink-0" />
+            )}
+
+            <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">
+              <motion.div
+                className="h-full rounded-full bg-gradient-to-r from-[#FF7300] to-[#FF8C33]"
+                animate={{ width: `${progressPercent}%` }}
+                transition={{ duration: 0.3 }}
+              />
+            </div>
+
+            <span className="w-10 text-right font-mono text-[11px] font-bold text-zinc-400">
+              {currentStepIndex + 1}/{STEP_ORDER.length}
+            </span>
+          </header>
+        )}
+
+        {/* Animated Step View Container */}
+        <AnimatePresence mode="wait" custom={direction}>
+          <motion.section
+            key={step}
+            custom={direction}
+            initial={{ opacity: 0, x: direction >= 0 ? 25 : -25 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: direction >= 0 ? -20 : 20 }}
+            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+            className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
+          >
+            {renderStepContent()}
+          </motion.section>
+        </AnimatePresence>
+      </main>
+    </div>
   );
 };

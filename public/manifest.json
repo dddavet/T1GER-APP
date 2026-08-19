@@ -1,33 +1,38 @@
 {
   "name": "T1GER",
   "short_name": "T1GER",
-  "description": "El simulador ejecutivo de negocios e inversiones.",
+  "description": "El simulador de negocios e inversiones con criterio real.",
   "start_url": "/?source=pwa",
   "display": "standalone",
-  "background_color": "#F7F7F7",
-  "theme_color": "#FF7300",
+  "background_color": "#071C19",
+  "theme_color": "#071C19",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "/favicon.svg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ],
-  "categories": ["education", "business", "productivity"],
+  "categories": ["education", "business", "finance"],
   "screenshots": [],
   "shortcuts": [
     {
-      "name": "Daily Mission",
-      "short_name": "Mission",
-      "description": "Start your daily executive mission",
-      "url": "/?view=mission",
-      "icons": [{ "src": "/favicon.svg", "sizes": "192x192" }]
+      "name": "Daily Lesson",
+      "short_name": "Learn",
+      "description": "Continue your daily investing streak",
+      "url": "/?view=learn",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }

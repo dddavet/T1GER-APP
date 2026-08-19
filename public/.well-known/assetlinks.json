@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.dddavet.tiger",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7C:0F:CD:CF:70:4E:86:11:6D:90:5E:0F:22:65:35:A9:74:6C:08:44:8A:0E:2E:85:43:14:49:F3:96"
+      ]
+    }
+  }
+]
