@@ -593,6 +593,94 @@ const investingMissions: BankMission[] = [
       { title: 'Eliminar el Riesgo', desc: 'Crea una garantía de satisfacción total o devolución.' },
       { title: 'Nombre Magnético', desc: 'Ponle un nombre memorable a tu solución.' }
     ]
+  },
+
+  // ==========================================
+  // LIBRO 5: HÁBITOS ATÓMICOS (James Clear)
+  // ==========================================
+  {
+    id: 'inv-m5-l1',
+    nodeType: 'learn',
+    competency: 'mindset',
+    difficulty: 'medium',
+    type: 'book_lesson',
+    title: 'La Regla de los 2 Minutos & Micro-Sistemas',
+    concept: 'No te elevas al nivel de tus metas; caes al nivel de tus sistemas. Para construir cualquier hábito financiero o de negocio, redúcelo a una acción que tome menos de 2 minutos para eliminar toda resistencia inicial.',
+    keyTakeaway: 'La repetición diaria de una micro-acción genera la identidad de una persona disciplinada.',
+    quote: {
+      text: 'No te elevas al nivel de tus metas. Caes al nivel de tus sistemas.',
+      author: 'James Clear',
+      context: 'Hábitos Atómicos'
+    },
+    sources: [{
+      type: 'book',
+      title: 'Hábitos Atómicos',
+      author: 'James Clear'
+    }],
+    xpReward: 100
+  },
+  {
+    id: 'inv-m5-apply',
+    nodeType: 'apply',
+    competency: 'mindset',
+    difficulty: 'medium',
+    type: 'real_world_task',
+    title: 'Eliminar 1 Disparador de Fricción Financiera',
+    taskBrief: 'Identifica una app o hábito que drena tu tiempo o dinero y crea una regla de diseño de entorno para bloquearlo.',
+    verificationMethod: 'honor_system',
+    verificationTier: 2,
+    reflectionPrompt: '¿Qué distracción o gasto impulsivo bloqueaste hoy y cuál es tu nueva regla de 2 minutos?',
+    minReflectionLength: 70,
+    xpReward: 300,
+    frameworkSteps: [
+      { title: 'Identificar Disparador', desc: 'Ubica la app o tentación que te distrae.' },
+      { title: 'Aumentar la Fricción', desc: 'Cierra sesión o elimina la tarjeta guardada.' },
+      { title: 'Reemplazar el Hábito', desc: 'Abre T1GER en su lugar para leer 1 playbook.' }
+    ]
+  },
+
+  // ==========================================
+  // LIBRO 6: ROMPE LA BARRERA DEL NO (Chris Voss)
+  // ==========================================
+  {
+    id: 'inv-m6-l1',
+    nodeType: 'learn',
+    competency: 'sales',
+    difficulty: 'hard',
+    type: 'book_lesson',
+    title: 'Negociación Táctica & Preguntas Calibradas',
+    concept: 'En una negociación de alto valor, nunca hagas preguntas que se respondan con "Sí" o "No". Usa preguntas calibradas que comiencen con "¿Cómo?" o "¿De qué manera?", obligando a la otra parte a resolver tu problema.',
+    keyTakeaway: 'La pregunta más poderosa del mundo: "¿Cómo se supone que haga eso?".',
+    quote: {
+      text: 'El conflicto no es el fin de la conversación; es el verdadero inicio de la negociación.',
+      author: 'Chris Voss (Ex-negociador de rehenes del FBI)',
+      context: 'Rompe la Barrera del No'
+    },
+    sources: [{
+      type: 'book',
+      title: 'Rompe la Barrera del No',
+      author: 'Chris Voss'
+    }],
+    xpReward: 100
+  },
+  {
+    id: 'inv-m6-apply',
+    nodeType: 'apply',
+    competency: 'sales',
+    difficulty: 'hard',
+    type: 'real_world_task',
+    title: 'Negociar una Tarifa o Suscripción con Pregunta Calibrada',
+    taskBrief: 'Aplica el método de Chris Voss para pedir un descuento o beneficio en una herramienta de trabajo o servicio.',
+    verificationMethod: 'honor_system',
+    verificationTier: 2,
+    reflectionPrompt: '¿Con qué empresa o cliente usaste la pregunta calibrada y cuál fue la respuesta recibida?',
+    minReflectionLength: 80,
+    xpReward: 350,
+    frameworkSteps: [
+      { title: 'Espejo Táctico', desc: 'Repite las últimas 3 palabras de su argumento.' },
+      { title: 'Pregunta Calibrada', desc: 'Pregunta: "¿Cómo podemos ajustar esto para que tenga sentido para ambos?".' },
+      { title: 'Pausa Silenciosa', desc: 'Deja que la otra parte hable primero.' }
+    ]
   }
 ];
 
@@ -646,6 +734,26 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
         applyNodeId: 'inv-m4-apply',
         days: [
           { dayId: 'inv-4-d1', dayNumber: 7, missionIds: ['inv-m4-l1'] },
+        ]
+      },
+      {
+        levelId: 'inv-level-5',
+        levelNumber: 5,
+        title: 'Hábitos Atómicos',
+        subtitle: 'James Clear · Regla de los 2 Minutos & Micro-Sistemas',
+        applyNodeId: 'inv-m5-apply',
+        days: [
+          { dayId: 'inv-5-d1', dayNumber: 8, missionIds: ['inv-m5-l1'] },
+        ]
+      },
+      {
+        levelId: 'inv-level-6',
+        levelNumber: 6,
+        title: 'Rompe la Barrera del No',
+        subtitle: 'Chris Voss · Negociación Táctica del FBI y Ventas',
+        applyNodeId: 'inv-m6-apply',
+        days: [
+          { dayId: 'inv-6-d1', dayNumber: 9, missionIds: ['inv-m6-l1'] },
         ]
       }
     ]

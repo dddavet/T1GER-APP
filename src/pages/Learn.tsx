@@ -17,6 +17,8 @@ import { getNodeMemoryShield } from '../services/brainService';
 import { KnowledgeNode } from '../components/learn/KnowledgeNode';
 import { CuratedLessonPlayer } from '../components/learn/CuratedLessonPlayer';
 import { MascotGuide } from '../components/MascotGuide';
+import { BookChestRewardModal } from '../components/learn/BookChestRewardModal';
+import { Gift } from 'lucide-react';
 
 interface LearnProps {
   onStartMission?: (mission: BankMission) => void;
@@ -27,6 +29,7 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
   const isEs = language === 'es';
 
   const [activePlaybookMission, setActivePlaybookMission] = useState<BankMission | null>(null);
+  const [activeRewardChest, setActiveRewardChest] = useState<{ title: string; badge: string } | null>(null);
 
   const completedMissionIds = useMemo(
     () =>
@@ -138,13 +141,24 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
                   </div>
                 </div>
 
-                <div className="text-right">
-                  <span className="font-mono text-xs font-bold text-zinc-300">
-                    {completedCount}/{totalDays}
-                  </span>
-                  <span className="block text-[10px] text-zinc-500 font-mono uppercase">
-                    {levelComplete ? (isEs ? 'Dominado' : 'Mastered') : (isEs ? 'En curso' : 'Active')}
-                  </span>
+                <div className="text-right flex items-center gap-2">
+                  {levelComplete && (
+                    <button
+                      onClick={() => setActiveRewardChest({ title: level.title, badge: `Maestro de ${level.title}` })}
+                      className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-b from-amber-400 to-[var(--ob-accent)] text-black shadow-[0_0_15px_rgba(255,115,0,0.4)] animate-bounce active:scale-90 transition cursor-pointer"
+                      aria-label="Abrir Cofre de Recompensas"
+                    >
+                      <Gift size={18} className="stroke-[2.5]" />
+                    </button>
+                  )}
+                  <div>
+                    <span className="font-mono text-xs font-bold text-zinc-300">
+                      {completedCount}/{totalDays}
+                    </span>
+                    <span className="block text-[10px] text-zinc-500 font-mono uppercase">
+                      {levelComplete ? (isEs ? 'Dominado' : 'Mastered') : (isEs ? 'En curso' : 'Active')}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -204,6 +218,15 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
           />
         )}
       </AnimatePresence>
+
+      {/* 5. BOOK COMPLETION TREASURE CHEST MODAL */}
+      <BookChestRewardModal
+        isOpen={Boolean(activeRewardChest)}
+        onClose={() => setActiveRewardChest(null)}
+        bookTitle={activeRewardChest?.title || ''}
+        badgeName={activeRewardChest?.badge || ''}
+        isEs={isEs}
+      />
     </div>
   );
 };

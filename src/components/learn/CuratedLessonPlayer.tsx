@@ -24,6 +24,7 @@ import { useBrain } from '../../contexts/BrainContext';
 
 import { LessonSummaryModal } from './LessonSummaryModal';
 import { StreakCelebrationModal } from '../StreakCelebrationModal';
+import { InteractiveCardWidget } from './InteractiveCardWidget';
 
 interface CuratedLessonPlayerProps {
   mission: BankMission;
@@ -153,9 +154,22 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
                   {playbook.mentalModel.concept}
                 </p>
 
+                {/* Interactive Tactical Widget (Swipe, Sliders, Value Formula) */}
+                <div className="mt-5">
+                  {mission.id === 'inv-m1-l1' && (
+                    <InteractiveCardWidget type="swipe_classifier" isEs={isEs} />
+                  )}
+                  {(mission.id === 'inv-m2-l2' || mission.id === 'inv-m3-l2') && (
+                    <InteractiveCardWidget type="compound_slider" isEs={isEs} />
+                  )}
+                  {mission.id === 'inv-m4-l1' && (
+                    <InteractiveCardWidget type="value_equation" isEs={isEs} />
+                  )}
+                </div>
+
                 {/* Author Quote Box */}
-                {playbook.source.keyQuote && (
-                  <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 relative">
+                {playbook.source.keyQuote && !mission.id.includes('inv-m1-l1') && (
+                  <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.02] p-4 relative">
                     <p className="text-sm italic text-zinc-200 leading-relaxed">
                       "{playbook.source.keyQuote}"
                     </p>
