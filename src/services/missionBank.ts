@@ -26,6 +26,45 @@ export interface CurriculumTrack {
   levels: CurriculumLevel[];
 }
 
+export interface ToolComparison {
+  name: string;
+  category: string;
+  bestFor: string;
+  pros: string[];
+  url?: string;
+  recommended?: boolean;
+}
+
+export interface PlaybookStep {
+  stepNumber: number;
+  title: string;
+  instruction: string;
+  proTip?: string;
+}
+
+export interface ExecutivePlaybook {
+  source: {
+    title: string;
+    author: string;
+    type: 'book' | 'article' | 'video' | 'paper';
+    keyQuote?: string;
+    url?: string;
+  };
+  mentalModel: {
+    title: string;
+    concept: string;
+    whyItMatters: string;
+    goldenRule: string;
+  };
+  toolComparisons?: ToolComparison[];
+  protocolSteps: PlaybookStep[];
+  applyMissionPrompt: {
+    deliverableTitle: string;
+    actionDescription: string;
+    estimatedMinutes: number;
+  };
+}
+
 export interface QuizOption {
   text: string;
   correct: boolean;
@@ -86,11 +125,80 @@ export interface BankMission {
   requiredTrades?: number;
   xpReward: number;
   microCards?: MicroLessonCard[];
+  playbook?: ExecutivePlaybook;
 }
 
 /**
- * Builds a structured Kinnu-style 4-card sequence from any BankMission.
+ * Builds an Executive Action Playbook (Learn -> Apply) from any BankMission.
  */
+export function getMissionPlaybook(mission: BankMission): ExecutivePlaybook {
+  if (mission.playbook) return mission.playbook;
+
+  const sourceTitle = mission.sources?.[0]?.title || 'The Intelligent Investor / Principios de Inversión';
+  const author = mission.sources?.[0]?.author || (mission.quote?.author || 'Benjamin Graham / Ray Dalio');
+  const quote = mission.quote?.text || mission.concept || 'Un activo pone dinero en tu bolsillo. La claridad en el proceso supera a la emoción del momento.';
+
+  return {
+    source: {
+      title: sourceTitle,
+      author,
+      type: 'book',
+      keyQuote: quote,
+      url: mission.sources?.[0]?.url,
+    },
+    mentalModel: {
+      title: mission.title,
+      concept: mission.concept || 'El criterio táctico separa a los aficionados de los operadores de élite.',
+      whyItMatters: mission.keyTakeaway || 'Comprender este fundamento te permite tomar decisiones basadas en evidencia y no en impulsos.',
+      goldenRule: 'Ejecuta con método: define tu regla de entrada y salida antes de comprometer capital o tiempo.',
+    },
+    toolComparisons: [
+      {
+        name: 'TradingView Paper',
+        category: 'Simulador / Gráficos',
+        bestFor: 'Práctica visual y análisis de mercado en tiempo real',
+        pros: ['Datos en vivo gratuitos', 'Interfaz moderna', 'Sin riesgo de capital'],
+        recommended: true,
+      },
+      {
+        name: 'Interactive Brokers Demo',
+        category: 'Brokerage Profesional',
+        bestFor: 'Órdenes avanzadas y spreads internacionales',
+        pros: ['Entorno institucional exacto', 'Amplia gama de activos globales'],
+      },
+    ],
+    protocolSteps: mission.frameworkSteps?.map((step, idx) => ({
+      stepNumber: idx + 1,
+      title: step.title,
+      instruction: step.desc,
+      proTip: 'Verifica tus supuestos antes de confirmar.',
+    })) || [
+      {
+        stepNumber: 1,
+        title: 'Analizar el Escenario',
+        instruction: 'Revisa los datos fundamentales y valida si cumple con tu marco estratégico.',
+        proTip: 'Evita decisiones apresuradas.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Configurar la Posición',
+        instruction: 'Define el tamaño adecuado y el límite de riesgo antes de operar.',
+        proTip: 'Nunca arriesgues más del 2% por operación.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Registrar la Evidencia',
+        instruction: 'Documenta la tesis de inversión en tu bitácora de T1GER para calibrar tu proceso.',
+      },
+    ],
+    applyMissionPrompt: {
+      deliverableTitle: mission.taskBrief || `Aplicar: ${mission.title}`,
+      actionDescription: mission.reflectionPrompt || 'Ejecuta la tarea en tu entorno real o simulado y documenta el resultado.',
+      estimatedMinutes: 5,
+    },
+  };
+}
+
 export function getMissionMicroCards(mission: BankMission): MicroLessonCard[] {
   if (mission.microCards?.length) return mission.microCards;
 

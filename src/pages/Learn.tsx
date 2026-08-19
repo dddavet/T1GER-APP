@@ -24,7 +24,7 @@ import {
 } from '../services/brainService';
 import { KnowledgeNode } from '../components/learn/KnowledgeNode';
 import { MemoryShieldBadge } from '../components/learn/MemoryShieldBadge';
-import { InteractiveLessonPlayer } from '../components/learn/InteractiveLessonPlayer';
+import { CuratedLessonPlayer } from '../components/learn/CuratedLessonPlayer';
 import { QuickShieldRefreshModal } from '../components/learn/QuickShieldRefreshModal';
 import { MascotGuide } from '../components/MascotGuide';
 
@@ -36,7 +36,7 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
   const { brainState, language, pathData, switchTrack } = useBrain();
   const isEs = language === 'es';
 
-  const [activeInteractiveMission, setActiveInteractiveMission] = useState<BankMission | null>(null);
+  const [activePlaybookMission, setActivePlaybookMission] = useState<BankMission | null>(null);
   const [showRefreshModal, setShowRefreshModal] = useState(false);
 
   const completedMissionIds = useMemo(
@@ -51,17 +51,18 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
   const vulnerableNodes = useMemo(() => getVulnerableShieldNodes(brainState), [brainState]);
 
   const handleNodeClick = (mission: BankMission) => {
-    // If it has theory/micro-cards, open the new Kinnu-style interactive player
+    // If it's a playbook / theory, open CuratedLessonPlayer
     if (mission.nodeType === 'learn' || !mission.verificationMethod || mission.verificationMethod === 'honor_system') {
-      setActiveInteractiveMission(mission);
+      setActivePlaybookMission(mission);
     } else {
-      // If it's a deep real-world execution task (e.g. paper trade / photo proof), use standard engine
+      // If it's an apply task, open mission engine directly
       onStartMission?.(mission);
     }
   };
 
-  const handleLessonCompleted = (missionId: string) => {
-    setActiveInteractiveMission(null);
+  const handleExecuteApply = (mission: BankMission) => {
+    setActivePlaybookMission(null);
+    onStartMission?.(mission);
   };
 
   return (
@@ -261,13 +262,13 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
         })}
       </div>
 
-      {/* 5. INTERACTIVE MICRO-LESSON PLAYER (Kinnu-Style Modal) */}
+      {/* 5. CURATED EXECUTIVE PLAYBOOK READER (Learn -> Apply) */}
       <AnimatePresence>
-        {activeInteractiveMission && (
-          <InteractiveLessonPlayer
-            mission={activeInteractiveMission}
-            onClose={() => setActiveInteractiveMission(null)}
-            onComplete={handleLessonCompleted}
+        {activePlaybookMission && (
+          <CuratedLessonPlayer
+            mission={activePlaybookMission}
+            onClose={() => setActivePlaybookMission(null)}
+            onExecuteApplyMission={handleExecuteApply}
           />
         )}
       </AnimatePresence>

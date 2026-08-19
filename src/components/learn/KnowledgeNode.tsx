@@ -89,33 +89,22 @@ export const KnowledgeNode: React.FC<KnowledgeNodeProps> = ({
       {/* Main Content Info */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-zinc-400">
-            {isApply ? 'Misión Táctica' : `Módulo ${index + 1}`}
+          <span className={`font-mono text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md ${
+            isApply 
+              ? 'bg-[var(--ob-accent)]/15 text-[var(--ob-accent)] border border-[var(--ob-accent)]/30'
+              : 'bg-white/10 text-zinc-300 border border-white/10'
+          }`}>
+            {isApply ? '⚡ ACCIÓN REAL' : '📖 PLAYBOOK (3 MIN)'}
           </span>
-          {isCompleted && (
-            <span className="text-[10px] font-mono text-zinc-500">•</span>
-          )}
-          {isCompleted && (
-            <span
-              className={`text-[10px] font-mono font-semibold ${
-                isVulnerable
-                  ? 'text-rose-400'
-                  : isDecaying
-                  ? 'text-amber-400'
-                  : 'text-[#3FC78E]'
-              }`}
-            >
-              {isVulnerable
-                ? 'Escudo en riesgo'
-                : isDecaying
-                ? 'Repaso sugerido'
-                : 'Memoria al 100%'}
+          {mission.sources?.[0]?.author && (
+            <span className="text-[10px] font-mono text-zinc-400 truncate max-w-[140px]">
+              • {mission.sources[0].author}
             </span>
           )}
         </div>
 
         <h3
-          className={`text-sm font-semibold truncate ${
+          className={`text-sm font-bold truncate ${
             isUnlocked ? 'text-white' : 'text-zinc-500'
           }`}
         >
@@ -123,16 +112,16 @@ export const KnowledgeNode: React.FC<KnowledgeNodeProps> = ({
         </h3>
 
         <p className="text-xs text-zinc-400 truncate mt-0.5">
-          {mission.keyTakeaway || mission.concept || 'Modelo mental de alto impacto'}
+          {mission.keyTakeaway || mission.concept || 'Criterio táctico de alto valor'}
         </p>
 
         {/* Footer info: XP, Duration, Shield status */}
-        <div className="mt-2.5 flex items-center gap-3 text-[11px] text-zinc-400">
+        <div className="mt-2 flex items-center gap-3 text-[11px] text-zinc-400">
           <span className="flex items-center gap-1 font-mono font-medium text-[var(--ob-accent)]">
             <Sparkles size={12} /> +{mission.xpReward} XP
           </span>
           <span>•</span>
-          <span>3 min</span>
+          <span>{isApply ? '~5 min práctica' : '3 min lectura'}</span>
           {isCompleted && (
             <>
               <span>•</span>
