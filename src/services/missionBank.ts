@@ -552,140 +552,145 @@ const investingMissions: BankMission[] = [
   },
 
   // ==========================================
-  // LIBRO 4: $100M OFFERS (Alex Hormozi)
+  // LIBRO 4: PRINCIPIOS (Ray Dalio)
   // ==========================================
   {
     id: 'inv-m4-l1',
     nodeType: 'learn',
-    competency: 'offer',
+    competency: 'investing',
     difficulty: 'hard',
     type: 'book_lesson',
-    title: 'La Ecuación de Gran Valor',
-    concept: 'Valor = (Resultado Soñado × Certeza Percibida) ÷ (Retraso de Tiempo × Esfuerzo & Sacrificio). Para cobrar 10x más que tu competencia, debes maximizar el numerador y reducir el esfuerzo y tiempo al mínimo.',
-    keyTakeaway: 'Crea una oferta tan buena que la gente se sienta estúpida diciendo que no.',
+    title: 'La Máquina Económica y Ciclos de Deuda',
+    concept: 'La economía funciona como una máquina simple impulsada por la productividad, el ciclo de deuda a corto plazo y el ciclo de deuda a largo plazo. Entender dónde estamos en el ciclo te permite estructurar un portafolio "All Weather" que resiste cualquier tormenta.',
+    keyTakeaway: 'No intentes predecir el futuro; construye un sistema que sobreviva todas las posibilidades.',
     quote: {
-      text: 'Crea una oferta tan buena que la gente se sienta estúpida diciendo que no.',
-      author: 'Alex Hormozi',
-      context: '$100M Offers'
+      text: 'Quien vive de la bola de cristal comerá vidrio molido.',
+      author: 'Ray Dalio',
+      context: 'Principios'
     },
     sources: [{
       type: 'book',
-      title: '$100M Offers',
-      author: 'Alex Hormozi'
+      title: 'Principios',
+      author: 'Ray Dalio'
     }],
     xpReward: 100
   },
   {
     id: 'inv-m4-apply',
     nodeType: 'apply',
-    competency: 'offer',
+    competency: 'investing',
     difficulty: 'hard',
     type: 'real_world_task',
-    title: 'Diseñar tu Oferta Irresistible',
-    taskBrief: 'Aplica la ecuación de valor de Alex Hormozi para estructurar tu oferta o propuesta de valor con garantía.',
+    title: 'Auditoría "All Weather" de tu Portafolio',
+    taskBrief: 'Evalúa la diversificación de tus activos. ¿Sobreviviría tu portafolio a una inflación extrema o a una recesión severa?',
     verificationMethod: 'honor_system',
     verificationTier: 2,
-    reflectionPrompt: 'Define: 1. Resultado soñado del cliente, 2. Tu garantía incondicional, 3. Cómo vas a reducir su esfuerzo.',
-    minReflectionLength: 90,
+    reflectionPrompt: 'Si el mercado de valores cae 40% mañana, ¿qué activo de tu balance te protegería? (Ej: Oro, Bonos, Efectivo, Inmuebles)',
+    minReflectionLength: 80,
     xpReward: 400,
     frameworkSteps: [
-      { title: 'Resultado Soñado', desc: '¿Qué transformación exacta compra el cliente?' },
-      { title: 'Eliminar el Riesgo', desc: 'Crea una garantía de satisfacción total o devolución.' },
-      { title: 'Nombre Magnético', desc: 'Ponle un nombre memorable a tu solución.' }
+      { title: 'Estresar el Sistema', desc: 'Asume un escenario de alta inflación y estancamiento.' },
+      { title: 'Identificar el Escudo', desc: 'Verifica qué porcentaje tienes en activos refugio.' },
+      { title: 'Rebalanceo Teórico', desc: 'Define qué comprarías hoy para blindar tu patrimonio.' }
     ]
   },
 
   // ==========================================
-  // LIBRO 5: HÁBITOS ATÓMICOS (James Clear)
+  // LIBRO 5: LO MÁS IMPORTANTE PARA INVERTIR CON SENTIDO COMÚN (Howard Marks)
   // ==========================================
   {
     id: 'inv-m5-l1',
     nodeType: 'learn',
-    competency: 'mindset',
-    difficulty: 'medium',
+    competency: 'investing',
+    difficulty: 'hard',
     type: 'book_lesson',
-    title: 'La Regla de los 2 Minutos & Micro-Sistemas',
-    concept: 'No te elevas al nivel de tus metas; caes al nivel de tus sistemas. Para construir cualquier hábito financiero o de negocio, redúcelo a una acción que tome menos de 2 minutos para eliminar toda resistencia inicial.',
-    keyTakeaway: 'La repetición diaria de una micro-acción genera la identidad de una persona disciplinada.',
+    title: 'Pensamiento de Segundo Nivel',
+    concept: 'El pensamiento de primer nivel dice: "Es una buena empresa, compremos la acción". El de segundo nivel dice: "Es una buena empresa, pero todo el mundo lo sabe, por lo que la acción está sobrevalorada. Vendamos".',
+    keyTakeaway: 'Para lograr rendimientos superiores al promedio, tu pensamiento debe ser diferente y mejor que el de la multitud.',
     quote: {
-      text: 'No te elevas al nivel de tus metas. Caes al nivel de tus sistemas.',
-      author: 'James Clear',
-      context: 'Hábitos Atómicos'
+      text: 'No puedes hacer lo mismo que los demás y esperar un resultado diferente.',
+      author: 'Howard Marks',
+      context: 'Lo Más Importante'
     },
     sources: [{
       type: 'book',
-      title: 'Hábitos Atómicos',
-      author: 'James Clear'
+      title: 'Lo Más Importante para Invertir',
+      author: 'Howard Marks'
     }],
     xpReward: 100
   },
   {
     id: 'inv-m5-apply',
     nodeType: 'apply',
-    competency: 'mindset',
-    difficulty: 'medium',
+    competency: 'investing',
+    difficulty: 'hard',
     type: 'real_world_task',
-    title: 'Eliminar 1 Disparador de Fricción Financiera',
-    taskBrief: 'Identifica una app o hábito que drena tu tiempo o dinero y crea una regla de diseño de entorno para bloquearlo.',
+    title: 'Análisis Contrarian de Segundo Nivel',
+    taskBrief: 'Toma el activo de moda actual (cripto, IA, etc.) y escribe una tesis contrarian sobre por qué podría estar sobrevalorado.',
     verificationMethod: 'honor_system',
     verificationTier: 2,
-    reflectionPrompt: '¿Qué distracción o gasto impulsivo bloqueaste hoy y cuál es tu nueva regla de 2 minutos?',
+    reflectionPrompt: '¿Cuál es el consenso actual del mercado sobre este activo, y cuál es tu pensamiento de "Segundo Nivel" que difiere?',
     minReflectionLength: 70,
     xpReward: 300,
     frameworkSteps: [
-      { title: 'Identificar Disparador', desc: 'Ubica la app o tentación que te distrae.' },
-      { title: 'Aumentar la Fricción', desc: 'Cierra sesión o elimina la tarjeta guardada.' },
-      { title: 'Reemplazar el Hábito', desc: 'Abre T1GER en su lugar para leer 1 playbook.' }
+      { title: 'Identificar el Consenso', desc: '¿Qué es lo que todo el mundo está comprando por FOMO?' },
+      { title: 'Buscar la Falla', desc: '¿Qué riesgo sistémico están ignorando los optimistas?' },
+      { title: 'Posición Contrarian', desc: 'Define a qué precio realmente valdría la pena entrar.' }
     ]
   },
 
   // ==========================================
-  // LIBRO 6: ROMPE LA BARRERA DEL NO (Chris Voss)
+  // LIBRO 6: UN PASO POR DELANTE DE WALL STREET (Peter Lynch)
   // ==========================================
   {
     id: 'inv-m6-l1',
     nodeType: 'learn',
-    competency: 'sales',
-    difficulty: 'hard',
+    competency: 'investing',
+    difficulty: 'medium',
     type: 'book_lesson',
-    title: 'Negociación Táctica & Preguntas Calibradas',
-    concept: 'En una negociación de alto valor, nunca hagas preguntas que se respondan con "Sí" o "No". Usa preguntas calibradas que comiencen con "¿Cómo?" o "¿De qué manera?", obligando a la otra parte a resolver tu problema.',
-    keyTakeaway: 'La pregunta más poderosa del mundo: "¿Cómo se supone que haga eso?".',
+    title: 'Invierte en lo que Conoces',
+    concept: 'El inversor particular tiene una enorme ventaja sobre Wall Street: puede ver las tendencias de consumo antes que los analistas. Si tu esposa, tus hijos y tus amigos no paran de comprar un producto excelente, ahí tienes una pista de inversión antes de que llegue a los fondos institucionales.',
+    keyTakeaway: 'Tu vida diaria es el mejor radar para encontrar empresas "Tenbaggers" (que multiplican por 10).',
     quote: {
-      text: 'El conflicto no es el fin de la conversación; es el verdadero inicio de la negociación.',
-      author: 'Chris Voss (Ex-negociador de rehenes del FBI)',
-      context: 'Rompe la Barrera del No'
+      text: 'La mejor acción para comprar es a menudo una que ya tienes en tu cartera.',
+      author: 'Peter Lynch',
+      context: 'Un Paso por Delante de Wall Street'
     },
     sources: [{
       type: 'book',
-      title: 'Rompe la Barrera del No',
-      author: 'Chris Voss'
+      title: 'Un Paso por Delante de Wall Street',
+      author: 'Peter Lynch'
     }],
     xpReward: 100
   },
   {
     id: 'inv-m6-apply',
     nodeType: 'apply',
-    competency: 'sales',
-    difficulty: 'hard',
+    competency: 'investing',
+    difficulty: 'medium',
     type: 'real_world_task',
-    title: 'Negociar una Tarifa o Suscripción con Pregunta Calibrada',
-    taskBrief: 'Aplica el método de Chris Voss para pedir un descuento o beneficio en una herramienta de trabajo o servicio.',
+    title: 'Radar de Consumo',
+    taskBrief: 'Identifica 1 producto o servicio que usas fanáticamente cada semana y analiza si es una empresa pública.',
     verificationMethod: 'honor_system',
     verificationTier: 2,
-    reflectionPrompt: '¿Con qué empresa o cliente usaste la pregunta calibrada y cuál fue la respuesta recibida?',
+    reflectionPrompt: '¿Qué empresa descubriste en tu vida diaria? ¿Cotiza en bolsa (ticker) y cuál es su ventaja competitiva visible?',
     minReflectionLength: 80,
     xpReward: 350,
     frameworkSteps: [
-      { title: 'Espejo Táctico', desc: 'Repite las últimas 3 palabras de su argumento.' },
-      { title: 'Pregunta Calibrada', desc: 'Pregunta: "¿Cómo podemos ajustar esto para que tenga sentido para ambos?".' },
-      { title: 'Pausa Silenciosa', desc: 'Deja que la otra parte hable primero.' }
+      { title: 'Auditar Consumo', desc: 'Revisa tus suscripciones, supermercado o apps favoritas.' },
+      { title: 'Investigar Ticker', desc: 'Busca si la empresa cotiza en bolsa (ej: NASDAQ/NYSE).' },
+      { title: 'Tesis Simple', desc: 'Escribe por qué crees que sus ventas seguirán subiendo.' }
     ]
   }
 ];
 
+import { businessMissions, businessLevels } from './curriculum/business';
+import { aiMissions, aiLevels } from './curriculum/ai';
+
 export const MISSION_BANK: BankMission[] = [
-  ...investingMissions
+  ...investingMissions,
+  ...businessMissions,
+  ...aiMissions
 ];
 
 export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
@@ -729,8 +734,8 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
       {
         levelId: 'inv-level-4',
         levelNumber: 4,
-        title: '$100M Offers',
-        subtitle: 'Alex Hormozi · Ecuación de Gran Valor y Ofertas Irresistibles',
+        title: 'Principios',
+        subtitle: 'Ray Dalio · All Weather Portfolio y Ciclos de Deuda',
         applyNodeId: 'inv-m4-apply',
         days: [
           { dayId: 'inv-4-d1', dayNumber: 7, missionIds: ['inv-m4-l1'] },
@@ -739,8 +744,8 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
       {
         levelId: 'inv-level-5',
         levelNumber: 5,
-        title: 'Hábitos Atómicos',
-        subtitle: 'James Clear · Regla de los 2 Minutos & Micro-Sistemas',
+        title: 'Lo Más Importante',
+        subtitle: 'Howard Marks · Pensamiento de Segundo Nivel y Riesgo',
         applyNodeId: 'inv-m5-apply',
         days: [
           { dayId: 'inv-5-d1', dayNumber: 8, missionIds: ['inv-m5-l1'] },
@@ -749,8 +754,8 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
       {
         levelId: 'inv-level-6',
         levelNumber: 6,
-        title: 'Rompe la Barrera del No',
-        subtitle: 'Chris Voss · Negociación Táctica del FBI y Ventas',
+        title: 'Un Paso por Delante de Wall Street',
+        subtitle: 'Peter Lynch · El Borde Competitivo del Inversor Cotidiano',
         applyNodeId: 'inv-m6-apply',
         days: [
           { dayId: 'inv-6-d1', dayNumber: 9, missionIds: ['inv-m6-l1'] },
@@ -761,12 +766,12 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
   business: {
     trackId: 'business',
     title: 'BUSINESS & ENTREPRENEURSHIP',
-    levels: []
+    levels: businessLevels
   },
   ai: {
     trackId: 'ai',
     title: 'ARTIFICIAL INTELLIGENCE',
-    levels: []
+    levels: aiLevels
   }
 };
 

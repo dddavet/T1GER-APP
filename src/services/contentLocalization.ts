@@ -122,11 +122,12 @@ const SPANISH_MISSIONS: Record<string, LocalizedMission> = {
 };
 
 const SPANISH_LEVELS: Record<string, Pick<CurriculumLevel, 'title' | 'subtitle'>> = {
-  'inv-level-1': { title: 'BASES DEL VALOR', subtitle: 'Activos, pasivos y flujo de efectivo' },
-  'inv-level-2': { title: 'PSICOLOGÍA DEL DINERO', subtitle: 'Riesgo, emociones e interés compuesto' },
-  'inv-level-3': { title: 'CLASES DE ACTIVOS', subtitle: 'Acciones, bonos y activos reales' },
-  'inv-level-4': { title: 'ANÁLISIS Y SELECCIÓN', subtitle: 'Balances, ventajas y valoración' },
-  'inv-level-5': { title: 'CONSTRUCCIÓN DEL PORTAFOLIO', subtitle: 'Diversificación, rebalanceo e impuestos' },
+  'inv-level-1': { title: 'Padre Rico, Padre Pobre', subtitle: 'Robert Kiyosaki · Activos vs Pasivos y Flujo de Caja' },
+  'inv-level-2': { title: 'La Psicología del Dinero', subtitle: 'Morgan Housel · Emociones, Libertad e Interés Compuesto' },
+  'inv-level-3': { title: 'El Inversor Inteligente', subtitle: 'Benjamin Graham & Bogle · Mr. Market y Fondos Indexados' },
+  'inv-level-4': { title: 'Principios', subtitle: 'Ray Dalio · All Weather Portfolio y Ciclos de Deuda' },
+  'inv-level-5': { title: 'Lo Más Importante', subtitle: 'Howard Marks · Pensamiento de Segundo Nivel y Riesgo' },
+  'inv-level-6': { title: 'Un Paso por Delante de Wall Street', subtitle: 'Peter Lynch · El Borde Competitivo del Inversor Cotidiano' },
 };
 
 export function localizeMission(mission: BankMission, language: Language): BankMission {

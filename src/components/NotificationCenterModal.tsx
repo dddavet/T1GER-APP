@@ -121,12 +121,12 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-            className="relative flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[#09231F] text-white shadow-2xl font-sans"
+            className="relative flex h-full w-full max-w-md flex-col border-l border-white/10 bg-[#09090B] text-white shadow-2xl font-sans"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
+            {/* Header with Safe-Area Clearance */}
+            <div className="flex items-center justify-between border-b border-white/8 px-6 pb-4 pt-[calc(1.2rem+env(safe-area-inset-top))]">
               <div className="flex items-center gap-3">
-                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--t1ger-orange)] text-[#09231F]">
+                <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--ob-accent)] text-black">
                   <Bell size={20} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4500] text-[10px] font-black text-white">
@@ -138,7 +138,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                   <h2 className="text-base font-bold text-white">
                     {isEs ? 'Centro de Notificaciones' : 'Notification Center'}
                   </h2>
-                  <p className="text-xs text-[#87A9A2]">
+                  <p className="text-xs text-zinc-400">
                     {unreadCount > 0
                       ? (isEs ? `${unreadCount} nuevas sin leer` : `${unreadCount} unread alerts`)
                       : (isEs ? 'Todo al día' : 'All caught up')}
@@ -151,14 +151,14 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                   <button
                     onClick={handleMarkAllRead}
                     title={isEs ? 'Marcar todas como leídas' : 'Mark all read'}
-                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
                   >
                     <CheckCheck size={17} />
                   </button>
                 )}
                 <button
                   onClick={onClose}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
                 >
                   <X size={18} />
                 </button>
@@ -166,10 +166,10 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
             </div>
 
             {/* Email Templates Action Banner */}
-            <div className="border-b border-white/8 bg-black/20 px-6 py-3">
+            <div className="border-b border-white/8 bg-black/30 px-6 py-3">
               <button
                 onClick={() => handleOpenEmailPreview()}
-                className="flex w-full items-center justify-between rounded-xl border border-[var(--t1ger-orange)]/30 bg-[var(--t1ger-orange)]/10 px-3.5 py-2.5 text-xs font-bold text-[var(--t1ger-orange)] hover:bg-[var(--t1ger-orange)]/20 transition-all cursor-pointer"
+                className="flex w-full items-center justify-between rounded-xl border border-[var(--ob-accent)]/30 bg-[var(--ob-accent)]/10 px-3.5 py-2.5 text-xs font-bold text-[var(--ob-accent)] hover:bg-[var(--ob-accent)]/20 transition-all cursor-pointer"
               >
                 <div className="flex items-center gap-2">
                   <Mail size={15} />
@@ -193,8 +193,8 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                   onClick={() => setActiveFilter(tab.key as any)}
                   className={`shrink-0 rounded-xl px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                     activeFilter === tab.key
-                      ? 'bg-[var(--t1ger-orange)] text-[#09231F] font-bold shadow-[0_2px_8px_rgba(255,115,0,0.3)]'
-                      : 'bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white'
+                      ? 'bg-[var(--ob-accent)] text-black font-bold shadow-[0_2px_8px_rgba(255,115,0,0.3)]'
+                      : 'bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white'
                   }`}
                 >
                   {tab.label}
@@ -205,7 +205,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
             {/* Notification List */}
             <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5">
               {filtered.length === 0 ? (
-                <div className="flex h-48 flex-col items-center justify-center text-center text-[#87A9A2]">
+                <div className="flex h-48 flex-col items-center justify-center text-center text-zinc-400">
                   <Bell size={28} className="text-white/20 mb-2" />
                   <p className="text-sm font-semibold text-white">
                     {isEs ? 'No hay notificaciones en esta categoría' : 'No notifications in this category'}
@@ -222,12 +222,12 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                     className={`group relative flex items-start gap-3 rounded-2xl border p-4 transition-all cursor-pointer ${
                       notif.read
                         ? 'border-white/6 bg-white/[.02] hover:bg-white/[.04]'
-                        : 'border-[var(--t1ger-orange)]/30 bg-[#0C312C] shadow-[0_4px_16px_rgba(0,0,0,0.2)] hover:border-[var(--t1ger-orange)]/50'
+                        : 'border-[var(--ob-accent)]/30 bg-[#18181D] shadow-[0_4px_16px_rgba(0,0,0,0.3)] hover:border-[var(--ob-accent)]/50'
                     }`}
                   >
                     {/* Unread indicator dot */}
                     {!notif.read && (
-                      <span className="absolute top-4 right-4 h-2 w-2 rounded-full bg-[var(--t1ger-orange)]" />
+                      <span className="absolute top-4 right-4 h-2 w-2 rounded-full bg-[var(--ob-accent)]" />
                     )}
 
                     <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white/5 mt-0.5">
@@ -240,11 +240,11 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                           {notif.title}
                         </h4>
                       </div>
-                      <p className="mt-1 text-xs text-[#87A9A2] leading-relaxed">
+                      <p className="mt-1 text-xs text-zinc-300 leading-relaxed">
                         {notif.body}
                       </p>
 
-                      <div className="mt-2.5 flex items-center justify-between text-[10px] text-[#5B8077]">
+                      <div className="mt-2.5 flex items-center justify-between text-[10px] text-zinc-500">
                         <span>{formatTimeAgo(notif.timestamp)}</span>
                         {notif.emailPreviewHtml && (
                           <button
@@ -252,7 +252,7 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
                               e.stopPropagation();
                               handleOpenEmailPreview(notif.emailPreviewHtml);
                             }}
-                            className="flex items-center gap-1 text-[var(--t1ger-orange)] hover:underline"
+                            className="flex items-center gap-1 text-[var(--ob-accent)] hover:underline"
                           >
                             <Mail size={11} />
                             <span>{isEs ? 'Ver Email' : 'View Email'}</span>

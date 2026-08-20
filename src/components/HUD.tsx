@@ -23,65 +23,76 @@ export const HUD = React.memo(() => {
     return () => window.removeEventListener('t1ger_notifications_updated', updateCount);
   }, []);
 
+  const haptic = () => {
+    if (typeof window !== 'undefined' && window.navigator.vibrate) {
+      window.navigator.vibrate(12);
+    }
+  };
+
   return (
     <>
-      <header className="z-40 flex w-full flex-none items-center justify-between border-b border-white/8 bg-[#09090B]/95 px-3.5 pb-3 pt-[calc(.8rem+env(safe-area-inset-top))] backdrop-blur-xl select-none">
-        {/* Left: T1GER Logo & Level */}
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-transparent">
-            <img src="/t1ger-avatar.png" alt="T1GER Mascot" className="h-full w-full object-contain filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]" />
+      <header className="sticky top-0 z-40 w-full px-2 sm:px-3 pt-[calc(.45rem+env(safe-area-inset-top))] pb-2 select-none pointer-events-auto">
+        {/* Floating Glass Dynamic Island Bar */}
+        <div className="flex items-center justify-between w-full max-w-lg mx-auto rounded-2xl border border-white/[0.08] bg-[#09090B]/90 px-3 py-1.5 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.08)]">
+          {/* Left: T1GER Logo & Prestige Level */}
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 shadow-inner">
+              <img src="/t1ger-avatar.png" alt="T1GER Mascot" className="h-5 w-5 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="font-mono text-xs font-black tracking-tight text-white leading-none">T1GER</span>
+                <span className="font-mono text-[8px] font-extrabold uppercase px-1 py-0.2 rounded bg-[var(--ob-accent)]/20 text-[var(--ob-accent)] border border-[var(--ob-accent)]/30">
+                  LVL {appUser?.level || 1}
+                </span>
+              </div>
+            </div>
           </div>
-          <div>
-            <span className="block text-sm font-semibold tracking-[-.02em] text-white">T1GER</span>
-            <span className="block text-[10px] text-[#64877F]">
-              {isEs ? 'Inversión' : 'Investing'} · {isEs ? 'Nivel' : 'Level'} {appUser?.level || 1}
-            </span>
-          </div>
-        </div>
 
-        {/* Right Actions: Bell Notification Hub, Profesor Button, Streak Flame, Verified XP */}
-        <div className="flex items-center gap-2">
-          {/* Notification Center Bell */}
-          <button
-            onClick={() => setShowNotificationCenter(true)}
-            className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-white/[.045] text-[#87A9A2] hover:bg-white/10 hover:text-white transition-all cursor-pointer"
-            aria-label={isEs ? 'Notificaciones' : 'Notifications'}
-          >
-            <Bell size={17} />
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#FF4500] text-[9px] font-black text-white shadow-[0_2px_6px_rgba(255,69,0,0.5)]">
-                {unreadCount}
-              </span>
-            )}
-          </button>
+          {/* Right Actions: Mentor, Notifications, Streak, Verified XP */}
+          <div className="flex items-center gap-1">
+            {/* Dedicated AI Mentor Action */}
+            <button
+              onClick={() => { haptic(); setActiveView('coach'); }}
+              className="flex h-7 items-center gap-1 rounded-lg border border-[var(--ob-accent)]/40 bg-[var(--ob-accent)]/15 px-2 font-mono text-[10px] font-bold text-[var(--ob-accent)] hover:bg-[var(--ob-accent)]/25 transition cursor-pointer active:scale-95 shadow-[0_0_10px_rgba(255,115,0,0.15)]"
+              aria-label={isEs ? 'Profesor T1GER AI' : 'Professor T1GER AI'}
+            >
+              <Bot size={13} />
+              <span>{isEs ? 'Mentor' : 'Mentor'}</span>
+            </button>
 
-          {/* Dedicated Physical Profesor T1GER Button */}
-          <button
-            onClick={() => setActiveView('coach')}
-            className="flex h-9 items-center gap-1.5 rounded-xl border border-[var(--t1ger-orange)]/40 bg-[var(--t1ger-orange)]/15 px-2.5 text-xs font-bold text-[var(--t1ger-orange)] shadow-[0_2px_10px_rgba(255,115,0,0.15)] hover:bg-[var(--t1ger-orange)]/25 transition-all cursor-pointer active:scale-95"
-            aria-label={isEs ? 'Profesor T1GER AI' : 'Professor T1GER AI'}
-          >
-            <Bot size={16} />
-            <span>{isEs ? 'Profesor' : 'Mentor'}</span>
-          </button>
+            {/* Streak Flame Badge */}
+            <button
+              onClick={() => { haptic(); setShowStreakModal(true); }}
+              className="flex h-7 items-center gap-1 rounded-lg bg-white/[0.04] border border-white/8 px-2 font-mono text-[10.5px] font-bold text-amber-400 hover:bg-white/8 transition cursor-pointer active:scale-95"
+              aria-label={isEs ? 'Ver Racha' : 'View Streak'}
+            >
+              <Flame size={13} className="fill-current text-amber-400" />
+              <span className="tabular-nums">{learnStreak}</span>
+            </button>
 
-          {/* Streak Flame Badge */}
-          <button
-            onClick={() => setShowStreakModal(true)}
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-white/[.045] px-2.5 font-mono text-xs text-[#E8B271] hover:bg-white/10 transition-colors cursor-pointer"
-            aria-label={isEs ? 'Ver Racha' : 'View Streak'}
-          >
-            <Flame size={16} />
-            {learnStreak}
-          </button>
+            {/* Verified XP Badge */}
+            <div
+              className="flex h-7 items-center gap-1 rounded-lg bg-[#3FC78E]/10 border border-[#3FC78E]/25 px-2 font-mono text-[10.5px] font-bold text-[#78DDB0]"
+              aria-label={`${stats.verifiedXP} ${isEs ? 'XP verificado' : 'verified XP'}`}
+            >
+              <ShieldCheck size={13} />
+              <span className="tabular-nums">{stats.verifiedXP}</span>
+            </div>
 
-          {/* Verified XP Badge */}
-          <div
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-[#3FC78E]/9 px-2.5 font-mono text-xs text-[#78DDB0]"
-            aria-label={`${stats.verifiedXP} ${isEs ? 'XP verificado' : 'verified XP'}`}
-          >
-            <ShieldCheck size={16} />
-            {stats.verifiedXP}
+            {/* Notification Center Bell */}
+            <button
+              onClick={() => { haptic(); setShowNotificationCenter(true); }}
+              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition cursor-pointer active:scale-95"
+              aria-label={isEs ? 'Notificaciones' : 'Notifications'}
+            >
+              <Bell size={13} />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[var(--ob-accent)] text-[7.5px] font-black text-black shadow-md">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
           </div>
         </div>
       </header>

@@ -21,7 +21,7 @@ export const InteractiveCardWidget: React.FC<InteractiveCardWidgetProps> = ({
       { id: 1, text: 'Auto deportivo de lujo en leasing', isAsset: false, hint: 'Drena dinero mensual de tu bolsillo' },
       { id: 2, text: 'Fondo indexado VTI con dividendos', isAsset: true, hint: 'Pone dinero en tu bolsillo sin tu tiempo' },
       { id: 3, text: 'Suscripciones y membresías olvidadas', isAsset: false, hint: 'Fuga silenciosa de liquidez' },
-      { id: 4, text: 'Bienes raíces con renta nuta positiva', isAsset: true, hint: 'Flujo de caja neto generado cada mes' },
+      { id: 4, text: 'Bienes raíces con renta neta positiva', isAsset: true, hint: 'Flujo de caja neto generado cada mes' },
     ];
 
     const [currentIndex, setCurrentIndex] = useState(0);

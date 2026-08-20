@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T1GER APP — Solicitud de Eliminación de Cuenta / Account Deletion Request</title>
+  <style>
+    :root {
+      --bg: #09090B;
+      --card-bg: #121216;
+      --accent: #FF7300;
+      --text: #E4E4E7;
+      --muted: #A1A1AA;
+      --border: rgba(255, 255, 255, 0.1);
+      --danger: #F43F5E;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      margin: 0;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    }
+    h1 {
+      color: #FFFFFF;
+      font-size: 24px;
+      font-weight: 800;
+      margin-top: 0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(244, 63, 94, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      font-family: monospace;
+      margin-bottom: 14px;
+    }
+    .box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin: 18px 0;
+    }
+    ol {
+      padding-left: 20px;
+      font-size: 14px;
+    }
+    li {
+      margin-bottom: 10px;
+    }
+    .contact-btn {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 12px 24px;
+      background: var(--danger);
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 12px;
+      font-family: monospace;
+    }
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <span class="badge">GOOGLE PLAY & APPLE COMPLIANCE</span>
+    <h1>Solicitud de Eliminación de Cuenta y Datos (T1GER APP)</h1>
+    <p>En cumplimiento con las directrices oficiales de privacidad de Google Play Store y Apple App Store, los usuarios de T1GER APP tienen derecho a solicitar la eliminación completa y permanente de su cuenta y todos los datos asociados.</p>
+
+    <div class="box">
+      <h3 style="margin-top:0; color: #FFFFFF; font-size: 15px;">¿Qué datos se eliminan permanentemente?</h3>
+      <ul>
+        <li>Perfil de usuario, nombre, correo electrónico y credenciales en Firebase Auth.</li>
+        <li>Historial de progreso de aprendizaje, puntuaciones de competencias, rachas y XP acumulado.</li>
+        <li>Planes de acción, reflexiones, historial de coaching con IA y registros de simulación en Firestore.</li>
+        <li>Cualquier métrica local vinculada a su identificador de usuario.</li>
+      </ul>
+    </div>
+
+    <h3>Métodos para Eliminar su Cuenta:</h3>
+    <ol>
+      <li><strong>Desde la Aplicación (Instantáneo):</strong> Abra T1GER APP > Vaya a <code>Perfil</code> > Desplácese hasta el final y presione <code>Eliminar Cuenta</code>. La cuenta y sus datos se eliminarán de inmediato en nuestros servidores.</li>
+      <li><strong>Vía Solicitud Web / Correo Electrónico:</strong> Si ya no tiene instalada la aplicación en su teléfono, puede solicitar la eliminación manual enviando un correo con el asunto <code>ELIMINAR CUENTA T1GER</code> indicando su correo de registro a:</li>
+    </ol>
+
+    <a href="mailto:support@t1ger.app?subject=Solicitud%20de%20Eliminacion%20de%20Cuenta%20T1GER" class="contact-btn">
+      ENVIAR SOLICITUD DE BORRADO (support@t1ger.app)
+    </a>
+
+    <p style="font-size: 12px; color: var(--muted); margin-top: 18px;">
+      * Las solicitudes por correo electrónico se procesan en un plazo máximo de 48 horas hábiles.
+    </p>
+  </div>
+  <footer>© 2026 T1GER Inc. Todos los derechos reservados.</footer>
+</body>
+</html>

@@ -3,6 +3,7 @@ import { useAuth } from './AuthContext';
 import { useBrain } from './BrainContext';
 import { MISSION_BANK } from '../services/missionBank';
 import { fireConfetti } from '../components/ui/confetti';
+import { LeagueService } from '../services/leagueService';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
 type Stats = { xp: number; verifiedXP: number; coins: number; streak: number; health: number; rank: string };
@@ -19,6 +20,7 @@ interface T1gerContextType {
   setActiveView: React.Dispatch<React.SetStateAction<View>>;
   setTriggerAnimation: React.Dispatch<React.SetStateAction<Animation>>;
   addXP: (amount: number, tier?: 1 | 2, rewardId?: string) => Promise<void>;
+  addCoins: (amount: number) => Promise<void>;
   spendCoins: (amount: number) => Promise<void>;
 }
 
@@ -103,7 +105,27 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     if (appUser) {
-      await updateAppUser({ xp: calculatedXP, verifiedXP: calculatedVerifiedXP, level: calculatedLevel, coins: calculatedCoins });
+      // League System Logic: Compute Weekly XP & Tier
+      const nowWeekId = LeagueService.getCurrentWeekId();
+      let newWeeklyXP = appUser.weeklyXP || 0;
+      if (appUser.currentWeekId !== nowWeekId) {
+        newWeeklyXP = 0; // Reset for new week
+      }
+      if (tier === 1) {
+        newWeeklyXP += amount; // Only Tier 1 XP counts towards Leagues
+      }
+      const newTier = LeagueService.getUserTier(calculatedVerifiedXP);
+
+      await updateAppUser({ 
+        xp: calculatedXP, 
+        verifiedXP: calculatedVerifiedXP, 
+        level: calculatedLevel, 
+        coins: calculatedCoins,
+        weeklyXP: newWeeklyXP,
+        currentWeekId: nowWeekId,
+        leagueTier: newTier as any,
+        streak: brainState.learnStreak
+      });
     }
   }, [appUser, updateAppUser, brainState]);
 
@@ -119,11 +141,23 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [appUser, updateAppUser]);
 
+  const addCoins = React.useCallback(async (amount: number) => {
+    let finalCoins = 0;
+    setStats(prev => {
+      finalCoins = prev.coins + amount;
+      return { ...prev, coins: finalCoins };
+    });
+
+    if (appUser) {
+      await updateAppUser({ coins: finalCoins });
+    }
+  }, [appUser, updateAppUser]);
+
   const value = React.useMemo(() => ({
     user, stats, activeView, triggerAnimation, 
     setUser, setStats, setActiveView, setTriggerAnimation, 
-    addXP, spendCoins
-  }), [user, stats, activeView, triggerAnimation, addXP, spendCoins]);
+    addXP, spendCoins, addCoins
+  }), [user, stats, activeView, triggerAnimation, addXP, spendCoins, addCoins]);
 
   return (
     <T1gerContext.Provider value={value}>

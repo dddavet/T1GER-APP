@@ -12,6 +12,7 @@ import {
   ImagePlus,
   Link2,
   ShieldCheck,
+  Sparkles,
   Target,
   TrendingUp,
   Trophy,
@@ -25,6 +26,8 @@ import { fireRewardConfetti } from './ui/confetti';
 import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
 import { StreakCelebrationModal } from './StreakCelebrationModal';
 import { LessonSummaryModal } from './learn/LessonSummaryModal';
+import { verifyWrittenActionProof, type WrittenVerificationResult } from '../services/gemini';
+import { shouldCelebrateStreakToday, markStreakCelebratedToday } from '../services/brainService';
 
 interface MissionEngineProps {
   mission: BankMission;
@@ -70,6 +73,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   const [error, setError] = useState('');
   const [complete, setComplete] = useState(alreadyCompleted);
   const [submitting, setSubmitting] = useState(false);
+  const [evaluatingAI, setEvaluatingAI] = useState(false);
+  const [aiFeedback, setAiFeedback] = useState<WrittenVerificationResult | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
 
@@ -88,7 +93,8 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
 
   const mascotMood = useMemo<MascotReaction>(() => {
     if (complete) return 'celebrate';
-    if (error) return 'warning';
+    if (error || (aiFeedback && aiFeedback.status === 'REJECTED')) return 'warning';
+    if (evaluatingAI) return 'thinking';
     if (!isApply) {
       if (learnStage === 'concept') return 'thinking';
       if (!answerChecked) return 'idle';
@@ -97,7 +103,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
     if (applyStage === 'brief') return 'thinking';
     if (applyStage === 'execute') return 'beast';
     return 'idle';
-  }, [applyStage, answerChecked, complete, correctOption, error, isApply, learnStage, selectedOption]);
+  }, [aiFeedback, applyStage, answerChecked, complete, correctOption, error, evaluatingAI, isApply, learnStage, selectedOption]);
 
   const framework = mission.frameworkSteps || [];
   const frameworkReady = framework.length === 0 || completedFramework.length === framework.length;
@@ -113,7 +119,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
     if (mission.verificationMethod === 'link') {
       return reflection.length >= minimumReflection && /https?:\/\//i.test(reflection);
     }
-    return reflection.length >= minimumReflection;
+    return reflection.length >= 25;
   }, [mission.verificationMethod, minimumReflection, photoName, reflection, requiredTrades, trades]);
 
   const progress = complete
@@ -146,9 +152,33 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   };
 
   const finishMission = async () => {
-    if (submitting || (!isApply && !answerIsCorrect) || (isApply && !evidenceValid)) return;
-    setSubmitting(true);
+    if (submitting || evaluatingAI || (!isApply && !answerIsCorrect) || (isApply && !evidenceValid)) return;
     setError('');
+    
+    // If it is a written/reflection Apply task, run real AI verification!
+    if (isApply && mission.verificationMethod !== 'paper_trade' && mission.verificationMethod !== 'photo') {
+      setEvaluatingAI(true);
+      try {
+        const result = await verifyWrittenActionProof(
+          mission.title,
+          mission.taskBrief || mission.reflectionPrompt || '',
+          reflection,
+          language
+        );
+        setAiFeedback(result);
+        if (result.status === 'REJECTED') {
+          setError(result.feedback);
+          setEvaluatingAI(false);
+          return;
+        }
+      } catch {
+        // Fallback gracefully
+      } finally {
+        setEvaluatingAI(false);
+      }
+    }
+
+    setSubmitting(true);
     try {
       if (mission.verificationMethod === 'paper_trade' && typeof window !== 'undefined') {
         const key = `t1ger_paper_trades_${appUser?.uid || 'local'}`;
@@ -158,8 +188,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           ...trades.map(trade => ({ ...trade, missionId: mission.id, createdAt: Date.now(), environment: 'simulation' })),
         ]));
       }
+      
       const seconds = Math.max(20, Math.round((Date.now() - startTimeRef.current) / 1000));
       setElapsedSeconds(seconds);
+      completeMission(mission.id, 100);
+      addXP(mission.xpReward || 150, 1);
       setComplete(true);
       setShowSummaryModal(true);
     } finally {
@@ -179,7 +212,12 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           isOpen={showSummaryModal}
           onContinue={() => {
             setShowSummaryModal(false);
-            setShowStreakCelebration(true);
+            if (shouldCelebrateStreakToday()) {
+              markStreakCelebratedToday();
+              setShowStreakCelebration(true);
+            } else {
+              onComplete();
+            }
           }}
           xpEarned={mission.xpReward || 100}
           timeSpentSeconds={elapsedSeconds}
@@ -201,10 +239,9 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
       </>
     );
   }
-
   return (
-    <main className="t1ger-mission-shell min-h-[100dvh] px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
-      <div className="mx-auto flex min-h-[calc(100dvh-3rem)] max-w-md flex-col">
+    <main className="fixed inset-0 z-[100] w-full h-[100dvh] overflow-y-auto bg-[#09090B] px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+      <div className="mx-auto flex min-h-full max-w-md flex-col">
         <header className="mb-6 flex items-center gap-4">
           <button onClick={onComplete} aria-label={isEs ? 'Cerrar misión' : 'Close mission'} className="t1ger-icon-button">
             <ArrowLeft size={20} />
@@ -227,7 +264,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
 
         <AnimatePresence mode="wait">
           {!isApply && learnStage === 'concept' && (
-            <motion.section key="concept" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }} className="flex flex-1 flex-col">
+            <motion.section key="concept" initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { type: 'spring', damping: 28, stiffness: 350 } }} exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.15 } }} className="flex flex-1 flex-col">
               <article className="t1ger-panel flex-1 p-6">
                 <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#173F38] text-[var(--t1ger-orange)]"><BookOpen size={23} /></div>
                 <p className="text-pretty text-lg font-medium leading-8 text-[#EAF4F1]">{mission.concept}</p>
@@ -240,14 +277,14 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                   </a>
                 )}
               </article>
-              <button onClick={() => setLearnStage('check')} className="t1ger-primary-button mt-5 w-full">
+              <button onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); setLearnStage('check'); }} className="t1ger-primary-button mt-5 w-full">
                 {isEs ? 'Comprobar comprensión' : 'Check understanding'} <ArrowRight size={18} />
               </button>
             </motion.section>
           )}
 
           {!isApply && learnStage === 'check' && (
-            <motion.section key="check" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="flex flex-1 flex-col">
+            <motion.section key="check" initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { type: 'spring', damping: 28, stiffness: 350 } }} exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.15 } }} className="flex flex-1 flex-col">
               <div className="t1ger-panel p-6">
                 <p className="t1ger-kicker">{isEs ? 'Decisión' : 'Decision check'}</p>
                 <h2 className="mt-2 text-xl font-semibold leading-7 text-white">
@@ -264,8 +301,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                         role="radio"
                         aria-checked={selected}
                         disabled={answerChecked}
-                        onClick={() => setSelectedOption(index)}
-                        className={`w-full rounded-2xl border p-4 text-left text-sm font-medium leading-5 transition ${correct ? 'border-[#3FC78E] bg-[#3FC78E]/12 text-white' : wrong ? 'border-[#E56A65] bg-[#E56A65]/10 text-white' : selected ? 'border-[var(--t1ger-orange)] bg-[var(--t1ger-orange)]/10 text-white' : 'border-white/10 bg-white/[.035] text-[#BED1CC] hover:border-white/20'}`}
+                        onClick={() => {
+                          if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(5);
+                          setSelectedOption(index);
+                        }}
+                        className={`w-full rounded-2xl border p-4 text-left text-sm font-medium leading-5 transition active:scale-[0.98] ${correct ? 'border-[#3FC78E] bg-[#3FC78E]/12 text-white' : wrong ? 'border-[#E56A65] bg-[#E56A65]/10 text-white' : selected ? 'border-[var(--t1ger-orange)] bg-[var(--t1ger-orange)]/10 text-white' : 'border-white/10 bg-white/[.035] text-[#BED1CC] hover:border-white/20'}`}
                       >
                         <span className="flex items-start gap-3"><span className="mt-0.5 font-mono text-xs text-[#6F9990]">{String.fromCharCode(65 + index)}</span>{option.text}</span>
                       </button>
@@ -280,15 +320,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                 )}
               </div>
               {!answerChecked ? (
-                <button disabled={selectedOption === null} onClick={() => setAnswerChecked(true)} className="t1ger-primary-button mt-5 w-full disabled:opacity-40">
+                <button disabled={selectedOption === null} onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); setAnswerChecked(true); }} className="t1ger-primary-button mt-5 w-full disabled:opacity-40">
                   {isEs ? 'Comprobar respuesta' : 'Check answer'}
                 </button>
               ) : answerIsCorrect ? (
-                <button disabled={submitting} onClick={finishMission} className="t1ger-primary-button mt-5 w-full">
+                <button disabled={submitting} onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); finishMission(); }} className="t1ger-primary-button mt-5 w-full">
                   {isEs ? 'Completar lección' : 'Complete lesson'} <Check size={18} />
                 </button>
               ) : (
-                <button onClick={() => { setSelectedOption(null); setAnswerChecked(false); }} className="t1ger-secondary-button mt-5 w-full">
+                <button onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); setSelectedOption(null); setAnswerChecked(false); }} className="t1ger-secondary-button mt-5 w-full">
                   {isEs ? 'Intentar de nuevo' : 'Try again'}
                 </button>
               )}
@@ -296,7 +336,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           )}
 
           {isApply && applyStage === 'brief' && (
-            <motion.section key="brief" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }} className="flex flex-1 flex-col">
+            <motion.section key="brief" initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { type: 'spring', damping: 28, stiffness: 350 } }} exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.15 } }} className="flex flex-1 flex-col">
               <article className="t1ger-panel flex-1 p-6">
                 <div className="flex items-start justify-between gap-5">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--t1ger-orange)]/12 text-[var(--t1ger-orange)]"><Target size={24} /></div>
@@ -320,7 +360,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           )}
 
           {isApply && applyStage === 'execute' && (
-            <motion.section key="execute" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }} className="flex flex-1 flex-col">
+            <motion.section key="execute" initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { type: 'spring', damping: 28, stiffness: 350 } }} exit={{ opacity: 0, scale: 0.98, filter: 'blur(4px)', transition: { duration: 0.15 } }} className="flex flex-1 flex-col">
               <div className="space-y-3">
                 {framework.map((step, index) => {
                   const done = completedFramework.includes(index);
@@ -347,7 +387,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
           )}
 
           {isApply && applyStage === 'evidence' && (
-            <motion.section key="evidence" initial={{ opacity: 0, x: 18 }} animate={{ opacity: 1, x: 0 }} className="flex flex-1 flex-col">
+            <motion.section key="evidence" initial={{ opacity: 0, scale: 0.98, filter: 'blur(4px)' }} animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', transition: { type: 'spring', damping: 28, stiffness: 350 } }} className="flex flex-1 flex-col">
               {mission.verificationMethod === 'paper_trade' ? (
                 <div className="t1ger-panel p-5">
                   <div className="flex items-center justify-between">
@@ -382,9 +422,15 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                 </div>
               )}
               {error && <p role="alert" className="mt-4 flex items-center gap-2 rounded-xl bg-[#E56A65]/10 p-3 text-xs text-[#F2C5C2]"><AlertCircle size={16} />{error}</p>}
-              <button disabled={!evidenceValid || submitting} onClick={finishMission} className="t1ger-primary-button mt-auto w-full disabled:opacity-35">
-                {mission.verificationTier === 1 ? <ShieldCheck size={18} /> : <Trophy size={18} />}
-                {submitting ? (isEs ? 'Guardando…' : 'Saving…') : mission.verificationTier === 1 ? (isEs ? 'Verificar y completar' : 'Verify and complete') : (isEs ? 'Completar misión' : 'Complete mission')}
+              <button disabled={!evidenceValid || submitting || evaluatingAI} onClick={finishMission} className="t1ger-primary-button mt-auto w-full disabled:opacity-35 cursor-pointer">
+                {evaluatingAI ? <Sparkles size={18} className="animate-spin text-amber-400" /> : mission.verificationTier === 1 ? <ShieldCheck size={18} /> : <Trophy size={18} />}
+                {evaluatingAI 
+                  ? (isEs ? 'Auditando criterio con IA…' : 'AI Auditing Plan…') 
+                  : submitting 
+                  ? (isEs ? 'Guardando…' : 'Saving…') 
+                  : mission.verificationTier === 1 
+                  ? (isEs ? 'Verificar y completar (+vXP)' : 'Verify and complete (+vXP)') 
+                  : (isEs ? 'Completar misión' : 'Complete mission')}
               </button>
             </motion.section>
           )}

@@ -68,6 +68,14 @@ interface BrainContextType {
   removeTacticalTask: (id: string, type: 'habit' | 'work' | 'lesson') => void;
   submitTacticalProof: (id: string, proofUrl?: string, proofText?: string, verified?: boolean) => void;
   commitTactical: (habitIds: string[], workIds: string[], lessonIds: string[]) => void;
+
+  // Virtual Pet (Pou + Finch + Opal)
+  petState: T1gerPetState;
+  feedPet: (nutritionAmount?: number) => void;
+  completeFocusSession: (minutes: number) => void;
+  petMascot: () => void;
+  updatePetSettings: (screenTimeLimitMinutes: number, dailyXPGoal: number) => void;
+
   // Internationalization (i18n)
   language: Language;
   setLanguage: (lang: Language) => void;
@@ -85,6 +93,7 @@ import {
   completeTacticalTask,
   commitDailyTactical
 } from '../services/brainService';
+import { type T1gerPetState, DEFAULT_PET_STATE, calculatePetVitalsWithDecay } from '../services/petEngine';
 
 const BrainContext = createContext<BrainContextType | undefined>(undefined);
 
@@ -446,6 +455,68 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return calculateT1gerEmotion(brainState);
   }, [brainState]);
 
+  const petState = useMemo(() => {
+    return calculatePetVitalsWithDecay(brainState.petState || DEFAULT_PET_STATE);
+  }, [brainState.petState]);
+
+  const feedPet = useCallback((nutritionAmount: number = 30) => {
+    setBrainState(prev => {
+      const current = calculatePetVitalsWithDecay(prev.petState || DEFAULT_PET_STATE);
+      return {
+        ...prev,
+        petState: {
+          ...current,
+          hunger: Math.min(100, current.hunger + nutritionAmount),
+          lastFedTimestamp: Date.now(),
+        }
+      };
+    });
+  }, []);
+
+  const completeFocusSession = useCallback((minutes: number) => {
+    setBrainState(prev => {
+      const current = calculatePetVitalsWithDecay(prev.petState || DEFAULT_PET_STATE);
+      const energyGain = Math.min(45, Math.floor(minutes * 0.8));
+      return {
+        ...prev,
+        petState: {
+          ...current,
+          energy: Math.min(100, current.energy + energyGain),
+          totalFocusMinutesToday: current.totalFocusMinutesToday + minutes,
+          lastFocusTimestamp: Date.now(),
+        }
+      };
+    });
+  }, []);
+
+  const petMascot = useCallback(() => {
+    setBrainState(prev => {
+      const current = calculatePetVitalsWithDecay(prev.petState || DEFAULT_PET_STATE);
+      return {
+        ...prev,
+        petState: {
+          ...current,
+          timesPettedToday: current.timesPettedToday + 1,
+          lastPetTimestamp: Date.now(),
+        }
+      };
+    });
+  }, []);
+
+  const updatePetSettings = useCallback((screenTimeLimitMinutes: number, dailyXPGoal: number) => {
+    setBrainState(prev => {
+      const current = calculatePetVitalsWithDecay(prev.petState || DEFAULT_PET_STATE);
+      return {
+        ...prev,
+        petState: {
+          ...current,
+          dailyScreenTimeLimitMinutes: screenTimeLimitMinutes,
+          dailyXPGoal,
+        }
+      };
+    });
+  }, []);
+
   const value = useMemo(() => ({
     competencies,
     getSessionMissions,
@@ -475,10 +546,15 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     removeTacticalTask,
     submitTacticalProof,
     commitTactical,
+    petState,
+    feedPet,
+    completeFocusSession,
+    petMascot,
+    updatePetSettings,
     language,
     setLanguage,
     resetBrain,
-  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, selectTrack, skipDaysForPlacement, t1gerEmotion, resetBrain, language, setLanguage]);
+  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, petState, feedPet, completeFocusSession, petMascot, updatePetSettings, selectTrack, skipDaysForPlacement, t1gerEmotion, resetBrain, language, setLanguage]);
 
   return (
     <BrainContext.Provider value={value}>

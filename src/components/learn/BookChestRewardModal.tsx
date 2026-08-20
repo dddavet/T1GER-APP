@@ -70,7 +70,8 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.92 }}
               onClick={handleOpenChest}
-              
+              className="flex flex-col items-center cursor-pointer group"
+            >
               <div className="relative flex h-40 w-40 items-center justify-center rounded-3xl bg-gradient-to-b from-amber-400 to-[var(--ob-accent)] text-black shadow-[0_0_50px_rgba(255,115,0,0.5),0_12px_0_#994700] group-hover:scale-105 active:translate-y-2 active:shadow-[0_2px_0_#994700] transition-all">
                 <Gift size={72} className="stroke-[2.5]" />
               </div>

@@ -55,20 +55,20 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
         className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-[#09090B] font-sans text-white select-none"
       >
         {/* Header Ribbon */}
-        <div className="relative shrink-0 overflow-hidden bg-gradient-to-b from-[#180A04] via-[#0E201B] to-[#09090B] px-5 pb-6 pt-4">
-          <div className="relative z-20 flex items-center justify-between">
+        <div className="relative shrink-0 overflow-hidden bg-gradient-to-b from-[#180A04] via-[#0E201B] to-[#09090B] px-5 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
+          <div className="relative z-20 flex items-center justify-between gap-3">
             <button
               onClick={onClose}
-              className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X size={22} />
             </button>
 
-            <span className="text-sm font-semibold tracking-[-0.01em] text-white">
+            <span className="text-sm font-semibold tracking-[-0.01em] text-white truncate text-center flex-1">
               {isEs ? 'Racha y Disciplina' : 'Streak & Consistency'}
             </span>
 
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--t1ger-orange)]/15 text-[var(--t1ger-orange)] font-mono text-sm font-bold">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--t1ger-orange)]/15 text-[var(--t1ger-orange)] font-mono text-sm font-bold">
               {streak}
             </div>
           </div>

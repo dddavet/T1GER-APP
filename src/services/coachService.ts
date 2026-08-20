@@ -148,7 +148,7 @@ export const getCoachResponse = async (
   if (geminiKey && geminiKey.trim() !== '') {
     try {
       const model = getAi().getGenerativeModel({
-        model: "gemini-1.5-flash",
+        model: "gemini-1.5-flash-latest",
         systemInstruction: fullSystemPrompt
       });
 

@@ -75,6 +75,7 @@ interface OnboardingDraft {
   knowledgeLevel: KnowledgeLevel;
   motivation: string | null;
   screenTimeHours: number;
+  selectedDistractions?: string[];
   dailyGoal: number;
   startingPoint: StartingPointChoice;
   lessonCompleted: boolean;
@@ -541,7 +542,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           <div className="flex min-h-full flex-col py-3">
             <DuolingoHeader
               speech={tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
-              mood="ready"
+              mood="happy"
             />
 
             <div className="space-y-2 my-auto">
@@ -663,7 +664,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           <div className="flex min-h-full flex-col py-3">
             <DuolingoHeader
               speech={tr(`¿Por qué quieres aprender ${topicName}?`, `Why are you learning ${topicName}?`)}
-              mood="ready"
+              mood="happy"
             />
 
             <div className="space-y-2.5 my-auto">
@@ -722,95 +723,105 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           </div>
         );
 
-      // Frame 9: Screen Time Hook (Opportunity Cost Calculator)
+      // Frame 9: Screen Time Hook & T1GER Health Pact
       case 'screen_time': {
-        const hours = draft.screenTimeHours || 3.5;
-        const weeklyHours = Math.round(hours * 7);
-        const yearlyHours = Math.round(hours * 365);
-        const annualLostUSD = Math.round(yearlyHours * 15);
-        const booksEquivalent = Math.max(1, Math.round(yearlyHours / 8));
+        const hours = draft.screenTimeHours || 1.5;
+        const selectedApps = draft.selectedDistractions || ['instagram', 'tiktok'];
+
+        const DISTRACTION_APPS = [
+          { id: 'tiktok', name: 'TikTok', icon: '🎵' },
+          { id: 'instagram', name: 'Instagram', icon: '📸' },
+          { id: 'youtube', name: 'YouTube', icon: '▶️' },
+          { id: 'x', name: 'X (Twitter)', icon: '𝕏' },
+          { id: 'games', name: 'Juegos', icon: '🎮' },
+          { id: 'browse', name: 'Doomscroll', icon: '📱' },
+        ];
+
+        const toggleApp = (appId: string) => {
+          const current = new Set(selectedApps);
+          if (current.has(appId)) current.delete(appId);
+          else current.add(appId);
+          patchDraft({ selectedDistractions: Array.from(current) });
+        };
 
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
               speech={tr(
-                'El 90% pierde 3h al día en redes sociales. Veamos tu costo de oportunidad real.',
-                '90% spend 3+ hours daily scrolling social feeds. Let’s calculate your opportunity cost.'
+                'El celular no debe controlar tu vida. Vamos a proteger tu tiempo y la salud de tu T1GER.',
+                'Your phone shouldn’t control your life. Let’s protect your time and T1GER’s health.'
               )}
-              mood={hours >= 4 ? 'beast' : 'thinking'}
-              eyebrow={tr('Costo de Oportunidad', 'Opportunity Cost')}
-              title={tr('¿Cuánto tiempo pasas en redes al día?', 'How much daily screen time goes into feeds?')}
+              mood="thinking"
+              eyebrow={tr('Pacto de Enfoque & Salud', 'Focus & Health Pact')}
+              title={tr('¿En qué apps pierdes más el tiempo?', 'Where do you lose the most time?')}
             />
 
-            {/* Presets */}
-            <div className="grid grid-cols-4 gap-2 mb-3">
-              {[1, 2.5, 4, 6].map((h) => (
+            {/* App Pickers */}
+            <div className="grid grid-cols-3 gap-2 mb-3.5">
+              {DISTRACTION_APPS.map((app) => {
+                const isSel = selectedApps.includes(app.id);
+                return (
+                  <button
+                    key={app.id}
+                    onClick={() => toggleApp(app.id)}
+                    className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border transition-all active:scale-95 cursor-pointer ${
+                      isSel
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/20 text-white font-bold'
+                        : 'border-white/10 bg-white/[.03] text-zinc-400'
+                    }`}
+                  >
+                    <span>{app.icon}</span>
+                    <span className="text-xs">{app.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Target Daily Limit Selector */}
+            <p className="text-xs font-bold text-zinc-300 mb-2">
+              {tr('Tu límite máximo diario en estas apps:', 'Your max daily target limit on these apps:')}
+            </p>
+            <div className="grid grid-cols-4 gap-1.5 mb-3.5">
+              {[0.75, 1.0, 1.5, 2.0].map((h) => (
                 <button
                   key={h}
-                  onClick={() => patchDraft({ screenTimeHours: h })}
-                  className={`flex flex-col items-center justify-center rounded-2xl border p-2.5 transition active:scale-95 cursor-pointer ${
+                  onClick={() => {
+                    patchDraft({ screenTimeHours: h });
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('t1ger_screen_time_hours', h.toString());
+                    }
+                  }}
+                  className={`flex flex-col items-center justify-center rounded-xl border p-2 transition active:scale-95 cursor-pointer ${
                     hours === h
-                      ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/20 text-white font-bold'
+                      ? 'border-cyan-500 bg-cyan-950/40 text-white font-bold shadow-[0_0_12px_rgba(6,182,212,0.25)]'
                       : 'border-white/10 bg-white/[.03] text-zinc-400'
                   }`}
                 >
-                  <span className="text-base font-black">{h}h</span>
-                  <span className="text-[10px]">{tr('al día', '/day')}</span>
+                  <span className="text-sm font-black">{h === 0.75 ? '45m' : `${h}h`}</span>
+                  <span className="text-[9px]">{tr('máximo', 'max')}</span>
                 </button>
               ))}
             </div>
 
-            {/* Slider */}
-            <div className="mb-4 px-1">
-              <input
-                type="range"
-                min="0.5"
-                max="8"
-                step="0.5"
-                value={hours}
-                onChange={(e) => patchDraft({ screenTimeHours: parseFloat(e.target.value) })}
-                className="w-full h-2 rounded-lg bg-white/10 accent-[var(--ob-accent)] cursor-pointer"
-              />
+            {/* Health Mechanics Alert Card */}
+            <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-b from-rose-500/10 to-transparent p-3.5 space-y-2 shadow-lg mb-2">
+              <div className="flex items-center gap-2">
+                <span className="text-rose-400 text-base">❤️</span>
+                <span className="font-mono text-xs font-bold text-rose-300">
+                  {tr('Impacto en la Vida de T1GER', 'Impact on T1GER Health')}
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-300 leading-relaxed">
+                {tr(
+                  `Si usas tus redes más de ${hours === 0.75 ? '45 min' : `${hours} horas`} al día, T1GER perderá Vida (❤️). ¡Mantenlo sano aprendiendo y respetando tu límite!`,
+                  `If you scroll more than ${hours === 0.75 ? '45 min' : `${hours} hours`} daily, T1GER loses Health (❤️). Keep him alive by staying under budget!`
+                )}
+              </p>
             </div>
 
-            {/* Calculation Card */}
-            <div className="rounded-2xl border border-[var(--ob-accent)]/30 bg-gradient-to-b from-[#FF7300]/10 to-transparent p-4 space-y-3 shadow-lg">
-              <div className="grid grid-cols-2 gap-2.5">
-                <div className="rounded-xl border border-white/6 bg-black/30 p-3 text-left">
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-[#FF8C33]">
-                    <DollarSign size={13} /> {tr('Dinero no ganado ($15/h)', 'Value lost ($15/hr)')}
-                  </span>
-                  <strong className="block text-base font-black text-white mt-0.5">
-                    ${annualLostUSD.toLocaleString()} USD
-                  </strong>
-                  <span className="text-[10px] text-zinc-400 block">{tr('por año en ocio pasivo', '/yr in passive scrolling')}</span>
-                </div>
-
-                <div className="rounded-xl border border-white/6 bg-black/30 p-3 text-left">
-                  <span className="flex items-center gap-1 text-[11px] font-medium text-[#78DDB0]">
-                    <BookOpen size={13} /> {tr('Conocimiento no adquirido', 'Skills & books lost')}
-                  </span>
-                  <strong className="block text-base font-black text-white mt-0.5">
-                    ~{booksEquivalent} {tr('libros', 'books')}
-                  </strong>
-                  <span className="text-[10px] text-zinc-400 block">{tr('o habilidades clave', 'or core masteries')}</span>
-                </div>
-              </div>
-
-              <div className="rounded-xl bg-[#3FC78E]/10 border border-[#3FC78E]/25 p-2.5 flex items-center gap-2">
-                <span className="text-[#3FC78E] text-sm">⚡</span>
-                <p className="text-[11px] text-[#C5E8DE] leading-tight">
-                  {tr(
-                    'T1GER solo te pide 5 a 10 min al día para convertir este tiempo en criterio real.',
-                    'T1GER only asks for 5 to 10 min/day to turn lost time into real judgment.'
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <div className="pt-4">
+            <div className="pt-2">
               <PrimaryAction onClick={advance}>
-                {tr('RECLAMAR MI TIEMPO', 'RECLAIM MY TIME')} <ArrowRight size={18} />
+                {tr('PROTEGER MI TIEMPO & T1GER', 'PROTECT MY TIME & T1GER')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
           </div>
@@ -823,7 +834,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           <div className="flex min-h-full flex-col py-3">
             <DuolingoHeader
               speech={tr('¿Cuánto tiempo puedes proteger cada día?', 'How much time can you protect each day?')}
-              mood="ready"
+              mood="happy"
               eyebrow={tr('Ritmo Diario', 'Daily Rhythm')}
             />
 
@@ -959,7 +970,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           <div className="flex min-h-full flex-col py-3">
             <DuolingoHeader
               speech={tr('¡Ahora encontremos el mejor lugar para comenzar!', "Now let's find the best place to start!")}
-              mood="ready"
+              mood="idle"
             />
 
             <div className="space-y-3 my-auto">
@@ -1053,7 +1064,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     : tr('Cuidado: recuerda la regla de flujos de efectivo.', 'Careful: remember the cash flow rule.')
                   : tr('Demuestra tu criterio para ganar tus primeros +100 XP.', 'Prove your judgement to earn your first +100 XP.')
               }
-              mood={lessonChecked ? (isCorrect ? 'celebrate' : 'warning') : 'ready'}
+              mood={lessonChecked ? (isCorrect ? 'celebrate' : 'warning') : 'idle'}
               eyebrow={tr('Micro-Lección Práctica', 'Hands-on Micro-Lesson')}
               title={tr('Tu Primera Decisión', 'Your First Decision')}
             />
@@ -1176,9 +1187,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             // CRITICAL: Save all local state BEFORE redirecting
             // so we don't lose the user's answers when the page reloads on mobile
             await updateAppUser({
-              niche: draft.niche || 'none',
-              goal: draft.goal || 'none',
-              experienceLevel: draft.experienceLevel || 1,
+              niche: draft.topic || 'investing',
+              goal: draft.motivation || 'wealth',
+              experienceLevel: Number(draft.knowledgeLevel) || 1,
               learningStyle: 'interactive',
               dailyTime: 15,
               onboardingComplete: false, // Wait until auth confirms
@@ -1338,7 +1349,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 'Un recordatorio diario protege tu racha antes de que el scroll te robe el día.',
                 'A daily reminder protects your streak before scrolling takes over your day.'
               )}
-              mood="calm"
+              mood="idle"
               eyebrow={tr('Recordatorios', 'Reminders')}
               title={tr('Haz espacio para tu racha diaria', 'Make room for your daily streak')}
             />

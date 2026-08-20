@@ -62,7 +62,7 @@ export const LessonSummaryModal: React.FC<LessonSummaryModalProps> = ({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[999] flex flex-col items-center justify-between bg-[#09090B] px-6 py-8 font-sans text-white select-none overflow-y-auto"
+        className="fixed inset-0 z-[999] flex flex-col items-center justify-between bg-[#09090B] px-6 pt-[max(env(safe-area-inset-top),2rem)] pb-[max(env(safe-area-inset-bottom),2rem)] font-sans text-white select-none overflow-y-auto"
       >
         {/* Top Celebration Sparkles & Title */}
         <motion.div

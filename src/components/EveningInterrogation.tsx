@@ -56,7 +56,7 @@ export const EveningInterrogation = ({ onComplete }: { onComplete: () => void })
   };
 
   return (
-    <div className="w-full h-full bg-white text-zinc-800 p-6 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="w-full h-full bg-white text-zinc-800 px-6 pt-[max(env(safe-area-inset-top),1.5rem)] pb-[max(env(safe-area-inset-bottom),1.5rem)] flex flex-col items-center justify-center relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-tr from-[#FF0000]/10 via-transparent to-transparent animate-pulse" />
       
       <header className="text-center space-y-2 z-10 mb-12">

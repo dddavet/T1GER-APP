@@ -71,12 +71,12 @@ export const AndroidScreenTimeCard: React.FC = () => {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: 'spring', stiffness: 290, damping: 30 }}
-        className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#0B2925] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_30px_rgba(0,0,0,0.3)] font-sans text-white select-none"
+        className="relative overflow-hidden rounded-[1.6rem] border border-white/10 bg-[#121216] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_10px_30px_rgba(0,0,0,0.5)] font-sans text-white select-none"
       >
         {/* Header with Android Badge */}
         <div className="flex items-center justify-between border-b border-white/8 pb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--t1ger-orange)] text-[#102622] shadow-[0_2px_10px_rgba(255,115,0,0.3)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--ob-accent)] text-black font-bold shadow-[0_2px_10px_rgba(255,115,0,0.3)]">
               <Smartphone size={20} />
             </div>
             <div>
@@ -84,11 +84,11 @@ export const AndroidScreenTimeCard: React.FC = () => {
                 <h3 className="text-xs font-bold uppercase tracking-wider text-white">
                   {isEs ? 'Tiempo en Redes Android' : 'Android Screen Time'}
                 </h3>
-                <span className="flex items-center gap-0.5 rounded bg-[#3FC78E]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#78DDB0] uppercase">
+                <span className="flex items-center gap-0.5 rounded bg-[#3FC78E]/20 px-1.5 py-0.5 font-mono text-[9px] font-bold text-[#3FC78E] uppercase">
                   <Sparkles size={10} /> Live
                 </span>
               </div>
-              <p className="text-[11px] text-[#6F918A]">
+              <p className="text-[11px] text-zinc-400">
                 {isEs ? 'Análisis diario de costo de oportunidad' : 'Daily opportunity cost tracker'}
               </p>
             </div>
@@ -96,7 +96,7 @@ export const AndroidScreenTimeCard: React.FC = () => {
 
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1 rounded-xl bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-1 rounded-xl bg-white/5 px-2.5 py-1.5 text-[11px] font-semibold text-zinc-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
           >
             <span>{isEs ? 'Simulador' : 'Simulator'}</span>
             <ChevronRight size={14} />
@@ -106,10 +106,10 @@ export const AndroidScreenTimeCard: React.FC = () => {
         {/* Live Detected Apps Breakdown */}
         <div className="mt-4 space-y-2.5">
           <div className="flex justify-between items-baseline text-xs">
-            <span className="font-semibold text-[#87A9A2]">
+            <span className="font-semibold text-zinc-400">
               {isEs ? 'Tiempo acumulado hoy:' : 'Total spent today:'}
             </span>
-            <span className="font-mono text-sm font-bold text-[var(--t1ger-orange)]">
+            <span className="font-mono text-sm font-bold text-[var(--ob-accent)]">
               {report.totalHours}h ({report.totalMinutes} min) = -${report.estimatedLossUSD} USD
             </span>
           </div>
@@ -118,16 +118,16 @@ export const AndroidScreenTimeCard: React.FC = () => {
           <div className="space-y-2 pt-1">
             {report.apps.map(app => (
               <div key={app.packageName} className="space-y-1">
-                <div className="flex justify-between text-[11px] font-medium text-[#C6D9D5]">
+                <div className="flex justify-between text-[11px] font-medium text-zinc-300">
                   <span className="flex items-center gap-1.5">
                     <span>{app.iconEmoji}</span>
                     <span>{app.appName}</span>
                   </span>
-                  <span className="font-mono text-[11px] text-[#87A9A2]">{app.minutes} min ({app.percentage}%)</span>
+                  <span className="font-mono text-[11px] text-zinc-400">{app.minutes} min ({app.percentage}%)</span>
                 </div>
                 <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--t1ger-orange)] to-[#FF9600]"
+                    className="h-full rounded-full bg-gradient-to-r from-[var(--ob-accent)] to-[#FFA500]"
                     style={{ width: `${Math.max(app.percentage, 5)}%` }}
                   />
                 </div>
@@ -140,10 +140,10 @@ export const AndroidScreenTimeCard: React.FC = () => {
         <div className="mt-5 rounded-2xl border border-white/8 bg-white/[.03] p-3.5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--t1ger-orange)]/20 text-[var(--t1ger-orange)]">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[var(--ob-accent)]/20 text-[var(--ob-accent)]">
                 <Bell size={15} />
               </div>
-              <span className="text-xs font-semibold text-[#EAF4F1]">
+              <span className="text-xs font-semibold text-zinc-200">
                 {isEs ? 'Alerta diaria de las 8:00 PM' : 'Daily 8:00 PM push alert'}
               </span>
             </div>
@@ -151,7 +151,7 @@ export const AndroidScreenTimeCard: React.FC = () => {
             <button
               onClick={triggerLivePushNotification}
               disabled={generatingAI}
-              className="flex items-center gap-1.5 rounded-xl bg-[var(--t1ger-orange)] px-3 py-1.5 font-sans text-xs font-bold text-[#102622] hover:bg-[#FF8C33] active:scale-95 transition-all cursor-pointer shadow-[0_2px_8px_rgba(255,115,0,0.3)] disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-[var(--ob-accent)] px-3 py-1.5 font-sans text-xs font-bold text-black hover:brightness-110 active:scale-95 transition-all cursor-pointer shadow-[0_2px_8px_rgba(255,115,0,0.3)] disabled:opacity-50"
             >
               {generatingAI ? (
                 <span className="animate-spin text-xs">⏳</span>
@@ -164,12 +164,12 @@ export const AndroidScreenTimeCard: React.FC = () => {
         </div>
 
         {/* Permission Status */}
-        <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-[#6F918A]">
+        <div className="mt-3 flex items-center justify-between px-1 text-[11px] text-zinc-400">
           <span className="flex items-center gap-1">
-            <CheckCircle2 size={13} className="text-[#78DDB0]" />
+            <CheckCircle2 size={13} className="text-[#3FC78E]" />
             {isEs ? 'Android UsageStats API activo' : 'Android UsageStats API active'}
           </span>
-          <span className="font-mono text-[10px] text-[#567A72]">
+          <span className="font-mono text-[10px] text-zinc-500">
             {isEs ? 'Base: $15/hr' : 'Base: $15/hr'}
           </span>
         </div>

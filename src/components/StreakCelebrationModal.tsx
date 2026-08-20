@@ -81,7 +81,7 @@ export const StreakCelebrationModal: React.FC<StreakCelebrationModalProps> = ({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         transition={{ duration: 0.25 }}
-        className="fixed inset-0 z-[1000] flex flex-col items-center justify-between overflow-y-auto bg-gradient-to-b from-[#220B02] via-[#0D0907] to-[#09090B] px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-8 font-sans text-white select-none"
+        className="fixed inset-0 z-[1000] flex flex-col items-center justify-between overflow-y-auto bg-gradient-to-b from-[#220B02] via-[#0D0907] to-[#09090B] px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[max(env(safe-area-inset-top),2rem)] font-sans text-white select-none"
       >
         {/* Top Hero: Flaming Mascot */}
         <div className="relative flex w-full max-w-sm flex-col items-center pt-2">

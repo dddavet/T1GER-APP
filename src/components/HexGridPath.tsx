@@ -12,7 +12,7 @@ export const HexGridPath: React.FC<HexGridPathProps> = ({ onStartMission }) => {
   const { pathData, brainState, language } = useBrain();
   const [selectedLevel, setSelectedLevel] = useState<CurriculumLevel | null>(null);
 
-  const track = pathData.track;
+  const track = pathData?.track;
   if (!track || !track.levels) return null;
 
   // Determine completion states per level

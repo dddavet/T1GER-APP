@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import type { BankMission } from '../../services/missionBank';
 import { getMissionPlaybook } from '../../services/missionBank';
+import { shouldCelebrateStreakToday, markStreakCelebratedToday } from '../../services/brainService';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { useBrain } from '../../contexts/BrainContext';
 
@@ -39,7 +40,7 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   onExecuteApplyMission,
 }) => {
   const { addXP } = useT1ger();
-  const { language, completeMissionStep, brainState } = useBrain();
+  const { language, completeMission, brainState } = useBrain();
   const isEs = language === 'es';
 
   const playbook = getMissionPlaybook(mission);
@@ -51,7 +52,7 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   const [showSummary, setShowSummary] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
 
-  const learnStreak = brainState.learnStreak?.current || brainState.streak?.current || 1;
+  const learnStreak = Math.max(1, brainState.learnStreak || 1);
 
   const handleNext = () => {
     if (currentCard < totalCards - 1) {
@@ -60,7 +61,7 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
       // Completed all 4 cards -> Show Duolingo celebratory summary!
       const totalTime = Math.max(12, Math.round((Date.now() - startTime) / 1000));
       setElapsedSeconds(totalTime);
-      completeMissionStep(mission.id);
+      completeMission(mission.id);
       addXP(mission.xpReward || 100);
       setShowSummary(true);
     }
@@ -68,12 +69,17 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
 
   const handleSummaryContinue = () => {
     setShowSummary(false);
-    setShowStreakModal(true);
+    if (shouldCelebrateStreakToday()) {
+      markStreakCelebratedToday();
+      setShowStreakModal(true);
+    } else {
+      onClose();
+    }
   };
 
   const handleStreakClose = () => {
     setShowStreakModal(false);
-    onExecuteApplyMission(mission);
+    onClose();
   };
 
   const handlePrev = () => {
@@ -83,9 +89,9 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full min-h-[100dvh] bg-[#09090B] text-zinc-100 select-none overflow-hidden">
+    <div className="fixed inset-0 z-[100] w-full h-[100dvh] flex flex-col bg-[#09090B] text-zinc-100 select-none overflow-hidden">
       {/* Top Header & Segmented Progress Bar */}
-      <div className="safe-top px-4 pt-4 pb-2 border-b border-white/8 bg-[#09090B]/90 backdrop-blur-md">
+      <div className="px-4 pt-[calc(1.2rem+env(safe-area-inset-top))] pb-3 border-b border-white/8 bg-[#09090B]/90 backdrop-blur-md">
         <div className="flex items-center justify-between gap-4 mb-3">
           <button
             onClick={onClose}
@@ -372,30 +378,37 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
       </div>
 
       {/* Fixed Bottom Navigation Buttons */}
-      <div className="safe-bottom p-4 border-t border-white/8 bg-[#09090B]/95 backdrop-blur-md max-w-lg mx-auto w-full">
+      <div className="pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3 px-4 border-t border-white/10 bg-[#09090B] max-w-lg mx-auto w-full">
         <div className="flex items-center gap-3">
           {currentCard > 0 && (
             <button
-              onClick={handlePrev}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+              onClick={() => {
+                if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(8);
+                handlePrev();
+              }}
+              className="flex h-13 w-13 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.05] text-zinc-300 hover:text-white hover:bg-white/10 transition active:scale-[0.96] cursor-pointer shrink-0"
+              title={isEs ? 'Anterior' : 'Previous'}
             >
-              <ArrowLeft size={18} />
+              <ArrowLeft size={20} />
             </button>
           )}
 
           <button
-            onClick={handleNext}
-            className="flex-1 py-3.5 rounded-2xl font-mono font-bold text-sm tracking-wide flex items-center justify-center gap-2 bg-[var(--ob-accent)] hover:brightness-110 text-black shadow-[0_0_25px_rgba(255,115,0,0.35)] transition-all active:scale-98 cursor-pointer"
+            onClick={() => {
+              if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(12);
+              handleNext();
+            }}
+            className="flex-1 py-4 px-6 rounded-2xl font-mono font-extrabold text-sm tracking-wider flex items-center justify-center gap-2.5 bg-[#FF7300] hover:brightness-110 text-black shadow-[0_0_35px_rgba(255,115,0,0.45)] border border-[#FFA500]/50 transition-all active:scale-[0.97] cursor-pointer"
           >
             {currentCard < totalCards - 1 ? (
               <>
-                <span>CONTINUAR</span>
-                <ArrowRight size={18} />
+                <span className="font-extrabold">{isEs ? 'CONTINUAR' : 'CONTINUE'}</span>
+                <ArrowRight size={19} strokeWidth={2.5} />
               </>
             ) : (
               <>
-                <span>⚡ EJECUTAR ACCIÓN REAL</span>
-                <ChevronRight size={18} />
+                <span className="font-extrabold">{isEs ? '⚡ COMPLETAR Y APLICAR' : '⚡ COMPLETE & APPLY'}</span>
+                <ChevronRight size={19} strokeWidth={2.5} />
               </>
             )}
           </button>

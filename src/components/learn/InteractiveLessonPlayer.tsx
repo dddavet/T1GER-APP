@@ -65,7 +65,7 @@ export const InteractiveLessonPlayer: React.FC<InteractiveLessonPlayerProps> = (
     setSubmitting(true);
     try {
       addXP(mission.xpReward || 100);
-      completeMission(mission.id, 'investing', 100);
+      completeMission(mission.id, 100);
       fireRewardConfetti();
       setIsFinished(true);
       setTimeout(() => {

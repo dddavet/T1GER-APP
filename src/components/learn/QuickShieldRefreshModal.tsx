@@ -58,7 +58,7 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
 
   const handleNext = () => {
     // Complete mission to update FSRS memory shield
-    completeMission(currentMission.id, currentMission.competency, isCorrect ? 100 : 60);
+    completeMission(currentMission.id, isCorrect ? 100 : 60);
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);

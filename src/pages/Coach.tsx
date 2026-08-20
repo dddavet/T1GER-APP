@@ -124,6 +124,9 @@ export const Coach: React.FC = () => {
   };
 
   const handleSend = async (messageText: string, file?: File) => {
+    if (typeof window !== 'undefined' && window.navigator.vibrate) {
+      window.navigator.vibrate(10);
+    }
     const cleanInput = messageText.trim();
     if ((!cleanInput && !file) || loading || streamingText !== null || !appUser) return;
 
@@ -223,18 +226,18 @@ export const Coach: React.FC = () => {
   const hasMessages = messages.length > 0 || streamingText !== null;
 
   return (
-    <main className="flex h-[100dvh] w-full flex-col bg-[#09090B] text-white selection:bg-[var(--ob-accent)] selection:text-black overflow-hidden">
+    <div className="flex h-screen w-full flex-col bg-[#09090B] text-white selection:bg-[var(--ob-accent)] selection:text-black overflow-hidden pb-[env(safe-area-inset-bottom)]">
       {/* Subtle Ambient Radial Aura */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(255,115,0,0.14),transparent_70%)]" />
 
-      {/* Top Header Bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/6 bg-[#09090B]/80 px-4 backdrop-blur-xl z-20">
+      {/* Top Header Bar with Safe Area Clearance */}
+      <header className="flex shrink-0 items-center justify-between border-b border-white/6 bg-[#09090B]/90 px-4 pb-3 pt-[calc(.85rem+env(safe-area-inset-top))] backdrop-blur-xl z-20">
         <button
           onClick={() => setActiveView('learn')}
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition cursor-pointer"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white active:scale-95 transition cursor-pointer"
           title={isEs ? 'Volver al aprendizaje' : 'Back to learn'}
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={20} />
         </button>
 
         <div className="flex items-center gap-2">
@@ -481,6 +484,6 @@ export const Coach: React.FC = () => {
           placeholder={isEs ? 'Pregúntale a T1GER...' : 'Ask T1GER anything...'}
         />
       </footer>
-    </main>
+    </div>
   );
 };

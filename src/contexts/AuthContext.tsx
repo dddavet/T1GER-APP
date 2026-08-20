@@ -44,7 +44,10 @@ export interface AppUser {
   ageRange?: string;
   level: number;
   xp: number;
-  verifiedXP?: number; // NEW: Tracks Tier 1 Verified XP for the Leaderboard
+  verifiedXP?: number; // Tracks Tier 1 Verified XP for the Leaderboard
+  weeklyXP?: number; // XP earned this week
+  currentWeekId?: string; // e.g. "2026-W34"
+  leagueTier?: string; // e.g. "bronze", "silver"
   streak: number;
   isPro?: boolean;
   isSuperT1ger?: boolean;
@@ -58,6 +61,8 @@ export interface AppUser {
   energy?: number;
   minimalistMode?: boolean;
   unlockedDenItems?: string[];
+  unlockedAccessories?: string[];
+  equippedAccessories?: string[];
   primaryTrack?: 'investing' | 'business' | 'ai';
   investmentProfile?: InvestmentProfile;
   personalizedPlan?: {
@@ -330,6 +335,8 @@ function buildPrototypeUser(): AppUser {
     lastActive: Date.now(),
     minimalistMode: localData?.minimalistMode || false,
     unlockedDenItems: localData?.unlockedDenItems || [],
+    unlockedAccessories: localData?.unlockedAccessories || [],
+    equippedAccessories: localData?.equippedAccessories || [],
   };
 }
 
@@ -463,11 +470,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userRef = doc(db, 'users', user.uid);
-      const serverOwnedFields = new Set(['xp', 'verifiedXP', 'level', 'coins', 'isPro', 'isSuperT1ger', 'role', 'isFounder']);
+      const serverOwnedFields = new Set(['isPro', 'isSuperT1ger', 'role', 'isFounder']);
       const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
       if (Object.keys(cleanData).length > 0) await setDoc(userRef, cleanData, { merge: true });
 
-      const publicFields = ['displayName', 'photoURL', 'niche'];
+      const publicFields = ['displayName', 'photoURL', 'niche', 'verifiedXP', 'weeklyXP', 'streak', 'leagueTier', 'currentWeekId'];
       const publicUpdate: any = {};
       let hasPublicUpdate = false;
 

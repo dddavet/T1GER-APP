@@ -84,34 +84,34 @@ export const Profile = () => {
         {[{ value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' }, { value: learnStreak, label: isEs ? 'racha' : 'streak' }, { value: stats.verifiedXP, label: 'vXP' }].map(item => <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 10 }, shown: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 30 } } }} className="transform-gpu rounded-[1.15rem] bg-[#121216] border border-white/8 p-4 text-center"><span className="block font-mono text-lg font-semibold text-white">{item.value}</span><span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span></motion.div>)}
       </motion.section>
 
-      {/* Direct Wireless APK Download Card */}
+      {/* Production Status & Cloud Sync Banner */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-[var(--ob-accent)]/30 bg-[var(--ob-accent)]/[0.06] p-4 flex items-center justify-between gap-3 shadow-lg"
+        className="rounded-2xl border border-white/10 bg-[#121216] p-3.5 flex items-center justify-between gap-3 shadow-lg"
       >
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--ob-accent)] text-black">
-            <Smartphone size={20} />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <ShieldCheck size={18} />
           </div>
           <div>
-            <h3 className="text-xs font-bold text-white uppercase tracking-wide">
-              {isEs ? 'App Nativa para tu Celular' : 'Native Android App'}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xs font-bold text-white tracking-wide">
+                {isEs ? 'Sincronización en la Nube' : 'Cloud Sync Active'}
+              </h3>
+              <span className="inline-flex items-center gap-1 font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                ONLINE
+              </span>
+            </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              {isEs ? 'Descarga directa sin conectar cables' : 'Direct wireless APK download'}
+              {isEs ? 'Progreso protegido y respaldado en tiempo real' : 'Progress protected & backed up in real time'}
             </p>
           </div>
         </div>
-        <a
-          href="https://github.com/dddavet/T1GER-APP/raw/codex/t1ger-onboarding-redesign/releases/t1ger.apk"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="px-3.5 py-2 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-black tracking-wide flex items-center gap-1.5 shadow-md active:scale-95 transition cursor-pointer shrink-0"
-        >
-          <Download size={14} />
-          <span>{isEs ? 'DESCARGAR' : 'DOWNLOAD'}</span>
-        </a>
+        <span className="font-mono text-[10px] text-zinc-500 shrink-0 font-semibold">
+          v1.0.0
+        </span>
       </motion.div>
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .08 }} className="t1ger-panel transform-gpu overflow-hidden">
@@ -142,8 +142,8 @@ export const Profile = () => {
         <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Plan gratuito' : 'Free plan')} />
         <SettingRow
           icon={UserRound}
-          title={isEs ? 'Reiniciar Onboarding (Pruebas)' : 'Replay Onboarding (Testing)'}
-          detail={isEs ? 'Probar 18 pasos' : 'Test 18 steps'}
+          title={isEs ? 'Reiniciar Diagnóstico Táctico' : 'Reset Tactical Diagnostic'}
+          detail={isEs ? 'Recalibrar ruta' : 'Recalibrate path'}
           onClick={() => {
             localStorage.removeItem('t1ger_onboarding_draft_v2');
             updateAppUser({ onboardingComplete: false });
@@ -166,7 +166,7 @@ export const Profile = () => {
         <button onClick={logout} className="t1ger-secondary-button"><LogOut size={17} />{isEs ? 'Salir' : 'Sign out'}</button>
         {!deleteConfirm ? <button onClick={() => setDeleteConfirm(true)} className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-[#E56A65]/25 bg-[#E56A65]/7 px-4 text-sm font-semibold text-[#F0AAA6]"><Trash2 size={17} />{isEs ? 'Eliminar' : 'Delete'}</button> : <button onClick={removeAccount} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-[#E56A65] px-4 text-sm font-semibold text-[#1F1918]">{isEs ? 'Confirmar' : 'Confirm delete'}</button>}
       </div>
-      <p className="text-center text-[11px] text-[#496C64]">{isEs ? 'Vista previa local de T1GER · Fundamentos de inversión' : 'T1GER local preview · Investing foundations'}</p>
+      <p className="text-center text-[11px] text-[#496C64]">{isEs ? 'T1GER App v1.0.0 · Sistema de Maestría y Ejecución para Emprendedores' : 'T1GER App v1.0.0 · Mastery & Execution Platform for Founders'}</p>
 
       <ScreenTimeFreedomModal
         isOpen={showScreenTimeModal}

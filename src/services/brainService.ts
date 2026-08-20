@@ -18,6 +18,7 @@ import {
   CURRICULUM_TRACKS,
 } from './missionBank';
 import { fsrs, createEmptyCard, Rating, type Card, type FSRS } from 'ts-fsrs';
+import { type T1gerPetState, DEFAULT_PET_STATE, calculatePetVitalsWithDecay } from './petEngine';
 
 // Global FSRS Instance
 export const fsrsEngine = fsrs();
@@ -89,6 +90,9 @@ export interface BrainState {
   // FSRS (Free Spaced Repetition Scheduler)
   fsrsCards: Record<string, Card>; // missionId -> FSRS Card
   dailyPipeline?: DailyPipeline;
+
+  // Virtual Pet & Screen Time / Focus System
+  petState?: T1gerPetState;
 }
 
 export interface TacticalTask {
@@ -185,6 +189,7 @@ export const DEFAULT_BRAIN_STATE: BrainState = {
   ],
   dailyTacticalStatus: {},
   fsrsCards: {},
+  petState: DEFAULT_PET_STATE,
 };
 
 export function buildRescueProtocolSelection({
@@ -543,6 +548,19 @@ export function processMissionResult(
     newLastLearnDate = today;
   }
 
+  // Feed T1ger on successful mission completion
+  const currentPet = calculatePetVitalsWithDecay(state.petState || DEFAULT_PET_STATE);
+  const xpEarned = mission.xpReward || 100;
+  const newTodayXP = (currentPet.todayXPEarned || 0) + (completed ? xpEarned : 0);
+  const updatedPetState: T1gerPetState = completed
+    ? {
+        ...currentPet,
+        todayXPEarned: newTodayXP,
+        hunger: Math.min(100, Math.round((newTodayXP / (currentPet.dailyXPGoal || 100)) * 100)),
+        lastFedTimestamp: Date.now(),
+      }
+    : currentPet;
+
   return {
     ...state,
     competencies: updatedCompetencies,
@@ -556,7 +574,8 @@ export function processMissionResult(
     learnStreak: newLearnStreak,
     lastLearnDate: newLastLearnDate,
     fsrsCards: newFsrsCards,
-    customWorkTasks: newCustomWorkTasks
+    customWorkTasks: newCustomWorkTasks,
+    petState: updatedPetState,
   };
 }
 
@@ -700,8 +719,17 @@ export function completeTacticalTask(state: BrainState, id: string, proofUrl?: s
   const newCompletedIds = [...currentStatus.completedIds, id];
   const newProofs = { ...currentStatus.proofs, [id]: { url: proofUrl, text: proofText, verified } };
 
+  const currentPet = calculatePetVitalsWithDecay(state.petState || DEFAULT_PET_STATE);
+  const updatedPetState: T1gerPetState = {
+    ...currentPet,
+    todayBuildActionsCompleted: (currentPet.todayBuildActionsCompleted || 0) + 1,
+    energy: Math.min(100, (currentPet.energy || 50) + 30),
+    strength: Math.min(100, currentPet.strength + 15),
+  };
+
   const newState = {
     ...state,
+    petState: updatedPetState,
     dailyTacticalStatus: {
       ...state.dailyTacticalStatus,
       [today]: { ...currentStatus, completedIds: newCompletedIds, proofs: newProofs }
@@ -882,5 +910,36 @@ export function getVulnerableShieldNodes(state: BrainState): BankMission[] {
   return vulnerableMissions
     .sort((a, b) => a.percentage - b.percentage)
     .map(item => item.mission);
+}
+
+const STREAK_CELEBRATION_KEY = 't1ger_last_streak_celebrated_date';
+
+/**
+ * Checks whether the streak has already been celebrated today.
+ * Returns true only on the FIRST completion of the day.
+ */
+export function shouldCelebrateStreakToday(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    const today = getLocalDateString();
+    const lastCelebrated = localStorage.getItem(STREAK_CELEBRATION_KEY);
+    return lastCelebrated !== today;
+  } catch {
+    return true;
+  }
+}
+
+/**
+ * Marks today's streak as celebrated so subsequent lessons on the same day
+ * won't redundantly pop up the full-screen modal.
+ */
+export function markStreakCelebratedToday(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const today = getLocalDateString();
+    localStorage.setItem(STREAK_CELEBRATION_KEY, today);
+  } catch {
+    // Ignore localStorage errors
+  }
 }
 

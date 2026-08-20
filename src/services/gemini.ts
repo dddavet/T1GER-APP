@@ -224,6 +224,101 @@ export const requestSeniorReview = async (missionType: string, missionTitle: str
 
 export const reviewMissionProof = requestSeniorReview;
 
+export interface WrittenVerificationResult {
+  status: 'APPROVED' | 'REJECTED';
+  score: number; // 0-100
+  headline: string;
+  feedback: string;
+  strength?: string;
+  improvementTip?: string;
+}
+
+/**
+ * Evaluates written evidence, action plans, and reflections using Gemini AI
+ * to ensure users submit genuine tactical effort, rejecting spam/gibberish.
+ */
+export const verifyWrittenActionProof = async (
+  missionTitle: string,
+  taskBrief: string,
+  userText: string,
+  language: 'es' | 'en' = 'es'
+): Promise<WrittenVerificationResult> => {
+  const isEs = language === 'es';
+  const cleanText = (userText || '').trim();
+
+  // Basic anti-spam heuristic check
+  const words = cleanText.split(/\s+/).filter(Boolean);
+  const uniqueWords = new Set(words.map(w => w.toLowerCase()));
+  const isGibberish = words.length < 5 || (uniqueWords.size / Math.max(1, words.length)) < 0.35;
+
+  if (isGibberish) {
+    return {
+      status: 'REJECTED',
+      score: 20,
+      headline: isEs ? 'Falta Profundidad Táctica' : 'Tactical Depth Required',
+      feedback: isEs
+        ? 'Tu entrega parece demasiado corta o repetitiva. Describe una acción real con números, nombres de activos o decisiones concretas.'
+        : 'Your submission seems too short or repetitive. Provide a real action with numbers, assets, or concrete decisions.',
+      improvementTip: isEs
+        ? 'Especifica qué paso del framework vas a aplicar esta semana.'
+        : 'Specify which step of the framework you will apply this week.',
+    };
+  }
+
+  try {
+    const model = getModel('gemini-1.5-flash');
+    const prompt = `You are the Profesor T1GER AI Tactical Auditor.
+Evaluate the following user response for the practical mission: "${missionTitle}".
+Mission Goal/Brief: "${taskBrief}".
+User Submission: "${cleanText}".
+Target Language: ${language === 'es' ? 'Spanish (Español)' : 'English'}.
+
+CRITERIA:
+1. Approve (status: "APPROVED", score: 70-100) if the user demonstrated genuine understanding, applied the concept, or provided concrete numbers/examples/actions.
+2. Reject (status: "REJECTED", score: 10-55) if it is obvious spam, unrelated keyboard mash, low-effort filler, or completely misses the lesson's framework.
+3. Provide constructive, high-agency mentor feedback in ${language === 'es' ? 'Spanish' : 'English'}.
+
+Return ONLY valid JSON matching this exact structure:
+{
+  "status": "APPROVED",
+  "score": 90,
+  "headline": "¡Excelente criterio!",
+  "feedback": "Has identificado correctamente la diferencia...",
+  "strength": "Dato o razonamiento más sólido",
+  "improvementTip": "Sugerencia táctica de mejora"
+}`;
+
+    const result = await withRetry(() => model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' }
+    }));
+
+    const parsed = JSON.parse(result.response.text().trim());
+    return {
+      status: parsed.status === 'APPROVED' ? 'APPROVED' : 'REJECTED',
+      score: typeof parsed.score === 'number' ? parsed.score : 85,
+      headline: parsed.headline || (isEs ? 'Auditoría T1GER' : 'T1GER Audit'),
+      feedback: parsed.feedback || (isEs ? 'Criterio revisado y procesado.' : 'Submission reviewed and processed.'),
+      strength: parsed.strength,
+      improvementTip: parsed.improvementTip,
+    };
+  } catch (err) {
+    console.warn('Gemini verification fallback to heuristic:', err);
+    // Intelligent heuristic fallback if offline or rate limited
+    const hasNumbers = /\d+/.test(cleanText);
+    const score = Math.min(95, 60 + (hasNumbers ? 20 : 10) + Math.min(15, words.length));
+    return {
+      status: 'APPROVED',
+      score,
+      headline: isEs ? 'Acción Registrada' : 'Action Recorded',
+      feedback: isEs
+        ? 'Tu plan táctico ha sido registrado en tu bitácora de ejecución.'
+        : 'Your tactical plan has been saved to your execution log.',
+      strength: isEs ? 'Compromiso de ejecución inmediata' : 'Immediate execution commitment',
+    };
+  }
+};
+
 export const generateBadgeIcon = async (title: string) => {
   return `https://api.dicebear.com/7.x/identicon/svg?seed=${encodeURIComponent(title)}&backgroundColor=050505&fontFamily=monospace`;
 };

@@ -85,7 +85,7 @@ service cloud.firestore {
     match /users_public/{userId} {
       allow read: if isAuthenticated();
       allow create, update: if isOwner(userId)
-        && request.resource.data.keys().hasOnly(['uid', 'displayName', 'photoURL', 'niche', 'role', 'isFounder', 'deletedAt', 'isDeleted'])
+        && request.resource.data.keys().hasOnly(['uid', 'displayName', 'photoURL', 'niche', 'role', 'isFounder', 'deletedAt', 'isDeleted', 'verifiedXP', 'weeklyXP', 'streak', 'leagueTier', 'currentWeekId'])
         && isValidString(request.resource.data.displayName, 100)
         && (!('photoURL' in request.resource.data) || isValidString(request.resource.data.photoURL, 1000000));
       allow delete: if isOwner(userId);

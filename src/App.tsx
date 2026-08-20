@@ -36,17 +36,20 @@ const TAB_VIEW_ORDER = ['learn', 'build', 'compete', 'profile'] as const;
 const PAGE_VARIANTS = {
   initial: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
-    y: isTab ? 6 : 0,
+    y: isTab ? 8 : 0,
+    scale: isTab ? 0.985 : 1,
   }),
   animate: { 
     opacity: 1, 
     y: 0,
-    transition: { duration: 0.14, ease: [0.25, 1, 0.5, 1] }
+    scale: 1,
+    transition: { type: 'spring' as const, stiffness: 600, damping: 35, mass: 0.6 }
   },
   exit: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
     y: isTab ? -4 : 0,
-    transition: { duration: 0.08, ease: 'easeOut' }
+    scale: isTab ? 0.99 : 1,
+    transition: { duration: 0.08, ease: [0.23, 1, 0.32, 1] as const }
   }),
 };
 
@@ -60,7 +63,12 @@ const AppContent = () => {
   
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
-  const [onboardingBypassed, setOnboardingBypassed] = useState(false);
+  const [onboardingBypassed, setOnboardingBypassed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('t1ger_onboarding_completed') === 'true';
+    }
+    return false;
+  });
   const forceOnboardingFromUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('forceOnboarding') === '1';
   const previewAppFromUrl = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('previewApp') === '1';
 
@@ -247,15 +255,60 @@ const AppContent = () => {
 
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
-  if (!previewAppFromUrl && (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser || !appUser.onboardingComplete)) {
-    return <OnboardingFlow onComplete={() => setOnboardingBypassed(true)} />;
-  }
-
-  const isFullscreen = activeView === 'mission' || activeView === 'debrief' || activeView === 'coach';
-
   // Simulator Mock Native Styles
   const simPlatform = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('sim_platform') : null;
   const platformClasses = simPlatform === 'ios' ? 'pt-14 pb-8 rounded-[40px] border border-black/10' : simPlatform === 'android' ? 'pt-8 pb-4 rounded-[30px] border border-black/10' : '';
+
+  if (!previewAppFromUrl && (((FORCE_ONBOARDING_TEST || forceOnboardingFromUrl) && !onboardingBypassed) || !appUser || !appUser.onboardingComplete)) {
+    return (
+      <OnboardingFlow
+        onComplete={() => {
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('t1ger_onboarding_completed', 'true');
+          }
+          setOnboardingBypassed(true);
+        }}
+      />
+    );
+  }
+
+  if (activeMission) {
+    if (activeMission.type === 'book_lesson' || activeMission.nodeType === 'learn') {
+      return (
+        <MotionConfig reducedMotion="user">
+          <div className={`h-[100dvh] w-full max-w-md mx-auto relative flex flex-col bg-[#09090B] text-[#FFFFFF] font-sans font-medium overflow-hidden theme-${dayType} ${platformClasses}`}>
+            <CuratedLessonPlayer
+              mission={activeMission}
+              onClose={() => {
+                setActiveMission(null);
+                setActiveView('learn');
+              }}
+              onExecuteApplyMission={(applyMission) => {
+                setActiveMission(null);
+                setActiveView('learn');
+              }}
+            />
+          </div>
+        </MotionConfig>
+      );
+    }
+    return (
+      <MotionConfig reducedMotion="user">
+        <div className={`h-[100dvh] w-full max-w-md mx-auto relative flex flex-col bg-[#09090B] text-[#FFFFFF] font-sans font-medium overflow-hidden theme-${dayType} ${platformClasses}`}>
+          <MissionEngine
+            mission={activeMission}
+            onComplete={() => {
+              setActiveMission(null);
+              setActiveView('learn');
+            }}
+          />
+        </div>
+      </MotionConfig>
+    );
+  }
+
+  const isFullscreen = activeView === 'debrief' || activeView === 'coach';
+
   const previousTabIndex = TAB_VIEW_ORDER.indexOf(previousViewRef.current as typeof TAB_VIEW_ORDER[number]);
   const currentTabIndex = TAB_VIEW_ORDER.indexOf(activeView as typeof TAB_VIEW_ORDER[number]);
   const isTabTransition = previousTabIndex >= 0 && currentTabIndex >= 0;
@@ -263,18 +316,6 @@ const AppContent = () => {
   const transitionContext = { direction, isTab: isTabTransition };
 
   const activeContent = (() => {
-    if (activeView === 'mission' && activeMission) {
-      if (activeMission.type === 'book_lesson' || activeMission.nodeType === 'learn') {
-        return (
-          <CuratedLessonPlayer
-            mission={activeMission}
-            onClose={() => setActiveView('learn')}
-            onExecuteApplyMission={(applyMission) => startMission(applyMission)}
-          />
-        );
-      }
-      return <MissionEngine mission={activeMission} onComplete={() => setActiveView('learn')} />;
-    }
     if (activeView === 'debrief') return <EveningInterrogation onComplete={() => setActiveView('learn')} />;
     if (activeView === 'build') return <BuildTab onStartMission={startMission} />;
     if (activeView === 'learn') return <Learn onStartMission={startMission} />;
@@ -295,25 +336,32 @@ const AppContent = () => {
       {/* HUD - visible on non-fullscreen views */}
       {!isFullscreen && <HUD />}
       
-      {/* Main scrollable content area */}
-      <main ref={mainRef} id="main-content" className={`t1ger-scroll-area flex-1 min-h-0 overflow-y-auto overflow-x-hidden ${isFullscreen ? '' : 'px-5 pb-[calc(6.5rem+env(safe-area-inset-bottom))]'}`}
+      {/* Main content area */}
+      <main
+        ref={mainRef}
+        id="main-content"
+        className={`t1ger-scroll-area flex-1 min-h-0 ${
+          isFullscreen
+            ? 'overflow-hidden flex flex-col'
+            : 'overflow-y-auto overflow-x-hidden px-3.5 sm:px-4 pb-[calc(5rem+env(safe-area-inset-bottom))]'
+        }`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-          <AnimatePresence initial={false} mode="wait" custom={transitionContext}>
-            {activeContent && (
-              <motion.div
-                key={activeView}
-                custom={transitionContext}
-                variants={PAGE_VARIANTS}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="min-h-full will-change-transform"
-              >
-                {activeContent}
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <AnimatePresence initial={false} mode="popLayout" custom={transitionContext}>
+          {activeContent && (
+            <motion.div
+              key={activeView}
+              custom={transitionContext}
+              variants={PAGE_VARIANTS}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className={isFullscreen ? 'h-full flex flex-col will-change-transform w-full' : 'min-h-full will-change-transform w-full'}
+            >
+              {activeContent}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </main>
 
       {!isFullscreen && <CoachFAB />}
