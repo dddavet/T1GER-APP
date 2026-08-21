@@ -41,7 +41,7 @@ export const AchievementTracker: React.FC = () => {
         setTimeout(() => setToast(null), 5000);
       }
     }
-  }, [appUser?.unlockedAchievements?.length, stats.missionsCompleted, brainState.learnStreak, appUser?.coins, appUser?.unlockedAccessories?.length]);
+  }, [appUser?.unlockedAchievements?.length, brainState.missionHistory?.length, brainState.learnStreak, appUser?.coins, appUser?.unlockedAccessories?.length]);
 
   return (
     <AnimatePresence>

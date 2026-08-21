@@ -14,7 +14,7 @@ export const ACHIEVEMENTS: Achievement[] = [
     description: 'Completa tu primera misión táctica.',
     icon: '🩸',
     color: 'from-rose-500 to-red-600',
-    condition: (_, stats) => stats?.missionsCompleted > 0
+    condition: (_, __, brainState) => (brainState?.missionHistory?.length || 0) > 0
   },
   {
     id: 'streak_3',
