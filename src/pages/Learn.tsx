@@ -19,6 +19,7 @@ import { getNodeMemoryShield } from '../services/brainService';
 import { KnowledgeNode } from '../components/learn/KnowledgeNode';
 import { T1gerPetHero } from '../components/pet/T1gerPetHero';
 import { BookChestRewardModal } from '../components/learn/BookChestRewardModal';
+import { DailySupplyDrop } from '../components/DailySupplyDrop';
 
 interface LearnProps {
   onStartMission?: (mission: BankMission) => void;
@@ -95,7 +96,10 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
         />
       </div>
 
-      {/* 3. EXECUTIVE BOOK PLAYBOOKS ROADMAP (Machined Hardbound Tomes) */}
+      {/* 3. DAILY SUPPLY DROP (LOOTBOX) */}
+      <DailySupplyDrop />
+
+      {/* 4. EXECUTIVE BOOK PLAYBOOKS ROADMAP (Machined Hardbound Tomes) */}
       <div className="space-y-3.5">
         {pathData.track.levels.map((sourceLevel, levelIndex) => {
           const level = localizeCurriculumLevel(sourceLevel, language);

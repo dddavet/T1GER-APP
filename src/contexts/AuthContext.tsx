@@ -63,6 +63,8 @@ export interface AppUser {
   unlockedDenItems?: string[];
   unlockedAccessories?: string[];
   equippedAccessories?: string[];
+  unlockedAchievements?: string[];
+  lastSupplyDropClaimed?: number;
   primaryTrack?: 'investing' | 'business' | 'ai';
   investmentProfile?: InvestmentProfile;
   personalizedPlan?: {
@@ -337,6 +339,8 @@ function buildPrototypeUser(): AppUser {
     unlockedDenItems: localData?.unlockedDenItems || [],
     unlockedAccessories: localData?.unlockedAccessories || [],
     equippedAccessories: localData?.equippedAccessories || [],
+    unlockedAchievements: localData?.unlockedAchievements || [],
+    lastSupplyDropClaimed: localData?.lastSupplyDropClaimed || 0,
   };
 }
 

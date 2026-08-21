@@ -4,6 +4,7 @@ import { Bell, Bot, Check, ChevronRight, Download, Globe2, LogOut, ShieldCheck, 
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
+import { AchievementsWall } from '../components/AchievementsWall';
 import { downloadT1gerDataExport } from '../services/dataPortability';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import { TermsOfService } from './TermsOfService';
@@ -83,6 +84,8 @@ export const Profile = () => {
       <motion.section initial="hidden" animate="shown" variants={{ hidden: {}, shown: { transition: { staggerChildren: .045 } } }} className="grid grid-cols-3 gap-2">
         {[{ value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' }, { value: learnStreak, label: isEs ? 'racha' : 'streak' }, { value: stats.verifiedXP, label: 'vXP' }].map(item => <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 10 }, shown: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 30 } } }} className="transform-gpu rounded-[1.15rem] bg-[#121216] border border-white/8 p-4 text-center"><span className="block font-mono text-lg font-semibold text-white">{item.value}</span><span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span></motion.div>)}
       </motion.section>
+
+      <AchievementsWall />
 
       {/* Production Status & Cloud Sync Banner */}
       <motion.div
