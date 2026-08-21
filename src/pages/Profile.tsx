@@ -12,6 +12,7 @@ import { MascotGuide } from '../components/MascotGuide';
 import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
 import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
+import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
 
 type LegalView = 'privacy' | 'terms' | null;
 
@@ -86,6 +87,8 @@ export const Profile = () => {
       </motion.section>
 
       <AchievementsWall />
+      
+      <ConsistencyHeatmap />
 
       {/* Production Status & Cloud Sync Banner */}
       <motion.div

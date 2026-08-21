@@ -23,6 +23,7 @@ import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
 import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 import { AchievementTracker } from './components/AchievementTracker';
+import { TacticalPomodoro } from './components/TacticalPomodoro';
 
 import { AppSkeleton } from './components/ui/AppSkeleton';
 import { MissionSkeleton } from './components/ui/MissionSkeleton';
@@ -333,6 +334,7 @@ const AppContent = () => {
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_85%_-10%,rgba(255,115,0,.12),transparent_35%),linear-gradient(180deg,#09090B_0%,#050507_100%)]" />
       
       <AchievementTracker />
+      <TacticalPomodoro />
       <OfflineBanner />
 
       {/* HUD - visible on non-fullscreen views */}
