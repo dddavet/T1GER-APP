@@ -52,6 +52,7 @@ export interface AppUser {
   isPro?: boolean;
   isSuperT1ger?: boolean;
   isFlaggedForInterrogation?: boolean;
+  weeklyReportOptIn?: boolean;
   coins?: number;
   streakShields?: number;
   activeCoachId?: string;

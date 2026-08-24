@@ -393,7 +393,7 @@ html { scroll-behavior: smooth; }
   }
 
   body {
-    @apply font-sans antialiased bg-[#041411];
+    @apply font-sans antialiased bg-[#09090B];
     color: #EAF4F1;
     background-image: 
       radial-gradient(circle at 15% 50%, var(--bg-glow-1) 0%, transparent 50%),

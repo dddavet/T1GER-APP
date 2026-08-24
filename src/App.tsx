@@ -118,11 +118,6 @@ const AppContent = () => {
     }
   }, [appUser?.uid, brainState.learnStreak, language]);
 
-  useEffect(() => {
-    if (!activeView) {
-      setActiveView('learn');
-    }
-  }, [activeView, setActiveView]);
 
   useEffect(() => {
     const requestedView = new URLSearchParams(window.location.search).get('view');
@@ -278,6 +273,12 @@ const AppContent = () => {
   const viewFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('view') : null;
   if (viewFromUrl === 'privacy') return <PrivacyPolicy onBack={() => window.history.back()} />;
   if (viewFromUrl === 'terms') return <TermsOfService onBack={() => window.history.back()} />;
+
+  useEffect(() => {
+    if (!activeView) {
+      setActiveView('learn');
+    }
+  }, [activeView, setActiveView]);
 
   if (loading) {
     return <AppSkeleton />;

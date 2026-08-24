@@ -89,4 +89,3 @@ See `firestore.rules` for security rules and data schemas.
 ## Styling
 
 Tailwind CSS v4 with custom theme variables (`--accent-main`, `--accent-glow`) for dynamic color themes based on day type (focus, beast, relaxed, rest).
-
