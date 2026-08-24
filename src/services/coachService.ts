@@ -144,7 +144,8 @@ export const getCoachResponse = async (
   const fullSystemPrompt = `${PROFESOR_SYSTEM_PROMPT}\n\n${languageInstruction}\n\n${context}`;
 
   // Priority 1: Google Gemini Flash (Instant, sub-second responses)
-  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const clientAiEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_CLIENT_AI === 'true';
+  const geminiKey = clientAiEnabled ? import.meta.env.VITE_GEMINI_API_KEY : '';
   if (geminiKey && geminiKey.trim() !== '') {
     try {
       const model = getAi().getGenerativeModel({
@@ -170,7 +171,7 @@ export const getCoachResponse = async (
   }
 
   // Priority 2: OpenRouter Fallback
-  const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
+  const openRouterKey = clientAiEnabled ? import.meta.env.VITE_OPENROUTER_API_KEY : '';
   if (openRouterKey && openRouterKey.trim() !== '') {
     try {
       const res = await callOpenRouterWithFallback(fullSystemPrompt, userMessage, history, openRouterKey.trim());

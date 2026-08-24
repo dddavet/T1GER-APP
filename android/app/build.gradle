@@ -1,5 +1,17 @@
 apply plugin: 'com.android.application'
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
+}
+
+def releaseStoreFile = System.getenv('T1GER_ANDROID_KEYSTORE') ?: keystoreProperties.getProperty('storeFile')
+def releaseStorePassword = System.getenv('T1GER_ANDROID_STORE_PASSWORD') ?: keystoreProperties.getProperty('storePassword')
+def releaseKeyAlias = System.getenv('T1GER_ANDROID_KEY_ALIAS') ?: keystoreProperties.getProperty('keyAlias')
+def releaseKeyPassword = System.getenv('T1GER_ANDROID_KEY_PASSWORD') ?: keystoreProperties.getProperty('keyPassword')
+def releaseSigningConfigured = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
+
 android {
     namespace "com.dddavet.tiger"
     compileSdk rootProject.ext.compileSdkVersion
@@ -18,16 +30,20 @@ android {
     }
 
     signingConfigs {
-        release {
-            storeFile file('t1ger-release-key.jks')
-            storePassword 't1gerapp2026'
-            keyAlias 't1ger'
-            keyPassword 't1gerapp2026'
+        if (releaseSigningConfigured) {
+            release {
+                storeFile rootProject.file(releaseStoreFile)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
         }
     }
     buildTypes {
         release {
-            signingConfig signingConfigs.release
+            if (releaseSigningConfigured) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

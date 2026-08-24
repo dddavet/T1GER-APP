@@ -6,140 +6,230 @@ export interface AppUsage {
   percentage: number;
 }
 
+export type ScreenTimeDataSource = 'native' | 'manual' | 'unconfigured';
+
 export interface ScreenTimeReport {
   isNativeAndroid: boolean;
   hasPermission: boolean;
+  dataSource: ScreenTimeDataSource;
   totalMinutes: number;
   totalHours: number;
+  awakeLifePercent: number;
+  daysLostPerYear: number;
+  annualHoursLost: number;
   hourlyWage: number;
   estimatedLossUSD: number;
+  annualOpportunityUSD: number;
+  monthlyOpportunityUSD: number;
   booksEquivalentYear: number;
   compound10YearsUSD: number;
   apps: AppUsage[];
   lastUpdated: number;
 }
 
-const DEFAULT_MOCK_APPS: Omit<AppUsage, 'percentage'>[] = [
-  { packageName: 'com.zhiliaoapp.musically', appName: 'TikTok', minutes: 85, iconEmoji: '🎵' },
-  { packageName: 'com.instagram.android', appName: 'Instagram', minutes: 55, iconEmoji: '📸' },
-  { packageName: 'com.google.android.youtube', appName: 'YouTube', minutes: 40, iconEmoji: '▶️' },
-  { packageName: 'com.twitter.android', appName: 'X (Twitter)', minutes: 20, iconEmoji: '𝕏' },
+type AndroidScreenTimeBridge = {
+  hasUsagePermission: () => boolean;
+  requestUsagePermission: () => void;
+  getDailySocialUsage: () => string;
+};
+
+declare global {
+  interface Window {
+    AndroidScreenTime?: AndroidScreenTimeBridge;
+  }
+}
+
+const AWAKE_MINUTES_PER_DAY = 16 * 60;
+const DEFAULT_HOURLY_WAGE = 10;
+const MANUAL_APPS_KEY = 't1ger_manual_social_usage_v2';
+const HOURLY_WAGE_KEY = 't1ger_hourly_wage';
+const LEGACY_HOURS_KEY = 't1ger_screen_time_hours';
+
+export const TRACKED_SOCIAL_APPS: ReadonlyArray<Omit<AppUsage, 'minutes' | 'percentage'>> = [
+  { packageName: 'com.zhiliaoapp.musically', appName: 'TikTok', iconEmoji: '♪' },
+  { packageName: 'com.instagram.android', appName: 'Instagram', iconEmoji: '◎' },
+  { packageName: 'com.google.android.youtube', appName: 'YouTube', iconEmoji: '▶' },
+  { packageName: 'com.twitter.android', appName: 'X', iconEmoji: '𝕏' },
+  { packageName: 'com.facebook.katana', appName: 'Facebook', iconEmoji: 'f' },
+  { packageName: 'com.reddit.frontpage', appName: 'Reddit', iconEmoji: '●' },
 ];
 
+const LEGACY_DISTRIBUTION = [0.35, 0.25, 0.2, 0.08, 0.07, 0.05];
+
+const clampNumber = (value: unknown, min: number, max: number): number => {
+  const numeric = typeof value === 'number' ? value : Number(value);
+  if (!Number.isFinite(numeric)) return min;
+  return Math.min(max, Math.max(min, numeric));
+};
+
+const round = (value: number, digits: number = 0): number => {
+  const factor = 10 ** digits;
+  return Math.round(value * factor) / factor;
+};
+
+export function calculateOpportunityCost(totalMinutes: number, hourlyWage: number = DEFAULT_HOURLY_WAGE) {
+  const safeMinutes = clampNumber(totalMinutes, 0, 24 * 60);
+  const safeWage = clampNumber(hourlyWage, 1, 1000);
+  const totalHours = safeMinutes / 60;
+  const annualHoursLost = totalHours * 365;
+  const dailyOpportunityUSD = totalHours * safeWage;
+  const annualOpportunityUSD = dailyOpportunityUSD * 365;
+  const monthlyOpportunityUSD = annualOpportunityUSD / 12;
+  const monthlyRate = 0.08 / 12;
+  const months = 10 * 12;
+  const compound10YearsUSD = monthlyOpportunityUSD
+    * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+
+  return {
+    totalMinutes: Math.round(safeMinutes),
+    totalHours: round(totalHours, 1),
+    awakeLifePercent: round((safeMinutes / AWAKE_MINUTES_PER_DAY) * 100, 1),
+    daysLostPerYear: round((safeMinutes * 365) / (24 * 60), 1),
+    annualHoursLost: Math.round(annualHoursLost),
+    hourlyWage: round(safeWage, 2),
+    estimatedLossUSD: Math.round(dailyOpportunityUSD),
+    annualOpportunityUSD: Math.round(annualOpportunityUSD),
+    monthlyOpportunityUSD: Math.round(monthlyOpportunityUSD),
+    booksEquivalentYear: Math.round(annualHoursLost / 4),
+    compound10YearsUSD: Math.round(compound10YearsUSD),
+  };
+}
+
+function normalizeApps(apps: Array<Partial<AppUsage>>): AppUsage[] {
+  const normalized = TRACKED_SOCIAL_APPS.map((definition) => {
+    const match = apps.find((app) =>
+      app.packageName === definition.packageName
+      || app.appName?.toLowerCase().startsWith(definition.appName.toLowerCase())
+    );
+    return {
+      ...definition,
+      minutes: Math.round(clampNumber(match?.minutes, 0, 24 * 60)),
+      percentage: 0,
+    };
+  });
+  const total = normalized.reduce((sum, app) => sum + app.minutes, 0);
+  return normalized
+    .map((app) => ({
+      ...app,
+      percentage: total > 0 ? Math.round((app.minutes / total) * 100) : 0,
+    }))
+    .sort((a, b) => b.minutes - a.minutes);
+}
+
 export class AndroidScreenTimeService {
-  private static getHourlyWage(): number {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('t1ger_hourly_wage');
-      if (saved) return parseFloat(saved);
-    }
-    return 15;
+  public static getHourlyWage(): number {
+    if (typeof window === 'undefined') return DEFAULT_HOURLY_WAGE;
+    return clampNumber(localStorage.getItem(HOURLY_WAGE_KEY) || DEFAULT_HOURLY_WAGE, 1, 1000);
+  }
+
+  public static saveHourlyWage(hourlyWage: number): number {
+    const safeWage = clampNumber(hourlyWage, 1, 1000);
+    if (typeof window !== 'undefined') localStorage.setItem(HOURLY_WAGE_KEY, String(safeWage));
+    return safeWage;
   }
 
   public static isAndroidNative(): boolean {
-    return typeof window !== 'undefined' && Boolean((window as any).AndroidScreenTime);
+    return typeof window !== 'undefined' && Boolean(window.AndroidScreenTime);
   }
 
   public static checkPermission(): boolean {
-    if (this.isAndroidNative()) {
-      try {
-        return (window as any).AndroidScreenTime.hasUsagePermission();
-      } catch {
-        return false;
-      }
+    if (!this.isAndroidNative()) return false;
+    try {
+      return Boolean(window.AndroidScreenTime?.hasUsagePermission());
+    } catch {
+      return false;
     }
-    // In web simulator, return true if user opted-in
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('t1ger_android_usage_granted') === 'true';
-    }
-    return false;
   }
 
-  public static requestPermission(): void {
-    if (this.isAndroidNative()) {
-      try {
-        (window as any).AndroidScreenTime.requestUsagePermission();
-        return;
-      } catch {
-        // fallback
-      }
+  public static requestPermission(): boolean {
+    if (!this.isAndroidNative()) return false;
+    try {
+      window.AndroidScreenTime?.requestUsagePermission();
+      return true;
+    } catch {
+      return false;
     }
+  }
+
+  public static getManualApps(): AppUsage[] {
+    if (typeof window === 'undefined') return normalizeApps([]);
+
+    try {
+      const saved = localStorage.getItem(MANUAL_APPS_KEY);
+      if (saved) return normalizeApps(JSON.parse(saved));
+    } catch {
+      localStorage.removeItem(MANUAL_APPS_KEY);
+    }
+
+    const legacyHours = clampNumber(localStorage.getItem(LEGACY_HOURS_KEY) || 0, 0, 24);
+    const legacyMinutes = Math.round(legacyHours * 60);
+    if (legacyMinutes > 0) {
+      return normalizeApps(TRACKED_SOCIAL_APPS.map((app, index) => ({
+        ...app,
+        minutes: Math.round(legacyMinutes * LEGACY_DISTRIBUTION[index]),
+      })));
+    }
+
+    return normalizeApps([]);
+  }
+
+  public static saveManualUsage(apps: Array<Pick<AppUsage, 'packageName' | 'appName' | 'minutes' | 'iconEmoji'>>, hourlyWage: number): ScreenTimeReport {
+    const normalized = normalizeApps(apps);
+    const safeWage = clampNumber(hourlyWage, 1, 1000);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('t1ger_android_usage_granted', 'true');
+      localStorage.setItem(MANUAL_APPS_KEY, JSON.stringify(normalized.map(({ percentage, ...app }) => app)));
+      localStorage.setItem(HOURLY_WAGE_KEY, String(safeWage));
+      localStorage.setItem(LEGACY_HOURS_KEY, String(round(normalized.reduce((sum, app) => sum + app.minutes, 0) / 60, 2)));
     }
+    return this.createReport(normalized, safeWage, 'manual', this.isAndroidNative(), this.checkPermission());
+  }
+
+  public static previewManualUsage(apps: Array<Partial<AppUsage>>, hourlyWage: number): ScreenTimeReport {
+    return this.createReport(normalizeApps(apps), hourlyWage, 'manual', this.isAndroidNative(), this.checkPermission());
+  }
+
+  private static createReport(
+    apps: AppUsage[],
+    hourlyWage: number,
+    dataSource: ScreenTimeDataSource,
+    isNativeAndroid: boolean,
+    hasPermission: boolean,
+  ): ScreenTimeReport {
+    const totalMinutes = apps.reduce((sum, app) => sum + app.minutes, 0);
+    return {
+      isNativeAndroid,
+      hasPermission,
+      dataSource,
+      ...calculateOpportunityCost(totalMinutes, hourlyWage),
+      apps,
+      lastUpdated: Date.now(),
+    };
   }
 
   public static getReport(): ScreenTimeReport {
     const hourlyWage = this.getHourlyWage();
-    const isNative = this.isAndroidNative();
+    const isNativeAndroid = this.isAndroidNative();
     const hasPermission = this.checkPermission();
 
-    if (isNative && hasPermission) {
+    if (isNativeAndroid && hasPermission) {
       try {
-        const rawJson = (window as any).AndroidScreenTime.getDailySocialUsage(hourlyWage);
-        const parsed = JSON.parse(rawJson);
-        const totalMin = parsed.totalMinutes || 0;
-        const appsWithPct: AppUsage[] = (parsed.apps || []).map((a: any) => ({
-          ...a,
-          percentage: totalMin > 0 ? Math.round((a.minutes / totalMin) * 100) : 0,
-        }));
-
-        const totalHrs = totalMin / 60;
-        const annualHrs = totalHrs * 365;
-        const monthlyInv = (annualHrs / 12) * hourlyWage * 0.5;
-        const r = 0.08 / 12;
-        const compound10 = Math.round(monthlyInv * ((Math.pow(1 + r, 120) - 1) / r));
-
-        return {
-          isNativeAndroid: true,
-          hasPermission: true,
-          totalMinutes: totalMin,
-          totalHours: Math.round(totalHrs * 10) / 10,
-          hourlyWage,
-          estimatedLossUSD: Math.round(totalHrs * hourlyWage),
-          booksEquivalentYear: Math.round(annualHrs / 8),
-          compound10YearsUSD: compound10,
-          apps: appsWithPct,
-          lastUpdated: Date.now(),
-        };
-      } catch (err) {
-        console.warn('Error querying native Android usage stats:', err);
+        const parsed = JSON.parse(window.AndroidScreenTime?.getDailySocialUsage() || '{}');
+        const apps = normalizeApps(Array.isArray(parsed.apps) ? parsed.apps : []);
+        return this.createReport(apps, hourlyWage, 'native', true, true);
+      } catch (error) {
+        console.warn('[ScreenTime] Native usage report unavailable; using manual fallback.', error);
       }
     }
 
-    // Web / Simulator Fallback with customizable total hours
-    const configuredHours = typeof window !== 'undefined'
-      ? parseFloat(localStorage.getItem('t1ger_screen_time_hours') || '3.3')
-      : 3.3;
-
-    const totalMinutes = Math.round(configuredHours * 60);
-    const totalAppsMinutes = DEFAULT_MOCK_APPS.reduce((acc, a) => acc + a.minutes, 0);
-
-    const appsWithPct: AppUsage[] = DEFAULT_MOCK_APPS.map(a => {
-      const scaledMinutes = Math.round((a.minutes / totalAppsMinutes) * totalMinutes);
-      return {
-        ...a,
-        minutes: scaledMinutes,
-        percentage: Math.round((scaledMinutes / totalMinutes) * 100),
-      };
-    });
-
-    const annualHrs = configuredHours * 365;
-    const monthlyInv = (annualHrs / 12) * hourlyWage * 0.5;
-    const r = 0.08 / 12;
-    const compound10 = Math.round(monthlyInv * ((Math.pow(1 + r, 120) - 1) / r));
-
-    return {
-      isNativeAndroid: isNative,
-      hasPermission: hasPermission,
-      totalMinutes,
-      totalHours: Math.round(configuredHours * 10) / 10,
+    const manualApps = this.getManualApps();
+    const hasManualData = manualApps.some((app) => app.minutes > 0);
+    return this.createReport(
+      manualApps,
       hourlyWage,
-      estimatedLossUSD: Math.round(configuredHours * hourlyWage),
-      booksEquivalentYear: Math.round(annualHrs / 8),
-      compound10YearsUSD: compound10,
-      apps: appsWithPct,
-      lastUpdated: Date.now(),
-    };
+      hasManualData ? 'manual' : 'unconfigured',
+      isNativeAndroid,
+      hasPermission,
+    );
   }
 
   public static async generateAINotificationScript(
@@ -147,63 +237,50 @@ export class AndroidScreenTimeService {
     language: 'es' | 'en' = 'es'
   ): Promise<{ title: string; body: string; ctaText: string }> {
     const isEs = language === 'es';
-    const topApp = report.apps[0]?.appName || (isEs ? 'redes sociales' : 'social feeds');
-
-    // Default high-impact script
+    const topApp = report.apps.find((app) => app.minutes > 0)?.appName || (isEs ? 'redes sociales' : 'social feeds');
     const defaultScript = {
       title: isEs
-        ? `🐅 Alerta T1GER: ${report.totalHours}h en ${topApp} hoy`
-        : `🐅 T1GER Alert: ${report.totalHours}h on ${topApp} today`,
+        ? `T1GER perdió ${Math.round(report.totalHours * 10) / 10} h contigo hoy`
+        : `T1GER lost ${Math.round(report.totalHours * 10) / 10} h with you today`,
       body: isEs
-        ? `Hoy consumiste $${report.estimatedLossUSD} USD de tu tiempo en ${topApp}. 1 lección de 4 min en T1GER te devuelve el control y suma +10 vXP.`
-        : `You consumed $${report.estimatedLossUSD} USD of your time on ${topApp}. 1 4-min lesson in T1GER restores your edge and earns +10 vXP.`,
-      ctaText: isEs ? 'Recuperar mi tiempo (+10 vXP)' : 'Reclaim my time (+10 vXP)',
+        ? `${topApp} consumió ${report.awakeLifePercent}% de tu día consciente. Una lección rescata tus vitales y protege tu racha.`
+        : `${topApp} consumed ${report.awakeLifePercent}% of your waking day. One lesson rescues your vitals and protects your streak.`,
+      ctaText: isEs ? 'Salvar a T1GER' : 'Save T1GER',
     };
 
-    // If OpenRouter is available, call NVIDIA Nemotron to generate dynamic copy
-    const openRouterKey = import.meta.env.VITE_OPENROUTER_API_KEY;
-    if (openRouterKey && openRouterKey.trim() !== '') {
-      try {
-        const prompt = isEs
-          ? `Genera una notificación push corta (título y cuerpo de 2 líneas) de la app T1GER para un estudiante que hoy pasó ${report.totalHours} horas en ${topApp} perdiendo aprox $${report.estimatedLossUSD} USD. Sé desafiante y motivacional. Responde en JSON con formato: {"title": "...", "body": "...", "ctaText": "..."}`
-          : `Generate a short push notification (title and 2-line body) for T1GER app for a user who spent ${report.totalHours} hours on ${topApp} losing ~$${report.estimatedLossUSD} USD. Format JSON: {"title": "...", "body": "...", "ctaText": "..."}`;
+    const clientAiEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_CLIENT_AI === 'true';
+    const openRouterKey = clientAiEnabled ? import.meta.env.VITE_OPENROUTER_API_KEY : '';
+    if (!openRouterKey?.trim()) return defaultScript;
 
-        const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${openRouterKey.trim()}`,
-            'HTTP-Referer': 'https://t1ger.app',
-            'X-Title': 'T1GER Notification Engine',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
-            messages: [{ role: 'user', content: prompt }],
-            temperature: 0.7,
-            max_tokens: 150
-          })
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          const text = data.choices?.[0]?.message?.content || '';
-          const match = text.match(/\{[\s\S]*\}/);
-          if (match) {
-            const parsed = JSON.parse(match[0]);
-            if (parsed.title && parsed.body) {
-              return {
-                title: parsed.title,
-                body: parsed.body,
-                ctaText: parsed.ctaText || defaultScript.ctaText,
-              };
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('AI notification script fallback:', e);
-      }
+    try {
+      const prompt = isEs
+        ? `Genera una alerta breve de T1GER: ${report.totalHours} horas perdidas en ${topApp}, ${report.awakeLifePercent}% del día consciente. Devuelve JSON con title, body y ctaText.`
+        : `Generate a brief T1GER alert: ${report.totalHours} hours lost to ${topApp}, ${report.awakeLifePercent}% of the waking day. Return JSON with title, body and ctaText.`;
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${openRouterKey.trim()}`,
+          'HTTP-Referer': 'https://t1ger.app',
+          'X-Title': 'T1GER Notification Engine',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'nvidia/nemotron-3-ultra-550b-a55b:free',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.7,
+          max_tokens: 150,
+        }),
+      });
+      if (!response.ok) return defaultScript;
+      const data = await response.json();
+      const match = String(data.choices?.[0]?.message?.content || '').match(/\{[\s\S]*\}/);
+      if (!match) return defaultScript;
+      const parsed = JSON.parse(match[0]);
+      return parsed.title && parsed.body
+        ? { title: parsed.title, body: parsed.body, ctaText: parsed.ctaText || defaultScript.ctaText }
+        : defaultScript;
+    } catch {
+      return defaultScript;
     }
-
-    return defaultScript;
   }
 }

@@ -24,23 +24,26 @@ export default defineConfig(() => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            if (id.includes('node_modules')) {
-              if (id.includes('firebase')) {
+            const normalizedId = id.replace(/\\/g, '/');
+            if (normalizedId.includes('/node_modules/')) {
+              if (normalizedId.includes('/node_modules/firebase/')) {
                 return 'vendor-firebase';
               }
-              if (id.includes('recharts') || id.includes('d3')) {
-                return 'vendor-charts';
-              }
-              if (id.includes('motion') || id.includes('framer-motion')) {
+              if (normalizedId.includes('/node_modules/motion/') || normalizedId.includes('/node_modules/framer-motion/')) {
                 return 'vendor-motion';
               }
-              if (id.includes('lucide-react')) {
+              if (normalizedId.includes('/node_modules/lucide-react/')) {
                 return 'vendor-icons';
               }
-              if (id.includes('react') || id.includes('scheduler')) {
+              if (normalizedId.includes('/node_modules/three/')) {
+                return 'vendor-three';
+              }
+              if (normalizedId.includes('/node_modules/@react-three/')) {
+                return 'vendor-react-three';
+              }
+              if (/\/node_modules\/(react|react-dom|scheduler)\//.test(normalizedId)) {
                 return 'vendor-react-core';
               }
-              return 'vendor-others';
             }
           }
         }

@@ -5,7 +5,6 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.Settings;
@@ -14,7 +13,8 @@ import com.getcapacitor.BridgeActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class MainActivity extends BridgeActivity {
         }
 
         @JavascriptInterface
-        public String getDailySocialUsage(double hourlyWage) {
+        public String getDailySocialUsage() {
             JSONObject result = new JSONObject();
             JSONArray appsArray = new JSONArray();
             long totalMinutes = 0;
@@ -82,15 +82,10 @@ public class MainActivity extends BridgeActivity {
                     return result.toString();
                 }
 
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, 0);
-                calendar.set(Calendar.MINUTE, 0);
-                calendar.set(Calendar.SECOND, 0);
-                calendar.set(Calendar.MILLISECOND, 0);
-                long startTime = calendar.getTimeInMillis();
                 long endTime = System.currentTimeMillis();
+                long startTime = endTime - (24L * 60L * 60L * 1000L);
 
-                List<UsageStats> statsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, startTime, endTime);
+                List<UsageStats> statsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
 
                 // Social package mapping
                 Map<String, String[]> targetApps = new HashMap<>();
@@ -98,12 +93,13 @@ public class MainActivity extends BridgeActivity {
                 targetApps.put("com.ss.android.ugc.trill", new String[]{"TikTok", "🎵"});
                 targetApps.put("com.instagram.android", new String[]{"Instagram", "📸"});
                 targetApps.put("com.google.android.youtube", new String[]{"YouTube", "▶️"});
-                targetApps.put("com.twitter.android", new String[]{"X (Twitter)", "𝕏"});
+                targetApps.put("com.twitter.android", new String[]{"X", "𝕏"});
                 targetApps.put("com.facebook.katana", new String[]{"Facebook", "📘"});
-                targetApps.put("com.snapchat.android", new String[]{"Snapchat", "👻"});
                 targetApps.put("com.reddit.frontpage", new String[]{"Reddit", "🤖"});
 
                 Map<String, Long> aggregatedUsage = new HashMap<>();
+                Map<String, String> canonicalPackageByName = new HashMap<>();
+                Map<String, String> iconByName = new HashMap<>();
 
                 if (statsList != null) {
                     for (UsageStats usageStats : statsList) {
@@ -113,18 +109,24 @@ public class MainActivity extends BridgeActivity {
                             long timeInForeground = usageStats.getTotalTimeInForeground();
                             long current = aggregatedUsage.getOrDefault(appName, 0L);
                             aggregatedUsage.put(appName, current + timeInForeground);
+                            canonicalPackageByName.putIfAbsent(appName, pkg);
+                            iconByName.putIfAbsent(appName, targetApps.get(pkg)[1]);
                         }
                     }
                 }
 
-                for (Map.Entry<String, Long> entry : aggregatedUsage.entrySet()) {
+                List<Map.Entry<String, Long>> sortedUsage = new ArrayList<>(aggregatedUsage.entrySet());
+                Collections.sort(sortedUsage, (left, right) -> Long.compare(right.getValue(), left.getValue()));
+
+                for (Map.Entry<String, Long> entry : sortedUsage) {
                     long minutes = entry.getValue() / (1000 * 60);
                     if (minutes > 0) {
                         totalMinutes += minutes;
                         JSONObject appObj = new JSONObject();
+                        appObj.put("packageName", canonicalPackageByName.get(entry.getKey()));
                         appObj.put("appName", entry.getKey());
                         appObj.put("minutes", minutes);
-                        appObj.put("iconEmoji", entry.getKey().equals("TikTok") ? "🎵" : entry.getKey().equals("Instagram") ? "📸" : entry.getKey().equals("YouTube") ? "▶️" : "📱");
+                        appObj.put("iconEmoji", iconByName.get(entry.getKey()));
                         appsArray.put(appObj);
                     }
                 }

@@ -53,11 +53,24 @@ jobs:
       - name: 🔨 Grant Execute Permission for Gradle Wrapper
         run: chmod +x android/gradlew
 
-      - name: 📱 Build Android APK (Debug & Release)
-        run: |
-          cd android
-          ./gradlew assembleDebug
-          ./gradlew bundleRelease || true
+      - name: 📱 Build Android debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: 🔐 Configure Android release signing
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        shell: bash
+        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/t1ger-upload-key.jks"
+
+      - name: 📦 Build signed Android App Bundle
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        working-directory: android
+        env:
+          T1GER_ANDROID_KEYSTORE: ${{ runner.temp }}/t1ger-upload-key.jks
+          T1GER_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          T1GER_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          T1GER_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease
 
       - name: 📤 Upload Android Debug APK Artifact
         uses: actions/upload-artifact@v4

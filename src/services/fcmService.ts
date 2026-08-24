@@ -1,6 +1,5 @@
-import { getToken } from 'firebase/messaging';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
-import { db, messaging } from '../firebase';
+import { app, db } from '../firebase';
 
 // Esta llave VAPID es necesaria para autenticar el cliente web con los servidores push de Firebase.
 // Debería sacarse de las configuraciones del proyecto en Firebase Console.
@@ -10,12 +9,13 @@ const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY || 'REEMPLAZAR_CON_VAP
  * Solicita permiso para enviar notificaciones Push y guarda el token en el perfil del usuario.
  */
 export const requestPushNotificationsPermission = async (userId: string) => {
-  if (!messaging) {
-    console.warn('Firebase Messaging no está soportado o inicializado en este navegador.');
-    return false;
-  }
-
   try {
+    const { getMessaging, getToken, isSupported } = await import('firebase/messaging');
+    if (!(await isSupported())) {
+      console.warn('Firebase Messaging no está soportado en este navegador.');
+      return false;
+    }
+    const messaging = getMessaging(app);
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
       console.log('Permiso de notificaciones concedido.');
@@ -26,7 +26,7 @@ export const requestPushNotificationsPermission = async (userId: string) => {
       });
 
       if (currentToken) {
-        console.log('FCM Token obtenido. Guardando en Firestore...', currentToken);
+        console.info('FCM token obtenido; guardando registro del dispositivo.');
         
         // Guardar el token en el array de tokens del usuario
         const userRef = doc(db, 'users', userId);

@@ -3,7 +3,12 @@ import { Mic, MicOff, Bot } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { GoogleGenAI, Modality } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+const getVoiceAi = () => {
+  const clientAiEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_CLIENT_AI === 'true';
+  const apiKey = clientAiEnabled ? import.meta.env.VITE_GEMINI_API_KEY : '';
+  if (!apiKey) throw new Error('CLIENT_AI_DISABLED');
+  return new GoogleGenAI({ apiKey });
+};
 
 export const VoiceCoach = () => {
   const { appUser } = useAuth();
@@ -19,7 +24,7 @@ export const VoiceCoach = () => {
     audioContextRef.current = new AudioContext({ sampleRate: 16000 });
     mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
     
-    const sessionPromise = ai.live.connect({
+    const sessionPromise = getVoiceAi().live.connect({
       model: "gemini-3.1-flash-live-preview",
       callbacks: {
         onopen: () => {

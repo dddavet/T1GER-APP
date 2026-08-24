@@ -17,8 +17,8 @@ class ScreenTimeJavascriptInterface(private val service: UsageStatsService) {
     }
 
     @JavascriptInterface
-    fun getDailySocialUsage(hourlyWage: Double): String {
-        val report = service.getDailySocialUsage(hourlyWage)
+    fun getDailySocialUsage(): String {
+        val report = service.getDailySocialUsage(10.0)
         val json = JSONObject().apply {
             put("totalMinutes", report.totalMinutes)
             put("totalHours", report.totalHours)

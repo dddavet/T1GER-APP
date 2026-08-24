@@ -153,13 +153,13 @@ html, body {
 }
 
 .t1ger-primary-button {
-  background: #ef7030;
-  color: #122b26;
-  box-shadow: 0 12px 26px rgba(239,112,48,.18);
+  background: #FF7300;
+  color: #09090B;
+  box-shadow: 0 12px 26px rgba(255,115,0,.2);
 }
 
-.t1ger-primary-button:not(:disabled):hover { background: #f68147; transform: translateY(-1px); }
-.t1ger-primary-button:not(:disabled):active { transform: translateY(1px) scale(.975); box-shadow: 0 5px 14px rgba(239,112,48,.14); }
+.t1ger-primary-button:not(:disabled):hover { background: #FF8426; transform: translateY(-1px); }
+.t1ger-primary-button:not(:disabled):active { transform: translateY(1px) scale(.975); box-shadow: 0 5px 14px rgba(255,115,0,.16); }
 
 .t1ger-secondary-button {
   border: 1px solid rgba(255,255,255,.1);
@@ -167,7 +167,7 @@ html, body {
   color: #dbe9e6;
 }
 
-.t1ger-secondary-button:not(:disabled):hover { border-color: rgba(239,112,48,.35); background: rgba(239,112,48,.08); }
+.t1ger-secondary-button:not(:disabled):hover { border-color: rgba(255,115,0,.35); background: rgba(255,115,0,.08); }
 .t1ger-secondary-button:not(:disabled):active { transform: translateY(1px) scale(.975); }
 
 .t1ger-icon-button {

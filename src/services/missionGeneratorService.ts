@@ -1,4 +1,3 @@
-import { Type } from '@google/genai';
 import { collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getAi } from './gemini';

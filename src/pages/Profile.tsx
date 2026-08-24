@@ -17,7 +17,7 @@ import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
 type LegalView = 'privacy' | 'terms' | null;
 
 export const Profile = () => {
-  const { appUser, updateAppUser, logout, deleteAccountAndData } = useAuth();
+  const { user: firebaseUser, appUser, updateAppUser, logout, deleteAccountAndData } = useAuth();
   const { language, setLanguage, brainState, learnStreak } = useBrain();
   const { stats, setActiveView } = useT1ger();
   const isEs = language === 'es';
@@ -30,6 +30,7 @@ export const Profile = () => {
   const [showScreenTimeModal, setShowScreenTimeModal] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const notificationsEnabled = appUser?.notificationPreferences?.daily_reminder ?? false;
+  const hasCloudAccount = Boolean(firebaseUser?.uid);
 
   const saveName = async () => {
     const cleanName = name.trim();
@@ -103,15 +104,19 @@ export const Profile = () => {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-xs font-bold text-white tracking-wide">
-                {isEs ? 'Sincronización en la Nube' : 'Cloud Sync Active'}
+                {hasCloudAccount
+                  ? (isEs ? 'Sincronización en la nube' : 'Cloud sync active')
+                  : (isEs ? 'Progreso local' : 'Local progress')}
               </h3>
               <span className="inline-flex items-center gap-1 font-mono text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                ONLINE
+                {hasCloudAccount ? 'CLOUD' : 'LOCAL'}
               </span>
             </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              {isEs ? 'Progreso protegido y respaldado en tiempo real' : 'Progress protected & backed up in real time'}
+              {hasCloudAccount
+                ? (isEs ? 'Progreso respaldado en tu cuenta' : 'Progress backed up to your account')
+                : (isEs ? 'Guardado en este dispositivo; inicia sesión para sincronizar' : 'Saved on this device; sign in to sync')}
             </p>
           </div>
         </div>

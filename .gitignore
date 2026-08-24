@@ -11,3 +11,12 @@ tmp-*.png
 .agents/
 .claude/
 .firebase-emulator-data/
+.firebase/
+android/.idea/
+android/key.properties
+*.jks
+*.keystore
+dist-apk/
+releases/
+android_logs.txt
+screen_*.png

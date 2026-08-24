@@ -20,6 +20,7 @@ import { KnowledgeNode } from '../components/learn/KnowledgeNode';
 import { T1gerPetHero } from '../components/pet/T1gerPetHero';
 import { BookChestRewardModal } from '../components/learn/BookChestRewardModal';
 import { DailySupplyDrop } from '../components/DailySupplyDrop';
+import { OpportunityCostCard } from '../components/OpportunityCostCard';
 
 interface LearnProps {
   onStartMission?: (mission: BankMission) => void;
@@ -95,6 +96,8 @@ export const Learn: React.FC<LearnProps> = ({ onStartMission }) => {
           }}
         />
       </div>
+
+      <OpportunityCostCard />
 
       {/* 3. DAILY SUPPLY DROP (LOOTBOX) */}
       <DailySupplyDrop />

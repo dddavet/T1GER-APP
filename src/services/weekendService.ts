@@ -1,8 +1,6 @@
-import { GoogleGenAI } from '@google/genai';
 import { doc, setDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-
-const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+import { getAi } from './gemini';
 
 export const generateFridaySummary = async (performanceData: any) => {
   const prompt = `Act as a serious business mentor for T1GER.
@@ -11,12 +9,9 @@ export const generateFridaySummary = async (performanceData: any) => {
   If success rate < 50%, interrogate the user: "Why are we slacking? The pride is falling behind. What is the bottleneck?"
   Output a 3-sentence "Weekly Executive Summary".`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-pro',
-    contents: prompt,
-  });
-
-  return response.text;
+  const model = getAi().getGenerativeModel({ model: 'gemini-1.5-pro' });
+  const response = await model.generateContent(prompt);
+  return response.response.text();
 };
 
 export const generateWeekendMissions = async (userId: string, niche: string) => {
@@ -29,13 +24,12 @@ export const generateWeekendMissions = async (userId: string, niche: string) => 
     "personal": { "title": string, "description": string, "proofRequirement": string }
   }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-1.5-pro',
-    contents: prompt,
-    config: { responseMimeType: 'application/json' }
+  const model = getAi().getGenerativeModel({ model: 'gemini-1.5-pro' });
+  const response = await model.generateContent({
+    contents: [{ role: 'user', parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: 'application/json' },
   });
-
-  const missions = JSON.parse(response.text);
+  const missions = JSON.parse(response.response.text());
 
   // Save to Firestore
   const weekendMissionsRef = collection(db, 'users', userId, 'weekendMissions');

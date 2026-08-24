@@ -13,7 +13,8 @@ React + TypeScript productivity app for entrepreneurs.
 
 1. Install dependencies:
    `npm install`
-2. Create `.env.local` from `.env.example` and set `VITE_GEMINI_API_KEY`.
+2. Copy `.env.example` to `.env.local`. Provider keys are optional and are only
+   enabled for local development when `VITE_ENABLE_CLIENT_AI=true`.
 3. Run the app:
    `npm run dev`
 
@@ -31,3 +32,18 @@ npx cap sync ios
 ```
 
 Opening and archiving the iOS project requires macOS with Xcode.
+
+## Production AI
+
+Variables prefixed with `VITE_` are shipped to the browser and must never contain
+production provider secrets. Production AI should call an authenticated
+server-side proxy. Until that proxy is configured, the app uses its deterministic
+local fallbacks instead of embedding Gemini or OpenRouter credentials.
+
+## Android release signing
+
+Debug builds do not require signing configuration. For a signed release, copy
+`android/key.properties.example` to the ignored `android/key.properties` file and
+point it at the private upload keystore, or provide the equivalent
+`T1GER_ANDROID_*` environment variables used by CI. Never commit keystores or
+their passwords.

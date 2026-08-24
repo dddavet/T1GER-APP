@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { createPortal } from 'react-dom';
+import React, { useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
@@ -19,7 +18,7 @@ import {
   Flame
 } from 'lucide-react';
 import type { BankMission } from '../../services/missionBank';
-import { getMissionPlaybook } from '../../services/missionBank';
+import { getMissionPlaybook, MISSION_BANK } from '../../services/missionBank';
 import { shouldCelebrateStreakToday, markStreakCelebratedToday } from '../../services/brainService';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { useBrain } from '../../contexts/BrainContext';
@@ -40,7 +39,7 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   onExecuteApplyMission,
 }) => {
   const { addXP } = useT1ger();
-  const { language, completeMission, brainState } = useBrain();
+  const { language, completeMission, brainState, pathData } = useBrain();
   const isEs = language === 'es';
 
   const playbook = getMissionPlaybook(mission);
@@ -51,20 +50,50 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [showSummary, setShowSummary] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
+  const completionHandledRef = useRef(false);
+
+  const applyMission = useMemo(() => {
+    const sourceLevel = pathData.track.levels.find(level =>
+      level.days.some(day => day.missionIds.includes(mission.id))
+    );
+    if (!sourceLevel?.applyNodeId) return null;
+
+    const allLessonsComplete = sourceLevel.days.every(day =>
+      day.missionIds.every(missionId =>
+        missionId === mission.id || brainState.missionHistory.some(
+          record => record.missionId === missionId && record.completed
+        )
+      )
+    );
+
+    return allLessonsComplete
+      ? MISSION_BANK.find(item => item.id === sourceLevel.applyNodeId) || null
+      : null;
+  }, [brainState.missionHistory, mission.id, pathData.track.levels]);
 
   const learnStreak = Math.max(1, brainState.learnStreak || 1);
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentCard < totalCards - 1) {
       setCurrentCard((prev) => prev + 1);
     } else {
+      if (completionHandledRef.current) return;
+      completionHandledRef.current = true;
       // Completed all 4 cards -> Show Duolingo celebratory summary!
       const totalTime = Math.max(12, Math.round((Date.now() - startTime) / 1000));
       setElapsedSeconds(totalTime);
       completeMission(mission.id);
-      addXP(mission.xpReward || 100);
+      await addXP(mission.xpReward || 100, 1, `mission:${mission.id}`);
       setShowSummary(true);
     }
+  };
+
+  const continueToNextStep = () => {
+    if (applyMission) {
+      onExecuteApplyMission(applyMission);
+      return;
+    }
+    onClose();
   };
 
   const handleSummaryContinue = () => {
@@ -73,13 +102,13 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
       markStreakCelebratedToday();
       setShowStreakModal(true);
     } else {
-      onClose();
+      continueToNextStep();
     }
   };
 
   const handleStreakClose = () => {
     setShowStreakModal(false);
-    onClose();
+    continueToNextStep();
   };
 
   const handlePrev = () => {
@@ -407,7 +436,11 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
               </>
             ) : (
               <>
-                <span className="font-extrabold">{isEs ? '⚡ COMPLETAR Y APLICAR' : '⚡ COMPLETE & APPLY'}</span>
+                <span className="font-extrabold">
+                  {applyMission
+                    ? (isEs ? '⚡ COMPLETAR Y APLICAR' : '⚡ COMPLETE & APPLY')
+                    : (isEs ? 'COMPLETAR LECCIÓN' : 'COMPLETE LESSON')}
+                </span>
                 <ChevronRight size={19} strokeWidth={2.5} />
               </>
             )}

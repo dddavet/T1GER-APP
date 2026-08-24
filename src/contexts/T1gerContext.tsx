@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useBrain } from './BrainContext';
 import { MISSION_BANK } from '../services/missionBank';
@@ -31,6 +31,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   const { brainState } = useBrain();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
   const [stats, setStats] = useState<Stats>({ xp: 0, verifiedXP: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
+  const statsRef = useRef(stats);
   const [activeView, setActiveView] = useState<View>('learn');
   const [triggerAnimation, setTriggerAnimation] = useState<Animation>('none');
 
@@ -44,14 +45,18 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
         age: null,
         avatar: appUser.photoURL || '🐅'
       });
-      setStats(prev => ({
+      setStats(prev => {
+        const nextStats = {
         ...prev,
         xp: appUser.xp,
         verifiedXP: appUser.verifiedXP || 0,
         coins: appUser.coins || 0,
         streak: appUser.streak,
         rank: appUser.level > 10 ? 'Apex' : appUser.level > 5 ? 'Hunter' : 'Cub'
-      }));
+        };
+        statsRef.current = nextStats;
+        return nextStats;
+      });
       if (activeView === 'onboarding') {
         setActiveView('learn');
       }
@@ -72,37 +77,30 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     const applyMissionsCompleted = (brainState?.missionHistory?.filter(record => record.completed && MISSION_BANK.find(mission => mission.id === record.missionId)?.type === 'real_world_task').length || 0)
       + (rewardedMission?.type === 'real_world_task' && !rewardAlreadyInHistory ? 1 : 0);
     
-    let calculatedXP = 0;
-    let calculatedVerifiedXP = 0;
-    let calculatedLevel = 1;
-    let earnedCoins = Math.floor(amount / 2);
-    let calculatedCoins = 0;
+    const previousStats = statsRef.current;
+    const calculatedXP = Math.max(0, previousStats.xp + amount);
+    const calculatedVerifiedXP = Math.max(0, previousStats.verifiedXP + (tier === 1 ? amount : 0));
+    const earnedCoins = amount > 0 ? Math.floor(amount / 2) : 0;
+    const calculatedCoins = Math.max(0, previousStats.coins + earnedCoins);
 
-    setStats(prev => {
-      calculatedXP = prev.xp + amount;
-      calculatedVerifiedXP = prev.verifiedXP + (tier === 1 ? amount : 0);
-      
-      // NEW LEVELING ALGORITHM (Requires BOTH XP and Apply Missions)
-      // Every 200 XP grants a potential level, but it is capped by Apply Missions
-      const xpLevel = Math.floor(calculatedXP / 200) + 1;
-      const applyLevel = applyMissionsCompleted + 1;
-      calculatedLevel = Math.min(xpLevel, applyLevel);
+    // Every 200 XP opens a potential level, capped by completed Apply missions.
+    const xpLevel = Math.floor(calculatedXP / 200) + 1;
+    const applyLevel = applyMissionsCompleted + 1;
+    const calculatedLevel = Math.max(appUser?.level || 1, Math.min(xpLevel, applyLevel));
+    const nextStats = {
+      ...previousStats,
+      xp: calculatedXP,
+      verifiedXP: calculatedVerifiedXP,
+      coins: calculatedCoins,
+    };
+    statsRef.current = nextStats;
+    setStats(nextStats);
 
-      calculatedCoins = prev.coins + earnedCoins;
-
-      if (calculatedLevel > (appUser?.level || 1)) {
-        setTriggerAnimation('level-up');
-        fireConfetti();
-        setTimeout(() => setTriggerAnimation('none'), 3000);
-      }
-
-      return {
-        ...prev,
-        xp: calculatedXP,
-        verifiedXP: calculatedVerifiedXP,
-        coins: calculatedCoins,
-      };
-    });
+    if (calculatedLevel > (appUser?.level || 1)) {
+      setTriggerAnimation('level-up');
+      fireConfetti();
+      setTimeout(() => setTriggerAnimation('none'), 3000);
+    }
 
     if (appUser) {
       // League System Logic: Compute Weekly XP & Tier
@@ -123,18 +121,17 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
         coins: calculatedCoins,
         weeklyXP: newWeeklyXP,
         currentWeekId: nowWeekId,
-        leagueTier: newTier as any,
+        leagueTier: newTier,
         streak: brainState.learnStreak
       });
     }
   }, [appUser, updateAppUser, brainState]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
-    let finalCoins = 0;
-    setStats(prev => {
-      finalCoins = Math.max(0, prev.coins - amount);
-      return { ...prev, coins: finalCoins };
-    });
+    const finalCoins = Math.max(0, statsRef.current.coins - amount);
+    const nextStats = { ...statsRef.current, coins: finalCoins };
+    statsRef.current = nextStats;
+    setStats(nextStats);
 
     if (appUser) {
       await updateAppUser({ coins: finalCoins });
@@ -142,11 +139,10 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   }, [appUser, updateAppUser]);
 
   const addCoins = React.useCallback(async (amount: number) => {
-    let finalCoins = 0;
-    setStats(prev => {
-      finalCoins = prev.coins + amount;
-      return { ...prev, coins: finalCoins };
-    });
+    const finalCoins = Math.max(0, statsRef.current.coins + amount);
+    const nextStats = { ...statsRef.current, coins: finalCoins };
+    statsRef.current = nextStats;
+    setStats(nextStats);
 
     if (appUser) {
       await updateAppUser({ coins: finalCoins });

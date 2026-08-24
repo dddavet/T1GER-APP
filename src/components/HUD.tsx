@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Bell, Bot, Flame, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
-import { StreakModal } from './StreakModal';
-import { NotificationCenterModal } from './NotificationCenterModal';
 import { NotificationService } from '../services/notificationService';
+
+const StreakModal = lazy(() => import('./StreakModal').then(module => ({ default: module.StreakModal })));
+const NotificationCenterModal = lazy(() => import('./NotificationCenterModal').then(module => ({ default: module.NotificationCenterModal })));
 
 export const HUD = React.memo(() => {
   const { learnStreak, language } = useBrain();
@@ -97,16 +98,22 @@ export const HUD = React.memo(() => {
         </div>
       </header>
 
-      <StreakModal
-        isOpen={showStreakModal}
-        onClose={() => setShowStreakModal(false)}
-        streak={learnStreak}
-      />
+      <Suspense fallback={null}>
+        {showStreakModal && (
+          <StreakModal
+            isOpen
+            onClose={() => setShowStreakModal(false)}
+            streak={learnStreak}
+          />
+        )}
 
-      <NotificationCenterModal
-        isOpen={showNotificationCenter}
-        onClose={() => setShowNotificationCenter(false)}
-      />
+        {showNotificationCenter && (
+          <NotificationCenterModal
+            isOpen
+            onClose={() => setShowNotificationCenter(false)}
+          />
+        )}
+      </Suspense>
     </>
   );
 });

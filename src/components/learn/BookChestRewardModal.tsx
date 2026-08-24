@@ -33,10 +33,11 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleOpenChest = () => {
+  const handleOpenChest = async () => {
+    if (chestOpened) return;
     setChestOpened(true);
     fireRewardConfetti();
-    addXP(300);
+    await addXP(300, 2, `book_chest:${bookTitle}`);
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
       window.navigator.vibrate([60, 50, 80, 100]);
     }

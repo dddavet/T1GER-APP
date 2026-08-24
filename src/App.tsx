@@ -1,38 +1,42 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { T1gerProvider, useT1ger } from './contexts/T1gerContext';
 import { BrainProvider, useBrain } from './contexts/BrainContext';
 import { useAuth, AuthProvider } from './contexts/AuthContext';
-import { AuthGate } from './components/AuthGate';
 import { HUD } from './components/HUD';
 import { NavDock } from './components/NavDock';
-import { BuildTab } from './components/BuildTab';
-import { Learn } from './pages/Learn';
-import { Profile } from './pages/Profile';
-import { Coach } from './pages/Coach';
-import { MissionEngine } from './components/MissionEngine';
-import { SquadTab } from './components/social/SquadTab';
-import { EveningInterrogation } from './components/EveningInterrogation';
-import { Simulator } from './pages/Simulator';
 import { OfflineBanner } from './components/ui/OfflineBanner';
 import { CoachFAB } from './components/CoachFAB';
-import { CuratedLessonPlayer } from './components/learn/CuratedLessonPlayer';
-
-import { OnboardingFlow } from './components/OnboardingFlow';
-import { generateAdaptiveLesson } from './services/gemini';
 import { getUserWeaknesses } from './services/brainService';
-import { AI_CURATED_CURRICULUM } from './services/aiCuratedLibrary';
 import { AchievementTracker } from './components/AchievementTracker';
 import { TacticalPomodoro } from './components/TacticalPomodoro';
 
 import { AppSkeleton } from './components/ui/AppSkeleton';
 import { MissionSkeleton } from './components/ui/MissionSkeleton';
-import { OneSignalService } from './services/oneSignalService';
 import { MISSION_BANK } from './services/missionBank';
+import type { BankMission } from './services/missionBank';
 
-import { PrivacyPolicy } from './pages/PrivacyPolicy';
-import { TermsOfService } from './pages/TermsOfService';
-import { AndroidDeviceSimulator } from './components/AndroidDeviceSimulator';
+type ActiveMission = BankMission & {
+  dayNumber?: number;
+  isCuratedAI?: boolean;
+  curatedData?: unknown;
+  concept_flashcard?: string;
+  business_scenario?: string;
+  mission_brief?: string;
+};
+
+const BuildTab = lazy(() => import('./components/BuildTab').then(module => ({ default: module.BuildTab })));
+const Learn = lazy(() => import('./pages/Learn').then(module => ({ default: module.Learn })));
+const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const Coach = lazy(() => import('./pages/Coach').then(module => ({ default: module.Coach })));
+const MissionEngine = lazy(() => import('./components/MissionEngine').then(module => ({ default: module.MissionEngine })));
+const CuratedLessonPlayer = lazy(() => import('./components/learn/CuratedLessonPlayer').then(module => ({ default: module.CuratedLessonPlayer })));
+const SquadTab = lazy(() => import('./components/social/SquadTab').then(module => ({ default: module.SquadTab })));
+const EveningInterrogation = lazy(() => import('./components/EveningInterrogation').then(module => ({ default: module.EveningInterrogation })));
+const OnboardingFlow = lazy(() => import('./components/OnboardingFlow').then(module => ({ default: module.OnboardingFlow })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
+const Simulator = lazy(() => import('./pages/Simulator').then(module => ({ default: module.Simulator })));
 
 const TAB_VIEW_ORDER = ['learn', 'build', 'compete', 'profile'] as const;
 const PAGE_VARIANTS = {
@@ -57,37 +61,26 @@ const PAGE_VARIANTS = {
 
 const AppContent = () => {
   const { activeView, setActiveView } = useT1ger();
-  const { dailyTacticalStatus, brainState, language } = useBrain();
+  const { dailyTacticalStatus, brainState, language, getDailyPipelineMissions } = useBrain();
   const { appUser, loading } = useAuth();
-  const [activeMission, setActiveMission] = useState<any>(null);
+  const [activeMission, setActiveMission] = useState<ActiveMission | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const previousViewRef = useRef(activeView);
   
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
+  const forceOnboardingFromUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('forceOnboarding') === '1';
   const [onboardingBypassed, setOnboardingBypassed] = useState(() => {
     if (typeof window !== 'undefined') {
-      return localStorage.getItem('t1ger_onboarding_completed') === 'true';
+      return !forceOnboardingFromUrl && localStorage.getItem('t1ger_onboarding_completed') === 'true';
     }
     return false;
   });
-  const forceOnboardingFromUrl = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('forceOnboarding') === '1';
   const previewAppFromUrl = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('previewApp') === '1';
 
-  // Initialize OneSignal Push Notification Controller with Deep-Linking
+  // Register the global push deep-link bridge. The SDK itself is initialized
+  // when there is a user to identify, avoiding duplicate/racing init calls.
   useEffect(() => {
-    OneSignalService.init((data) => {
-      if (data.screen === 'daily_mission' || data.view === 'learn') {
-        setActiveView('learn');
-        if (data.missionId) {
-          const found = MISSION_BANK.find(m => m.id === data.missionId);
-          if (found) setActiveMission(found);
-        }
-      } else if (data.view) {
-        setActiveView(data.view);
-      }
-    });
-
     const handlePushDeepLink = (event: any) => {
       const data = event.detail;
       if (data?.screen === 'daily_mission' || data?.view === 'learn') {
@@ -102,15 +95,26 @@ const AppContent = () => {
     };
 
     window.addEventListener('t1ger_push_deeplink', handlePushDeepLink);
-    return () => window.removeEventListener('t1ger_push_deeplink', handlePushDeepLink);
+    return () => {
+      window.removeEventListener('t1ger_push_deeplink', handlePushDeepLink);
+    };
   }, [setActiveView]);
 
   useEffect(() => {
     if (appUser?.uid) {
-      OneSignalService.identifyUser(appUser.uid, {
-        streak_days: brainState.learnStreak,
-        language: language,
+      let cancelled = false;
+      import('./services/oneSignalService').then(async ({ OneSignalService }) => {
+        await OneSignalService.init();
+        if (cancelled) return;
+        await OneSignalService.identifyUser(appUser.uid, {
+          streak_days: brainState.learnStreak,
+          language,
+        });
       });
+
+      return () => {
+        cancelled = true;
+      };
     }
   }, [appUser?.uid, brainState.learnStreak, language]);
 
@@ -135,9 +139,10 @@ const AppContent = () => {
     previousViewRef.current = activeView;
   }, [activeView]);
 
-  const startMission = async (baseMission: any) => {
+  const startMission = async (baseMission: ActiveMission) => {
     if (baseMission.competency === 'ai') {
       const dayNum = baseMission.dayNumber || 1;
+      const { AI_CURATED_CURRICULUM } = await import('./services/aiCuratedLibrary');
       const curated = AI_CURATED_CURRICULUM[dayNum];
       if (curated) {
         setActiveMission({
@@ -187,6 +192,7 @@ const AppContent = () => {
       const dailyTime = appUser?.dailyTime || 5;
 
       // Call dynamic generator service
+      const { generateAdaptiveLesson } = await import('./services/gemini');
       const personalizedLesson = await generateAdaptiveLesson(
         userNiche,
         userLevel,
@@ -240,6 +246,33 @@ const AppContent = () => {
     }
   };
 
+  useEffect(() => {
+    const startDailyRescue = (event: Event) => {
+      const requestedMissionId = (event as CustomEvent<{ missionId?: string }>).detail?.missionId;
+      const requestedMission = requestedMissionId
+        ? MISSION_BANK.find((mission) => mission.id === requestedMissionId)
+        : undefined;
+      const dailyMission = getDailyPipelineMissions().learnNode;
+      const completedMissionIds = new Set(
+        brainState.missionHistory.filter((record) => record.completed).map((record) => record.missionId)
+      );
+      const fallbackMission = MISSION_BANK.find((mission) =>
+        (mission.nodeType === 'learn' || mission.type === 'book_lesson')
+        && !completedMissionIds.has(mission.id)
+      );
+      const targetMission = requestedMission || dailyMission || fallbackMission;
+
+      if (targetMission) {
+        void startMission(targetMission);
+      } else {
+        setActiveView('learn');
+      }
+    };
+
+    window.addEventListener('t1ger_start_daily_rescue', startDailyRescue);
+    return () => window.removeEventListener('t1ger_start_daily_rescue', startDailyRescue);
+  }, [brainState.missionHistory, getDailyPipelineMissions, setActiveView]);
+
   const dayType = dailyTacticalStatus.dayType || 'focus';
 
   const viewFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('view') : null;
@@ -249,11 +282,6 @@ const AppContent = () => {
   if (loading) {
     return <AppSkeleton />;
   }
-
-  const isSimulator = typeof window !== 'undefined' && (
-    new URLSearchParams(window.location.search).get('simulator') === 'true' || 
-    (window.innerWidth > 640 && new URLSearchParams(window.location.search).get('simulator') !== 'false' && !new URLSearchParams(window.location.search).get('sim_platform'))
-  );
 
   const FORCE_ONBOARDING_TEST = import.meta.env.VITE_FORCE_ONBOARDING_TEST === 'true';
 
@@ -286,8 +314,8 @@ const AppContent = () => {
                 setActiveView('learn');
               }}
               onExecuteApplyMission={(applyMission) => {
-                setActiveMission(null);
-                setActiveView('learn');
+                setActiveMission(applyMission);
+                setActiveView('mission');
               }}
             />
           </div>
@@ -386,14 +414,16 @@ const AppContent = () => {
 
 export default function App() {
   if (typeof window !== 'undefined' && window.location.pathname === '/sim') {
-    return <Simulator />;
+    return <Suspense fallback={<AppSkeleton />}><Simulator /></Suspense>;
   }
 
   return (
     <AuthProvider>
       <BrainProvider>
         <T1gerProvider>
-          <AppContent />
+          <Suspense fallback={<AppSkeleton />}>
+            <AppContent />
+          </Suspense>
         </T1gerProvider>
       </BrainProvider>
     </AuthProvider>

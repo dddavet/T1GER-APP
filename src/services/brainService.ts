@@ -18,7 +18,12 @@ import {
   CURRICULUM_TRACKS,
 } from './missionBank';
 import { fsrs, createEmptyCard, Rating, type Card, type FSRS } from 'ts-fsrs';
-import { type T1gerPetState, DEFAULT_PET_STATE, calculatePetVitalsWithDecay } from './petEngine';
+import {
+  type T1gerPetState,
+  DEFAULT_PET_STATE,
+  applyDailyMissionRescue,
+  calculatePetVitalsWithDecay,
+} from './petEngine';
 
 // Global FSRS Instance
 export const fsrsEngine = fsrs();
@@ -552,7 +557,7 @@ export function processMissionResult(
   const currentPet = calculatePetVitalsWithDecay(state.petState || DEFAULT_PET_STATE);
   const xpEarned = mission.xpReward || 100;
   const newTodayXP = (currentPet.todayXPEarned || 0) + (completed ? xpEarned : 0);
-  const updatedPetState: T1gerPetState = completed
+  let updatedPetState: T1gerPetState = completed
     ? {
         ...currentPet,
         todayXPEarned: newTodayXP,
@@ -560,6 +565,11 @@ export function processMissionResult(
         lastFedTimestamp: Date.now(),
       }
     : currentPet;
+
+  const isDailyLearningMission = mission.nodeType === 'learn' || mission.type === 'book_lesson';
+  if (completed && isDailyLearningMission) {
+    updatedPetState = applyDailyMissionRescue(updatedPetState, mission.id);
+  }
 
   return {
     ...state,
@@ -942,4 +952,3 @@ export function markStreakCelebratedToday(): void {
     // Ignore localStorage errors
   }
 }
-

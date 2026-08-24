@@ -4,9 +4,10 @@ let aiInstance: GoogleGenerativeAI | null = null;
 
 export const getAi = () => {
   if (!aiInstance) {
-    let apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+    const clientAiEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_CLIENT_AI === 'true';
+    const apiKey = clientAiEnabled ? import.meta.env.VITE_GEMINI_API_KEY : '';
     if (!apiKey) {
-      throw new Error('API_KEY_MISSING');
+      throw new Error('CLIENT_AI_DISABLED');
     }
     aiInstance = new GoogleGenerativeAI(apiKey);
   }

@@ -1,0 +1,5 @@
+# Copy this file to android/key.properties and keep the real values local.
+storeFile=app/path-to-your-upload-key.jks
+storePassword=replace-me
+keyAlias=replace-me
+keyPassword=replace-me

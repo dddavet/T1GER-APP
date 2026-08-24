@@ -192,7 +192,11 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
       const seconds = Math.max(20, Math.round((Date.now() - startTimeRef.current) / 1000));
       setElapsedSeconds(seconds);
       completeMission(mission.id, 100);
-      addXP(mission.xpReward || 150, 1);
+      await addXP(
+        mission.xpReward || 150,
+        isApply ? (mission.verificationTier ?? 2) : 1,
+        `mission:${mission.id}`
+      );
       setComplete(true);
       setShowSummaryModal(true);
     } finally {

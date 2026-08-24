@@ -3,7 +3,16 @@
  * Handles SDK initialization, user identification, tagging, runtime permissions, and deep-linking.
  */
 
-import OneSignal from 'react-onesignal';
+type WebOneSignal = typeof import('react-onesignal')['default'];
+
+let webOneSignalPromise: Promise<WebOneSignal> | null = null;
+
+async function getWebOneSignal(): Promise<WebOneSignal> {
+  if (!webOneSignalPromise) {
+    webOneSignalPromise = import('react-onesignal').then(module => module.default);
+  }
+  return webOneSignalPromise;
+}
 
 export interface NotificationPayloadData {
   screen?: string;
@@ -15,6 +24,7 @@ export interface NotificationPayloadData {
 
 export class OneSignalService {
   private static isInitialized = false;
+  private static runtime: 'native' | 'web' | null = null;
   private static onNotificationClickHandler?: (data: NotificationPayloadData) => void;
 
   /**
@@ -47,12 +57,14 @@ export class OneSignalService {
         });
 
         this.isInitialized = true;
+        this.runtime = 'native';
         console.log('[OneSignal] Native Android initialized successfully with App ID:', appId);
         return;
       }
 
       // 2. Web / PWA OneSignal Initialization
       if (appId && !appId.includes('0000-0000')) {
+        const OneSignal = await getWebOneSignal();
         await OneSignal.init({
           appId,
           allowLocalhostAsSecureOrigin: true,
@@ -66,6 +78,7 @@ export class OneSignalService {
         });
 
         this.isInitialized = true;
+        this.runtime = 'web';
         console.log('[OneSignal] Web SDK initialized successfully.');
       } else {
         console.info('[OneSignal] Running in dev mode with mock OneSignal bridge.');
@@ -113,7 +126,8 @@ export class OneSignalService {
         return;
       }
 
-      if (this.isInitialized) {
+      if (this.isInitialized && this.runtime === 'web') {
+        const OneSignal = await getWebOneSignal();
         await OneSignal.login(userId);
         if (tags) {
           await OneSignal.User.addTags(stringTags);
@@ -140,7 +154,8 @@ export class OneSignalService {
         (window as any).plugins.OneSignal.User.addTags(tags);
         return;
       }
-      if (this.isInitialized) {
+      if (this.isInitialized && this.runtime === 'web') {
+        const OneSignal = await getWebOneSignal();
         await OneSignal.User.addTags(tags);
       }
     } catch (e) {
@@ -160,7 +175,8 @@ export class OneSignalService {
       }
 
       // Web Push
-      if (this.isInitialized) {
+      if (this.isInitialized && this.runtime === 'web') {
+        const OneSignal = await getWebOneSignal();
         await OneSignal.Notifications.requestPermission();
         return OneSignal.Notifications.permission;
       }

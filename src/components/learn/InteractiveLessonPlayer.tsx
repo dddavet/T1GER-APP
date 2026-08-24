@@ -64,7 +64,7 @@ export const InteractiveLessonPlayer: React.FC<InteractiveLessonPlayerProps> = (
     if (submitting) return;
     setSubmitting(true);
     try {
-      addXP(mission.xpReward || 100);
+      await addXP(mission.xpReward || 100, 1, `mission:${mission.id}`);
       completeMission(mission.id, 100);
       fireRewardConfetti();
       setIsFinished(true);

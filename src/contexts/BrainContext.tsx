@@ -197,11 +197,59 @@ function saveState(userId: string, state: BrainState) {
   }
 }
 
+function mergeById<T extends { id: string }>(localItems: T[] = [], cloudItems: T[] = []): T[] {
+  const merged = new Map(localItems.map(item => [item.id, item]));
+  cloudItems.forEach(item => merged.set(item.id, { ...merged.get(item.id), ...item }));
+  return Array.from(merged.values());
+}
+
+function mergeBrainStates(localState: BrainState, cloudState: Partial<BrainState>): BrainState {
+  const missionHistory = new Map(
+    localState.missionHistory.map(record => [`${record.missionId}:${record.timestamp}`, record])
+  );
+  (cloudState.missionHistory || []).forEach(record => {
+    missionHistory.set(`${record.missionId}:${record.timestamp}`, record);
+  });
+
+  return {
+    ...DEFAULT_BRAIN_STATE,
+    ...localState,
+    ...cloudState,
+    competencies: {
+      ...DEFAULT_BRAIN_STATE.competencies,
+      ...localState.competencies,
+      ...cloudState.competencies,
+    },
+    missionHistory: Array.from(missionHistory.values()).sort((a, b) => a.timestamp - b.timestamp),
+    completedDayIds: Array.from(new Set([
+      ...localState.completedDayIds,
+      ...(cloudState.completedDayIds || []),
+    ])),
+    customHabits: mergeById(localState.customHabits, cloudState.customHabits),
+    customWorkTasks: mergeById(localState.customWorkTasks, cloudState.customWorkTasks),
+    customLessonTasks: mergeById(localState.customLessonTasks, cloudState.customLessonTasks),
+    dailyTacticalStatus: {
+      ...localState.dailyTacticalStatus,
+      ...cloudState.dailyTacticalStatus,
+    },
+    fsrsCards: {
+      ...localState.fsrsCards,
+      ...cloudState.fsrsCards,
+    },
+    petState: {
+      ...(localState.petState || DEFAULT_PET_STATE),
+      ...(cloudState.petState || {}),
+    },
+  };
+}
+
 import { type Language } from '../services/i18n';
 
 export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { appUser } = useAuth();
   const [brainState, setBrainState] = useState<BrainState>(DEFAULT_BRAIN_STATE);
+  const [hydratedUserId, setHydratedUserId] = useState<string | null>(null);
+  const [cloudReadyUserId, setCloudReadyUserId] = useState<string | null>(null);
 
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = typeof window !== 'undefined' ? (localStorage.getItem('t1ger_app_language') as Language) : null;
@@ -228,14 +276,19 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [language]);
 
   const LOCAL_STORAGE_ID = 'anonymous_local_user';
+  const activeUserId = appUser?.uid || LOCAL_STORAGE_ID;
 
   useEffect(() => {
-    const uid = appUser?.uid || LOCAL_STORAGE_ID;
+    const uid = activeUserId;
+    let cancelled = false;
+    setHydratedUserId(null);
+    setCloudReadyUserId(null);
     const loaded = loadState(uid);
     // Keep persisted competency scores immutable on load. Decay is presented as
     // a derived value by applyDecay, avoiding a second permanent deduction on
     // every app launch.
     setBrainState(loaded);
+    setHydratedUserId(uid);
 
     if (appUser?.uid && appUser.uid !== 'anonymous') {
       const fetchFromFirestore = async () => {
@@ -244,41 +297,34 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const snap = await getDoc(userRef);
           if (snap.exists()) {
             const cloudData = snap.data().brainState as BrainState;
-            if (cloudData) {
-              setBrainState(prev => {
-                const merged = {
-                  ...DEFAULT_BRAIN_STATE,
-                  ...prev,
-                  ...cloudData,
-                  competencies: {
-                    ...DEFAULT_BRAIN_STATE.competencies,
-                    ...prev.competencies,
-                    ...cloudData?.competencies,
-                  },
-                  dailyTacticalStatus: {
-                    ...DEFAULT_BRAIN_STATE.dailyTacticalStatus,
-                    ...prev.dailyTacticalStatus,
-                    ...cloudData?.dailyTacticalStatus,
-                  }
-                };
-                return merged;
-              });
+            if (cloudData && !cancelled) {
+              setBrainState(prev => mergeBrainStates(prev, cloudData));
             }
           }
         } catch (err) {
           console.error("Failed to sync from Firestore", err);
+        } finally {
+          if (!cancelled) setCloudReadyUserId(uid);
         }
       };
-      fetchFromFirestore();
+      void fetchFromFirestore();
+    } else {
+      setCloudReadyUserId(uid);
     }
-  }, [appUser?.uid]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeUserId, appUser?.uid]);
 
   useEffect(() => {
-    const uid = appUser?.uid || LOCAL_STORAGE_ID;
+    const uid = activeUserId;
+    if (hydratedUserId !== uid) return;
+
     saveState(uid, brainState);
 
-    if (appUser?.uid && appUser.uid !== 'anonymous') {
-      const syncToFirestore = async () => {
+    if (appUser?.uid && appUser.uid !== 'anonymous' && cloudReadyUserId === uid) {
+      const syncTimer = window.setTimeout(async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
           const cleanBrainState = Object.fromEntries(
@@ -288,10 +334,11 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         } catch (err) {
           console.error("Failed to sync to Firestore", err);
         }
-      };
-      syncToFirestore();
+      }, 700);
+
+      return () => window.clearTimeout(syncTimer);
     }
-  }, [brainState, appUser?.uid]);
+  }, [brainState, activeUserId, appUser?.uid, hydratedUserId, cloudReadyUserId]);
 
   // Ensure daily curriculum pipeline is built
   useEffect(() => {
