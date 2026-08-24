@@ -54,7 +54,7 @@ class UsageStatsService(private val context: Context) {
         context.startActivity(intent)
     }
 
-    fun getDailySocialUsage(hourlyWage: Double = 15.0): SocialUsageReport {
+    fun getDailySocialUsage(hourlyWage: Double = 10.0): SocialUsageReport {
         if (!hasUsageStatsPermission()) {
             return SocialUsageReport(0, 0.0, 0.0, emptyList())
         }

@@ -22,7 +22,7 @@ class DailyOpportunityWorker(
 
     override suspend fun doWork(): Result {
         val usageService = UsageStatsService(appContext)
-        val report = usageService.getDailySocialUsage(hourlyWage = 15.0)
+        val report = usageService.getDailySocialUsage(hourlyWage = 10.0)
 
         // Only notify if user had at least 15 minutes of social media usage
         if (report.totalMinutes >= 15) {
