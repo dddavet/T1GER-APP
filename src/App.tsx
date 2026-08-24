@@ -66,6 +66,7 @@ const AppContent = () => {
   const [activeMission, setActiveMission] = useState<ActiveMission | null>(null);
   const mainRef = useRef<HTMLElement>(null);
   const previousViewRef = useRef(activeView);
+  const urlViewAppliedRef = useRef(false);
   
   const [loadingMission, setLoadingMission] = useState(false);
   const [loadingText, setLoadingText] = useState('Sincronizando...');
@@ -120,6 +121,8 @@ const AppContent = () => {
 
 
   useEffect(() => {
+    if (urlViewAppliedRef.current) return;
+    urlViewAppliedRef.current = true;
     const requestedView = new URLSearchParams(window.location.search).get('view');
     const allowedViews = ['learn', 'build', 'compete', 'profile', 'coach'];
     if (requestedView === 'home') {
