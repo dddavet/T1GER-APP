@@ -29,7 +29,8 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
   onSuccess,
 }) => {
   const { addXP } = useT1ger();
-  const { completeMission } = useBrain();
+  const { reviewMission, language } = useBrain();
+  const isEs = language === 'es';
 
   // Queue up to 3 questions
   const questions = vulnerableMissions.slice(0, 3);
@@ -57,8 +58,7 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
   };
 
   const handleNext = () => {
-    // Complete mission to update FSRS memory shield
-    completeMission(currentMission.id, isCorrect ? 100 : 60);
+    reviewMission(currentMission.id, isCorrect ? 100 : 40);
 
     if (currentIndex < questions.length - 1) {
       setCurrentIndex((prev) => prev + 1);
@@ -70,7 +70,8 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
   };
 
   const finishSpeedRound = () => {
-    addXP(150);
+    const reviewDay = new Date().toISOString().slice(0, 10);
+    void addXP(10, 2, `memory:${reviewDay}:${questions.map((question) => question.id).join('|')}`);
     fireRewardConfetti();
     setFinished(true);
     setTimeout(() => {
@@ -102,11 +103,11 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
             </div>
 
             <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#3FC78E]">
-              ¡ESCUDOS BLINDADOS AL 100%!
+              {isEs ? 'ESCUDOS REFORZADOS' : 'SHIELDS STRENGTHENED'}
             </span>
-            <h2 className="text-2xl font-black text-white mt-1">+150 XP Recibidos</h2>
+            <h2 className="text-2xl font-black text-white mt-1">+10 XP</h2>
             <p className="text-xs text-zinc-400 mt-2 max-w-xs mx-auto leading-relaxed">
-              Completaste la ronda relámpago con éxito. Tu racha y tu memoria cognitiva están aseguradas.
+              {isEs ? 'La recuperación activa extendió la vida de estos conceptos sin repetir recompensas de misión.' : 'Active recall extended these concepts without replaying mission rewards.'}
             </p>
 
             <div className="mt-6 flex justify-center">
@@ -123,11 +124,11 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
               </div>
               <div>
                 <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                  Ronda Relámpago (60s)
+                  {isEs ? 'Smart Review (60 s)' : 'Smart Review (60s)'}
                   <Flame size={14} className="text-[var(--ob-accent)]" />
                 </h3>
                 <p className="text-[11px] text-zinc-400">
-                  Pregunta {currentIndex + 1} de {questions.length}
+                  {isEs ? 'Pregunta' : 'Question'} {currentIndex + 1} {isEs ? 'de' : 'of'} {questions.length}
                 </p>
               </div>
             </div>
@@ -198,14 +199,14 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
                 onClick={handleCheck}
                 className="w-full py-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Comprobar
+                {isEs ? 'Comprobar' : 'Check'}
               </button>
             ) : (
               <button
                 onClick={handleNext}
                 className="w-full py-3.5 rounded-xl bg-[var(--ob-accent)] hover:brightness-110 text-black font-mono font-bold text-xs uppercase tracking-wider transition cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>{currentIndex < questions.length - 1 ? 'Siguiente Pregunta' : 'Finalizar y Blindar'}</span>
+                <span>{currentIndex < questions.length - 1 ? (isEs ? 'Siguiente pregunta' : 'Next question') : (isEs ? 'Finalizar y reforzar' : 'Finish and strengthen')}</span>
                 <ArrowRight size={16} />
               </button>
             )}

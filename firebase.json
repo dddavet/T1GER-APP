@@ -1,6 +1,15 @@
 {
+  "functions": {
+    "source": "functions",
+    "runtime": "nodejs22",
+    "predeploy": ["npm --prefix functions run build"]
+  },
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   },
   "hosting": {
     "public": "dist",
@@ -8,6 +17,15 @@
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
+    ],
+    "headers": [
+      { "source": "**", "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ] },
+      { "source": "/assets/**", "headers": [{ "key": "Cache-Control", "value": "public,max-age=31536000,immutable" }] },
+      { "source": "/index.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
     ],
     "rewrites": [
       {
@@ -17,11 +35,13 @@
     ]
   },
   "emulators": {
+    "firestore": { "port": 8080 },
+    "storage": { "port": 9199 },
     "auth": {
       "port": 9099
     },
     "ui": {
-      "enabled": true,
+      "enabled": false,
       "port": 4000
     },
     "singleProjectMode": true

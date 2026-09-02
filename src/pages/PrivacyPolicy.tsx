@@ -38,14 +38,14 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
               </div>
             </div>
             <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400 text-[9px] font-mono font-bold uppercase tracking-wider border border-emerald-500/30">
-              GDPR & CCPA
+              {isEs ? 'BETA' : 'BETA'}
             </span>
           </div>
 
           <div className="mt-3.5 p-3 rounded-xl bg-white/[0.03] border border-white/6 text-xs text-zinc-300 leading-relaxed">
             {isEs
-              ? 'En T1GER (operado por T1GER Inc.), protegemos la privacidad y soberanía de datos de nuestros usuarios. Esta política detalla el tratamiento ético y seguro de su información.'
-              : 'At T1GER (operated by T1GER Inc.), we fiercely protect user privacy and data sovereignty. This policy outlines our ethical, secure data handling practices.'}
+              ? 'Esta versión de prueba describe cómo T1GER trata los datos. Antes del lanzamiento público deben confirmarse el responsable legal, su contacto, los plazos de conservación y las condiciones de los proveedores.'
+              : 'This beta describes how T1GER handles data. Before public launch, the legal operator, contact details, retention periods and provider terms must be confirmed.'}
           </div>
         </div>
       </div>
@@ -62,7 +62,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
 
           <div className="space-y-2.5 text-xs text-zinc-300">
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-              <strong className="text-white block font-mono text-xs">A. Datos de Identidad y Cuenta</strong>
+              <strong className="text-white block font-mono text-xs">{isEs ? 'A. Identidad y cuenta' : 'A. Identity and account'}</strong>
               <p className="text-zinc-400 mt-1 text-[11px]">
                 {isEs 
                   ? 'Nombre de usuario, correo electrónico y credenciales encriptadas mediante Firebase Authentication (Google Cloud Identity).'
@@ -71,7 +71,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             </div>
 
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-              <strong className="text-white block font-mono text-xs">B. Privacidad de Tiempo en Pantalla (Screen Time)</strong>
+              <strong className="text-white block font-mono text-xs">{isEs ? 'B. Tiempo de pantalla' : 'B. Screen time'}</strong>
               <p className="text-zinc-400 mt-1 text-[11px]">
                 {isEs 
                   ? 'El acceso a estadísticas de uso (UsageStatsManager) se ejecuta 100% de manera local en su dispositivo para alimentar las mecánicas de bienestar del T1GER 3D. Jamás compartimos ni vendemos sus registros de uso a terceros ni a redes de publicidad.'
@@ -80,11 +80,11 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             </div>
 
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-              <strong className="text-white block font-mono text-xs">C. Entregas Tácticas y Criterio con IA</strong>
+              <strong className="text-white block font-mono text-xs">{isEs ? 'C. Pruebas y mentor con IA' : 'C. Proofs and AI mentor'}</strong>
               <p className="text-zinc-400 mt-1 text-[11px]">
                 {isEs 
-                  ? 'Las reflexiones y planes de acción se procesan a través de la API de Google Gemini exclusivamente para proporcionar retroalimentación pedagógica en tiempo real, sin utilizarse para entrenar modelos públicos externos.'
-                  : 'User action plans and written submissions are audited via Google Gemini API solely for real-time pedagogical grading, never for public model training.'}
+                  ? 'Las pruebas escritas, imágenes y mensajes al mentor se envían a Google Gemini para obtener feedback. Las pruebas aprobadas se guardan en Firebase. No incluyas contraseñas, documentos de identidad ni datos financieros sensibles. El tratamiento del proveedor depende de sus condiciones y de la configuración del servicio.'
+                  : 'Written evidence, images and mentor messages are sent to Google Gemini for feedback. Approved proofs are stored in Firebase. Do not include passwords, identity documents or sensitive financial data. Provider processing depends on its terms and service configuration.'}
               </p>
             </div>
           </div>
@@ -103,13 +103,13 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
 
           <p className="text-xs text-zinc-300 leading-relaxed">
             {isEs
-              ? 'Usted mantiene control total sobre sus datos. Puede exportar un archivo JSON con todo su historial desde la pestaña de Perfil o eliminar permanentemente su cuenta y todos sus registros de nuestros servidores de forma instantánea.'
-              : 'You retain full control over your personal data. You can export a complete JSON archive of your progress or permanently delete your account and all associated Firestore records from Profile settings.'}
+              ? 'En Perfil puedes exportar el progreso disponible o solicitar la eliminación de tu cuenta y sus datos asociados. La eliminación requiere verificar tu identidad y disponer del servicio de backend. Solo se confirma cuando el proceso termina.'
+              : 'In Profile you can export available progress or request deletion of your account and its associated data. Deletion requires identity verification and an available backend. It is confirmed only after the process completes.'}
           </p>
 
           <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-300 font-mono flex items-center gap-2">
             <CheckCircle2 size={14} className="text-rose-400 shrink-0" />
-            <span>{isEs ? 'Borrado total conforme a las directrices de Google Play y Apple.' : 'Full deletion compliant with Google Play & Apple Store standards.'}</span>
+            <a href="/delete-account" className="underline">{isEs ? 'Gestionar la eliminación de mi cuenta' : 'Manage account deletion'}</a>
           </div>
         </div>
       </div>

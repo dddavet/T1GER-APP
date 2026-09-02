@@ -68,8 +68,8 @@ export const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack }) => {
 
           <p className="text-[11px] text-zinc-400 leading-relaxed">
             {isEs
-              ? 'El usuario asume el 100% de la responsabilidad por cualquier decisión económica o empresarial tomada en el mundo real. Ni los creadores, fundadores ni T1GER Inc. asumen responsabilidad alguna por pérdidas o ganancias derivadas del uso de la aplicación.'
-              : 'The user assumes 100% responsibility for any financial or commercial decisions made in the real world. Neither the creators, founders, nor T1GER Inc. assume liability for any financial losses or outcomes resulting from using this application.'}
+              ? 'Las simulaciones no garantizan resultados. Verifica las sugerencias de IA y consulta a un profesional cualificado cuando lo necesites. Este aviso no limita los derechos que te correspondan por ley.'
+              : 'Simulations do not guarantee results. Verify AI suggestions and consult a qualified professional when needed. This notice does not limit your statutory rights.'}
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ export const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack }) => {
           <ul className="text-xs text-zinc-300 space-y-2 list-disc pl-4">
             <li>{isEs ? 'El usuario se compromete a no utilizar bots ni scripts automáticos para alterar la economía de XP o manipular el ranking de la liga.' : 'Users agree not to utilize automated bots or scripts to manipulate XP rankings.'}</li>
             <li>{isEs ? 'Todos los modelos 3D, interfaces, marcas y diseños de T1GER están protegidos por derechos de propiedad intelectual internacional.' : 'All 3D assets, UI designs, and trademarks are protected under international copyright law.'}</li>
-            <li>{isEs ? 'Las compras dentro de la aplicación (T1GER Plus) son procesadas directamente por Google Play y Apple App Store bajo sus respectivas políticas de suscripción.' : 'In-app purchases are governed directly by Google Play and Apple App Store billing rules.'}</li>
+            <li>{isEs ? 'Esta versión beta no permite compras ni activa suscripciones de pago. Las monedas y el XP son virtuales, no se compran ni se canjean por dinero.' : 'This beta does not accept purchases or activate paid subscriptions. Coins and XP are virtual, cannot be purchased and have no cash value.'}</li>
           </ul>
         </div>
       </div>

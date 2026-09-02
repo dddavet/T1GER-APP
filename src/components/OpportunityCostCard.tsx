@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpRight, Clock3, ShieldAlert } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
 import { ScreenTimeFreedomModal } from './ScreenTimeFreedomModal';
+import { useDevHarnessState } from '../dev/devHarnessState';
 
 export const OpportunityCostCard: React.FC = () => {
   const { language, petState } = useBrain();
   const isEs = language === 'es';
+  const devHarness = useDevHarnessState();
   const [modalOpen, setModalOpen] = useState(false);
   const [report, setReport] = useState(() => AndroidScreenTimeService.getReport());
   const configured = report.dataSource !== 'unconfigured';
   const overBudget = configured && report.totalMinutes > petState.dailyScreenTimeLimitMinutes;
+
+  useEffect(() => {
+    setReport(AndroidScreenTimeService.getReport());
+  }, [devHarness.screenTime]);
 
   const closeModal = () => {
     setModalOpen(false);
@@ -34,7 +40,7 @@ export const OpportunityCostCard: React.FC = () => {
         <span className="min-w-0">
           <span className="block font-mono text-[8px] font-bold uppercase tracking-[.14em] text-[#FF7300]">
             {configured
-              ? `${report.dataSource === 'native' ? 'LIVE' : 'MANUAL'} · ${report.awakeLifePercent}% ${isEs ? 'DEL DÍA' : 'OF DAY'}`
+              ? `${report.dataSource === 'native' ? 'LIVE' : report.dataSource === 'simulated' ? 'DEV' : 'MANUAL'} · ${report.awakeLifePercent}% ${isEs ? 'DEL DÍA' : 'OF DAY'}`
               : (isEs ? 'AUDITORÍA SIN CONFIGURAR' : 'AUDIT NOT CONFIGURED')}
           </span>
           <strong className="mt-1 block truncate text-sm font-semibold text-white">

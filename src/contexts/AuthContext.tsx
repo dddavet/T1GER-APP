@@ -13,9 +13,11 @@ import {
   signInWithRedirect,
   getRedirectResult
 } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, auth, db } from '../firebase';
 import { AUTH_BYPASS_ENABLED } from '../config/appMode';
+import { useDevHarnessState } from '../dev/devHarnessState';
 
 export interface InvestmentProfile {
   goal: 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement' | 'investing' | 'ai' | 'sales';
@@ -31,6 +33,9 @@ export interface AppUser {
   email: string;
   displayName?: string;
   photoURL?: string;
+  username?: string;
+  usernameNormalized?: string;
+  inviteCode?: string;
   role?: 'founder' | 'member';
   isFounder?: boolean;
   niche: string;
@@ -48,7 +53,10 @@ export interface AppUser {
   weeklyXP?: number; // XP earned this week
   currentWeekId?: string; // e.g. "2026-W34"
   leagueTier?: string; // e.g. "bronze", "silver"
+  leagueCohortId?: string;
   streak: number;
+  lastVerifiedMissionDay?: string;
+  timeZone?: string;
   isPro?: boolean;
   isSuperT1ger?: boolean;
   isFlaggedForInterrogation?: boolean;
@@ -58,6 +66,8 @@ export interface AppUser {
   activeCoachId?: string;
   lastMissionDate?: any;
   lastActive?: any;
+  missionCompletedToday?: boolean;
+  tigerStatus?: 'thriving' | 'steady' | 'critical';
   createdAt?: any;
   energy?: number;
   minimalistMode?: boolean;
@@ -75,6 +85,11 @@ export interface AppUser {
     focusAreas: string[];
   };
   acquisitionSource?: string;
+  onboardingKnowledgeLevel?: 'zero' | 'basic' | 'intermediate' | 'competent' | 'advanced';
+  onboardingMotivation?: string;
+  onboardingDistractions?: string[];
+  screenTimeLimitMinutes?: number;
+  onboardingStartingPoint?: 'scratch' | 'placement';
   fcmTokens?: string[];
   notificationPreferences?: {
     daily_reminder?: boolean; // daily lesson reminder
@@ -275,7 +290,7 @@ const FOUNDER_EMAILS = (import.meta.env.VITE_FOUNDER_EMAILS || '')
   .filter(Boolean);
 
 function getAccountRole(email?: string | null) {
-  const isFounder = Boolean(email && FOUNDER_EMAILS.includes(email.toLowerCase()));
+  const isFounder = Boolean(import.meta.env.DEV && email && FOUNDER_EMAILS.includes(email.toLowerCase()));
   return {
     role: isFounder ? 'founder' as const : 'member' as const,
     isFounder,
@@ -283,7 +298,8 @@ function getAccountRole(email?: string | null) {
 }
 
 function buildLocalSignedInUser(firebaseUser: User): AppUser {
-  const localData = getLocalAppUser();
+  const cached = getLocalAppUser();
+  const localData = cached?.uid === firebaseUser.uid || cached?.uid === 'anonymous' ? cached : null;
   return {
     uid: firebaseUser.uid,
     email: firebaseUser.email || '',
@@ -294,6 +310,15 @@ function buildLocalSignedInUser(firebaseUser: User): AppUser {
     goal: localData?.goal || 'none',
     learningStyle: localData?.learningStyle,
     experienceLevel: localData?.experienceLevel,
+    dailyTime: localData?.dailyTime,
+    primaryTrack: localData?.primaryTrack,
+    acquisitionSource: localData?.acquisitionSource,
+    onboardingKnowledgeLevel: localData?.onboardingKnowledgeLevel,
+    onboardingMotivation: localData?.onboardingMotivation,
+    onboardingDistractions: localData?.onboardingDistractions,
+    screenTimeLimitMinutes: localData?.screenTimeLimitMinutes,
+    onboardingStartingPoint: localData?.onboardingStartingPoint,
+    notificationPreferences: localData?.notificationPreferences,
     ageRange: localData?.ageRange,
     onboardingStep: localData?.onboardingStep || 'identity',
     onboardingComplete: localData?.onboardingComplete || false,
@@ -342,6 +367,14 @@ function buildPrototypeUser(): AppUser {
     equippedAccessories: localData?.equippedAccessories || [],
     unlockedAchievements: localData?.unlockedAchievements || [],
     lastSupplyDropClaimed: localData?.lastSupplyDropClaimed || 0,
+    primaryTrack: localData?.primaryTrack,
+    acquisitionSource: localData?.acquisitionSource,
+    onboardingKnowledgeLevel: localData?.onboardingKnowledgeLevel,
+    onboardingMotivation: localData?.onboardingMotivation,
+    onboardingDistractions: localData?.onboardingDistractions,
+    screenTimeLimitMinutes: localData?.screenTimeLimitMinutes,
+    onboardingStartingPoint: localData?.onboardingStartingPoint,
+    notificationPreferences: localData?.notificationPreferences,
   };
 }
 
@@ -368,6 +401,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [appUser, setAppUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const devHarness = useDevHarnessState();
 
   const googleSignIn = useCallback(async () => {
     const provider = new GoogleAuthProvider();
@@ -422,25 +456,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const deleteAccountAndData = useCallback(async () => {
     const currentUid = appUser?.uid || user?.uid;
-    
-    if (currentUid) {
-      localStorage.removeItem(`tiger_brain_state_v3_${currentUid}`);
-    }
-    saveLocalAppUser(null);
-
     if (user) {
-      try {
-        const userRef = doc(db, 'users', user.uid);
-        const publicRef = doc(db, 'users_public', user.uid);
-        await setDoc(userRef, { deletedAt: serverTimestamp(), isDeleted: true }, { merge: true });
-        await setDoc(publicRef, { deletedAt: serverTimestamp(), isDeleted: true }, { merge: true });
-        await user.delete();
-      } catch (err) {
-        console.warn('Error deleting cloud user account:', err);
-        throw err;
-      }
+      await httpsCallable(getFunctions(app), 'deleteMyAccount')({});
+      await auth.signOut();
     }
-
+    if (currentUid) {
+      Object.keys(localStorage).filter(key => key.includes(currentUid)).forEach(key => localStorage.removeItem(key));
+        const { FieldMissionService } = await import('../services/fieldMissionService');
+        await FieldMissionService.clearUserCache(currentUid);
+    }
+    localStorage.removeItem('t1ger_onboarding_completed');
+    localStorage.removeItem('t1ger_onboarding_draft_v2');
+    saveLocalAppUser(null);
     setAppUser(null);
     setUser(null);
   }, [user, appUser]);
@@ -462,9 +489,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return;
     }
 
+    const serverOwnedFields = new Set(['uid', 'email', 'xp', 'level', 'verifiedXP', 'coins', 'isPro', 'isSuperT1ger', 'role', 'isFounder', 'streak', 'streakShields', 'weeklyXP', 'currentWeekId', 'leagueTier', 'leagueCohortId', 'lastVerifiedMissionDay', 'verifiedMissionCount', 'timeZone', 'lastMissionDate', 'missionCompletedToday', 'tigerStatus', 'unlockedAccessories', 'unlockedDenItems', 'lastSupplyDropClaimed']);
+    const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
     setAppUser(prev => {
       const base = prev || { uid: user.uid, email: user.email || '', niche: 'none', level: 1, xp: 0, streak: 0 };
-      const next = { ...base, ...data } as AppUser;
+      const next = { ...base, ...cleanData } as AppUser;
       saveLocalAppUser(next);
       return next;
     });
@@ -475,11 +504,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     try {
       const userRef = doc(db, 'users', user.uid);
-      const serverOwnedFields = new Set(['isPro', 'isSuperT1ger', 'role', 'isFounder']);
-      const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
       if (Object.keys(cleanData).length > 0) await setDoc(userRef, cleanData, { merge: true });
 
-      const publicFields = ['displayName', 'photoURL', 'niche', 'verifiedXP', 'weeklyXP', 'streak', 'leagueTier', 'currentWeekId'];
+      const publicFields = ['displayName', 'photoURL', 'niche', 'username', 'usernameNormalized', 'inviteCode', 'lastActive'];
       const publicUpdate: any = {};
       let hasPublicUpdate = false;
 
@@ -515,37 +542,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (userSnap.exists()) {
         const existingUser = userSnap.data() as AppUser;
-        const accountRole = getAccountRole(firebaseUser.email);
-        const syncedUser = { ...existingUser, ...accountRole };
-
-        if (existingUser.role !== accountRole.role || existingUser.isFounder !== accountRole.isFounder) {
-          await setDoc(userRef, accountRole, { merge: true });
-          await setDoc(doc(db, 'users_public', firebaseUser.uid), accountRole, { merge: true });
-        }
-
-        setAppUser(syncedUser);
+        setAppUser(existingUser);
       } else {
-        const localData = getLocalAppUser();
-        const accountRole = getAccountRole(firebaseUser.email);
+        const cached = getLocalAppUser();
+        const localData = cached?.uid === firebaseUser.uid || cached?.uid === 'anonymous' ? cached : null;
+        const accountRole = { role: 'member' as const, isFounder: false };
         const rawNewUser: Record<string, any> = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
-          displayName: firebaseUser.displayName || '',
+          displayName: firebaseUser.displayName || localData?.displayName || 'T1GER',
           photoURL: firebaseUser.photoURL || '',
           ...accountRole,
           niche: localData?.niche || 'none',
           goal: localData?.goal || 'none',
           learningStyle: localData?.learningStyle || 'text',
           experienceLevel: localData?.experienceLevel || 1,
+          dailyTime: localData?.dailyTime || 10,
+          primaryTrack: localData?.primaryTrack,
+          acquisitionSource: localData?.acquisitionSource,
+          onboardingKnowledgeLevel: localData?.onboardingKnowledgeLevel,
+          onboardingMotivation: localData?.onboardingMotivation,
+          onboardingDistractions: localData?.onboardingDistractions,
+          screenTimeLimitMinutes: localData?.screenTimeLimitMinutes,
+          onboardingStartingPoint: localData?.onboardingStartingPoint,
+          notificationPreferences: localData?.notificationPreferences,
           ageRange: localData?.ageRange || '25-34',
           onboardingStep: localData?.onboardingStep || 'identity',
           onboardingComplete: localData?.onboardingComplete || false,
-          level: localData?.level || 1,
-          xp: localData?.xp || 0,
-          streak: localData?.streak || 0,
+          level: 1,
+          xp: 0,
+          coins: 0,
+          streak: 0,
           isPro: false,
           streakShields: 0,
-          lastMissionDate: serverTimestamp(),
           createdAt: serverTimestamp(),
           lastActive: serverTimestamp(),
         };
@@ -554,11 +583,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const newUser = Object.fromEntries(Object.entries(rawNewUser).filter(([_, v]) => v !== undefined)) as AppUser;
 
         await setDoc(userRef, newUser, { merge: true });
+        const socialUsername = (newUser.displayName || 't1ger')
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .toLowerCase()
+          .replace(/\s+/g, '.')
+          .replace(/[^a-z0-9._]/g, '')
+          .slice(0, 24) || `t1ger.${firebaseUser.uid.slice(0, 6)}`;
         await setDoc(doc(db, 'users_public', firebaseUser.uid), {
           uid: newUser.uid,
           displayName: newUser.displayName || '',
           photoURL: newUser.photoURL || '',
           niche: newUser.niche || 'none',
+          username: socialUsername,
+          usernameNormalized: socialUsername,
+          inviteCode: firebaseUser.uid.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8).toUpperCase(),
           ...accountRole,
         }, { merge: true });
         setAppUser(newUser);
@@ -577,6 +616,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       await fetchAppUser(user);
     }
   }, [user, fetchAppUser]);
+
+  // Server-awarded XP, league results and entitlements stay canonical on every device.
+  useEffect(() => {
+    if (!user || USE_AUTH_EMULATOR) return;
+    return onSnapshot(doc(db, 'users', user.uid), snapshot => {
+      if (snapshot.exists()) {
+        const canonicalUser = snapshot.data() as AppUser;
+        setAppUser(canonicalUser);
+        saveLocalAppUser(canonicalUser);
+      }
+    }, error => console.warn('Live profile sync unavailable:', error.code));
+  }, [user?.uid]);
 
   useEffect(() => {
     const localUser = getLocalAppUser();
@@ -640,9 +691,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [fetchAppUser]);
 
+  const effectiveAppUser = React.useMemo(() => {
+    if (!appUser || devHarness.entitlement === 'real') return appUser;
+    const hasProAccess = devHarness.entitlement === 'pro';
+    return {
+      ...appUser,
+      isPro: hasProAccess,
+      isSuperT1ger: hasProAccess,
+    };
+  }, [appUser, devHarness.entitlement]);
+
   const value = React.useMemo(() => ({
     user,
-    appUser,
+    appUser: effectiveAppUser,
     loading,
     googleSignIn,
     appleSignIn,
@@ -656,7 +717,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loginAsDemoUser,
   }), [
     user,
-    appUser,
+    effectiveAppUser,
     loading,
     googleSignIn,
     appleSignIn,

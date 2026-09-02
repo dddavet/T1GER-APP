@@ -5,8 +5,10 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
-    base: './',
+    base: '/',
     plugins: [react(), tailwindcss()],
+    // Never crawl generated Android/iOS HTML bundles as development entry points.
+    optimizeDeps: { entries: ['index.html'] },
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src'),
@@ -15,6 +17,8 @@ export default defineConfig(() => {
     server: {
       host: true,
       port: 3000,
+      strictPort: true,
+      watch: { ignored: ['**/android/**', '**/ios/**', '**/functions/lib/**', '**/test-results/**'] },
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.
       hmr: process.env.DISABLE_HMR !== 'true',

@@ -22,6 +22,9 @@ import { getMissionPlaybook, MISSION_BANK } from '../../services/missionBank';
 import { shouldCelebrateStreakToday, markStreakCelebratedToday } from '../../services/brainService';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { useBrain } from '../../contexts/BrainContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { SocialService } from '../../services/socialService';
+import { FieldMissionService } from '../../services/fieldMissionService';
 
 import { LessonSummaryModal } from './LessonSummaryModal';
 import { StreakCelebrationModal } from '../StreakCelebrationModal';
@@ -38,8 +41,9 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   onClose,
   onExecuteApplyMission,
 }) => {
-  const { addXP } = useT1ger();
+  const { setActiveView } = useT1ger();
   const { language, completeMission, brainState, pathData } = useBrain();
+  const { appUser } = useAuth();
   const isEs = language === 'es';
 
   const playbook = getMissionPlaybook(mission);
@@ -79,12 +83,10 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
     } else {
       if (completionHandledRef.current) return;
       completionHandledRef.current = true;
-      // Completed all 4 cards -> Show Duolingo celebratory summary!
-      const totalTime = Math.max(12, Math.round((Date.now() - startTime) / 1000));
-      setElapsedSeconds(totalTime);
-      completeMission(mission.id);
-      await addXP(mission.xpReward || 100, 1, `mission:${mission.id}`);
-      setShowSummary(true);
+      FieldMissionService.queueFromBankMission(mission, appUser?.uid || 'local', language);
+      navigator.vibrate?.([18, 28, 42]);
+      onClose();
+      setActiveView('build');
     }
   };
 

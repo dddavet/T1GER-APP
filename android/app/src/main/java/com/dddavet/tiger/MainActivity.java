@@ -1,14 +1,20 @@
 package com.dddavet.tiger;
 
 import android.app.AppOpsManager;
-import android.app.usage.UsageStats;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.provider.Settings;
+import android.view.View;
+import android.view.WindowInsetsController;
 import android.webkit.JavascriptInterface;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import com.getcapacitor.BridgeActivity;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -24,6 +30,49 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        configureDarkSystemBars();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        configureDarkSystemBars();
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if (hasFocus) configureDarkSystemBars();
+    }
+
+    private void configureDarkSystemBars() {
+        getWindow().setStatusBarColor(Color.parseColor("#09090B"));
+        getWindow().setNavigationBarColor(Color.parseColor("#09090B"));
+
+        WindowInsetsControllerCompat compatController = WindowCompat.getInsetsController(
+            getWindow(),
+            getWindow().getDecorView()
+        );
+        compatController.setAppearanceLightStatusBars(false);
+        compatController.setAppearanceLightNavigationBars(false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowInsetsController controller = getWindow().getInsetsController();
+            if (controller != null) {
+                controller.setSystemBarsAppearance(
+                    0,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                        | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS
+                );
+            }
+        } else {
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                decorView.getSystemUiVisibility()
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                    & ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+            );
+        }
     }
 
     @Override
@@ -85,7 +134,26 @@ public class MainActivity extends BridgeActivity {
                 long endTime = System.currentTimeMillis();
                 long startTime = endTime - (24L * 60L * 60L * 1000L);
 
-                List<UsageStats> statsList = usm.queryUsageStats(UsageStatsManager.INTERVAL_BEST, startTime, endTime);
+                if (!hasUsagePermission()) return "{\"totalMinutes\":0,\"apps\":[],\"permissionGranted\":false}";
+                // Daily UsageStats buckets can extend outside our rolling 24-hour window.
+                // A preceding day of events seeds any session crossing the boundary.
+                UsageEvents events = usm.queryEvents(startTime - 86_400_000L, endTime);
+                ForegroundUsageWindow window = new ForegroundUsageWindow(startTime, endTime);
+                if (events != null) {
+                    UsageEvents.Event event = new UsageEvents.Event();
+                    while (events.hasNextEvent()) {
+                        events.getNextEvent(event);
+                        int type = event.getEventType();
+                        if (type == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                            window.resume(event.getPackageName(), event.getTimeStamp());
+                        } else if (type == UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                            window.pause(event.getPackageName(), event.getTimeStamp());
+                        } else if (type == UsageEvents.Event.SCREEN_NON_INTERACTIVE
+                                || type == UsageEvents.Event.DEVICE_SHUTDOWN) {
+                            window.close(event.getTimeStamp());
+                        }
+                    }
+                }
 
                 // Social package mapping
                 Map<String, String[]> targetApps = new HashMap<>();
@@ -101,12 +169,12 @@ public class MainActivity extends BridgeActivity {
                 Map<String, String> canonicalPackageByName = new HashMap<>();
                 Map<String, String> iconByName = new HashMap<>();
 
-                if (statsList != null) {
-                    for (UsageStats usageStats : statsList) {
-                        String pkg = usageStats.getPackageName();
+                {
+                    for (Map.Entry<String, Long> usage : window.finish().entrySet()) {
+                        String pkg = usage.getKey();
                         if (targetApps.containsKey(pkg)) {
                             String appName = targetApps.get(pkg)[0];
-                            long timeInForeground = usageStats.getTotalTimeInForeground();
+                            long timeInForeground = usage.getValue();
                             long current = aggregatedUsage.getOrDefault(appName, 0L);
                             aggregatedUsage.put(appName, current + timeInForeground);
                             canonicalPackageByName.putIfAbsent(appName, pkg);
@@ -133,6 +201,9 @@ public class MainActivity extends BridgeActivity {
 
                 result.put("totalMinutes", totalMinutes);
                 result.put("apps", appsArray);
+                result.put("windowStart", startTime);
+                result.put("windowEnd", endTime);
+                result.put("measurement", "foreground-event-estimate");
             } catch (Exception e) {
                 try {
                     result.put("totalMinutes", 0);

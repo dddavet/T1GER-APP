@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, MessageSquarePlus, Sparkles, TrendingUp, Zap, Target, DollarSign, CheckCircle2, Circle, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { addDoc, collection, getDocs, orderBy, query, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, getDocs, limitToLast, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
@@ -18,6 +18,13 @@ type ChatMessage = {
   checklist?: { text: string; done: boolean }[];
 };
 
+const sanitizeStoredMessage = (message: ChatMessage): ChatMessage => ({
+  ...message,
+  checklist: message.checklist
+    ?.filter(item => !/^(example|ejemplo):/i.test(item.text.trim()))
+    .slice(0, 5),
+});
+
 export const Coach: React.FC = () => {
   const { appUser, user } = useAuth();
   const { language } = useBrain();
@@ -26,29 +33,27 @@ export const Coach: React.FC = () => {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [streamingText, setStreamingText] = useState<string | null>(null);
   const [error, setError] = useState('');
   const endRef = useRef<HTMLDivElement>(null);
-  const streamIntervalRef = useRef<number | null>(null);
 
-  const userName = appUser?.displayName ? appUser.displayName.split(' ')[0] : (isEs ? 'David' : 'Student');
+  const userName = appUser?.displayName ? appUser.displayName.split(' ')[0] : (isEs ? 'aprendiz' : 'learner');
 
   const suggestionPills = useMemo(() => [
     {
-      icon: <Zap size={16} className="text-[#FF7300]" />,
-      text: isEs ? 'Estructurar una oferta de alto valor' : 'Craft an irresistible high-ticket offer',
+      icon: <Zap size={16} className="text-[#FF8A2A]" />,
+      text: isEs ? 'Mejorar una oferta' : 'Improve an offer',
     },
     {
-      icon: <Target size={16} className="text-[#06B6D4]" />,
-      text: isEs ? 'Estrategia para mis primeros 5 clientes' : 'Strategy to close my first 5 clients',
+      icon: <Target size={16} className="text-[#FF8A2A]" />,
+      text: isEs ? 'Conseguir 5 clientes' : 'Find 5 customers',
     },
     {
-      icon: <DollarSign size={16} className="text-[#10B981]" />,
-      text: isEs ? 'Optimizar mi flujo de caja este mes' : 'Optimize cash flow and unit economics',
+      icon: <DollarSign size={16} className="text-[#FF8A2A]" />,
+      text: isEs ? 'Revisar flujo de caja' : 'Review cash flow',
     },
     {
-      icon: <TrendingUp size={16} className="text-[#8B5CF6]" />,
-      text: isEs ? 'Fundamentos de apalancamiento' : 'Principles of capital leverage',
+      icon: <TrendingUp size={16} className="text-[#FF8A2A]" />,
+      text: isEs ? 'Entender apalancamiento' : 'Understand leverage',
     },
   ], [isEs]);
 
@@ -59,7 +64,7 @@ export const Coach: React.FC = () => {
       try {
         const localHistory = JSON.parse(localStorage.getItem(`t1ger_coach_${appUser.uid}`) || '[]');
         if (localHistory.length) {
-          setMessages(localHistory.slice(-40));
+          setMessages(localHistory.slice(-8).map(sanitizeStoredMessage));
         }
       } catch {
         // empty
@@ -70,12 +75,12 @@ export const Coach: React.FC = () => {
     const loadHistory = async () => {
       try {
         const snapshot = await getDocs(
-          query(collection(db, 'users', appUser.uid, 'coachingSessions'), orderBy('timestamp', 'asc'))
+          query(collection(db, 'users', appUser.uid, 'coachingSessions'), orderBy('timestamp', 'asc'), limitToLast(12))
         );
         const documents = snapshot.docs.map(item => item.data());
         const incremental = documents.flatMap(data => data.messages || []);
         if (incremental.length > 0) {
-          setMessages(incremental.slice(-40));
+          setMessages(incremental.slice(-8).map(sanitizeStoredMessage));
         }
       } catch {
         // fallback
@@ -85,21 +90,15 @@ export const Coach: React.FC = () => {
   }, [appUser?.uid, user]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, loading, streamingText]);
-
-  // Clean up streaming on unmount
-  useEffect(() => {
-    return () => {
-      if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-    };
-  }, []);
+    endRef.current?.scrollIntoView({ behavior: loading ? 'auto' : 'smooth' });
+  }, [messages.length, loading]);
 
   const parseSuggestedOptions = (text: string): { cleanText: string; options: string[]; checklist?: { text: string; done: boolean }[] } => {
     const lines = text.split('\n');
     const options: string[] = [];
     const textLines: string[] = [];
     const checklist: { text: string; done: boolean }[] = [];
+    const listLines: string[] = [];
 
     for (const line of lines) {
       const optionMatch = line.match(/^\s*(?:[1-3]\.|\-|\*|•)\s+(.+)$/);
@@ -109,17 +108,22 @@ export const Coach: React.FC = () => {
         const itemText = line.replace(/^[\•\-\*]\s*/, '').replace(/[\*\_\#]/g, '').trim();
         if (itemText.length > 0) {
           checklist.push({ text: itemText, done: false });
+          listLines.push(line);
         }
-        textLines.push(line);
       } else {
         textLines.push(line);
       }
     }
 
+    const conciseChecklist = checklist
+      .filter(item => !/^(example|ejemplo):/i.test(item.text))
+      .slice(0, 5);
+    if (conciseChecklist.length < 2) textLines.push(...listLines);
+
     return {
       cleanText: textLines.join('\n').trim(),
       options: options.slice(0, 3),
-      checklist: checklist.length >= 2 ? checklist : undefined,
+      checklist: conciseChecklist.length >= 2 ? conciseChecklist : undefined,
     };
   };
 
@@ -128,7 +132,7 @@ export const Coach: React.FC = () => {
       window.navigator.vibrate(10);
     }
     const cleanInput = messageText.trim();
-    if ((!cleanInput && !file) || loading || streamingText !== null || !appUser) return;
+    if ((!cleanInput && !file) || loading || !appUser) return;
 
     const userMsg: ChatMessage = {
       role: 'user',
@@ -145,52 +149,30 @@ export const Coach: React.FC = () => {
       const parsed = parseSuggestedOptions(responseText);
       const finalText = parsed.cleanText || responseText;
 
+      const modelMsg: ChatMessage = {
+        role: 'model',
+        text: finalText,
+        options: parsed.options.length > 0 ? parsed.options : undefined,
+        checklist: parsed.checklist,
+      };
+
+      setMessages(prev => [...prev, modelMsg]);
       setLoading(false);
 
-      // Start Progressive Fluid Typewriter Streamer
-      const words = finalText.split(' ');
-      let currentWordIndex = 0;
-      setStreamingText('');
-
-      if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-
-      streamIntervalRef.current = window.setInterval(() => {
-        currentWordIndex += 1;
-        const currentSlice = words.slice(0, currentWordIndex).join(' ');
-        setStreamingText(currentSlice);
-
-        if (currentWordIndex >= words.length) {
-          if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-          streamIntervalRef.current = null;
-
-          const modelMsg: ChatMessage = {
-            role: 'model',
-            text: finalText,
-            options: parsed.options.length > 0 ? parsed.options : undefined,
-            checklist: parsed.checklist,
-          };
-
-          setMessages(prev => [...prev, modelMsg]);
-          setStreamingText(null);
-
-          // Persist session
-          if (user) {
-            addDoc(collection(db, 'users', appUser.uid, 'coachingSessions'), {
-              coachId: 't1ger',
-              schemaVersion: 2,
-              messages: [userMsg, modelMsg],
-              summary: responseText.slice(0, 100),
-              timestamp: serverTimestamp(),
-            }).catch(console.warn);
-          } else {
-            const localHistory = [...messages, userMsg, modelMsg].slice(-40);
-            localStorage.setItem(`t1ger_coach_${appUser.uid}`, JSON.stringify(localHistory));
-          }
-        }
-      }, 12);
+      if (user) {
+        addDoc(collection(db, 'users', appUser.uid, 'coachingSessions'), {
+          coachId: 't1ger',
+          schemaVersion: 2,
+          messages: [userMsg, modelMsg],
+          summary: responseText.slice(0, 100),
+          timestamp: serverTimestamp(),
+        }).catch(console.warn);
+      } else {
+        const localHistory = [...messages, userMsg, modelMsg].slice(-12);
+        localStorage.setItem(`t1ger_coach_${appUser.uid}`, JSON.stringify(localHistory));
+      }
     } catch {
       setLoading(false);
-      setStreamingText(null);
       setError(
         isEs
           ? 'No pudimos conectar con el mentor. Inténtalo de nuevo.'
@@ -214,8 +196,6 @@ export const Coach: React.FC = () => {
   };
 
   const clearChat = () => {
-    if (streamIntervalRef.current) clearInterval(streamIntervalRef.current);
-    setStreamingText(null);
     setLoading(false);
     setMessages([]);
     if (appUser) {
@@ -223,15 +203,15 @@ export const Coach: React.FC = () => {
     }
   };
 
-  const hasMessages = messages.length > 0 || streamingText !== null;
+  const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#09090B] text-white selection:bg-[var(--ob-accent)] selection:text-black overflow-hidden pb-[env(safe-area-inset-bottom)]">
+    <div className="flex h-[100dvh] min-h-0 w-full flex-col overflow-hidden bg-[#09090B] text-white selection:bg-[var(--ob-accent)] selection:text-black pb-[env(safe-area-inset-bottom)]">
       {/* Subtle Ambient Radial Aura */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_50%_at_50%_-15%,rgba(255,115,0,0.14),transparent_70%)]" />
 
       {/* Top Header Bar with Safe Area Clearance */}
-      <header className="flex shrink-0 items-center justify-between border-b border-white/6 bg-[#09090B]/90 px-4 pb-3 pt-[calc(.85rem+env(safe-area-inset-top))] backdrop-blur-xl z-20">
+      <header className="z-20 flex shrink-0 items-center justify-between border-b border-white/6 bg-[#0D0D11] px-4 pb-3 pt-[calc(.85rem+env(safe-area-inset-top))]">
         <button
           onClick={() => setActiveView('learn')}
           className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white active:scale-95 transition cursor-pointer"
@@ -241,16 +221,18 @@ export const Coach: React.FC = () => {
         </button>
 
         <div className="flex items-center gap-2">
-          <div className="relative w-7 h-7 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+          <div className="relative flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-[#FF7300]/25 bg-[#FF7300]/10 p-0.5">
             <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
             <div className="absolute top-0 right-0 w-1.5 h-1.5 bg-[#10B981] rounded-full animate-pulse border border-[#09090B]" />
           </div>
           <span className="text-sm font-bold tracking-wider uppercase text-zinc-200">
             T1GER AI
           </span>
-          <span className="px-1.5 py-0.5 rounded bg-[var(--ob-accent)]/20 text-[9px] font-black text-[var(--ob-accent)] uppercase">
-            PRO
-          </span>
+          {appUser?.isPro && (
+            <span className="rounded bg-[var(--ob-accent)]/20 px-1.5 py-0.5 text-[9px] font-black uppercase text-[var(--ob-accent)]">
+              PRO
+            </span>
+          )}
         </div>
 
         <button
@@ -271,7 +253,7 @@ export const Coach: React.FC = () => {
             <motion.div
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.6, ease: 'easeOut' }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
               className="mb-6 flex items-center justify-center"
             >
               <AIOrb size="lg" />
@@ -281,7 +263,7 @@ export const Coach: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              transition={{ duration: 0.2 }}
               className="space-y-1.5 mb-8 max-w-xs px-2"
             >
               <p className="text-xs font-medium text-zinc-400">
@@ -296,8 +278,8 @@ export const Coach: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35, duration: 0.5 }}
-              className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full px-1"
+              transition={{ duration: 0.2 }}
+              className="grid w-full grid-cols-2 gap-2.5 px-1"
             >
               {suggestionPills.map((pill, idx) => (
                 <button
@@ -332,7 +314,7 @@ export const Coach: React.FC = () => {
                 >
                   <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start gap-3'}`}>
                     {!isUser && (
-                      <div className="shrink-0 mt-0.5 relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
+                      <div className="relative mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#FF7300]/25 bg-[#FF7300]/10 p-0.5">
                         <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
                       </div>
                     )}
@@ -386,7 +368,7 @@ export const Coach: React.FC = () => {
                             <button
                               key={optIdx}
                               onClick={() => handleSend(opt)}
-                              disabled={loading || streamingText !== null}
+                              disabled={loading}
                               className="rounded-full border border-white/12 bg-white/[.04] px-3.5 py-1.5 text-left text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[.08] hover:border-[var(--ob-accent)]/50 transition-all cursor-pointer active:scale-95 shadow-xs break-words [overflow-wrap:anywhere]"
                             >
                               {opt}
@@ -399,27 +381,6 @@ export const Coach: React.FC = () => {
                 </motion.div>
               );
             })}
-
-            {/* Live Streaming Typewriter Display */}
-            {streamingText !== null && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-3 w-full"
-              >
-                <div className="shrink-0 mt-0.5 relative w-8 h-8 rounded-full bg-gradient-to-tr from-[#FF7300]/20 to-[#06B6D4]/20 border border-white/10 flex items-center justify-center p-0.5 overflow-hidden">
-                  <img src="/t1ger-avatar.png" alt="T1GER" className="w-full h-full object-contain" />
-                </div>
-                <div className="flex flex-col gap-2 max-w-[calc(100%-2.5rem)]">
-                  <div className="text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] text-zinc-200 py-1">
-                    <p className="whitespace-pre-line">
-                      {streamingText}
-                      <span className="inline-block w-2 h-4 ml-1 bg-[var(--ob-accent)] animate-pulse align-middle rounded-xs" />
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
 
             {/* Mesmerizing Neural Thinking Waveform & Hologram */}
             {loading && (
@@ -439,15 +400,13 @@ export const Coach: React.FC = () => {
                     </span>
                   </div>
 
-                  {/* Multi-Color Siri / Apple Intelligence Fluid Waveform */}
+                  {/* Restrained brand waveform */}
                   <div className="flex items-center gap-1.5 h-3.5">
                     {[
                       { bg: '#FF7300', delay: '0ms', dur: '0.6s' },
                       { bg: '#F59E0B', delay: '120ms', dur: '0.8s' },
-                      { bg: '#06B6D4', delay: '240ms', dur: '0.7s' },
-                      { bg: '#8B5CF6', delay: '360ms', dur: '0.9s' },
-                      { bg: '#EC4899', delay: '480ms', dur: '0.65s' },
-                      { bg: '#10B981', delay: '600ms', dur: '0.75s' },
+                      { bg: '#FF8A2A', delay: '240ms', dur: '0.7s' },
+                      { bg: '#F59E0B', delay: '360ms', dur: '0.9s' },
                     ].map((wave, wIdx) => (
                       <motion.span
                         key={wIdx}
@@ -476,11 +435,11 @@ export const Coach: React.FC = () => {
       </section>
 
       {/* Floating Minimalist Input Bar */}
-      <footer className="border-t border-white/6 bg-[#09090B]/90 px-4 pb-[calc(.85rem+env(safe-area-inset-bottom))] pt-2.5 backdrop-blur-2xl z-20">
+      <footer className="z-20 border-t border-white/6 bg-[#0D0D11] px-4 pb-[calc(.85rem+env(safe-area-inset-bottom))] pt-2.5">
         {error && <p role="alert" className="mb-2 text-center text-xs text-red-400">{error}</p>}
         <SleekChatInput
           onSend={handleSend}
-          isLoading={loading || streamingText !== null}
+          isLoading={loading}
           placeholder={isEs ? 'Pregúntale a T1GER...' : 'Ask T1GER anything...'}
         />
       </footer>

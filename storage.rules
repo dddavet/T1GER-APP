@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /proofs/{userId}/{missionId}/{fileName} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      // The auditor uploads the exact bytes it approved; no evidence swapping.
+      allow write: if false;
+    }
+  }
+}

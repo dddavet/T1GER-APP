@@ -122,21 +122,18 @@ export const Profile = () => {
 
       <MascotGuide surface="profile" />
 
-      <motion.section initial="hidden" animate="shown" variants={{ hidden: {}, shown: { transition: { staggerChildren: .045 } } }} className="grid grid-cols-3 gap-2">
+      <section className="grid grid-cols-3 gap-2">
         {[
           { value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' },
           { value: learnStreak, label: isEs ? 'racha' : 'streak' },
           { value: stats.verifiedXP, label: 'vXP' },
         ].map(item => (
-          <motion.div key={item.label} variants={{ hidden: { opacity: 0, y: 10 }, shown: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 320, damping: 30 } } }} className="transform-gpu rounded-[1.15rem] border border-white/8 bg-[#121216] p-4 text-center">
+          <div key={item.label} className="rounded-[1.15rem] border border-white/8 bg-[#121216] p-4 text-center">
             <span className="block font-mono text-lg font-semibold text-white">{item.value}</span>
             <span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span>
-          </motion.div>
+          </div>
         ))}
-      </motion.section>
-
-      <AchievementsWall />
-      <ConsistencyHeatmap />
+      </section>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#121216] p-3.5 shadow-lg">
         <div className="flex items-center gap-3">
@@ -174,6 +171,9 @@ export const Profile = () => {
         <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Plan gratuito' : 'Free plan')} />
         <SettingRow icon={UserRound} title={isEs ? 'Reiniciar Diagnóstico Táctico' : 'Reset Tactical Diagnostic'} detail={isEs ? 'Recalibrar ruta' : 'Recalibrate path'} onClick={() => { localStorage.removeItem('t1ger_onboarding_draft_v2'); void updateAppUser({ onboardingComplete: false }); }} />
       </motion.section>
+
+      <AchievementsWall />
+      <ConsistencyHeatmap />
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .1 }} className="t1ger-panel transform-gpu overflow-hidden">
         <div className="border-b border-white/7 p-5"><div className="flex items-center justify-between gap-3"><div><p className="t1ger-kicker">Predator report</p><p className="mt-1 text-sm font-semibold text-white">{isEs ? 'Tu ejecución semanal, sin ruido' : 'Your weekly execution, without noise'}</p></div><FileText size={20} className="text-[var(--t1ger-orange)]" /></div></div>

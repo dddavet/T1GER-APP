@@ -1,25 +1,26 @@
 import React from 'react';
-import { Loader2 } from 'lucide-react';
 
 export const AppSkeleton = () => {
   return (
-    <div className="flex flex-col h-[100dvh] w-full bg-[#09090B] text-zinc-50 items-center justify-center relative overflow-hidden">
-      {/* Deep Obsidian Background with subtle dark warm glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,rgba(255,115,0,0.12),transparent_60%)]" />
-      <div className="relative flex flex-col items-center gap-6 z-10">
-        <div className="relative h-24 w-24 rounded-[2rem] bg-gradient-to-br from-[#1c1c1f] to-[#0d0d0f] border border-white/5 flex items-center justify-center p-4 shadow-[0_20px_40px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.05)]">
-          {/* Subtle spinning glow ring */}
-          <div className="absolute inset-0 rounded-[2rem] border border-[#FF7300]/20 animate-[spin_4s_linear_infinite] opacity-50" style={{ clipPath: 'polygon(0 0, 100% 0, 100% 50%, 0 50%)' }} />
-          <img src="/t1ger-avatar.png" alt="T1GER" className="h-full w-full object-contain filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]" />
-        </div>
-        <div className="flex items-center gap-2">
-          <Loader2 className="w-4 h-4 text-[#FF7300] animate-spin" />
-          <span className="font-mono text-[11px] font-semibold tracking-[0.15em] text-zinc-400 uppercase">
-            Loading System
-          </span>
-        </div>
+    <div role="status" aria-label="Loading T1GER" className="mx-auto flex h-[100dvh] w-full max-w-md flex-col overflow-hidden bg-[#09090B] px-3.5 text-[#F7F4F1]">
+      <div className="mt-[calc(.55rem+env(safe-area-inset-top))] flex h-11 items-center justify-between rounded-2xl border border-white/7 bg-[#121216] px-3">
+        <div className="flex items-center gap-2"><span className="h-7 w-7 animate-pulse rounded-xl bg-white/7" /><span className="h-3 w-16 animate-pulse rounded bg-white/7" /></div>
+        <div className="flex gap-1.5"><span className="h-7 w-14 animate-pulse rounded-lg bg-white/7" /><span className="h-7 w-10 animate-pulse rounded-lg bg-white/7" /><span className="h-7 w-10 animate-pulse rounded-lg bg-white/7" /></div>
       </div>
+      <div className="mt-4 flex-1 space-y-4 overflow-hidden">
+        <section className="overflow-hidden rounded-[1.75rem] border border-white/7 bg-[#121216] p-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex-1 space-y-3"><div className="h-2.5 w-24 animate-pulse rounded bg-[#FF7300]/16" /><div className="h-7 w-48 animate-pulse rounded-lg bg-white/8" /><div className="h-3 w-full animate-pulse rounded bg-white/6" /><div className="h-3 w-4/5 animate-pulse rounded bg-white/6" /></div>
+            <div className="h-24 w-24 animate-pulse rounded-[2rem] bg-white/6" />
+          </div>
+          <div className="mt-5 grid grid-cols-3 gap-px overflow-hidden rounded-xl bg-white/6"><span className="h-16 animate-pulse bg-[#0E0E12]" /><span className="h-16 animate-pulse bg-[#0E0E12]" /><span className="h-16 animate-pulse bg-[#0E0E12]" /></div>
+        </section>
+        <div className="h-14 animate-pulse rounded-2xl border border-white/6 bg-[#121216]" />
+        <section className="rounded-[1.5rem] border border-white/7 bg-[#121216] p-4"><div className="h-3 w-28 animate-pulse rounded bg-white/7" /><div className="mt-3 h-5 w-52 animate-pulse rounded bg-white/8" /><div className="mt-4 h-2 w-full animate-pulse rounded bg-white/6" /></section>
+        <section className="rounded-[1.5rem] border border-[#FF7300]/12 bg-[#121216] p-4"><div className="h-3 w-24 animate-pulse rounded bg-[#FF7300]/16" /><div className="mt-3 h-5 w-44 animate-pulse rounded bg-white/8" /><div className="mt-3 h-3 w-full animate-pulse rounded bg-white/6" /></section>
+      </div>
+      <div className="mb-[calc(.5rem+env(safe-area-inset-bottom))] grid h-16 grid-cols-4 gap-2 rounded-[1.5rem] border border-white/7 bg-[#121216] p-2"><span className="animate-pulse rounded-xl bg-[#FF7300]/10" /><span className="animate-pulse rounded-xl bg-white/4" /><span className="animate-pulse rounded-xl bg-white/4" /><span className="animate-pulse rounded-xl bg-white/4" /></div>
+      <span className="sr-only">Loading T1GER</span>
     </div>
   );
 };
-

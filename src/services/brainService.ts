@@ -17,6 +17,7 @@ import {
   MISSION_BANK,
   CURRICULUM_TRACKS,
 } from './missionBank';
+import { INTERACTIVE_FIELD_MISSION_BANK, INTERACTIVE_MISSION_BANK } from './interactiveCurriculum';
 import { fsrs, createEmptyCard, Rating, type Card, type FSRS } from 'ts-fsrs';
 import {
   type T1gerPetState,
@@ -27,6 +28,20 @@ import {
 
 // Global FSRS Instance
 export const fsrsEngine = fsrs();
+
+const PROGRESS_MISSION_BANK: BankMission[] = [
+  ...MISSION_BANK,
+  ...INTERACTIVE_MISSION_BANK,
+  ...INTERACTIVE_FIELD_MISSION_BANK,
+];
+
+export function getProgressMissionById(missionId: string): BankMission | undefined {
+  return PROGRESS_MISSION_BANK.find((mission) => mission.id === missionId);
+}
+
+export function isApplyMissionId(missionId: string): boolean {
+  return getProgressMissionById(missionId)?.type === 'real_world_task';
+}
 
 // ============================================================
 // TYPES
@@ -438,7 +453,7 @@ export function processMissionResult(
   score: number = 100,
   rating?: Rating
 ): BrainState {
-  const mission = MISSION_BANK.find(m => m.id === missionId);
+  const mission = getProgressMissionById(missionId);
   if (!mission) return state;
 
   // Curriculum rewards and progress are idempotent. Reviews need a dedicated
@@ -530,12 +545,13 @@ export function processMissionResult(
     fsrsCards: newFsrsCards
   });
 
-  // Handle Learn Streak
+  // Quiz completion prepares execution; only an accepted Apply proof secures the day.
+  const hasExecutionProof = completed && isApplyMissionId(missionId);
   const today = getLocalDateString();
   let newLearnStreak = state.learnStreak;
   let newLastLearnDate = state.lastLearnDate;
 
-  if (completed && state.lastLearnDate !== today) {
+  if (hasExecutionProof && state.lastLearnDate !== today) {
     // If they haven't learned today yet, increment or reset streak
     if (state.lastLearnDate) {
       const yesterday = new Date();
@@ -556,8 +572,8 @@ export function processMissionResult(
   // Feed T1ger on successful mission completion
   const currentPet = calculatePetVitalsWithDecay(state.petState || DEFAULT_PET_STATE);
   const xpEarned = mission.xpReward || 100;
-  const newTodayXP = (currentPet.todayXPEarned || 0) + (completed ? xpEarned : 0);
-  let updatedPetState: T1gerPetState = completed
+  const newTodayXP = (currentPet.todayXPEarned || 0) + (hasExecutionProof ? xpEarned : 0);
+  let updatedPetState: T1gerPetState = hasExecutionProof
     ? {
         ...currentPet,
         todayXPEarned: newTodayXP,
@@ -566,8 +582,7 @@ export function processMissionResult(
       }
     : currentPet;
 
-  const isDailyLearningMission = mission.nodeType === 'learn' || mission.type === 'book_lesson';
-  if (completed && isDailyLearningMission) {
+  if (hasExecutionProof) {
     updatedPetState = applyDailyMissionRescue(updatedPetState, mission.id);
   }
 
@@ -586,6 +601,28 @@ export function processMissionResult(
     fsrsCards: newFsrsCards,
     customWorkTasks: newCustomWorkTasks,
     petState: updatedPetState,
+  };
+}
+
+/**
+ * Records a retrieval-practice review without replaying curriculum rewards,
+ * streaks, pet recovery, or mission history. This is the only path Memory
+ * Shield refreshes should use after the original Proof of Work is verified.
+ */
+export function processMissionReview(state: BrainState, missionId: string, score: number): BrainState {
+  const wasLearned = state.missionHistory.some((record) => record.missionId === missionId && record.completed);
+  if (!wasLearned) return state;
+
+  const rating = score >= 90 ? Rating.Easy : score >= 75 ? Rating.Good : score >= 50 ? Rating.Hard : Rating.Again;
+  const card = state.fsrsCards?.[missionId] || createEmptyCard();
+  const scheduled = fsrsEngine.repeat(card, new Date());
+
+  return {
+    ...state,
+    fsrsCards: {
+      ...state.fsrsCards,
+      [missionId]: scheduled[rating].card,
+    },
   };
 }
 
@@ -764,7 +801,7 @@ export function completeTacticalTask(state: BrainState, id: string, proofUrl?: s
 export function getTopicProgress(state: BrainState): TopicProgress[] {
   const scores = applyDecay(state);
   return ALL_COMPETENCIES.map(comp => {
-    const totalInBank = MISSION_BANK.filter(m => m.competency === comp).length;
+    const totalInBank = PROGRESS_MISSION_BANK.filter(m => m.competency === comp).length;
     const completedInComp = new Set(
       state.missionHistory
         .filter(r => r.competency === comp && r.completed)
@@ -798,7 +835,7 @@ export function getUserWeaknesses(state: BrainState): UserWeaknesses {
     state.missionHistory
       .filter(record => !record.completed)
       .map(record => {
-        const mission = MISSION_BANK.find(m => m.id === record.missionId);
+        const mission = getProgressMissionById(record.missionId);
         return mission ? `${mission.title} (${mission.concept || ''})` : '';
       })
       .filter(Boolean)
@@ -910,7 +947,7 @@ export function getVulnerableShieldNodes(state: BrainState): BankMission[] {
   for (const id of completedIds) {
     const shield = getNodeMemoryShield(id, state);
     if (shield.percentage < 80) {
-      const mission = MISSION_BANK.find(m => m.id === id);
+      const mission = getProgressMissionById(id);
       if (mission) {
         vulnerableMissions.push({ mission, percentage: shield.percentage });
       }

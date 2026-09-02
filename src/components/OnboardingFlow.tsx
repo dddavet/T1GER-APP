@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'motion/react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -27,13 +27,38 @@ import {
   WalletCards,
   Zap,
 } from 'lucide-react';
-import { useAuth, type AppUser, type InvestmentProfile } from '../contexts/AuthContext';
+import { useAuth, type InvestmentProfile } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
+import { useT1ger } from '../contexts/T1gerContext';
 import type { Language } from '../services/i18n';
-import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
+import type { MascotReaction } from './T1gerMascot3D';
 import { MISSION_BANK } from '../services/missionBank';
 import { fireRewardConfetti } from './ui/confetti';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
+import { OneSignalService } from '../services/oneSignalService';
+import { ProofVerificationService } from '../services/proofVerificationService';
+import {
+  getOnboardingExperienceLevel,
+  getOnboardingTrack,
+  type OnboardingCourseTopic,
+  type OnboardingKnowledgeLevel,
+} from '../services/onboardingProfile';
+
+const LazyT1gerMascot3D = React.lazy(() =>
+  import('./T1gerMascot3D').then((module) => ({ default: module.T1gerMascot3D })),
+);
+
+const OnboardingMascot: React.FC<{
+  mood: MascotReaction;
+  className: string;
+  closeUp?: boolean;
+}> = ({ mood, className, closeUp }) => (
+  <React.Suspense
+    fallback={<img src="/mascot/t1ger-icon.png" alt="" aria-hidden="true" className={`${className} object-contain`} />}
+  >
+    <LazyT1gerMascot3D mood={mood} closeUp={closeUp} className={className} />
+  </React.Suspense>
+);
 
 export type OnboardingStep =
   | 'welcome'
@@ -55,8 +80,8 @@ export type OnboardingStep =
   | 'reminders'
   | 'access';
 
-export type CourseTopic = 'finance' | 'tech' | 'humanities' | 'skills' | 'random';
-export type KnowledgeLevel = 'zero' | 'basic' | 'intermediate' | 'competent' | 'advanced';
+export type CourseTopic = OnboardingCourseTopic;
+export type KnowledgeLevel = OnboardingKnowledgeLevel;
 export type StartingPointChoice = 'scratch' | 'placement';
 export type ReminderStatus = 'idle' | 'enabled' | 'denied' | 'unsupported' | 'dismissed';
 
@@ -86,20 +111,14 @@ interface OnboardingDraft {
 const DRAFT_KEY = 't1ger_onboarding_draft_v2';
 const ONBOARDING_XP = 100;
 
-export const STEP_ORDER: OnboardingStep[] = [
+const STEP_ORDER: OnboardingStep[] = [
   'welcome',
   'topic_select',
-  'course_building',
   'acquisition_source',
   'knowledge_level',
-  'encouragement',
   'motivation_reason',
-  'weekly_promise',
   'screen_time',
   'daily_goal',
-  'widget_preview',
-  'achievement_roadmap',
-  'starting_point',
   'micro_lesson',
   'success',
   'save_progress',
@@ -114,7 +133,7 @@ const defaultDraft: OnboardingDraft = {
   acquisitionSource: null,
   knowledgeLevel: 'zero',
   motivation: null,
-  screenTimeHours: 3.5,
+  screenTimeHours: 1.5,
   dailyGoal: 10,
   startingPoint: 'scratch',
   lessonCompleted: false,
@@ -123,7 +142,7 @@ const defaultDraft: OnboardingDraft = {
 };
 
 // Course Categories
-export const COURSE_TOPICS: Array<{
+const COURSE_TOPICS: Array<{
   id: CourseTopic;
   title: LocalizedText;
   subtitle: LocalizedText;
@@ -139,27 +158,15 @@ export const COURSE_TOPICS: Array<{
   },
   {
     id: 'tech',
-    title: { es: 'Ciencia, IA & Tecnología', en: 'Science, AI & Tech' },
-    subtitle: { es: 'Inteligencia artificial, ciberseguridad, física y código', en: 'Artificial intelligence, cybersecurity, physics & code' },
+    title: { es: 'IA & Automatización', en: 'AI & Automation' },
+    subtitle: { es: 'Prompts, agentes y flujos que puedes construir hoy', en: 'Prompts, agents, and workflows you can build today' },
     icon: '🤖',
   },
   {
     id: 'skills',
-    title: { es: 'Habilidades Prácticas', en: 'Practical Life Skills' },
-    subtitle: { es: 'Ventas, negociación, comunicación y salud de alto rendimiento', en: 'Sales, negotiation, high-impact communication & health' },
+    title: { es: 'Growth & Marketing', en: 'Growth & Marketing' },
+    subtitle: { es: 'Hooks, ofertas y sistemas de distribución que convierten', en: 'Hooks, offers, and distribution systems that convert' },
     icon: '⚡',
-  },
-  {
-    id: 'humanities',
-    title: { es: 'Humanidades & Psicología', en: 'Humanities & Psychology' },
-    subtitle: { es: 'Modelos mentales, toma de decisiones, historia y liderazgo', en: 'Mental models, decision making, history & leadership' },
-    icon: '🧠',
-  },
-  {
-    id: 'random',
-    title: { es: 'Cultura & Curiosidades', en: 'Culture & Discovery' },
-    subtitle: { es: 'Dinosaurios, mitología, astronomía y cultura general', en: 'Dinosaurs, mythology, deep astronomy & trivia' },
-    icon: '🦖',
   },
 ];
 
@@ -201,7 +208,9 @@ function loadDraft(): OnboardingDraft {
     if (!raw) return defaultDraft;
     const parsed = JSON.parse(raw) as Partial<OnboardingDraft>;
     if (parsed.version !== 2 || !parsed.step || !STEP_ORDER.includes(parsed.step)) return defaultDraft;
-    return { ...defaultDraft, ...parsed };
+    const migrated = { ...defaultDraft, ...parsed };
+    if (![0.75, 1, 1.5, 2].includes(migrated.screenTimeHours)) migrated.screenTimeHours = 1.5;
+    return migrated;
   } catch {
     return defaultDraft;
   }
@@ -240,7 +249,7 @@ const DuolingoHeader: React.FC<{
 
       {/* 3D Mascot */}
       <div className="h-32 w-32 relative flex items-center justify-center pointer-events-none">
-        <T1gerMascot3D mood={mood} closeUp className="h-32 w-32" />
+        <OnboardingMascot mood={mood} closeUp className="h-32 w-32" />
       </div>
     </div>
 
@@ -273,19 +282,18 @@ export const PrimaryAction: React.FC<
 
 export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplete }) => {
   const {
-    appUser,
     updateAppUser,
     googleSignIn,
     appleSignIn,
     emailPasswordSignIn,
     emailPasswordSignUp,
   } = useAuth();
-  const { language, setLanguage } = useBrain();
+  const { language, setLanguage, selectTrack, updatePetSettings } = useBrain();
+  const { addXP } = useT1ger();
   const isEs = language === 'es';
   const tr = (es: string, en: string) => (isEs ? es : en);
 
   const [draft, setDraft] = useState<OnboardingDraft>(() => loadDraft());
-  const [direction, setDirection] = useState(1);
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-up');
@@ -312,12 +320,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
   useEffect(() => {
     saveDraft(draft);
-    updateAppUser({
-      niche: draft.topic,
-      dailyTime: draft.dailyGoal,
-      onboardingComplete: false,
-    }).catch(() => undefined);
-  }, [draft, updateAppUser]);
+  }, [draft]);
 
   useEffect(() => {
     if (step === 'success' && draft.lessonCompleted) {
@@ -329,8 +332,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     setDraft((curr) => ({ ...curr, ...patch }));
   };
 
-  const goTo = (target: OnboardingStep, nextDirection = 1) => {
-    setDirection(nextDirection);
+  const goTo = (target: OnboardingStep, _nextDirection = 1) => {
     setError('');
     setDraft((curr) => ({ ...curr, step: target }));
   };
@@ -347,22 +349,35 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
   const currentTopicObj = COURSE_TOPICS.find((t) => t.id === draft.topic) || COURSE_TOPICS[0];
   const topicName = localize(currentTopicObj.title, language);
+  const primaryTrack = getOnboardingTrack(draft.topic);
+
+  const getProfilePatch = (onboardingComplete: boolean) => ({
+    niche: primaryTrack,
+    primaryTrack,
+    goal: draft.motivation || 'productivity',
+    experienceLevel: getOnboardingExperienceLevel(draft.knowledgeLevel),
+    onboardingKnowledgeLevel: draft.knowledgeLevel,
+    onboardingMotivation: draft.motivation || undefined,
+    onboardingDistractions: draft.selectedDistractions || [],
+    screenTimeLimitMinutes: Math.round(draft.screenTimeHours * 60),
+    onboardingStartingPoint: draft.startingPoint,
+    acquisitionSource: draft.acquisitionSource || undefined,
+    learningStyle: 'interactive' as const,
+    dailyTime: draft.dailyGoal,
+    onboardingComplete,
+    notificationPreferences: {
+      daily_reminder: draft.reminderStatus === 'enabled',
+      streak_risk: draft.reminderStatus === 'enabled',
+      apply_reminder: draft.reminderStatus === 'enabled',
+    },
+  });
 
   const requestReminder = async () => {
     try {
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          patchDraft({ reminderStatus: 'enabled' });
-        } else {
-          patchDraft({ reminderStatus: 'denied' });
-        }
-      } else {
-        // Native Android webview / mobile: enable reminders by default in user preferences
-        patchDraft({ reminderStatus: 'enabled' });
-      }
+      const granted = await OneSignalService.requestPermission();
+      patchDraft({ reminderStatus: granted ? 'enabled' : 'denied' });
     } catch {
-      patchDraft({ reminderStatus: 'enabled' });
+      patchDraft({ reminderStatus: 'denied' });
     }
     advance();
   };
@@ -371,12 +386,16 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     setFinalizing(true);
     patchDraft({ accessChoice: choice });
     try {
+      selectTrack(primaryTrack);
+      updatePetSettings(Math.round(draft.screenTimeHours * 60), Math.max(50, draft.dailyGoal * 10));
       await updateAppUser({
-        onboardingComplete: true,
-        isSuperT1ger: choice === 'super',
-        dailyTime: draft.dailyGoal,
-        niche: draft.topic,
+        ...getProfilePatch(true),
       });
+      await ProofVerificationService.claimOnboardingReward().catch((claimError) => {
+        console.warn('Onboarding cloud reward deferred:', claimError);
+        return null;
+      });
+      await addXP(ONBOARDING_XP, 2, 'onboarding:v2');
       window.localStorage.removeItem(DRAFT_KEY);
       onComplete();
     } catch (e: any) {
@@ -416,7 +435,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
               {/* 3D Mascot Centered */}
               <div className="h-56 w-56 relative flex items-center justify-center pointer-events-none my-2">
-                <T1gerMascot3D mood="happy" className="h-56 w-56" />
+                <OnboardingMascot mood="happy" className="h-56 w-56" />
               </div>
 
               <h1 className="text-3xl font-black tracking-tight text-white mt-4">
@@ -424,8 +443,8 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               </h1>
               <p className="text-sm font-medium text-zinc-400 mt-1 max-w-xs">
                 {tr(
-                  'El mejor aprendizaje del mundo convertido en acciones y criterio real.',
-                  'World-class education turned into real actions and financial judgment.'
+                  'Aprende en minutos. Demuéstralo con acciones reales.',
+                  'Learn in minutes. Prove it through real action.'
                 )}
               </p>
             </div>
@@ -516,7 +535,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 transition={{ repeat: Infinity, duration: 2.5 }}
                 className="h-48 w-48 relative flex items-center justify-center pointer-events-none mb-4"
               >
-                <T1gerMascot3D mood="celebrate" className="h-48 w-48" />
+                <OnboardingMascot mood="celebrate" className="h-48 w-48" />
               </motion.div>
 
               <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-[var(--ob-accent)]">
@@ -545,24 +564,24 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               mood="happy"
             />
 
-            <div className="space-y-2 my-auto">
+            <div className="grid grid-cols-2 gap-2 my-auto">
               {ACQUISITION_SOURCES.map((src) => {
                 const isSelected = draft.acquisitionSource === src.id;
                 return (
                   <button
                     key={src.id}
                     onClick={() => patchDraft({ acquisitionSource: src.id })}
-                    className={`flex items-center gap-3 w-full p-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                    className={`relative flex min-h-20 items-center gap-2.5 rounded-2xl border p-3 text-left transition-all active:scale-[0.985] cursor-pointer ${
                       isSelected
                         ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
                         : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
                     }`}
                   >
-                    <span className="text-xl shrink-0">{src.icon}</span>
-                    <span className="text-sm font-semibold flex-1">
+                    <span className="text-lg shrink-0">{src.icon}</span>
+                    <span className="text-xs font-semibold leading-snug flex-1">
                       {localize(src.title, language)}
                     </span>
-                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                    {isSelected && <Check size={14} className="absolute right-2 top-2 text-[var(--ob-accent)]" />}
                   </button>
                 );
               })}
@@ -581,7 +600,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         return (
           <div className="flex min-h-full flex-col py-3">
             <DuolingoHeader
-              speech={tr(`¿Cuánto sabes sobre ${topicName}?`, `How much ${topicName} do you know?`)}
+              speech={tr(`¿Cuál es tu nivel en ${topicName}?`, `What is your level in ${topicName}?`)}
               mood="thinking"
             />
 
@@ -639,7 +658,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div />
             <div className="flex flex-col items-center">
               <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-3">
-                <T1gerMascot3D mood="happy" className="h-44 w-44" />
+                <OnboardingMascot mood="happy" className="h-44 w-44" />
               </div>
 
               <h2 className="text-2xl font-black text-white">
@@ -705,7 +724,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div />
             <div className="flex flex-col items-center">
               <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-3">
-                <T1gerMascot3D mood="celebrate" className="h-44 w-44" />
+                <OnboardingMascot mood="celebrate" className="h-44 w-44" />
               </div>
 
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#FF7300]/20 border border-[#FF7300]/40 text-[#FF8C33] text-xs font-black uppercase mb-3">
@@ -725,16 +744,16 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 9: Screen Time Hook & T1GER Health Pact
       case 'screen_time': {
-        const hours = draft.screenTimeHours || 1.5;
+        const hours = [0.75, 1, 1.5, 2].includes(draft.screenTimeHours) ? draft.screenTimeHours : 1.5;
         const selectedApps = draft.selectedDistractions || ['instagram', 'tiktok'];
 
         const DISTRACTION_APPS = [
-          { id: 'tiktok', name: 'TikTok', icon: '🎵' },
-          { id: 'instagram', name: 'Instagram', icon: '📸' },
-          { id: 'youtube', name: 'YouTube', icon: '▶️' },
-          { id: 'x', name: 'X (Twitter)', icon: '𝕏' },
-          { id: 'games', name: 'Juegos', icon: '🎮' },
-          { id: 'browse', name: 'Doomscroll', icon: '📱' },
+          { id: 'tiktok', name: { es: 'TikTok', en: 'TikTok' }, icon: '🎵' },
+          { id: 'instagram', name: { es: 'Instagram', en: 'Instagram' }, icon: '📸' },
+          { id: 'youtube', name: { es: 'YouTube', en: 'YouTube' }, icon: '▶️' },
+          { id: 'x', name: { es: 'X (Twitter)', en: 'X (Twitter)' }, icon: '𝕏' },
+          { id: 'games', name: { es: 'Juegos', en: 'Games' }, icon: '🎮' },
+          { id: 'browse', name: { es: 'Scroll infinito', en: 'Doomscroll' }, icon: '📱' },
         ];
 
         const toggleApp = (appId: string) => {
@@ -771,7 +790,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     }`}
                   >
                     <span>{app.icon}</span>
-                    <span className="text-xs">{app.name}</span>
+                    <span className="text-xs">{localize(app.name, language)}</span>
                   </button>
                 );
               })}
@@ -1021,38 +1040,54 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 14: Hands-on Micro-Lesson
       case 'micro_lesson': {
-        const questionPrompt = tr(
-          '¿Cuál es la diferencia fundamental entre un Activo y un Pasivo?',
-          'What is the fundamental difference between an Asset and a Liability?'
-        );
-        const options = [
-          {
-            id: 0,
-            text: tr(
-              'Un Activo pone dinero en tu bolsillo; un Pasivo saca dinero de tu bolsillo.',
-              'An Asset puts money into your pocket; a Liability takes money out of your pocket.'
-            ),
-            correct: true,
+        const lessonByTopic: Record<CourseTopic, { prompt: string; promptEn: string; explanation: string; explanationEn: string; options: Array<{ es: string; en: string; correct: boolean }> }> = {
+          finance: {
+            prompt: '¿Qué acción aprovecha mejor el interés compuesto?',
+            promptEn: 'Which action uses compound growth best?',
+            explanation: 'Invertir una cantidad constante y reinvertir rendimientos convierte el tiempo en tu ventaja.',
+            explanationEn: 'Investing consistently and reinvesting returns turns time into your advantage.',
+            options: [
+              { es: 'Invertir cada mes y reinvertir los rendimientos.', en: 'Invest monthly and reinvest the returns.', correct: true },
+              { es: 'Esperar a encontrar el momento perfecto.', en: 'Wait until you find the perfect moment.', correct: false },
+              { es: 'Cambiar de estrategia cada semana.', en: 'Change strategies every week.', correct: false },
+            ],
           },
-          {
-            id: 1,
-            text: tr(
-              'Un Pasivo es un préstamo que siempre genera ganancias garantizadas.',
-              'A Liability is a loan that always produces guaranteed profits.'
-            ),
-            correct: false,
+          tech: {
+            prompt: '¿Qué mejora más un prompt para una tarea real?',
+            promptEn: 'What improves a prompt for a real task most?',
+            explanation: 'Un objetivo, contexto, restricciones y formato de salida reducen la ambigüedad y hacen el resultado utilizable.',
+            explanationEn: 'A goal, context, constraints, and output format reduce ambiguity and make the result usable.',
+            options: [
+              { es: 'Definir objetivo, contexto, restricciones y formato.', en: 'Define the goal, context, constraints, and format.', correct: true },
+              { es: 'Pedir simplemente que sea “mejor”.', en: 'Simply ask it to be “better”.', correct: false },
+              { es: 'Hacer el prompt largo sin estructura.', en: 'Make the prompt long without structure.', correct: false },
+            ],
           },
-          {
-            id: 2,
-            text: tr(
-              'Son exactamente lo mismo en contabilidad e inversiones.',
-              'They are the exact same thing in accounting and investing.'
-            ),
-            correct: false,
+          skills: {
+            prompt: '¿Qué hace fuerte a un hook de tres segundos?',
+            promptEn: 'What makes a three-second hook strong?',
+            explanation: 'Una tensión específica y relevante promete una recompensa clara antes de que la audiencia deslice.',
+            explanationEn: 'Specific, relevant tension promises a clear payoff before the audience scrolls.',
+            options: [
+              { es: 'Tensión específica y una recompensa clara.', en: 'Specific tension and a clear payoff.', correct: true },
+              { es: 'Una introducción larga sobre el creador.', en: 'A long introduction about the creator.', correct: false },
+              { es: 'Muchos temas diferentes a la vez.', en: 'Many different topics at once.', correct: false },
+            ],
           },
-        ];
-
-        const isCorrect = selectedLessonOption === 0;
+        };
+        const lesson = lessonByTopic[draft.topic];
+        const questionPrompt = tr(lesson.prompt, lesson.promptEn);
+        const options = lesson.options.map((option, index) => ({
+          id: index,
+          text: tr(option.es, option.en),
+          correct: option.correct,
+        }));
+        /*
+         * This first retrieval check is deliberately retryable: a mistake gives
+         * corrective feedback but never awards completion or XP.
+         */
+        const selectedOption = options.find((option) => option.id === selectedLessonOption);
+        const isCorrect = Boolean(selectedOption?.correct);
 
         return (
           <div className="flex min-h-full flex-col py-3">
@@ -1121,8 +1156,8 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   {isCorrect ? tr('¡Correcto! +100 XP desbloqueados', 'Correct! +100 XP unlocked') : tr('Respuesta correcta:', 'Correct answer:')}
                 </strong>
                 {tr(
-                  'Un activo pone dinero en tu bolsillo. Un pasivo resta liquidez.',
-                  'An asset produces cash flow. A liability drains your liquidity.'
+                  lesson.explanation,
+                  lesson.explanationEn
                 )}
               </motion.div>
             )}
@@ -1135,14 +1170,22 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 >
                   {tr('COMPROBAR', 'CHECK')} <Check size={18} />
                 </PrimaryAction>
-              ) : (
+              ) : isCorrect ? (
                 <PrimaryAction
                   onClick={() => {
                     patchDraft({ lessonCompleted: true, step: 'success' });
-                    setDirection(1);
                   }}
                 >
                   {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
+                </PrimaryAction>
+              ) : (
+                <PrimaryAction
+                  onClick={() => {
+                    setSelectedLessonOption(null);
+                    setLessonChecked(false);
+                  }}
+                >
+                  {tr('INTENTAR DE NUEVO', 'TRY AGAIN')} <ArrowRight size={18} />
                 </PrimaryAction>
               )}
             </div>
@@ -1157,7 +1200,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div />
             <div className="flex flex-col items-center">
               <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-2">
-                <T1gerMascot3D mood="celebrate" className="h-44 w-44" />
+                <OnboardingMascot mood="celebrate" className="h-44 w-44" />
               </div>
 
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--ob-accent)] text-black mb-3">
@@ -1186,14 +1229,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           try {
             // CRITICAL: Save all local state BEFORE redirecting
             // so we don't lose the user's answers when the page reloads on mobile
-            await updateAppUser({
-              niche: draft.topic || 'investing',
-              goal: draft.motivation || 'wealth',
-              experienceLevel: Number(draft.knowledgeLevel) || 1,
-              learningStyle: 'interactive',
-              dailyTime: 15,
-              onboardingComplete: false, // Wait until auth confirms
-            });
+            await updateAppUser(getProfilePatch(false));
 
             await googleSignIn();
             
@@ -1211,6 +1247,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           setAuthError('');
           setAuthLoading(true);
           try {
+            await updateAppUser(getProfilePatch(false));
             await appleSignIn();
             goTo('reminders');
           } catch (err: any) {
@@ -1235,6 +1272,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           setAuthError('');
           setAuthLoading(true);
           try {
+            await updateAppUser(getProfilePatch(false));
             if (authMode === 'sign-up') {
               await emailPasswordSignUp(authEmail, authPassword);
             } else {
@@ -1481,20 +1519,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           </header>
         )}
 
-        {/* Animated Step View Container */}
-        <AnimatePresence mode="wait" custom={direction}>
-          <motion.section
-            key={step}
-            custom={direction}
-            initial={{ opacity: 0, x: direction >= 0 ? 25 : -25 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: direction >= 0 ? -20 : 20 }}
-            transition={{ type: 'spring', stiffness: 350, damping: 32 }}
-            className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
-          >
-            {renderStepContent()}
-          </motion.section>
-        </AnimatePresence>
+        {/* Keep this container mounted so the WebGL mascot survives step changes. */}
+        <section className="min-h-0 flex-1 overflow-y-auto px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
+          {renderStepContent()}
+        </section>
       </main>
     </div>
   );

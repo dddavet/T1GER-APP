@@ -305,7 +305,9 @@ Return ONLY valid JSON matching this exact structure:
     };
   } catch (err) {
     console.warn('Gemini verification fallback to heuristic:', err);
-    // Intelligent heuristic fallback if offline or rate limited
+    // Never mint verified progress from a client heuristic in production.
+    // Local development keeps a deterministic fallback for the Dev Harness.
+    if (!import.meta.env.DEV) throw err;
     const hasNumbers = /\d+/.test(cleanText);
     const score = Math.min(95, 60 + (hasNumbers ? 20 : 10) + Math.min(15, words.length));
     return {

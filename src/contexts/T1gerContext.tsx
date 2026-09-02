@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { useBrain } from './BrainContext';
-import { MISSION_BANK } from '../services/missionBank';
+import { getProgressMissionById, isApplyMissionId } from '../services/brainService';
 import { fireConfetti } from '../components/ui/confetti';
 import { LeagueService } from '../services/leagueService';
 
@@ -27,7 +27,7 @@ interface T1gerContextType {
 const T1gerContext = createContext<T1gerContextType | undefined>(undefined);
 
 export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
-  const { appUser, updateAppUser } = useAuth();
+  const { appUser, user: authenticatedUser, updateAppUser, refreshAppUser } = useAuth();
   const { brainState } = useBrain();
   const [user, setUser] = useState<User>({ name: '', niche: null, mode: null, age: null, avatar: '🐅' });
   const [stats, setStats] = useState<Stats>({ xp: 0, verifiedXP: 0, coins: 0, streak: 0, health: 100, rank: 'Cub' });
@@ -64,17 +64,21 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
   }, [appUser]);
 
   const addXP = React.useCallback(async (amount: number, tier?: 1 | 2, rewardId?: string) => {
+    if (authenticatedUser) {
+      await refreshAppUser();
+      return; // Cloud rewards are issued exclusively by verified server actions.
+    }
     if (rewardId && typeof window !== 'undefined') {
       const ledgerKey = `t1ger_reward_${appUser?.uid || 'local'}_${rewardId}`;
       if (localStorage.getItem(ledgerKey)) return;
       localStorage.setItem(ledgerKey, String(Date.now()));
     }
     const rewardedMissionId = rewardId?.startsWith('mission:') ? rewardId.slice('mission:'.length) : undefined;
-    const rewardedMission = rewardedMissionId ? MISSION_BANK.find(mission => mission.id === rewardedMissionId) : undefined;
+    const rewardedMission = rewardedMissionId ? getProgressMissionById(rewardedMissionId) : undefined;
     const rewardAlreadyInHistory = rewardedMissionId
       ? brainState?.missionHistory?.some(record => record.missionId === rewardedMissionId && record.completed)
       : false;
-    const applyMissionsCompleted = (brainState?.missionHistory?.filter(record => record.completed && MISSION_BANK.find(mission => mission.id === record.missionId)?.type === 'real_world_task').length || 0)
+    const applyMissionsCompleted = (brainState?.missionHistory?.filter(record => record.completed && isApplyMissionId(record.missionId)).length || 0)
       + (rewardedMission?.type === 'real_world_task' && !rewardAlreadyInHistory ? 1 : 0);
     
     const previousStats = statsRef.current;
@@ -125,9 +129,11 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
         streak: brainState.learnStreak
       });
     }
-  }, [appUser, updateAppUser, brainState]);
+  }, [appUser, authenticatedUser, refreshAppUser, updateAppUser, brainState]);
 
   const spendCoins = React.useCallback(async (amount: number) => {
+    if (authenticatedUser) throw new Error('Use a server-validated purchase.');
+    if (!Number.isFinite(amount) || amount < 0 || amount > statsRef.current.coins) throw new Error('Invalid coin amount.');
     const finalCoins = Math.max(0, statsRef.current.coins - amount);
     const nextStats = { ...statsRef.current, coins: finalCoins };
     statsRef.current = nextStats;
@@ -136,9 +142,10 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     if (appUser) {
       await updateAppUser({ coins: finalCoins });
     }
-  }, [appUser, updateAppUser]);
+  }, [appUser, authenticatedUser, updateAppUser]);
 
   const addCoins = React.useCallback(async (amount: number) => {
+    if (authenticatedUser) return;
     const finalCoins = Math.max(0, statsRef.current.coins + amount);
     const nextStats = { ...statsRef.current, coins: finalCoins };
     statsRef.current = nextStats;
@@ -147,7 +154,7 @@ export const T1gerProvider = ({ children }: { children: React.ReactNode }) => {
     if (appUser) {
       await updateAppUser({ coins: finalCoins });
     }
-  }, [appUser, updateAppUser]);
+  }, [appUser, authenticatedUser, updateAppUser]);
 
   const value = React.useMemo(() => ({
     user, stats, activeView, triggerAnimation, 

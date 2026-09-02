@@ -12,6 +12,12 @@ def releaseKeyAlias = System.getenv('T1GER_ANDROID_KEY_ALIAS') ?: keystoreProper
 def releaseKeyPassword = System.getenv('T1GER_ANDROID_KEY_PASSWORD') ?: keystoreProperties.getProperty('keyPassword')
 def releaseSigningConfigured = releaseStoreFile && releaseStorePassword && releaseKeyAlias && releaseKeyPassword
 
+gradle.taskGraph.whenReady { graph ->
+    if (graph.allTasks.any { it.path in [':app:bundleRelease', ':app:assembleRelease'] } && !releaseSigningConfigured) {
+        throw new GradleException('Release signing is required. Configure android/key.properties or T1GER_ANDROID_* environment variables.')
+    }
+}
+
 android {
     namespace "com.dddavet.tiger"
     compileSdk rootProject.ext.compileSdkVersion

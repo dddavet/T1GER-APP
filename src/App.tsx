@@ -6,7 +6,6 @@ import { useAuth, AuthProvider } from './contexts/AuthContext';
 import { HUD } from './components/HUD';
 import { NavDock } from './components/NavDock';
 import { OfflineBanner } from './components/ui/OfflineBanner';
-import { CoachFAB } from './components/CoachFAB';
 import { getUserWeaknesses } from './services/brainService';
 import { AchievementTracker } from './components/AchievementTracker';
 import { TacticalPomodoro } from './components/TacticalPomodoro';
@@ -25,37 +24,42 @@ type ActiveMission = BankMission & {
   mission_brief?: string;
 };
 
-const BuildTab = lazy(() => import('./components/BuildTab').then(module => ({ default: module.BuildTab })));
-const Learn = lazy(() => import('./pages/Learn').then(module => ({ default: module.Learn })));
-const Profile = lazy(() => import('./pages/Profile').then(module => ({ default: module.Profile })));
+const loadBuildTab = () => import('./components/BuildTab').then(module => ({ default: module.BuildTab }));
+const loadLearn = () => import('./pages/Learn').then(module => ({ default: module.Learn }));
+const loadProfile = () => import('./pages/Profile').then(module => ({ default: module.Profile }));
+const loadSquadTab = () => import('./components/social/SquadTab').then(module => ({ default: module.SquadTab }));
+const BuildTab = lazy(loadBuildTab);
+const Learn = lazy(loadLearn);
+const Profile = lazy(loadProfile);
 const Coach = lazy(() => import('./pages/Coach').then(module => ({ default: module.Coach })));
 const MissionEngine = lazy(() => import('./components/MissionEngine').then(module => ({ default: module.MissionEngine })));
 const CuratedLessonPlayer = lazy(() => import('./components/learn/CuratedLessonPlayer').then(module => ({ default: module.CuratedLessonPlayer })));
-const SquadTab = lazy(() => import('./components/social/SquadTab').then(module => ({ default: module.SquadTab })));
+const SquadTab = lazy(loadSquadTab);
 const EveningInterrogation = lazy(() => import('./components/EveningInterrogation').then(module => ({ default: module.EveningInterrogation })));
 const OnboardingFlow = lazy(() => import('./components/OnboardingFlow').then(module => ({ default: module.OnboardingFlow })));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
 const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
+const DeleteAccount = lazy(() => import('./pages/DeleteAccount').then(module => ({ default: module.DeleteAccount })));
 const Simulator = lazy(() => import('./pages/Simulator').then(module => ({ default: module.Simulator })));
+const DevHarness = import.meta.env.DEV
+  ? lazy(() => import('./dev/DevHarness').then(module => ({ default: module.DevHarness })))
+  : null;
 
 const TAB_VIEW_ORDER = ['learn', 'build', 'compete', 'profile'] as const;
 const PAGE_VARIANTS = {
   initial: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
-    y: isTab ? 8 : 0,
-    scale: isTab ? 0.985 : 1,
+    x: isTab ? direction * 10 : 0,
   }),
   animate: { 
     opacity: 1, 
-    y: 0,
-    scale: 1,
-    transition: { type: 'spring' as const, stiffness: 600, damping: 35, mass: 0.6 }
+    x: 0,
+    transition: { duration: 0.18, ease: [0.23, 1, 0.32, 1] as const }
   },
   exit: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
-    y: isTab ? -4 : 0,
-    scale: isTab ? 0.99 : 1,
-    transition: { duration: 0.08, ease: [0.23, 1, 0.32, 1] as const }
+    x: isTab ? direction * -8 : 0,
+    transition: { duration: 0.12, ease: [0.23, 1, 0.32, 1] as const }
   }),
 };
 
@@ -102,6 +106,37 @@ const AppContent = () => {
   }, [setActiveView]);
 
   useEffect(() => {
+    let cancelled = false;
+    let removeListener: (() => Promise<void>) | undefined;
+    const openAppUrl = (rawUrl: string) => {
+      try {
+        const incoming = new URL(rawUrl);
+        const inviteUid = incoming.pathname.match(/^\/invite\/([^/?#]+)/i)?.[1]
+          || (incoming.hostname === 'invite' ? incoming.pathname.replace(/^\//, '') : '');
+        if (inviteUid) {
+          sessionStorage.setItem('t1ger_pending_invite_uid', decodeURIComponent(inviteUid));
+          setActiveView('compete');
+        }
+      } catch {
+        // Ignore malformed URLs from third-party intents.
+      }
+    };
+
+    void import('@capacitor/app').then(async ({ App }) => {
+      const launch = await App.getLaunchUrl();
+      if (!cancelled && launch?.url) openAppUrl(launch.url);
+      const listener = await App.addListener('appUrlOpen', event => openAppUrl(event.url));
+      removeListener = () => listener.remove();
+      if (cancelled) await listener.remove();
+    }).catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+      void removeListener?.();
+    };
+  }, [setActiveView]);
+
+  useEffect(() => {
     if (appUser?.uid) {
       let cancelled = false;
       import('./services/oneSignalService').then(async ({ OneSignalService }) => {
@@ -119,10 +154,28 @@ const AppContent = () => {
     }
   }, [appUser?.uid, brainState.learnStreak, language]);
 
+  // Warm the primary tab chunks after the first screen is interactive. This
+  // keeps the initial bundle small while making the first tab switch instant.
+  useEffect(() => {
+    if (!appUser?.onboardingComplete && !onboardingBypassed) return;
+    const timers = [
+      window.setTimeout(() => { void loadBuildTab(); }, 900),
+      window.setTimeout(() => { void loadSquadTab(); }, 1700),
+      window.setTimeout(() => { void loadProfile(); }, 2500),
+    ];
+    return () => timers.forEach(window.clearTimeout);
+  }, [appUser?.onboardingComplete, onboardingBypassed]);
+
 
   useEffect(() => {
     if (urlViewAppliedRef.current) return;
     urlViewAppliedRef.current = true;
+    const inviteUid = window.location.pathname.match(/^\/invite\/([^/?#]+)/i)?.[1];
+    if (inviteUid) {
+      sessionStorage.setItem('t1ger_pending_invite_uid', decodeURIComponent(inviteUid));
+      setActiveView('compete');
+      return;
+    }
     const requestedView = new URLSearchParams(window.location.search).get('view');
     const allowedViews = ['learn', 'build', 'compete', 'profile', 'coach'];
     if (requestedView === 'home') {
@@ -276,6 +329,7 @@ const AppContent = () => {
   const viewFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('view') : null;
   if (viewFromUrl === 'privacy') return <PrivacyPolicy onBack={() => window.history.back()} />;
   if (viewFromUrl === 'terms') return <TermsOfService onBack={() => window.history.back()} />;
+  if (window.location.pathname === '/delete-account') return <DeleteAccount />;
 
   useEffect(() => {
     if (!activeView) {
@@ -335,6 +389,10 @@ const AppContent = () => {
               setActiveMission(null);
               setActiveView('learn');
             }}
+            onFieldMissionReady={() => {
+              setActiveMission(null);
+              setActiveView('build');
+            }}
           />
         </div>
       </MotionConfig>
@@ -368,6 +426,7 @@ const AppContent = () => {
       <AchievementTracker />
       <TacticalPomodoro />
       <OfflineBanner />
+      {DevHarness && <Suspense fallback={null}><DevHarness /></Suspense>}
 
       {/* HUD - visible on non-fullscreen views */}
       {!isFullscreen && <HUD />}
@@ -383,24 +442,20 @@ const AppContent = () => {
         }`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
-        <AnimatePresence initial={false} mode="popLayout" custom={transitionContext}>
-          {activeContent && (
-            <motion.div
-              key={activeView}
-              custom={transitionContext}
-              variants={PAGE_VARIANTS}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              className={isFullscreen ? 'h-full flex flex-col will-change-transform w-full' : 'min-h-full will-change-transform w-full'}
-            >
-              {activeContent}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {activeContent && (
+          <motion.div
+            key={activeView}
+            custom={transitionContext}
+            variants={PAGE_VARIANTS}
+            initial="initial"
+            animate="animate"
+            className={isFullscreen ? 'h-full flex flex-col w-full' : 'min-h-full w-full'}
+          >
+            {activeContent}
+          </motion.div>
+        )}
       </main>
 
-      {!isFullscreen && <CoachFAB />}
       {!isFullscreen && <NavDock />}
 
       {/* Tactical Loading Overlay */}

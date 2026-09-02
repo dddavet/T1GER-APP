@@ -1,6 +1,8 @@
 import { db } from "../firebase";
 import { doc, getDoc, collection, getDocs, query, orderBy, limit } from "firebase/firestore";
 import { getAi } from "./gemini";
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app, auth } from '../firebase';
 
 const PROFESOR_SYSTEM_PROMPT = `
 Eres el "Mentor T1GER", un estratega de negocios, finanzas e inteligencia artificial de clase mundial.
@@ -11,7 +13,9 @@ PRINCIPIOS DE COMUNICACIÓN:
 2. Formato limpio y escaneable: Usa párrafos cortos y contundentes, puntos clave accionables y números concretos.
 3. Si el usuario envía una búsqueda, modo de razonamiento o captura, analiza los datos reales y da el veredicto estratégico.
 4. Idioma: 100% en el idioma del usuario (Español o Inglés).
-5. Concluye SIEMPRE con 2 a 3 sugerencias tácticas inmediatas para ejecutar en el formato:
+5. Mantén la respuesta por debajo de 180 palabras. Prioriza una recomendación y un máximo de 3 acciones.
+6. No repitas en una lista lo que ya explicaste en el cuerpo de la respuesta.
+7. Concluye SIEMPRE con 2 a 3 sugerencias tácticas inmediatas para ejecutar en el formato:
 "💡 Siguiente paso táctico:
 1. [Acción inmediata 1]
 2. [Acción inmediata 2]
@@ -78,7 +82,7 @@ const callOpenRouterWithFallback = async (
           model: modelName,
           messages: formattedMessages,
           temperature: 0.65,
-          max_tokens: 600
+          max_tokens: 350
         })
       });
 
@@ -117,6 +121,15 @@ export const getCoachResponse = async (
   _coachId = 't1ger',
   language: string = 'es'
 ): Promise<string> => {
+  if (!import.meta.env.DEV) {
+    if (!auth.currentUser) return language === 'en'
+      ? 'Sign in to talk with your AI mentor. Your learning path remains available offline.'
+      : 'Inicia sesión para hablar con tu mentor de IA. Tu ruta de aprendizaje sigue disponible sin conexión.';
+    const response = await httpsCallable<Record<string, unknown>, { text: string }>(getFunctions(app), 'askT1gerMentor')({
+      message: userMessage, history: history.slice(-8), language,
+    });
+    return response.data.text;
+  }
   // 1. Fetch user context & recent history if available
   let userData = {};
   if (userId && userId !== 'anonymous') {

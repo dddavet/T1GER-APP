@@ -16,6 +16,7 @@ import {
   type DailyPipeline,
   DEFAULT_BRAIN_STATE,
   processMissionResult,
+  processMissionReview,
   applyDecay,
   buildCurriculumSession,
   getTopicProgress,
@@ -26,6 +27,7 @@ import {
 } from '../services/brainService';
 import { type BankMission, type TrackType, MISSION_BANK, CURRICULUM_TRACKS } from '../services/missionBank';
 import { calculateT1gerEmotion, type T1gerEmotion } from '../services/t1gerStateEngine';
+import { getDailyStreak } from '../services/dailyStreak';
 
 interface BrainContextType {
   competencies: CompetencyProfile;
@@ -34,6 +36,8 @@ interface BrainContextType {
   /** Report a mission as completed */
   getDailyPipelineMissions: () => { pipeline: DailyPipeline | null, learnNode: BankMission | null, applyNode: BankMission | null };
   completeMission: (missionId: string, score?: number) => void;
+  /** Refresh spaced-repetition memory without replaying mission rewards. */
+  reviewMission: (missionId: string, score: number) => void;
   /** Report a mission as failed */
   failMission: (missionId: string) => void;
   /** Full brain state for debugging */
@@ -53,6 +57,7 @@ interface BrainContextType {
 
   // Dual Streaks
   learnStreak: number;
+  isLearnStreakAtRisk: boolean;
   tacticalStreak: number;
   completeHabit: () => void; // Legacy, keep for now
 
@@ -93,7 +98,8 @@ import {
   completeTacticalTask,
   commitDailyTactical
 } from '../services/brainService';
-import { type T1gerPetState, DEFAULT_PET_STATE, calculatePetVitalsWithDecay } from '../services/petEngine';
+import { type T1gerPetState, DEFAULT_PET_STATE, calculatePetVitalsWithDecay, applyDailyMissionRescue } from '../services/petEngine';
+import { useDevHarnessState } from '../dev/devHarnessState';
 
 const BrainContext = createContext<BrainContextType | undefined>(undefined);
 
@@ -246,7 +252,15 @@ function mergeBrainStates(localState: BrainState, cloudState: Partial<BrainState
 import { type Language } from '../services/i18n';
 
 export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { appUser } = useAuth();
+  const { appUser, user } = useAuth();
+  const [clockNow, setClockNow] = useState(Date.now);
+  useEffect(() => {
+    const refreshClock = () => setClockNow(Date.now());
+    const timer = window.setInterval(refreshClock, 60_000);
+    window.addEventListener('focus', refreshClock);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', refreshClock); };
+  }, []);
+  const devHarness = useDevHarnessState();
   const [brainState, setBrainState] = useState<BrainState>(DEFAULT_BRAIN_STATE);
   const [hydratedUserId, setHydratedUserId] = useState<string | null>(null);
   const [cloudReadyUserId, setCloudReadyUserId] = useState<string | null>(null);
@@ -290,7 +304,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setBrainState(loaded);
     setHydratedUserId(uid);
 
-    if (appUser?.uid && appUser.uid !== 'anonymous') {
+    if (user?.uid && appUser?.uid === user.uid) {
       const fetchFromFirestore = async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
@@ -315,7 +329,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => {
       cancelled = true;
     };
-  }, [activeUserId, appUser?.uid]);
+  }, [activeUserId, appUser?.uid, user?.uid]);
 
   useEffect(() => {
     const uid = activeUserId;
@@ -323,7 +337,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     saveState(uid, brainState);
 
-    if (appUser?.uid && appUser.uid !== 'anonymous' && cloudReadyUserId === uid) {
+    if (user?.uid && appUser?.uid === user.uid && cloudReadyUserId === uid) {
       const syncTimer = window.setTimeout(async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
@@ -338,7 +352,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       return () => window.clearTimeout(syncTimer);
     }
-  }, [brainState, activeUserId, appUser?.uid, hydratedUserId, cloudReadyUserId]);
+  }, [brainState, activeUserId, appUser?.uid, user?.uid, hydratedUserId, cloudReadyUserId]);
 
   // Ensure daily curriculum pipeline is built
   useEffect(() => {
@@ -389,6 +403,10 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const completeMission = useCallback((missionId: string, score: number = 100) => {
     setBrainState(prev => processMissionResult(prev, missionId, true, score));
+  }, []);
+
+  const reviewMission = useCallback((missionId: string, score: number) => {
+    setBrainState(prev => processMissionReview(prev, missionId, score));
   }, []);
 
   const failMission = useCallback((missionId: string) => {
@@ -502,9 +520,27 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return calculateT1gerEmotion(brainState);
   }, [brainState]);
 
+  const dailyStreak = getDailyStreak(
+    user ? appUser?.streak || 0 : brainState.learnStreak,
+    user ? appUser?.lastVerifiedMissionDay : brainState.lastLearnDate,
+    clockNow,
+    user ? appUser?.timeZone : undefined,
+  );
   const petState = useMemo(() => {
-    return calculatePetVitalsWithDecay(brainState.petState || DEFAULT_PET_STATE);
-  }, [brainState.petState]);
+    const current = calculatePetVitalsWithDecay(brainState.petState || DEFAULT_PET_STATE, clockNow);
+    return user && dailyStreak.completedToday
+      ? applyDailyMissionRescue(current, 'server-confirmed-proof', clockNow)
+      : current;
+  }, [brainState.petState, devHarness.screenTime, clockNow, user?.uid, dailyStreak.completedToday]);
+  const effectiveLearnStreak = devHarness.streak === 'real'
+    ? dailyStreak.count
+    : Math.max(7, brainState.learnStreak || 0);
+
+  const isLearnStreakAtRisk = useMemo(() => {
+    if (devHarness.streak === 'active') return false;
+    if (devHarness.streak === 'at_risk') return true;
+    return dailyStreak.isAtRisk;
+  }, [dailyStreak.isAtRisk, devHarness.streak]);
 
   const feedPet = useCallback((nutritionAmount: number = 30) => {
     setBrainState(prev => {
@@ -569,6 +605,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getSessionMissions,
     getDailyPipelineMissions,
     completeMission,
+    reviewMission,
     failMission,
     brainState,
     totalCompleted,
@@ -579,7 +616,8 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     skipDaysForPlacement,
     pathData,
     t1gerEmotion,
-    learnStreak: brainState.learnStreak,
+    learnStreak: effectiveLearnStreak,
+    isLearnStreakAtRisk,
     tacticalStreak: brainState.tacticalStreak,
     completeHabit,
     customHabits: brainState.customHabits,
@@ -601,7 +639,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     language,
     setLanguage,
     resetBrain,
-  }), [competencies, getSessionMissions, completeMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, petState, feedPet, completeFocusSession, petMascot, updatePetSettings, selectTrack, skipDaysForPlacement, t1gerEmotion, resetBrain, language, setLanguage]);
+  }), [competencies, getSessionMissions, completeMission, reviewMission, failMission, brainState, totalCompleted, dailyProgress, topicProgress, pathData, completeHabit, dailyTacticalStatus, setDayType, addHabit, addWorkTask, addLessonTask, removeTacticalTask, submitTacticalProof, commitTactical, petState, feedPet, completeFocusSession, petMascot, updatePetSettings, selectTrack, skipDaysForPlacement, t1gerEmotion, resetBrain, language, setLanguage, effectiveLearnStreak, isLearnStreakAtRisk]);
 
   return (
     <BrainContext.Provider value={value}>

@@ -1,5 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-@import "tailwindcss";
+@import "tailwindcss" source(none);
+@source "./**/*.{ts,tsx}";
 
 :root {
   --accent-main: #FF7300;
@@ -16,12 +16,12 @@
   --ob-surface: #121216;
   --ob-surface-raised: #18181D;
   --ob-border: rgba(255, 255, 255, 0.10);
-  --ob-text: #FFFFFF;
+  --ob-text: #F7F4F1;
   --ob-muted: #A1A1AA;
   --ob-muted-strong: #D4D4D8;
   --ob-accent: #FF7300;
   --ob-accent-deep: #C2410C;
-  --ob-accent-ink: #000000;
+  --ob-accent-ink: #160A02;
   
   /* Emil Kowalski Motion Easing */
   --ease-out-custom: cubic-bezier(0.23, 1, 0.32, 1);
@@ -30,7 +30,7 @@
 
 html, body {
   background-color: #050507;
-  color: #FFFFFF;
+  color: #F7F4F1;
   margin: 0;
   padding: 0;
   min-height: 100vh;
@@ -154,12 +154,53 @@ html, body {
 
 .t1ger-primary-button {
   background: #FF7300;
-  color: #09090B;
-  box-shadow: 0 12px 26px rgba(255,115,0,.2);
+  color: #160A02;
+  box-shadow: 0 5px 0 #A83D00, 0 12px 24px rgba(255,115,0,.14);
 }
 
 .t1ger-primary-button:not(:disabled):hover { background: #FF8426; transform: translateY(-1px); }
-.t1ger-primary-button:not(:disabled):active { transform: translateY(1px) scale(.975); box-shadow: 0 5px 14px rgba(255,115,0,.16); }
+.t1ger-primary-button:not(:disabled):active { transform: translateY(3px) scale(.985); box-shadow: 0 2px 0 #A83D00, 0 5px 12px rgba(255,115,0,.12); }
+.t1ger-primary-button:disabled { box-shadow: none; }
+
+.learn-range {
+  height: 1.6rem;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.learn-range::-webkit-slider-runnable-track {
+  height: .4rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,115,0,.42), rgba(255,255,255,.08));
+}
+
+.learn-range::-webkit-slider-thumb {
+  height: 1.25rem;
+  width: 1.25rem;
+  margin-top: -.46rem;
+  appearance: none;
+  border: 3px solid #121216;
+  border-radius: 999px;
+  background: #FF7300;
+  box-shadow: 0 0 0 1px rgba(255,155,74,.55);
+}
+
+.learn-range::-moz-range-track {
+  height: .4rem;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(255,115,0,.42), rgba(255,255,255,.08));
+}
+
+.learn-range::-moz-range-thumb {
+  height: 1rem;
+  width: 1rem;
+  border: 3px solid #121216;
+  border-radius: 999px;
+  background: #FF7300;
+}
 
 .t1ger-secondary-button {
   border: 1px solid rgba(255,255,255,.1);

@@ -1,88 +1,101 @@
-name: T1GER Android CI/CD Pipeline 🐅🚀
+name: T1GER verified Android build
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   pull_request:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-package:
-    name: Build & Package Android APK/AAB
+  verify-and-build:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 35
+    env:
+      HAS_SIGNING: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
     steps:
-      - name: 📥 Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: 🟢 Setup Node.js (v20)
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: 📦 Install NPM Dependencies
-        run: npm ci
-
-      - name: 🔍 TypeScript & Linter Verification
-        run: npm run lint
-
-      - name: 🏗️ Vite Production Build
-        run: npm run build
-        env:
-          VITE_APP_MODE: production
-          VITE_FIREBASE_PROJECT_ID: t1ger-69d6a
-
-      - name: ☕ Setup Java Development Kit (JDK 17)
-        uses: actions/setup-java@v4
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+      - uses: actions/setup-java@v4
         with:
-          distribution: 'zulu'
-          java-version: '17'
-          cache: 'gradle'
-
-      - name: 🔄 Capacitor Sync Android
-        run: npx cap sync android
-
-      - name: 🔑 Inject Google Services JSON (if secret present)
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - uses: android-actions/setup-android@v3
+      - run: npm ci
+      - run: npm --prefix functions ci
+      - name: Type safety, curriculum, economy and backend regressions
+        run: npm run test:all
+      - name: Audit shipped dependencies
         run: |
-          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
-            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > android/app/google-services.json
-          fi
-
-      - name: 🔨 Grant Execute Permission for Gradle Wrapper
-        run: chmod +x android/gradlew
-
-      - name: 📱 Build Android debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug
-
-      - name: 🔐 Configure Android release signing
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        shell: bash
-        run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > "$RUNNER_TEMP/t1ger-upload-key.jks"
-
-      - name: 📦 Build signed Android App Bundle
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
-        working-directory: android
+          npm audit --omit=dev --audit-level=high
+          npm --prefix functions audit --omit=dev --audit-level=high
+      - name: Build production web assets
+        run: npm run build:production
+      - name: Check secrets and release isolation
+        run: npm run release:check
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
+      - name: Mobile web smoke test
+        run: |
+          npm run dev > /tmp/t1ger-vite.log 2>&1 &
+          VITE_PID=$!
+          trap 'kill "$VITE_PID" || true' EXIT
+          for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:3000 > /dev/null && break || sleep 1; done
+          npm run test:shell
+      - name: Optional native push configuration
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then printf '%s' "$GOOGLE_SERVICES_JSON" > android/app/google-services.json; fi
+      - name: Build APK and native unit tests
+        run: npm run android:build -- --skip-web
+      - name: Restore Play upload key
+        if: env.HAS_SIGNING == 'true' && github.event_name != 'pull_request'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/t1ger-upload-key.jks"
+      - name: Build signed Play bundle
+        if: env.HAS_SIGNING == 'true' && github.event_name != 'pull_request'
         env:
           T1GER_ANDROID_KEYSTORE: ${{ runner.temp }}/t1ger-upload-key.jks
           T1GER_ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
           T1GER_ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           T1GER_ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew bundleRelease
-
-      - name: 📤 Upload Android Debug APK Artifact
-        uses: actions/upload-artifact@v4
+        run: npm run android:bundle -- --skip-web
+      - name: Remove temporary key
+        if: always()
+        run: rm -f -- "$RUNNER_TEMP/t1ger-upload-key.jks"
+      - uses: actions/upload-artifact@v4
         with:
           name: t1ger-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
           retention-days: 14
-
-      - name: 📤 Upload Android App Bundle (AAB) Artifact
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
+        if: env.HAS_SIGNING == 'true' && github.event_name != 'pull_request'
         with:
-          name: t1ger-release-aab
+          name: t1ger-signed-aab
           path: android/app/build/outputs/bundle/release/*.aab
-          if-no-files-found: ignore
-          retention-days: 30
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: t1ger-test-diagnostics
+          path: |
+            test-results/
+            android/app/build/reports/tests/

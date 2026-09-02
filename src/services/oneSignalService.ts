@@ -118,7 +118,11 @@ export class OneSignalService {
     }
 
     try {
-      if ((window as any).plugins?.OneSignal) {
+      // Never touch the native bridge until init() has accepted a real App ID.
+      // The Cordova plugin throws on Android when login/addTags runs pre-init.
+      if (!this.isInitialized) return;
+
+      if (this.runtime === 'native' && (window as any).plugins?.OneSignal) {
         (window as any).plugins.OneSignal.login(userId);
         if (tags) {
           (window as any).plugins.OneSignal.User.addTags(tags);
@@ -169,7 +173,7 @@ export class OneSignalService {
   public static async requestPermission(): Promise<boolean> {
     try {
       // Native Android / Capacitor
-      if ((window as any).plugins?.OneSignal) {
+      if (this.isInitialized && this.runtime === 'native' && (window as any).plugins?.OneSignal) {
         const granted = await (window as any).plugins.OneSignal.Notifications.requestPermission(true);
         return Boolean(granted);
       }

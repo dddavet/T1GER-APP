@@ -1,0 +1,20 @@
+{
+  "name": "t1ger-functions",
+  "private": true,
+  "main": "lib/index.js",
+  "engines": { "node": "22" },
+  "scripts": {
+    "build": "tsc",
+    "deploy": "firebase deploy --only functions"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.3.0",
+    "firebase-functions": "^7.3.2"
+  },
+  "devDependencies": {
+    "typescript": "~5.8.2"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

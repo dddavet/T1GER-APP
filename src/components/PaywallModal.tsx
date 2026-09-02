@@ -18,6 +18,17 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
 
   if (!isOpen) return null;
 
+  // No fabricated prices or free-trial promises before store products are configured.
+  if (import.meta.env.PROD) return (
+    <div className="fixed inset-0 z-[300] grid place-items-center bg-black/85 p-5" role="dialog" aria-modal="true" aria-labelledby="plus-title">
+      <section className="w-full max-w-sm space-y-5 rounded-3xl border border-white/10 bg-[#121216] p-6 text-white">
+        <h2 id="plus-title" className="text-2xl font-bold">T1GER Plus</h2>
+        <p className="text-sm leading-relaxed text-zinc-300">{isEs ? 'Las suscripciones todavía no están disponibles. Puedes continuar con el acceso gratuito. No se realizará ningún cobro.' : 'Subscriptions are not available yet. You can continue with free access. You will not be charged.'}</p>
+        <button onClick={onClose} className="t1ger-primary-button w-full">{isEs ? 'Continuar aprendiendo' : 'Keep learning'}</button>
+      </section>
+    </div>
+  );
+
   const features = [
     { icon: Zap, text: isEs ? 'Misiones ilimitadas' : 'Unlimited Missions', color: 'text-amber-400' },
     { icon: Shield, text: isEs ? 'Sin anuncios ni interrupciones' : 'No ads or interruptions', color: 'text-emerald-400' },

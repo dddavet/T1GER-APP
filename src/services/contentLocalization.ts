@@ -13,6 +13,19 @@ type LocalizedMission = Partial<Pick<BankMission,
   | 'frameworkSteps'
 >>;
 
+const ENGLISH_MISSIONS: Record<string, LocalizedMission> = {
+  'bus-m1-apply': {
+    title: 'Engineer a Grand Slam Offer',
+    taskBrief: 'Audit your core offer and make three concrete changes that cut the customer effort in half.',
+    reflectionPrompt: 'Which painful or slow step did you remove, and how does that change your promise?',
+    frameworkSteps: [
+      { title: 'Map the friction', desc: 'Name the slowest or hardest step the customer faces.' },
+      { title: 'Remove the burden', desc: 'Design one change that reduces time, effort, or uncertainty.' },
+      { title: 'Rewrite the promise', desc: 'Turn the improvement into a specific, credible offer.' },
+    ],
+  },
+};
+
 const SPANISH_MISSIONS: Record<string, LocalizedMission> = {
   'inv-m1-l1': {
     title: 'Activos y pasivos',
@@ -131,8 +144,7 @@ const SPANISH_LEVELS: Record<string, Pick<CurriculumLevel, 'title' | 'subtitle'>
 };
 
 export function localizeMission(mission: BankMission, language: Language): BankMission {
-  if (language !== 'es') return mission;
-  const localized = SPANISH_MISSIONS[mission.id];
+  const localized = language === 'es' ? SPANISH_MISSIONS[mission.id] : ENGLISH_MISSIONS[mission.id];
   return localized ? { ...mission, ...localized } : mission;
 }
 

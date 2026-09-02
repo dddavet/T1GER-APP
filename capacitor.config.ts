@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https',
-    cleartext: true
+    cleartext: false
   },
   plugins: {
     PushNotifications: {
@@ -19,7 +19,7 @@ const config: CapacitorConfig = {
       androidScaleType: "CENTER_CROP"
     },
     StatusBar: {
-      style: "DARK",
+      style: "LIGHT",
       backgroundColor: "#09090B"
     }
   }

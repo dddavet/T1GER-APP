@@ -686,11 +686,14 @@ const investingMissions: BankMission[] = [
 
 import { businessMissions, businessLevels } from './curriculum/business';
 import { aiMissions, aiLevels } from './curriculum/ai';
+import { INTERACTIVE_FIELD_MISSION_BANK, INTERACTIVE_MISSION_BANK } from './interactiveCurriculum';
 
 export const MISSION_BANK: BankMission[] = [
   ...investingMissions,
   ...businessMissions,
-  ...aiMissions
+  ...aiMissions,
+  ...INTERACTIVE_MISSION_BANK,
+  ...INTERACTIVE_FIELD_MISSION_BANK,
 ];
 
 export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {

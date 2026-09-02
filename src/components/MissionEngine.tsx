@@ -28,10 +28,13 @@ import { StreakCelebrationModal } from './StreakCelebrationModal';
 import { LessonSummaryModal } from './learn/LessonSummaryModal';
 import { verifyWrittenActionProof, type WrittenVerificationResult } from '../services/gemini';
 import { shouldCelebrateStreakToday, markStreakCelebratedToday } from '../services/brainService';
+import { SocialService } from '../services/socialService';
+import { FieldMissionService } from '../services/fieldMissionService';
 
 interface MissionEngineProps {
   mission: BankMission;
   onComplete: () => void;
+  onFieldMissionReady?: () => void;
 }
 
 type LearnStage = 'concept' | 'check';
@@ -48,7 +51,7 @@ const PAPER_ASSETS = [
 const formatMoney = (value: number, language: 'es' | 'en') =>
   new Intl.NumberFormat(language === 'es' ? 'es-CO' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
-export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMission, onComplete }) => {
+export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMission, onComplete, onFieldMissionReady }) => {
   const { addXP } = useT1ger();
   const { completeMission, language, brainState } = useBrain();
   const { appUser } = useAuth();
@@ -154,6 +157,21 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   const finishMission = async () => {
     if (submitting || evaluatingAI || (!isApply && !answerIsCorrect) || (isApply && !evidenceValid)) return;
     setError('');
+
+    if (!isApply) {
+      setSubmitting(true);
+      try {
+        FieldMissionService.queueFromBankMission(mission, appUser?.uid || 'local', language);
+        navigator.vibrate?.([18, 28, 42]);
+        onFieldMissionReady?.();
+      } catch (handoffError) {
+        console.error('MissionEngine field handoff failed:', handoffError);
+        setError(isEs ? 'No pudimos preparar la Misión de Campo. Inténtalo otra vez.' : 'We could not prepare the Field Mission. Try again.');
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
     
     // If it is a written/reflection Apply task, run real AI verification!
     if (isApply && mission.verificationMethod !== 'paper_trade' && mission.verificationMethod !== 'photo') {
@@ -197,6 +215,30 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
         isApply ? (mission.verificationTier ?? 2) : 1,
         `mission:${mission.id}`
       );
+      if (appUser) {
+        void SocialService.publishMissionActivity({
+          uid: appUser.uid,
+          displayName: appUser.displayName || (isEs ? 'Miembro T1GER' : 'T1GER member'),
+          photoURL: appUser.photoURL,
+          niche: appUser.niche,
+          weeklyXP: appUser.weeklyXP,
+          verifiedXP: appUser.verifiedXP,
+          currentWeekId: appUser.currentWeekId,
+          leagueTier: appUser.leagueTier,
+          streak: appUser.streak,
+        }, {
+          id: mission.id,
+          title: mission.title,
+          type: isApply ? 'apply' : 'learn',
+          durationMinutes: seconds / 60,
+          verified: !isApply || (mission.verificationTier ?? 2) === 1,
+          proofLabel: mission.verificationMethod === 'paper_trade'
+            ? `${trades.length} ${isEs ? 'orden(es) simulada(s)' : 'simulated order(s)'}`
+            : isApply
+              ? (isEs ? 'Evidencia revisada' : 'Evidence reviewed')
+              : (isEs ? 'Quiz completado' : 'Quiz completed'),
+        }).catch(error => console.warn('Social activity sync deferred:', error));
+      }
       setComplete(true);
       setShowSummaryModal(true);
     } finally {
@@ -329,7 +371,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                 </button>
               ) : answerIsCorrect ? (
                 <button disabled={submitting} onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); finishMission(); }} className="t1ger-primary-button mt-5 w-full">
-                  {isEs ? 'Completar lección' : 'Complete lesson'} <Check size={18} />
+                  {isEs ? 'Crear Misión de Campo' : 'Create Field Mission'} <ArrowRight size={18} />
                 </button>
               ) : (
                 <button onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); setSelectedOption(null); setAnswerChecked(false); }} className="t1ger-secondary-button mt-5 w-full">

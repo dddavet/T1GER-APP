@@ -1,3 +1,5 @@
+import { getDevScreenTimeMinutes } from '../dev/devHarnessState';
+
 export interface AppUsage {
   packageName: string;
   appName: string;
@@ -6,7 +8,7 @@ export interface AppUsage {
   percentage: number;
 }
 
-export type ScreenTimeDataSource = 'native' | 'manual' | 'unconfigured';
+export type ScreenTimeDataSource = 'native' | 'simulated' | 'manual' | 'unconfigured';
 
 export interface ScreenTimeReport {
   isNativeAndroid: boolean;
@@ -55,6 +57,17 @@ export const TRACKED_SOCIAL_APPS: ReadonlyArray<Omit<AppUsage, 'minutes' | 'perc
 ];
 
 const LEGACY_DISTRIBUTION = [0.35, 0.25, 0.2, 0.08, 0.07, 0.05];
+
+const createSimulatedApps = (totalMinutes: number): AppUsage[] => {
+  let assignedMinutes = 0;
+  return normalizeApps(TRACKED_SOCIAL_APPS.map((app, index) => {
+    const minutes = index === TRACKED_SOCIAL_APPS.length - 1
+      ? totalMinutes - assignedMinutes
+      : Math.round(totalMinutes * LEGACY_DISTRIBUTION[index]);
+    assignedMinutes += minutes;
+    return { ...app, minutes };
+  }));
+};
 
 const clampNumber = (value: unknown, min: number, max: number): number => {
   const numeric = typeof value === 'number' ? value : Number(value);
@@ -210,6 +223,17 @@ export class AndroidScreenTimeService {
     const hourlyWage = this.getHourlyWage();
     const isNativeAndroid = this.isAndroidNative();
     const hasPermission = this.checkPermission();
+    const simulatedMinutes = getDevScreenTimeMinutes(isNativeAndroid);
+
+    if (simulatedMinutes !== null) {
+      return this.createReport(
+        createSimulatedApps(simulatedMinutes),
+        hourlyWage,
+        'simulated',
+        isNativeAndroid,
+        hasPermission,
+      );
+    }
 
     if (isNativeAndroid && hasPermission) {
       try {

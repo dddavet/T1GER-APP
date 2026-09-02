@@ -44,7 +44,9 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
     const refresh = () => {
       const nextReport = AndroidScreenTimeService.getReport();
       setReport(nextReport);
-      if (nextReport.dataSource !== 'native') setManualApps(AndroidScreenTimeService.getManualApps());
+      if (nextReport.dataSource === 'manual' || nextReport.dataSource === 'unconfigured') {
+        setManualApps(AndroidScreenTimeService.getManualApps());
+      }
       setHourlyWage(nextReport.hourlyWage);
     };
     refresh();
@@ -53,7 +55,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
     return () => window.clearInterval(interval);
   }, [isOpen]);
 
-  const requiresManualFallback = report.dataSource !== 'native';
+  const requiresManualFallback = report.dataSource === 'manual' || report.dataSource === 'unconfigured';
   const overBudget = report.totalMinutes > petState.dailyScreenTimeLimitMinutes;
   const topApp = report.apps.find((app) => app.minutes > 0);
 
@@ -93,7 +95,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
   const updateWage = (value: number) => {
     const safeWage = AndroidScreenTimeService.saveHourlyWage(value);
     setHourlyWage(safeWage);
-    setReport(report.dataSource === 'native'
+    setReport(report.dataSource === 'native' || report.dataSource === 'simulated'
       ? AndroidScreenTimeService.getReport()
       : AndroidScreenTimeService.previewManualUsage(manualApps, safeWage));
   };
@@ -136,7 +138,11 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
           <div>
             <p className="font-mono text-[9px] font-semibold tracking-[0.18em] text-[#FF7300]">[ AUDIT / LAST 24H ]</p>
             <p className="mt-1 font-mono text-[10px] tracking-[0.08em] text-zinc-500">
-              {report.dataSource === 'native' ? 'ANDROID_USAGE_STATS · LIVE' : isEs ? 'ESTIMACIÓN MANUAL · PRIVADA' : 'MANUAL ESTIMATE · PRIVATE'}
+              {report.dataSource === 'native'
+                ? 'ANDROID_USAGE_STATS · LIVE'
+                : report.dataSource === 'simulated'
+                  ? (isEs ? 'SIMULACIÓN DEV · DATOS SEGUROS' : 'DEV SIMULATION · SAFE DATA')
+                  : isEs ? 'ESTIMACIÓN MANUAL · PRIVADA' : 'MANUAL ESTIMATE · PRIVATE'}
             </p>
           </div>
           <button onClick={onClose} aria-label={isEs ? 'Cerrar auditoría' : 'Close audit'} className="grid h-10 w-10 place-items-center border border-white/12 bg-white/[.035] text-zinc-300 transition-colors hover:border-white/25 hover:text-white active:scale-95">
