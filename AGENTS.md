@@ -89,3 +89,31 @@ See `firestore.rules` for security rules and data schemas.
 ## Styling
 
 Tailwind CSS v4 with custom theme variables (`--accent-main`, `--accent-glow`) for dynamic color themes based on day type (focus, beast, relaxed, rest).
+
+---
+
+## 🛠️ Production-Grade Agent Skills Framework (addyosmani/agent-skills)
+
+All development, review, and refactoring in this repository strictly adheres to the **Agent Skills** lifecycle (`.agents/skills/` and global plugin `agent-skills`).
+
+### Core Operating Behaviors (Mandatory Across All Changes)
+
+1. **Surface Assumptions**: Before implementing anything non-trivial, explicitly state assumptions about requirements, architecture, and scope.
+2. **Manage Confusion Actively**: When noticing inconsistencies between specs and code, STOP, name the specific contradiction, and resolve before continuing.
+3. **Push Back When Warranted**: Never be a yes-machine. Point out architectural flaws, quantify tradeoffs (e.g. latency, bundle size, complexity), and propose cleaner alternatives.
+4. **Enforce Simplicity**: Resist overcomplicating. Favor boring, proven, concise patterns. If 100 lines suffice, never write 1,000.
+5. **Maintain Scope Discipline**: Surgical precision only. Never remove comments or refactor orthogonal files unsolicited.
+6. **Verify, Don't Assume**: Never assume a change works because "it looks right". Run type-checks, automated test suites, and inspect bundle outputs.
+
+### Development Lifecycle & Skill Matrix
+
+| Phase | Skill | Activated By |
+|---|---|---|
+| **Meta** | `using-agent-skills` | Start of any task to map the right engineering process |
+| **Define** | `interview-me` / `spec-driven-development` | Clarifying ambiguity, requirements, and acceptance criteria |
+| **Plan** | `planning-and-task-breakdown` | Decomposing work into small, verifiable slices |
+| **Build** | `incremental-implementation` / `frontend-ui-engineering` / `api-and-interface-design` | Writing clean, accessible, performant code |
+| **Verify** | `test-driven-development` / `browser-testing-with-devtools` / `debugging-and-error-recovery` | Red-green-refactor, runtime console checks, reproduction tests |
+| **Review** | `code-review-and-quality` / `code-simplification` / `security-and-hardening` / `performance-optimization` | 5-axis code audits, bundle profiling, OWASP hardening |
+| **Ship** | `git-workflow-and-versioning` / `ci-cd-and-automation` / `shipping-and-launch` | Atomic commits, pre-flight checklists, release verification |
+
