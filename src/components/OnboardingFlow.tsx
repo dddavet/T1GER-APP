@@ -18,9 +18,12 @@ import {
   Mail,
   Play,
   Share2,
+  Shield,
   ShieldCheck,
   Smartphone,
   Sparkles,
+  Star,
+  RefreshCw,
   Target,
   TrendingDown,
   Trophy,
@@ -37,6 +40,8 @@ import { fireRewardConfetti } from './ui/confetti';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
 import { OneSignalService } from '../services/oneSignalService';
 import { ProofVerificationService } from '../services/proofVerificationService';
+import { revenueCat } from '../services/revenueCatService';
+import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import {
   getOnboardingExperienceLevel,
   getOnboardingTrack,
@@ -303,6 +308,11 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   const [lessonChecked, setLessonChecked] = useState(false);
   const [finalizing, setFinalizing] = useState(false);
   const [error, setError] = useState('');
+  const [paywallPackages, setPaywallPackages] = useState<PurchasesPackage[]>([]);
+  const [selectedPaywallPkgId, setSelectedPaywallPkgId] = useState<string>('$rc_annual');
+  const [purchasingPaywall, setPurchasingPaywall] = useState(false);
+  const [paywallNotice, setPaywallNotice] = useState('');
+  const [restoringPaywall, setRestoringPaywall] = useState(false);
 
   // Auto-detect browser/system language on initial mount if not set
   useEffect(() => {
@@ -315,6 +325,24 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   }, []);
 
   const step = draft.step;
+
+  useEffect(() => {
+    if (step === 'access') {
+      void (async () => {
+        try {
+          const pkgs = await revenueCat.getAvailablePackages();
+          if (pkgs.length > 0) {
+            setPaywallPackages(pkgs);
+            const annual = pkgs.find(p => p.identifier.includes('annual'));
+            if (annual) setSelectedPaywallPkgId(annual.identifier);
+            else setSelectedPaywallPkgId(pkgs[0].identifier);
+          }
+        } catch (err) {
+          console.warn('Failed loading onboarding paywall packages:', err);
+        }
+      })();
+    }
+  }, [step]);
   const currentStepIndex = STEP_ORDER.indexOf(step);
   const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEP_ORDER.length) * 100);
 
@@ -390,6 +418,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       updatePetSettings(Math.round(draft.screenTimeHours * 60), Math.max(50, draft.dailyGoal * 10));
       await updateAppUser({
         ...getProfilePatch(true),
+        isPro: true,
+        isFounder: choice === 'super',
+        role: choice === 'super' ? 'founder' : undefined,
       });
       await ProofVerificationService.claimOnboardingReward().catch((claimError) => {
         console.warn('Onboarding cloud reward deferred:', claimError);
@@ -401,6 +432,49 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     } catch (e: any) {
       setError(tr('No se pudo finalizar. Intenta nuevamente.', 'Failed to finalize. Please try again.'));
       setFinalizing(false);
+    }
+  };
+
+  const handleOnboardingPurchase = async () => {
+    const pkg = paywallPackages.find(p => p.identifier === selectedPaywallPkgId) || paywallPackages[0];
+    if (!pkg) return;
+
+    setPurchasingPaywall(true);
+    setPaywallNotice('');
+    try {
+      const result = await revenueCat.purchase(pkg);
+      if (result.success && result.isPro) {
+        fireRewardConfetti();
+        await finalize('super');
+      } else {
+        setPaywallNotice(tr('Debes activar un plan para desbloquear la aplicación.', 'You must activate a plan to unlock the application.'));
+      }
+    } catch (err: any) {
+      if (err?.userCancelled) {
+        setPaywallNotice(tr('Compra cancelada. Se requiere una membresía activa para acceder a T1GER.', 'Purchase cancelled. An active membership is required to access T1GER.'));
+      } else {
+        setPaywallNotice(tr('No se pudo procesar el pago con Google Play.', 'Could not process payment with Google Play.'));
+      }
+    } finally {
+      setPurchasingPaywall(false);
+    }
+  };
+
+  const handleOnboardingRestore = async () => {
+    setRestoringPaywall(true);
+    setPaywallNotice('');
+    try {
+      const result = await revenueCat.restore();
+      if (result.isPro) {
+        fireRewardConfetti();
+        await finalize('super');
+      } else {
+        setPaywallNotice(tr('No encontramos compras previas activas en esta cuenta.', 'No active past purchases found on this account.'));
+      }
+    } catch {
+      setPaywallNotice(tr('Error al restaurar compras.', 'Error restoring purchases.'));
+    } finally {
+      setRestoringPaywall(false);
     }
   };
 
@@ -1422,62 +1496,211 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           </div>
         );
 
-      // Frame 18: 100% Free Learning Commitment (Duolingo-style)
-      case 'access':
+      // Frame 18: Calm & Headspace Style Hard Paywall (Mandatory Membership / 7-Day Free Trial)
+      case 'access': {
+        const isAnnualTrial = selectedPaywallPkgId.includes('annual');
+        const isLifetime = selectedPaywallPkgId.includes('lifetime');
+
         return (
-          <div className="flex min-h-full flex-col justify-between py-4">
+          <div className="flex min-h-full flex-col justify-between py-2 text-left">
             <DuolingoHeader
-              speech={tr('¡Todo listo! Tu educación práctica es 100% gratis.', "You're all set! Your practical learning is 100% free.")}
+              speech={tr(
+                'Tu protocolo de 30 días está listo. Activa tu membresía para desbloquear el acceso a T1GER.',
+                'Your 30-day protocol is ready. Activate your membership to unlock access to T1GER.'
+              )}
               mood="celebrate"
-              eyebrow={tr('Tu Compromiso', 'Your Commitment')}
-              title={tr('Aprende Gratis para Siempre', 'Learn Free Forever')}
+              eyebrow={tr('PASO FINAL // ACCESO REQUERIDO', 'FINAL STEP // ACCESS REQUIRED')}
+              title={tr('Desbloquea el Acceso a T1GER', 'Unlock Access to T1GER')}
             />
 
-            <div className="space-y-4 my-auto">
-              <div className="rounded-3xl border border-[#3FC78E]/40 bg-[#3FC78E]/10 p-6 text-left space-y-3 shadow-[0_0_30px_rgba(63,199,142,0.15)]">
-                <div className="flex items-center justify-between">
-                  <span className="px-3 py-1 rounded-full bg-[#3FC78E] text-black font-black text-xs uppercase tracking-wider">
-                    {tr('100% GRATIS', '100% FREE')}
-                  </span>
-                  <CheckCircle2 className="text-[#3FC78E]" size={24} />
+            <div className="space-y-3 my-auto overflow-y-auto max-h-[calc(100dvh-235px)] pr-0.5 hide-scrollbar">
+              {/* Calm/Headspace Hard Gate Banner */}
+              <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#FF7300]/10 to-transparent p-3.5 flex items-start gap-3 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
+                <div className="w-8 h-8 shrink-0 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30">
+                  <Lock size={16} />
                 </div>
-                <strong className="text-xl text-white font-black block">
-                  {tr('Plan Personalizado Activado', 'Personalized Plan Activated')}
-                </strong>
-                <p className="text-xs text-[#BCEAD5] leading-relaxed">
-                  {tr(
-                    'Micro-lecciones diarias de 5 minutos, práctica con decisiones reales, rachas continuas y mentoría con IA sin suscripciones.',
-                    '5-minute daily micro-lessons, real decision practice, habit streaks, and AI coaching with zero subscriptions.'
-                  )}
-                </p>
+                <div>
+                  <strong className="text-xs text-amber-300 font-black uppercase tracking-wider block">
+                    {tr('Membresía Requerida // Sin Atajos', 'Membership Required // No Shortcuts')}
+                  </strong>
+                  <p className="text-[11px] text-zinc-300 leading-snug mt-1">
+                    {tr(
+                      'T1GER no ofrece versión gratuita sin compromiso. Para usar la app, debes activar un plan o iniciar tu prueba de 7 días. Si no pagas, el acceso permanecerá cerrado.',
+                      'T1GER does not offer a free tier. Real discipline requires commitment. An active membership or 7-day trial is required to use the app.'
+                    )}
+                  </p>
+                </div>
               </div>
 
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[.03] border border-white/8 text-left">
-                <span className="text-2xl">🔥</span>
-                <div>
-                  <strong className="text-xs text-white font-bold block">
-                    {tr('Meta: 1 Lección Diaria', 'Goal: 1 Daily Lesson')}
-                  </strong>
-                  <span className="text-[11px] text-zinc-400">
-                    {tr('Construye tu hábito financiero día a día.', 'Build your wealth habit day by day.')}
+              {/* Plan Options Selector */}
+              <div className="space-y-2">
+                <p className="text-[10px] font-mono font-black uppercase tracking-wider text-zinc-400 px-1">
+                  {tr('Elige tu plan de entrenamiento', 'Choose your training plan')}
+                </p>
+
+                {paywallPackages.length > 0 ? (
+                  paywallPackages.map(pkg => {
+                    const isSelected = selectedPaywallPkgId === pkg.identifier;
+                    const isPkgAnnual = pkg.identifier.includes('annual');
+                    const isPkgLifetime = pkg.identifier.includes('lifetime');
+
+                    return (
+                      <button
+                        key={pkg.identifier}
+                        type="button"
+                        onClick={() => setSelectedPaywallPkgId(pkg.identifier)}
+                        className={`relative w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                          isSelected
+                            ? 'bg-[#FF7300]/15 border-[#FF7300] shadow-[0_0_20px_rgba(255,115,0,0.25)]'
+                            : 'bg-white/[.03] border-white/10 hover:border-white/20'
+                        }`}
+                      >
+                        {isPkgAnnual && (
+                          <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-gradient-to-r from-emerald-400 to-[#3FC78E] text-black shadow-md">
+                            {tr('⭐ RECOMENDADO // 7 DÍAS GRATIS', '⭐ RECOMMENDED // 7 DAYS FREE')}
+                          </span>
+                        )}
+                        {isPkgLifetime && (
+                          <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-gradient-to-r from-amber-400 to-[#FF7300] text-black shadow-md">
+                            {tr('💎 PAGO ÚNICO VITALICIO', '💎 LIFETIME ONE-TIME')}
+                          </span>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
+                              isSelected ? 'border-[#FF7300] bg-[#FF7300]' : 'border-zinc-500'
+                            }`}>
+                              {isSelected && <Check className="w-3 h-3 text-black stroke-[3]" />}
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-black text-white">{pkg.product.title}</h4>
+                              <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
+                                {isPkgAnnual 
+                                  ? tr('7 días gratis, luego $59.99/año ($4.99/mes)', '7 days free, then $59.99/year ($4.99/mo)')
+                                  : pkg.product.description}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-black text-white font-mono block">
+                              {isPkgAnnual ? '$4.99/mes' : pkg.product.priceString}
+                            </span>
+                            {isPkgAnnual && (
+                              <span className="text-[9px] text-emerald-400 font-mono font-bold block">
+                                {tr('Ahorras 50%', 'Save 50%')}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="p-4 rounded-2xl bg-white/[.03] border border-white/10 text-center text-xs text-zinc-400">
+                    {tr('Cargando planes de Google Play...', 'Loading Google Play plans...')}
+                  </div>
+                )}
+              </div>
+
+              {/* Calm / Headspace Interactive Timeline */}
+              <div className="rounded-2xl border border-white/10 bg-white/[.02] p-3.5 space-y-2.5">
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className="text-[#FF7300]" />
+                  <span className="text-[10px] font-mono font-black uppercase tracking-wider text-zinc-300">
+                    {tr('Línea de tiempo de tu acceso', 'Access timeline')}
                   </span>
                 </div>
+
+                <div className="space-y-3 relative pl-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-emerald-500 before:via-amber-500 before:to-[#FF7300]">
+                  {/* Point 1 */}
+                  <div className="relative">
+                    <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-black" />
+                    <p className="text-[11px] font-bold text-white leading-tight">
+                      {tr('Hoy: Acceso Total Inmediato', 'Today: Full Instant Access')}
+                    </p>
+                    <p className="text-[10px] text-zinc-400">
+                      {isAnnualTrial
+                        ? tr('Comienza tu entrenamiento. Cobro de $0 hoy.', 'Start your training. $0 charged today.')
+                        : tr('Acceso ilimitado desbloqueado en tu cuenta.', 'Unlimited access unlocked on your account.')}
+                    </p>
+                  </div>
+
+                  {/* Point 2 */}
+                  {isAnnualTrial && (
+                    <div className="relative">
+                      <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-black" />
+                      <p className="text-[11px] font-bold text-white leading-tight">
+                        {tr('Día 5: Notificación de Recordatorio', 'Day 5: Reminder Notification')}
+                      </p>
+                      <p className="text-[10px] text-zinc-400">
+                        {tr('Te avisaremos 48h antes de que concluya tu prueba.', 'We will notify you 48h before your trial ends.')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Point 3 */}
+                  <div className="relative">
+                    <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-[#FF7300] ring-4 ring-black" />
+                    <p className="text-[11px] font-bold text-white leading-tight">
+                      {isAnnualTrial ? tr('Día 7: Comienza tu Plan', 'Day 7: Plan Starts') : tr('Control Total en Google Play', 'Full Control on Google Play')}
+                    </p>
+                    <p className="text-[10px] text-zinc-400">
+                      {tr('Cancela en 1 toque en Google Play sin penalizaciones.', 'Cancel anytime in 1 tap on Google Play.')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Trust Badge */}
+              <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-400 pt-1">
+                <Shield size={13} className="text-emerald-400" />
+                <span>{tr('Garantía oficial y pagos seguros de Google Play', 'Official Google Play guarantee & secure payments')}</span>
               </div>
             </div>
 
-            {error && (
-              <p className="text-xs text-[#E56A65] text-center font-semibold mb-2">
-                {error}
+            {/* Error / Notice message */}
+            {(paywallNotice || error) && (
+              <p role="alert" className="rounded-xl border border-[#FF4B4B]/30 bg-[#FF4B4B]/10 p-2 text-center text-xs font-bold text-[#FF8F8F] my-1.5">
+                {paywallNotice || error}
               </p>
             )}
 
-            <div className="pt-2">
-              <PrimaryAction onClick={() => finalize('free')} disabled={finalizing}>
-                {tr('ENTRAR A T1GER', 'ENTER T1GER')} <ChevronRight size={18} />
+            {/* CTAs & Footer */}
+            <div className="pt-2 space-y-2">
+              <PrimaryAction onClick={handleOnboardingPurchase} disabled={purchasingPaywall || finalizing}>
+                {purchasingPaywall ? (
+                  <>
+                    <RefreshCw size={18} className="animate-spin" />
+                    {tr('PROCESANDO...', 'PROCESSING...')}
+                  </>
+                ) : isAnnualTrial ? (
+                  <>
+                    {tr('EMPEZAR MIS 7 DÍAS GRATIS', 'START MY 7-DAY FREE TRIAL')} <ChevronRight size={18} />
+                  </>
+                ) : (
+                  <>
+                    {tr('DESBLOQUEAR MI PLAN AHORA', 'UNLOCK MY PLAN NOW')} <Sparkles size={18} />
+                  </>
+                )}
               </PrimaryAction>
+
+              <div className="flex items-center justify-between px-2 pt-0.5 text-[10px] font-mono text-zinc-400">
+                <button
+                  type="button"
+                  onClick={handleOnboardingRestore}
+                  disabled={restoringPaywall || purchasingPaywall}
+                  className="hover:text-zinc-200 underline cursor-pointer"
+                >
+                  {restoringPaywall ? tr('Restaurando...', 'Restoring...') : tr('Restaurar compras', 'Restore purchases')}
+                </button>
+                <span className="text-zinc-600">•</span>
+                <span className="text-zinc-500">{tr('Google Play Billing', 'Google Play Billing')}</span>
+              </div>
             </div>
           </div>
         );
+      }
 
       default:
         return null;
