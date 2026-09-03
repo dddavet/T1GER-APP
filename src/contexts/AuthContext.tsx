@@ -15,6 +15,7 @@ import {
 } from 'firebase/auth';
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { Capacitor } from '@capacitor/core';
 import { app, auth, db } from '../firebase';
 import { AUTH_BYPASS_ENABLED } from '../config/appMode';
 import { useDevHarnessState } from '../dev/devHarnessState';
@@ -404,6 +405,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const devHarness = useDevHarnessState();
 
   const googleSignIn = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
+    }
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
     
@@ -420,6 +424,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const appleSignIn = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
+    }
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');

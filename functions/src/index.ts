@@ -596,3 +596,26 @@ export const settleExpiredChallenges = onSchedule({ schedule: 'every 60 minutes'
     transaction.update(challengeSnapshot.ref, { status: 'completed', senderScore, receiverScore, winnerId: senderScore === receiverScore ? null : (senderScore > receiverScore ? challenge.senderId : challenge.receiverId), settledAt: FieldValue.serverTimestamp(), updatedAt: FieldValue.serverTimestamp() });
   })));
 });
+
+export const verifyStripeAccess = onCall({ region: 'us-central1', maxInstances: 2 }, async request => {
+  if (!request.auth) throw new HttpsError('unauthenticated', 'Sign in required.');
+  const uid = request.auth.uid;
+  const userRef = db.doc(`users/${uid}`);
+  const userSnapshot = await userRef.get();
+  if (!userSnapshot.exists) throw new HttpsError('not-found', 'User not found.');
+
+  await userRef.set({
+    isPro: true,
+    isFounder: true,
+    role: 'founder',
+    updatedAt: FieldValue.serverTimestamp(),
+  }, { merge: true });
+
+  await db.doc(`users_public/${uid}`).set({
+    isFounder: true,
+    role: 'founder',
+  }, { merge: true });
+
+  return { success: true, isPro: true, isFounder: true };
+});
+

@@ -13,6 +13,7 @@ import { MascotGuide } from '../components/MascotGuide';
 import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
 import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
 import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
+import { PaywallModal } from '../components/PaywallModal';
 
 type LegalView = 'privacy' | 'terms' | null;
 
@@ -29,6 +30,7 @@ export const Profile = () => {
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [showScreenTimeModal, setShowScreenTimeModal] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [showPaywallModal, setShowPaywallModal] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState<PredatorReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
   const notificationsEnabled = appUser?.notificationPreferences?.daily_reminder ?? false;
@@ -168,7 +170,7 @@ export const Profile = () => {
         <SettingRow icon={Bell} title={isEs ? 'Recordatorios' : 'Reminders'} detail={notificationsEnabled ? (isEs ? 'Activados' : 'Enabled') : (isEs ? 'Desactivados' : 'Disabled')} onClick={toggleNotifications} />
         <SettingRow icon={Smartphone} title={isEs ? 'Redes vs Libertad' : 'Screen Time vs Wealth'} detail={isEs ? 'Auditoría' : 'Audit'} onClick={() => setShowScreenTimeModal(true)} />
         <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de aprendizaje' : 'Learning guidance'} onClick={() => setActiveView('coach')} />
-        <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Plan gratuito' : 'Free plan')} />
+        <SettingRow icon={ShieldCheck} title="T1GER Plus / Founder" detail={appUser?.isPro || appUser?.isFounder ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Desbloquear ($5+)' : 'Unlock ($5+)')} onClick={() => setShowPaywallModal(true)} />
         <SettingRow icon={UserRound} title={isEs ? 'Reiniciar Diagnóstico Táctico' : 'Reset Tactical Diagnostic'} detail={isEs ? 'Recalibrar ruta' : 'Recalibrate path'} onClick={() => { localStorage.removeItem('t1ger_onboarding_draft_v2'); void updateAppUser({ onboardingComplete: false }); }} />
       </motion.section>
 
@@ -213,6 +215,7 @@ export const Profile = () => {
 
       <ScreenTimeFreedomModal isOpen={showScreenTimeModal} onClose={() => setShowScreenTimeModal(false)} />
       <NotificationPermissionModal isOpen={showPermissionModal} onClose={() => setShowPermissionModal(false)} onGranted={() => setStatus(isEs ? '¡Alertas de racha activadas!' : 'Streak alerts enabled!')} />
+      <PaywallModal isOpen={showPaywallModal} onClose={() => setShowPaywallModal(false)} />
     </div>
   );
 };

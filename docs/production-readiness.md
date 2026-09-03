@@ -112,17 +112,12 @@ un flujo nativo compatible antes de prometer Google Sign-In en Android WebView.
 Mientras tanto, el flujo de correo/contraseña requiere tener ese proveedor activo.
 Publicar `assetlinks.json` de `t1ger.app` solo con el certificado real de Play.
 
-### 3. Confirmar el alcance de la primera beta
+### 3. Alcance y Estado de las Tareas Técnicas Resueltas
 
-Recomendación técnica: beta gratuita y cerrada. Para una versión de pago aún hay
-que implementar Play Billing, verificación de compras en servidor, renovación,
-cancelación y restauración tras configurar los productos. No basta con activar `isPro`.
-
-Antes de abrir el contenido social a público general faltan el flujo operativo de
-denuncias/bloqueos y moderación. Las ligas actuales usan división por XP y cohortes
-por hash; no implementan todavía salas estrictas de 30–50 y ascenso/descenso semanal.
-Estas son limitaciones de producto/código, NO trámites que deba resolver el usuario
-manualmente. Deben cerrarse en el siguiente cambio si forman parte del lanzamiento.
+- **Cobros y Stripe**: Conectado el enlace real de Early Adopter / Fundador (`https://buy.stripe.com/fZueVeaebe5T5pvdpQaZi01`) con `client_reference_id`, `prefilled_email`, función en servidor `verifyStripeAccess` y feedback de confirmación.
+- **Moderación UGC (Google Play Compliance)**: Implementado sistema completo de denuncia (`/reports`) con motivos estructurados (contenido inapropiado, acoso, spam, etc.) y bloqueo de usuarios (`/users/{uid}/blockedUsers/{blockedId}`) en `firestore.rules`, `socialService.ts` y `SquadTab.tsx`, filtrando en tiempo real las publicaciones, retos y ligas.
+- **Ligas Semanales**: Cohortes de 30 miembros delimitadas con división estricta de Zona de Ascenso (Top 5) y Zona de Descenso (Puestos 26–30), con protección en Liga Bronce (sin descenso) y separadores visuales claros.
+- **Seguridad OAuth Android**: Flujo de Google/Apple Sign-In protegido en WebView de Capacitor para evitar `disallowed_useragent: 403`, guiando a los usuarios de la app nativa al acceso por correo y contraseña.
 
 ### 4. Datos legales y Play Console
 

@@ -13,10 +13,12 @@ import {
   Image as ImageIcon,
   LoaderCircle,
   MessageCircle,
+  MoreHorizontal,
   Search,
   Send,
   Share2,
   ShieldAlert,
+  ShieldX,
   Sparkles,
   Swords,
   Target,
@@ -35,6 +37,7 @@ import {
   SocialService,
   type DirectChallenge,
   type Friendship,
+  type ReportReason,
   type SocialProfile,
   type SocialReaction,
   type SocialViewer,
@@ -119,11 +122,12 @@ function Toast({ message }: { message: string }) {
   );
 }
 
-function FeedCard({ activity, isEs, onReact, onComment }: {
+function FeedCard({ activity, isEs, onReact, onComment, onModerate }: {
   activity: SquadActivity;
   isEs: boolean;
   onReact: (activity: SquadActivity, reaction: SocialReaction) => void;
   onComment: (activity: SquadActivity) => void;
+  onModerate?: (target: { uid: string; name: string }) => void;
 }) {
   const copy = activityCopy(activity, isEs);
   return (
@@ -140,8 +144,20 @@ function FeedCard({ activity, isEs, onReact, onComment }: {
               <p className="mt-0.5 font-mono text-[9px] uppercase tracking-wider text-zinc-500">{relativeTime(activity.createdAt, isEs)}</p>
             </div>
           </div>
-          <div className={`rounded-xl border px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-wider ${activity.missionType === 'apply' ? 'border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF9A3D]' : 'border-cyan-400/20 bg-cyan-400/[0.08] text-cyan-300'}`}>
-            {activity.missionType === 'apply' ? (isEs ? 'Aplicar' : 'Apply') : (isEs ? 'Aprender' : 'Learn')}
+          <div className="flex items-center gap-2">
+            <div className={`rounded-xl border px-2 py-1 font-mono text-[8px] font-bold uppercase tracking-wider ${activity.missionType === 'apply' ? 'border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF9A3D]' : 'border-cyan-400/20 bg-cyan-400/[0.08] text-cyan-300'}`}>
+              {activity.missionType === 'apply' ? (isEs ? 'Aplicar' : 'Apply') : (isEs ? 'Aprender' : 'Learn')}
+            </div>
+            {onModerate && (
+              <button
+                type="button"
+                onClick={() => onModerate({ uid: activity.userId, name: activity.userName })}
+                className="p-1 rounded-lg text-zinc-500 hover:text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer"
+                title={isEs ? 'Reportar o bloquear' : 'Report or block'}
+              >
+                <MoreHorizontal size={15} />
+              </button>
+            )}
           </div>
         </div>
 
@@ -194,23 +210,24 @@ function FeedCard({ activity, isEs, onReact, onComment }: {
   );
 }
 
-function FeedView({ activities, loading, isEs, onReact, onComment, onInvite }: {
+function FeedView({ activities, loading, isEs, onReact, onComment, onInvite, onModerate }: {
   activities: SquadActivity[];
   loading: boolean;
   isEs: boolean;
   onReact: (activity: SquadActivity, reaction: SocialReaction) => void;
   onComment: (activity: SquadActivity) => void;
   onInvite: () => void;
+  onModerate?: (target: { uid: string; name: string }) => void;
 }) {
   if (loading) return <div className="space-y-3">{[0, 1].map(item => <div key={item} className="h-64 animate-pulse rounded-[1.5rem] border border-white/[0.07] bg-white/[0.035]" />)}</div>;
   if (!activities.length) return <EmptyState icon={Activity} title={isEs ? 'Tu manada aún está en silencio' : 'Your squad is quiet'} body={isEs ? 'Invita a dos personas de confianza. Sus misiones verificadas aparecerán aquí en tiempo real.' : 'Invite two trusted people. Their verified missions will appear here in real time.'} action={<button onClick={onInvite} className="t1ger-primary-button mx-auto px-5 py-3 text-[11px]">{isEs ? 'INVITAR A MI MANADA' : 'INVITE MY SQUAD'}</button>} />;
-  return <div className="space-y-3">{activities.map(activity => <FeedCard key={`${activity.circleId}:${activity.id}`} activity={activity} isEs={isEs} onReact={onReact} onComment={onComment} />)}</div>;
+  return <div className="space-y-3">{activities.map(activity => <FeedCard key={`${activity.circleId}:${activity.id}`} activity={activity} isEs={isEs} onReact={onReact} onComment={onComment} onModerate={onModerate} />)}</div>;
 }
 
-function LeagueView({ members, loading, tier, isEs, onApply }: { members: LeagueMember[]; loading: boolean; tier: LeagueTier; isEs: boolean; onApply: () => void }) {
+function LeagueView({ members, loading, tier, isEs, onApply, onModerate }: { members: LeagueMember[]; loading: boolean; tier: LeagueTier; isEs: boolean; onApply: () => void; onModerate?: (target: { uid: string; name: string }) => void }) {
   const config = LEAGUE_TIERS[tier];
   const currentRank = Math.max(1, members.findIndex(member => member.isCurrentUser) + 1);
-  const zones = LeagueService.getZones(members.length);
+  const zones = LeagueService.getZones(members.length, tier);
   const nextTier = LeagueService.getNextTier(tier);
   const [remaining, setRemaining] = useState(() => LeagueService.getTimeRemaining());
 
@@ -239,7 +256,7 @@ function LeagueView({ members, loading, tier, isEs, onApply }: { members: League
         <div className="relative mt-4 grid grid-cols-3 gap-2">
           <div className="rounded-xl border border-white/[0.07] bg-black/20 p-2.5"><p className="font-mono text-[8px] uppercase text-zinc-500">{isEs ? 'Posición' : 'Rank'}</p><p className="mt-1 font-mono text-lg font-black tabular-nums text-white">#{currentRank}</p></div>
           <div className="rounded-xl border border-emerald-400/15 bg-emerald-400/[0.05] p-2.5"><p className="font-mono text-[8px] uppercase text-emerald-400/70">Top 5</p><p className="mt-1 font-mono text-lg font-black text-emerald-300">↑</p></div>
-          <div className="rounded-xl border border-[#FF4B4B]/15 bg-[#FF4B4B]/[0.05] p-2.5"><p className="font-mono text-[8px] uppercase text-[#FF7474]">Bottom 5</p><p className="mt-1 font-mono text-lg font-black text-[#FF7474]">↓</p></div>
+          <div className="rounded-xl border border-[#FF4B4B]/15 bg-[#FF4B4B]/[0.05] p-2.5"><p className="font-mono text-[8px] uppercase text-[#FF7474]">{tier === 'bronze' ? (isEs ? 'Seguro' : 'Safe') : 'Bottom 5'}</p><p className="mt-1 font-mono text-lg font-black text-[#FF7474]">{tier === 'bronze' ? '🛡️' : '↓'}</p></div>
         </div>
         <p className="relative mt-3 text-[10px] leading-relaxed text-zinc-400">{nextTier ? (isEs ? `Termina en el Top 5 para ascender a ${LEAGUE_TIERS[nextTier].nameEs}. Solo cuenta el XP verificado.` : `Finish Top 5 to reach ${LEAGUE_TIERS[nextTier].nameEn}. Only verified XP counts.`) : (isEs ? 'Estás en la élite. Defiende Obsidiana con XP verificado.' : 'You are in the elite. Defend Obsidian with verified XP.')}</p>
       </Surface>
@@ -248,16 +265,35 @@ function LeagueView({ members, loading, tier, isEs, onApply }: { members: League
         {loading ? <div className="space-y-2 p-3">{[0, 1, 2, 3, 4].map(item => <div key={item} className="h-14 animate-pulse rounded-xl bg-white/[0.035]" />)}</div> : members.map((member, index) => {
           const rank = index + 1;
           const promotion = rank <= zones.promotionEnd;
-          const danger = rank >= zones.demotionStart;
+          const danger = tier !== 'bronze' && rank >= zones.demotionStart;
           return (
             <React.Fragment key={member.id}>
-              {rank === zones.promotionEnd + 1 && <div className="flex items-center gap-2 border-y border-emerald-400/15 bg-emerald-400/[0.045] px-3 py-1.5 font-mono text-[8px] font-bold uppercase tracking-[.15em] text-emerald-300"><ArrowUp size={11} /> {isEs ? 'Límite de ascenso' : 'Promotion cutoff'}</div>}
-              {rank === zones.demotionStart && <div className="flex items-center gap-2 border-y border-[#FF4B4B]/20 bg-[#FF4B4B]/[0.045] px-3 py-1.5 font-mono text-[8px] font-bold uppercase tracking-[.15em] text-[#FF7474]"><ArrowDown size={11} /> {isEs ? 'Zona de descenso' : 'Demotion zone'}</div>}
+              {rank === zones.promotionEnd + 1 && <div className="flex items-center gap-2 border-y border-emerald-400/15 bg-emerald-400/[0.045] px-3 py-1.5 font-mono text-[8px] font-bold uppercase tracking-[.15em] text-emerald-300"><ArrowUp size={11} /> {isEs ? 'Límite de ascenso (Top 5)' : 'Promotion cutoff (Top 5)'}</div>}
+              {tier !== 'bronze' && rank === zones.demotionStart && <div className="flex items-center gap-2 border-y border-[#FF4B4B]/20 bg-[#FF4B4B]/[0.045] px-3 py-1.5 font-mono text-[8px] font-bold uppercase tracking-[.15em] text-[#FF7474]"><ArrowDown size={11} /> {isEs ? 'Zona de descenso (Puestos 26–30)' : 'Demotion zone (Ranks 26–30)'}</div>}
               <motion.div layout className={`flex min-h-[62px] items-center gap-3 border-b border-white/[0.05] px-3 py-2.5 last:border-0 ${member.isCurrentUser ? 'bg-[#FF7300]/[0.09]' : ''}`}>
                 <div className={`w-6 text-center font-mono text-[11px] font-black tabular-nums ${promotion ? 'text-emerald-300' : danger ? 'text-[#FF7474]' : 'text-zinc-500'}`}>{String(rank).padStart(2, '0')}</div>
                 <Avatar name={member.name} profile={{ photoURL: member.avatar.startsWith('http') ? member.avatar : undefined }} />
-                <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><p className="truncate text-[12px] font-extrabold text-zinc-100">{member.name}</p>{member.isCurrentUser && <span className="rounded bg-[#FF7300]/15 px-1.5 py-0.5 font-mono text-[7px] font-black uppercase text-[#FF9A3D]">{isEs ? 'Tú' : 'You'}</span>}</div><p className="mt-0.5 truncate font-mono text-[8px] uppercase tracking-wider text-zinc-500">{member.niche} · {member.streak}d 🔥</p></div>
-                <div className="text-right"><p className="font-mono text-[13px] font-black tabular-nums text-white">{member.vXP.toLocaleString()}</p><p className="font-mono text-[7px] uppercase tracking-wider text-zinc-500">vXP</p></div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-[12px] font-extrabold text-zinc-100">{member.name}</p>
+                    {member.isCurrentUser && <span className="rounded bg-[#FF7300]/15 px-1.5 py-0.5 font-mono text-[7px] font-black uppercase text-[#FF9A3D]">{isEs ? 'Tú' : 'You'}</span>}
+                  </div>
+                  <p className="mt-0.5 truncate font-mono text-[8px] uppercase tracking-wider text-zinc-500">{member.niche} · {member.streak}d 🔥</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-mono text-[13px] font-black tabular-nums text-white">{member.vXP.toLocaleString()}</p>
+                  <p className="font-mono text-[7px] uppercase tracking-wider text-zinc-500">vXP</p>
+                </div>
+                {!member.isCurrentUser && onModerate && (
+                  <button
+                    type="button"
+                    onClick={() => onModerate({ uid: member.uid || member.id, name: member.name })}
+                    className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/5 transition-colors cursor-pointer"
+                    title={isEs ? 'Reportar o bloquear' : 'Report or block'}
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                )}
               </motion.div>
             </React.Fragment>
           );
@@ -367,6 +403,160 @@ function CommentComposer({ activity, isEs, onClose, onSubmit }: { activity: Squa
   return createPortal(<div className="fixed inset-0 z-[190] flex items-end justify-center bg-black/75 p-3 backdrop-blur-sm"><motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md rounded-[1.6rem] border border-white/10 bg-[#121216] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"><div className="flex items-center justify-between"><div><p className="font-mono text-[8px] uppercase tracking-[.18em] text-[#FF8A1F]">{isEs ? 'Respuesta de squad' : 'Squad reply'}</p><h2 className="mt-1 max-w-[17rem] truncate text-sm font-black text-white">{copy.title}</h2></div><button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400"><X size={16} /></button></div><form onSubmit={event => { event.preventDefault(); if (body.trim()) { onSubmit(body); setBody(''); } }} className="mt-4 flex gap-2"><input autoFocus maxLength={280} value={body} onChange={event => setBody(event.target.value)} placeholder={isEs ? 'Escribe algo útil…' : 'Say something useful…'} className="h-12 min-w-0 flex-1 rounded-2xl border border-white/[0.09] bg-[#09090B] px-4 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-[#FF7300]/50" /><button type="submit" disabled={!body.trim()} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF7300] text-black disabled:opacity-40"><Send size={17} /></button></form></motion.div></div>, document.body);
 }
 
+function ModerateModal({
+  target,
+  viewerUid,
+  isEs,
+  onClose,
+  onReported,
+  onBlocked,
+}: {
+  target: { uid: string; name: string } | null;
+  viewerUid: string;
+  isEs: boolean;
+  onClose: () => void;
+  onReported: (name: string) => void;
+  onBlocked: (name: string) => void;
+}) {
+  const [step, setStep] = useState<'menu' | 'report' | 'confirm-block'>('menu');
+  const [reason, setReason] = useState<ReportReason>('inappropriate_content');
+  const [details, setDetails] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  if (!target) return null;
+
+  const REASONS: Array<{ id: ReportReason; labelEs: string; labelEn: string }> = [
+    { id: 'inappropriate_content', labelEs: 'Contenido o imagen inapropiada', labelEn: 'Inappropriate content or image' },
+    { id: 'harassment', labelEs: 'Acoso o mensaje hostil', labelEn: 'Harassment or hostile message' },
+    { id: 'offensive_language', labelEs: 'Lenguaje ofensivo / Odio', labelEn: 'Offensive language / Hate speech' },
+    { id: 'spam', labelEs: 'Spam o publicidad no deseada', labelEn: 'Spam or unwanted advertising' },
+    { id: 'impersonation', labelEs: 'Suplantación de identidad', labelEn: 'Impersonation' },
+    { id: 'other', labelEs: 'Otro motivo', labelEn: 'Other reason' },
+  ];
+
+  const handleReport = async () => {
+    setLoading(true);
+    try {
+      await SocialService.reportUser(viewerUid, target.uid, reason, details);
+      onReported(target.name);
+      onClose();
+    } catch {
+      //
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBlock = async () => {
+    setLoading(true);
+    try {
+      await SocialService.blockUser(viewerUid, target.uid);
+      onBlocked(target.name);
+      onClose();
+    } catch {
+      //
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#121216] p-5 shadow-2xl text-white">
+        {step === 'menu' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm">{isEs ? `Opciones: ${target.name}` : `Options: ${target.name}`}</h3>
+              <button onClick={onClose} className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-white cursor-pointer"><X size={16} /></button>
+            </div>
+            <div className="space-y-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setStep('report')}
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-amber-400/20 bg-amber-400/[0.04] hover:bg-amber-400/[0.08] text-left transition-colors cursor-pointer text-xs font-semibold text-amber-300"
+              >
+                <ShieldAlert size={18} className="text-amber-400 shrink-0" />
+                <div>
+                  <p className="font-bold text-white text-xs">{isEs ? 'Reportar contenido o conducta' : 'Report content or behavior'}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">{isEs ? 'Notificar a los moderadores de T1GER' : 'Notify T1GER safety team'}</p>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep('confirm-block')}
+                className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-left transition-colors cursor-pointer text-xs font-semibold text-red-300"
+              >
+                <ShieldX size={18} className="text-red-400 shrink-0" />
+                <div>
+                  <p className="font-bold text-red-200 text-xs">{isEs ? `Bloquear a ${target.name}` : `Block ${target.name}`}</p>
+                  <p className="text-[10px] text-zinc-400 mt-0.5">{isEs ? 'Ocultar sus retos, actividades y misiones' : 'Hide their challenges, activity & missions'}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === 'report' && (
+          <div className="space-y-3.5">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-sm text-amber-300 flex items-center gap-2">
+                <ShieldAlert size={16} /> {isEs ? 'Reportar usuario' : 'Report user'}
+              </h3>
+              <button onClick={onClose} className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-white cursor-pointer"><X size={16} /></button>
+            </div>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              {isEs ? 'Selecciona el motivo principal del reporte:' : 'Select the main reason for the report:'}
+            </p>
+            <div className="space-y-1.5">
+              {REASONS.map(r => (
+                <button
+                  key={r.id}
+                  type="button"
+                  onClick={() => setReason(r.id)}
+                  className={`w-full p-2.5 rounded-xl border text-left text-xs font-medium transition-colors cursor-pointer flex items-center justify-between ${reason === r.id ? 'border-[#FF7300] bg-[#FF7300]/10 text-white' : 'border-white/5 bg-white/[0.02] text-zinc-300'}`}
+                >
+                  <span>{isEs ? r.labelEs : r.labelEn}</span>
+                  {reason === r.id && <Check size={14} className="text-[#FF7300]" />}
+                </button>
+              ))}
+            </div>
+            <textarea
+              maxLength={400}
+              value={details}
+              onChange={e => setDetails(e.target.value)}
+              placeholder={isEs ? 'Detalles adicionales (opcional)...' : 'Additional details (optional)...'}
+              className="w-full h-16 rounded-xl border border-white/10 bg-black/30 p-2.5 text-xs text-white placeholder:text-zinc-600 outline-none resize-none focus:border-[#FF7300]"
+            />
+            <div className="flex gap-2 pt-1">
+              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer">{isEs ? 'Atrás' : 'Back'}</button>
+              <button onClick={handleReport} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-[#FF7300] text-black text-xs font-bold cursor-pointer disabled:opacity-50">{loading ? '...' : (isEs ? 'Enviar reporte' : 'Submit report')}</button>
+            </div>
+          </div>
+        )}
+
+        {step === 'confirm-block' && (
+          <div className="space-y-4 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto">
+              <ShieldX size={24} />
+            </div>
+            <h3 className="font-bold text-sm text-white">{isEs ? `¿Bloquear a ${target.name}?` : `Block ${target.name}?`}</h3>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              {isEs 
+                ? 'No verás sus misiones en el feed, no podrá enviarte retos ni aparecerá en tus salas sociales.'
+                : 'You will not see their missions in the feed, they will not be able to challenge you, and they will be removed from your social views.'}
+            </p>
+            <div className="flex gap-2 pt-2">
+              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer">{isEs ? 'Cancelar' : 'Cancel'}</button>
+              <button onClick={handleBlock} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold cursor-pointer disabled:opacity-50">{loading ? '...' : (isEs ? 'Sí, bloquear' : 'Yes, block')}</button>
+            </div>
+          </div>
+        )}
+      </motion.div>
+    </div>,
+    document.body
+  );
+}
+
 export const SquadTab: React.FC = () => {
   const { language } = useBrain();
   const { stats, setActiveView } = useT1ger();
@@ -384,6 +574,7 @@ export const SquadTab: React.FC = () => {
   const [inviteProfile, setInviteProfile] = useState<SocialProfile | null>(null);
   const [challengeOpponent, setChallengeOpponent] = useState<SocialProfile | null>(null);
   const [commentActivity, setCommentActivity] = useState<SquadActivity | null>(null);
+  const [moderateTarget, setModerateTarget] = useState<{ uid: string; name: string } | null>(null);
   const [sentIds, setSentIds] = useState<Set<string>>(new Set());
   const [nudgedIds, setNudgedIds] = useState<Set<string>>(new Set());
   const [toast, setToast] = useState('');
@@ -473,6 +664,20 @@ export const SquadTab: React.FC = () => {
     }
   };
 
+  const onModerateReported = (targetName: string) => {
+    notify(isEs ? `Reporte enviado sobre ${targetName}. Gracias por mantener a T1GER seguro.` : `Report submitted for ${targetName}.`);
+  };
+
+  const onModerateBlocked = (targetName: string) => {
+    if (moderateTarget) {
+      setActivities(prev => prev.filter(a => a.userId !== moderateTarget.uid));
+      setLeague(prev => prev.filter(m => (m.uid || m.id) !== moderateTarget.uid));
+      setFriends(prev => prev.filter(f => f.profile.uid !== moderateTarget.uid));
+      setChallenges(prev => prev.filter(c => c.senderId !== moderateTarget.uid && c.receiverId !== moderateTarget.uid));
+    }
+    notify(isEs ? `Has bloqueado a ${targetName}. Ya no verás sus publicaciones ni retos.` : `You blocked ${targetName}.`);
+  };
+
   const tabs: Array<{ id: CompeteView; label: string; icon: IconComponent }> = [
     { id: 'feed', label: isEs ? 'Actividad' : 'Activity', icon: Activity },
     { id: 'league', label: isEs ? 'Liga' : 'League', icon: Trophy },
@@ -494,8 +699,8 @@ export const SquadTab: React.FC = () => {
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={view} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: .16 }}>
-          {view === 'feed' && <FeedView activities={activities} loading={loading.feed} isEs={isEs} onReact={react} onComment={setCommentActivity} onInvite={() => setFinderOpen(true)} />}
-          {view === 'league' && <LeagueView members={league} loading={loading.league} tier={tier} isEs={isEs} onApply={() => setActiveView('build')} />}
+          {view === 'feed' && <FeedView activities={activities} loading={loading.feed} isEs={isEs} onReact={react} onComment={setCommentActivity} onInvite={() => setFinderOpen(true)} onModerate={setModerateTarget} />}
+          {view === 'league' && <LeagueView members={league} loading={loading.league} tier={tier} isEs={isEs} onApply={() => setActiveView('build')} onModerate={setModerateTarget} />}
           {view === 'squad' && <SquadView friends={friends} requests={requests} challenges={challenges} viewerUid={viewer.uid} isEs={isEs} nudgedIds={nudgedIds} onInvite={() => setFinderOpen(true)} onNudge={nudge} onChallenge={setChallengeOpponent} onAccept={accept} onChallengeDecision={decideChallenge} />}
         </motion.div>
       </AnimatePresence>
@@ -503,6 +708,18 @@ export const SquadTab: React.FC = () => {
       <FriendFinderModal open={finderOpen} viewer={viewer} isEs={isEs} initialProfile={inviteProfile} sentIds={sentIds} onClose={() => { setFinderOpen(false); setInviteProfile(null); }} onSent={sendFriendRequest} />
       <AnimatePresence>{challengeOpponent && <ChallengeModal opponent={challengeOpponent} viewer={viewer} coins={stats.coins} isEs={isEs} onClose={() => setChallengeOpponent(null)} onCreate={challenge => { setChallenges(current => [challenge, ...current]); setChallengeOpponent(null); notify(isEs ? `Reto enviado a ${challenge.receiverName}` : `Challenge sent to ${challenge.receiverName}`); }} />}</AnimatePresence>
       <AnimatePresence>{commentActivity && <CommentComposer activity={commentActivity} isEs={isEs} onClose={() => setCommentActivity(null)} onSubmit={addComment} />}</AnimatePresence>
+      <AnimatePresence>
+        {moderateTarget && (
+          <ModerateModal
+            target={moderateTarget}
+            viewerUid={viewer.uid}
+            isEs={isEs}
+            onClose={() => setModerateTarget(null)}
+            onReported={onModerateReported}
+            onBlocked={onModerateBlocked}
+          />
+        )}
+      </AnimatePresence>
       <Toast message={toast} />
     </div>
   );

@@ -101,8 +101,15 @@ export class LeagueService {
     return `${weekId}-${tier}-${room}`;
   }
 
-  static getZones(memberCount: number): { promotionEnd: number; demotionStart: number } {
-    if (memberCount <= 10) return { promotionEnd: Math.min(3, memberCount), demotionStart: Math.max(7, memberCount - 1) };
-    return { promotionEnd: Math.min(5, memberCount), demotionStart: Math.max(6, memberCount - 4) };
+  static getZones(memberCount: number, tier?: LeagueTier): { promotionEnd: number; demotionStart: number } {
+    const promotionEnd = memberCount <= 10 ? Math.min(3, memberCount) : Math.min(5, memberCount);
+    // Bronze league has no demotion (it is the foundation tier)
+    if (tier === 'bronze') {
+      return { promotionEnd, demotionStart: memberCount + 1 };
+    }
+    const demotionStart = memberCount <= 10
+      ? Math.max(promotionEnd + 1, memberCount - 1)
+      : Math.max(promotionEnd + 1, Math.min(26, memberCount - 4));
+    return { promotionEnd, demotionStart };
   }
 }

@@ -29,6 +29,7 @@ import { LeagueService, type LeagueMember, type LeagueTier } from './leagueServi
 export type SocialReaction = 'fire' | 'tiger' | 'respect';
 export type FriendshipStatus = 'pending' | 'accepted' | 'declined';
 export type ChallengeStatus = 'pending' | 'active' | 'completed' | 'declined';
+export type ReportReason = 'spam' | 'harassment' | 'inappropriate_content' | 'offensive_language' | 'impersonation' | 'other';
 
 export interface SocialProfile {
   uid: string;
@@ -307,7 +308,7 @@ export class SocialService {
         isCurrentUser: true,
         lastActiveAt: Date.now(),
       };
-      const coreMembers = DEMO_PROFILES.map(profile => ({
+      const coreMembers: LeagueMember[] = DEMO_PROFILES.map(profile => ({
         id: profile.uid,
         uid: profile.uid,
         name: profile.displayName,
@@ -316,9 +317,10 @@ export class SocialService {
         vXP: profile.weeklyXP,
         streak: profile.streak,
         tier: currentTier,
+        isCurrentUser: false,
         lastActiveAt: profile.lastActiveAt,
-      } satisfies LeagueMember));
-      const roomMembers = DEMO_LEAGUE_MEMBERS.map(([name, niche], index) => ({
+      }));
+      const roomMembers: LeagueMember[] = DEMO_LEAGUE_MEMBERS.map(([name, niche], index) => ({
         id: `league-preview-${index}`,
         uid: `league-preview-${index}`,
         name,
@@ -327,10 +329,12 @@ export class SocialService {
         vXP: Math.max(25, 590 - index * 24),
         streak: Math.max(1, 14 - (index % 11)),
         tier: currentTier,
+        isCurrentUser: false,
         lastActiveAt: Date.now() - (index + 2) * 31 * 60_000,
-      } satisfies LeagueMember));
-      const seeded = SOCIAL_DEMO_ENABLED ? [...coreMembers, ...roomMembers] : [];
-      onData([...seeded, current].sort((a, b) => b.vXP - a.vXP));
+      }));
+      const blocked = new Set(SocialService.getBlockedUserIds(viewer.uid));
+      const seeded: LeagueMember[] = SOCIAL_DEMO_ENABLED ? [...coreMembers, ...roomMembers] : [];
+      onData([...seeded, current].filter(m => Boolean(m.isCurrentUser) || !blocked.has(m.uid || m.id)).sort((a, b) => b.vXP - a.vXP));
     };
 
     if (!this.isCloudEnabled(viewer.uid)) {
@@ -349,6 +353,7 @@ export class SocialService {
     );
 
     return onSnapshot(leagueQuery, snapshot => {
+      const blocked = new Set(SocialService.getBlockedUserIds(viewer.uid));
       const members = snapshot.docs.map(item => {
         const profile = profileFromData(item.id, item.data());
         return {
@@ -379,7 +384,7 @@ export class SocialService {
           lastActiveAt: Date.now(),
         });
       }
-      onData(members.sort((a, b) => b.vXP - a.vXP));
+      onData(members.filter(m => m.isCurrentUser || !blocked.has(m.uid || m.id)).sort((a, b) => b.vXP - a.vXP));
     }, error => {
       fallback();
       onError?.(error);
@@ -460,7 +465,10 @@ export class SocialService {
 
     const activityMap = new Map<string, SquadActivity>();
     const activityUnsubscribers = new Map<string, Unsubscribe>();
-    const emit = () => onData([...activityMap.values()].sort((a, b) => b.createdAt - a.createdAt).slice(0, 50));
+    const emit = () => {
+      const blocked = new Set(SocialService.getBlockedUserIds(uid));
+      onData([...activityMap.values()].filter(a => !blocked.has(a.userId)).sort((a, b) => b.createdAt - a.createdAt).slice(0, 50));
+    };
     const circlesQuery = query(collection(db, 'circles'), where('members', 'array-contains', uid), limit(10));
     const unsubscribeCircles = onSnapshot(circlesQuery, snapshot => {
       const activeCircleIds = new Set(snapshot.docs.map(item => item.id));
@@ -686,27 +694,31 @@ export class SocialService {
       return () => undefined;
     }
     const challengeQuery = query(collection(db, 'challenges'), where('participantIds', 'array-contains', uid), orderBy('createdAt', 'desc'), limit(30));
-    return onSnapshot(challengeQuery, snapshot => onData(snapshot.docs.map(item => {
-      const data = item.data();
-      return {
-        id: item.id,
-        senderId: data.senderId,
-        receiverId: data.receiverId,
-        participantIds: data.participantIds || [data.senderId, data.receiverId],
-        senderName: data.senderName || 'T1GER',
-        receiverName: data.receiverName || 'T1GER',
-        durationDays: data.durationDays || 7,
-        metric: data.metric === 'streak' ? 'streak' : 'missions',
-        stakeCoins: Math.max(0, Number(data.stakeCoins) || 0),
-        potCoins: Math.max(0, Number(data.potCoins) || 0),
-        status: data.status || 'pending',
-        startsAt: toMillis(data.startsAt, 0),
-        endsAt: toMillis(data.endsAt, 0),
-        senderScore: Math.max(0, Number(data.senderScore) || 0),
-        receiverScore: Math.max(0, Number(data.receiverScore) || 0),
-        createdAt: toMillis(data.createdAt),
-      } as DirectChallenge;
-    })), error => onError?.(error));
+    return onSnapshot(challengeQuery, snapshot => {
+      const blocked = new Set(SocialService.getBlockedUserIds(uid));
+      const challenges = snapshot.docs.map(item => {
+        const data = item.data();
+        return {
+          id: item.id,
+          senderId: data.senderId,
+          receiverId: data.receiverId,
+          participantIds: data.participantIds || [data.senderId, data.receiverId],
+          senderName: data.senderName || 'T1GER',
+          receiverName: data.receiverName || 'T1GER',
+          durationDays: data.durationDays || 7,
+          metric: data.metric === 'streak' ? 'streak' : 'missions',
+          stakeCoins: Math.max(0, Number(data.stakeCoins) || 0),
+          potCoins: Math.max(0, Number(data.potCoins) || 0),
+          status: data.status || 'pending',
+          startsAt: toMillis(data.startsAt, 0),
+          endsAt: toMillis(data.endsAt, 0),
+          senderScore: Math.max(0, Number(data.senderScore) || 0),
+          receiverScore: Math.max(0, Number(data.receiverScore) || 0),
+          createdAt: toMillis(data.createdAt),
+        } as DirectChallenge;
+      }).filter(c => !blocked.has(c.senderId));
+      onData(challenges);
+    }, error => onError?.(error));
   }
 
   static async acceptChallenge(challengeId: string, uid: string): Promise<void> {
@@ -729,5 +741,64 @@ export class SocialService {
       return;
     }
     await httpsCallable(getFunctions(app, 'us-central1'), 'queueSquadNudge')({ receiverId: friend.uid });
+  }
+
+  static async reportUser(reporterId: string, reportedUserId: string, reason: ReportReason, details = ''): Promise<void> {
+    if (!reporterId || !reportedUserId || reporterId === reportedUserId) return;
+    if (this.isCloudEnabled(reporterId)) {
+      await addDoc(collection(db, 'reports'), {
+        reporterId,
+        reportedUserId,
+        reason,
+        details: details.slice(0, 500),
+        createdAt: serverTimestamp(),
+      });
+    }
+  }
+
+  static async blockUser(currentUserId: string, blockedUserId: string): Promise<void> {
+    if (!currentUserId || !blockedUserId || currentUserId === blockedUserId) return;
+    const localKey = `t1ger_blocked_users_${currentUserId}`;
+    try {
+      const stored = JSON.parse(localStorage.getItem(localKey) || '[]') as string[];
+      if (!stored.includes(blockedUserId)) {
+        stored.push(blockedUserId);
+        localStorage.setItem(localKey, JSON.stringify(stored));
+      }
+    } catch {
+      // Local storage fallback
+    }
+
+    if (this.isCloudEnabled(currentUserId)) {
+      await setDoc(doc(db, `users/${currentUserId}/blockedUsers`, blockedUserId), {
+        blockedUid: blockedUserId,
+        createdAt: serverTimestamp(),
+      });
+    }
+  }
+
+  static async unblockUser(currentUserId: string, blockedUserId: string): Promise<void> {
+    if (!currentUserId || !blockedUserId) return;
+    const localKey = `t1ger_blocked_users_${currentUserId}`;
+    try {
+      const stored = JSON.parse(localStorage.getItem(localKey) || '[]') as string[];
+      const filtered = stored.filter(id => id !== blockedUserId);
+      localStorage.setItem(localKey, JSON.stringify(filtered));
+    } catch {
+      // Local storage fallback
+    }
+
+    if (this.isCloudEnabled(currentUserId)) {
+      await deleteDoc(doc(db, `users/${currentUserId}/blockedUsers`, blockedUserId));
+    }
+  }
+
+  static getBlockedUserIds(currentUserId: string): string[] {
+    if (typeof window === 'undefined' || !currentUserId) return [];
+    try {
+      return JSON.parse(localStorage.getItem(`t1ger_blocked_users_${currentUserId}`) || '[]') as string[];
+    } catch {
+      return [];
+    }
   }
 }

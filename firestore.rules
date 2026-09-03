@@ -285,5 +285,27 @@ service cloud.firestore {
         && isValidString(request.resource.data.summary, 200)
         && request.resource.data.messages is list;
     }
+
+    // Google Play UGC Compliance: User reporting & blocking
+    match /reports/{reportId} {
+      allow read: if false;
+      allow create: if isAuthenticated()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.reportedUserId is string
+        && request.resource.data.reportedUserId != request.auth.uid
+        && request.resource.data.reason in ['spam', 'harassment', 'inappropriate_content', 'offensive_language', 'impersonation', 'other']
+        && isValidString(request.resource.data.get('details', ''), 500)
+        && request.resource.data.keys().hasAll(['reporterId', 'reportedUserId', 'reason', 'createdAt']);
+      allow update, delete: if false;
+    }
+
+    match /users/{userId}/blockedUsers/{blockedUserId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId)
+        && blockedUserId != userId
+        && request.resource.data.blockedUid == blockedUserId;
+      allow delete: if isOwner(userId);
+      allow update: if false;
+    }
   }
 }

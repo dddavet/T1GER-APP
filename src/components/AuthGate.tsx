@@ -36,6 +36,12 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
 
   const getAuthMessage = (error: unknown) => {
     const message = error instanceof Error ? error.message : String(error);
+    if (message.includes('auth/native-unsupported-provider')) {
+      return tr(
+        'En la app nativa, usa correo y contraseña o enlace de acceso para iniciar sesión de forma segura.',
+        'On mobile, please sign in with email and password or email link.'
+      );
+    }
     if (message.includes('auth/invalid-credential') || message.includes('auth/wrong-password')) return tr('El correo o la contraseña no son correctos.', 'Email or password is incorrect.');
     if (message.includes('auth/email-already-in-use')) return tr('Ya existe una cuenta con ese correo.', 'That email already has an account.');
     if (message.includes('auth/weak-password')) return tr('La contraseña debe tener al menos 6 caracteres.', 'Password needs at least 6 characters.');
