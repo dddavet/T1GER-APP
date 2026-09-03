@@ -313,6 +313,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   const [purchasingPaywall, setPurchasingPaywall] = useState(false);
   const [paywallNotice, setPaywallNotice] = useState('');
   const [restoringPaywall, setRestoringPaywall] = useState(false);
+  const [accessSubPage, setAccessSubPage] = useState<1 | 2 | 3>(1);
 
   // Auto-detect browser/system language on initial mount if not set
   useEffect(() => {
@@ -344,7 +345,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     }
   }, [step]);
   const currentStepIndex = STEP_ORDER.indexOf(step);
-  const progressPercent = Math.max(5, ((currentStepIndex + 1) / STEP_ORDER.length) * 100);
+  const progressPercent = Math.min(
+    100,
+    Math.max(
+      5,
+      step === 'access'
+        ? ((currentStepIndex + (accessSubPage - 1) / 2) / STEP_ORDER.length) * 100
+        : ((currentStepIndex + 1) / STEP_ORDER.length) * 100
+    )
+  );
 
   useEffect(() => {
     saveDraft(draft);
@@ -371,6 +380,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   };
 
   const back = () => {
+    if (step === 'access' && accessSubPage > 1) {
+      setAccessSubPage((curr) => (curr - 1) as 1 | 2 | 3);
+      return;
+    }
     const prevIdx = Math.max(currentStepIndex - 1, 0);
     goTo(STEP_ORDER[prevIdx], -1);
   };
@@ -1496,8 +1509,196 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           </div>
         );
 
-      // Frame 18: Calm & Headspace Style Hard Paywall (Mandatory Membership / 7-Day Free Trial)
+      // Frame 18: Elite Calm/Headspace Multi-Page Paywall Sequence (3 Pages)
       case 'access': {
+        // --- SUB-PAGE 1: Personalization Climax & Projected Habit Formation Chart ---
+        if (accessSubPage === 1) {
+          return (
+            <div className="flex min-h-full flex-col justify-between py-2 text-left">
+              <DuolingoHeader
+                speech={tr(
+                  'He analizado tus respuestas y tu nivel de experiencia. Tu protocolo de 30 días está configurado.',
+                  'I analyzed your answers and experience level. Your 30-day protocol is ready.'
+                )}
+                mood="celebrate"
+                eyebrow={tr('DIAGNÓSTICO PERSONALIZADO // 1 DE 3', 'PERSONALIZED DIAGNOSIS // 1 OF 3')}
+                title={tr('Tu Plan T1GER está Listo', 'Your T1GER Plan is Ready')}
+              />
+
+              <div className="space-y-3.5 my-auto overflow-y-auto max-h-[calc(100dvh-235px)] pr-0.5 hide-scrollbar">
+                {/* 30-Day Projected Graph Card */}
+                <div className="rounded-3xl border border-[#FF7300]/35 bg-gradient-to-b from-[#FF7300]/15 via-black/50 to-transparent p-4 text-left relative overflow-hidden shadow-[0_0_30px_rgba(255,115,0,0.15)]">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#FF7300]/20 text-[#FF7300] border border-[#FF7300]/30">
+                      {tr('PROYECCIÓN DE DISCIPLINA A 30 DÍAS', '30-DAY DISCIPLINE PROJECTION')}
+                    </span>
+                    <span className="text-xs font-mono font-bold text-emerald-400">
+                      {tr('89% Éxito', '89% Success')}
+                    </span>
+                  </div>
+
+                  {/* SVG Chart */}
+                  <div className="h-28 w-full relative py-2">
+                    <svg viewBox="0 0 300 100" className="w-full h-full overflow-visible">
+                      <defs>
+                        <linearGradient id="proGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#FF7300" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="#FF7300" stopOpacity="0.0" />
+                        </linearGradient>
+                      </defs>
+                      <line x1="0" y1="20" x2="300" y2="20" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      <line x1="0" y1="50" x2="300" y2="50" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+                      <line x1="0" y1="80" x2="300" y2="80" stroke="rgba(255,255,255,0.06)" strokeDasharray="3 3" />
+
+                      {/* Drop curve */}
+                      <path
+                        d="M 10 65 Q 80 50 150 75 T 290 92"
+                        fill="none"
+                        stroke="#EF4444"
+                        strokeWidth="2"
+                        strokeDasharray="4 4"
+                      />
+                      {/* Growth area */}
+                      <path
+                        d="M 10 75 Q 80 60 150 35 T 290 10 L 290 95 L 10 95 Z"
+                        fill="url(#proGradient)"
+                      />
+                      {/* Growth line */}
+                      <path
+                        d="M 10 75 Q 80 60 150 35 T 290 10"
+                        fill="none"
+                        stroke="#FF7300"
+                        strokeWidth="3.5"
+                      />
+                      <circle cx="290" cy="10" r="4.5" fill="#FF7300" stroke="#FFFFFF" strokeWidth="2" />
+                    </svg>
+
+                    <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500 pt-1">
+                      <span>{tr('Día 1', 'Day 1')}</span>
+                      <span>{tr('Día 15', 'Day 15')}</span>
+                      <span className="text-[#FF7300] font-bold">{tr('Día 30 (Obsidian)', 'Day 30 (Obsidian)')}</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10 text-[10px]">
+                    <div className="flex items-center gap-1.5 text-zinc-400">
+                      <span className="w-2.5 h-0.5 bg-red-500 inline-block" />
+                      <span>{tr('Sin disciplina: 85% abandono', 'No system: 85% drop')}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[#FF8C33] font-bold">
+                      <span className="w-2.5 h-1 bg-[#FF7300] rounded inline-block" />
+                      <span>{tr('Con T1GER: +89% constancia', 'With T1GER: +89% habit')}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Metric Bento */}
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
+                    <Clock size={16} className="text-[#FF7300] mx-auto mb-1" />
+                    <span className="text-xs font-mono font-black text-white block">+2.4h</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Enfoque/día', 'Focus/day')}</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
+                    <Flame size={16} className="text-amber-400 mx-auto mb-1" />
+                    <span className="text-xs font-mono font-black text-white block">30 Días</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Racha invicta', 'Streak goal')}</span>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
+                    <Zap size={16} className="text-emerald-400 mx-auto mb-1" />
+                    <span className="text-xs font-mono font-black text-white block">4.5x</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Velocidad', 'Speed')}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <PrimaryAction onClick={() => setAccessSubPage(2)}>
+                  {tr('CONTINUAR A LA TRANSFORMACIÓN', 'CONTINUE TO TRANSFORMATION')} <ChevronRight size={18} />
+                </PrimaryAction>
+              </div>
+            </div>
+          );
+        }
+
+        // --- SUB-PAGE 2: The Value & Social Proof Bridge ---
+        if (accessSubPage === 2) {
+          return (
+            <div className="flex min-h-full flex-col justify-between py-2 text-left">
+              <DuolingoHeader
+                speech={tr(
+                  'El 95% de los emprendedores se estancan por falta de presión real y mentoría. T1GER te lleva a cerrar resultados.',
+                  '95% of founders stall due to lack of real accountability. T1GER drives you to close real results.'
+                )}
+                mood="beast"
+                eyebrow={tr('LA TRANSFORMACIÓN // 2 DE 3', 'TRANSFORMATION // 2 OF 3')}
+                title={tr('¿Por Qué Funciona T1GER?', 'Why Does T1GER Work?')}
+              />
+
+              <div className="space-y-3 my-auto overflow-y-auto max-h-[calc(100dvh-235px)] pr-0.5 hide-scrollbar">
+                {/* Comparison Bento */}
+                <div className="grid grid-cols-2 gap-2.5 text-left">
+                  <div className="p-3.5 rounded-2xl border border-red-500/20 bg-red-500/[.04] space-y-2">
+                    <span className="text-[9px] font-mono font-black uppercase tracking-wider text-red-400 block">
+                      {tr('❌ Entrenar Solo', '❌ Training Alone')}
+                    </span>
+                    <ul className="text-[10px] text-zinc-400 space-y-1.5 leading-snug">
+                      <li>• {tr('Scroll infinito en redes', 'Endless social scrolling')}</li>
+                      <li>• {tr('Teoría sin ejecución', 'Theory with zero action')}</li>
+                      <li>• {tr('Abandono al día 10', 'Quitting by day 10')}</li>
+                    </ul>
+                  </div>
+
+                  <div className="p-3.5 rounded-2xl border border-[#FF7300]/40 bg-gradient-to-b from-[#FF7300]/15 to-transparent space-y-2 shadow-[0_0_20px_rgba(255,115,0,0.1)]">
+                    <span className="text-[9px] font-mono font-black uppercase tracking-wider text-[#FF7300] block">
+                      {tr('⚡ Con T1GER Pro', '⚡ With T1GER Pro')}
+                    </span>
+                    <ul className="text-[10px] text-zinc-200 space-y-1.5 leading-snug">
+                      <li>✓ {tr('Coach IA 24/7 implacable', '24/7 relentless AI coach')}</li>
+                      <li>✓ {tr('Misiones con prueba real', 'Real proof missions')}</li>
+                      <li>✓ {tr('Ligas de 30 fundadores', '30-member founder leagues')}</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Testimonial Card */}
+                <div className="p-4 rounded-2xl border border-amber-500/30 bg-white/[.02] text-left space-y-2">
+                  <div className="flex items-center gap-1 text-amber-400">
+                    <Star size={13} fill="#F59E0B" />
+                    <Star size={13} fill="#F59E0B" />
+                    <Star size={13} fill="#F59E0B" />
+                    <Star size={13} fill="#F59E0B" />
+                    <Star size={13} fill="#F59E0B" />
+                    <span className="text-[10px] font-mono font-bold text-zinc-300 ml-1.5">5.0 / 5.0</span>
+                  </div>
+                  <p className="text-[11px] text-zinc-300 italic leading-relaxed">
+                    "{tr(
+                      'T1GER me obligó a validar mi oferta y cerrar mi primer cliente en 7 días en vez de pasarme 6 meses dudando.',
+                      'T1GER forced me to validate my offer and close my first customer in 7 days instead of spending 6 months overthinking.'
+                    )}"
+                  </p>
+                  <div className="flex items-center gap-2 pt-1 border-t border-white/5">
+                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FF7300] to-amber-500 flex items-center justify-center text-[10px] font-black text-black">
+                      CM
+                    </div>
+                    <div>
+                      <strong className="text-[10px] text-white block">Carlos Mendoza</strong>
+                      <span className="text-[9px] text-zinc-400">{tr('Fundador SaaS // Liga Obsidian', 'SaaS Founder // Obsidian League')}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <PrimaryAction onClick={() => setAccessSubPage(3)}>
+                  {tr('VER MI OFERTA DE BIENVENIDA', 'VIEW MY WELCOME OFFER')} <Sparkles size={18} />
+                </PrimaryAction>
+              </div>
+            </div>
+          );
+        }
+
+        // --- SUB-PAGE 3: The Hard Paywall with 50% Launch Discount & Calm Timeline ---
         const isAnnualTrial = selectedPaywallPkgId.includes('annual');
         const isLifetime = selectedPaywallPkgId.includes('lifetime');
 
@@ -1505,15 +1706,33 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           <div className="flex min-h-full flex-col justify-between py-2 text-left">
             <DuolingoHeader
               speech={tr(
-                'Tu protocolo de 30 días está listo. Activa tu membresía para desbloquear el acceso a T1GER.',
-                'Your 30-day protocol is ready. Activate your membership to unlock access to T1GER.'
+                'Tu protocolo está bloqueado. Activa tu membresía o prueba de 7 días para ingresar a T1GER.',
+                'Your protocol is locked. Activate your membership or 7-day trial to enter T1GER.'
               )}
               mood="celebrate"
-              eyebrow={tr('PASO FINAL // ACCESO REQUERIDO', 'FINAL STEP // ACCESS REQUIRED')}
-              title={tr('Desbloquea el Acceso a T1GER', 'Unlock Access to T1GER')}
+              eyebrow={tr('OFERTA DE LANZAMIENTO // 50% OFF', 'LAUNCH OFFER // 50% OFF')}
+              title={tr('Desbloquea Acceso Completo', 'Unlock Full Access')}
             />
 
             <div className="space-y-3 my-auto overflow-y-auto max-h-[calc(100dvh-235px)] pr-0.5 hide-scrollbar">
+              {/* Special Launch Discount Banner */}
+              <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-500/15 via-[#FF7300]/10 to-transparent p-3 flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-lg">🔥</span>
+                  <div>
+                    <strong className="text-[11px] text-emerald-300 font-black uppercase tracking-wider block">
+                      {tr('DESCUENTO DE LANZAMIENTO APLICADO', 'LAUNCH DISCOUNT APPLIED')}
+                    </strong>
+                    <span className="text-[10px] text-zinc-300">
+                      {tr('Ahorra hasta un 50% en tu membresía hoy', 'Save up to 50% on your membership today')}
+                    </span>
+                  </div>
+                </div>
+                <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[9px] font-black uppercase">
+                  -50% OFF
+                </span>
+              </div>
+
               {/* Calm/Headspace Hard Gate Banner */}
               <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#FF7300]/10 to-transparent p-3.5 flex items-start gap-3 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
                 <div className="w-8 h-8 shrink-0 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30">
@@ -1532,7 +1751,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 </div>
               </div>
 
-              {/* Plan Options Selector */}
+              {/* Plan Options Selector with Price Anchoring */}
               <div className="space-y-2">
                 <p className="text-[10px] font-mono font-black uppercase tracking-wider text-zinc-400 px-1">
                   {tr('Elige tu plan de entrenamiento', 'Choose your training plan')}
@@ -1583,6 +1802,16 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                             </div>
                           </div>
                           <div className="text-right">
+                            {isPkgAnnual && (
+                              <span className="text-[10px] text-zinc-500 line-through font-mono block">
+                                $119.99
+                              </span>
+                            )}
+                            {isPkgLifetime && (
+                              <span className="text-[10px] text-zinc-500 line-through font-mono block">
+                                $149.99
+                              </span>
+                            )}
                             <span className="text-sm font-black text-white font-mono block">
                               {isPkgAnnual ? '$4.99/mes' : pkg.product.priceString}
                             </span>
