@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -17,11 +17,13 @@ import {
   X,
 } from '@phosphor-icons/react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBrain } from '../../contexts/BrainContext';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { FieldMissionService } from '../../services/fieldMissionService';
 import type { AtomicLesson, ChallengeOption, LearningLocale, SavedLearningArtifact } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
-import { T1gerMascot3D } from '../T1gerMascot3D';
+const LazyMascot = React.lazy(() => import('../T1gerMascot3D').then(module => ({ default: module.T1gerMascot3D })));
+const T1gerMascot3D = (props: { mood: 'thinking' | 'beast'; closeUp?: boolean; className: string }) => <React.Suspense fallback={<img src="/mascot/t1ger-icon.png" alt="" className={props.className} />}><LazyMascot {...props} /></React.Suspense>;
 import { MicroToolLab } from './MicroToolLab';
 
 interface AtomicLessonPlayerProps {
@@ -29,6 +31,7 @@ interface AtomicLessonPlayerProps {
   locale: LearningLocale;
   onClose: () => void;
   onComplete: (lessonId: string) => void;
+  reviewOnly?: boolean;
 }
 
 const ARTIFACT_STORAGE_KEY = 't1ger_learning_artifacts_v1';
@@ -56,13 +59,14 @@ const playFeedback = (correct: boolean) => {
   }
 };
 
-function saveArtifact(artifact: SavedLearningArtifact) {
+function saveArtifact(artifact: SavedLearningArtifact, userId: string) {
+  const key = `${ARTIFACT_STORAGE_KEY}_${userId}`;
   try {
-    const current = JSON.parse(localStorage.getItem(ARTIFACT_STORAGE_KEY) || '[]') as SavedLearningArtifact[];
+    const current = JSON.parse(localStorage.getItem(key) || '[]') as SavedLearningArtifact[];
     const withoutDuplicate = current.filter((item) => item.lessonId !== artifact.lessonId);
-    localStorage.setItem(ARTIFACT_STORAGE_KEY, JSON.stringify([artifact, ...withoutDuplicate].slice(0, 100)));
+    localStorage.setItem(key, JSON.stringify([artifact, ...withoutDuplicate].slice(0, 100)));
   } catch {
-    localStorage.setItem(ARTIFACT_STORAGE_KEY, JSON.stringify([artifact]));
+    localStorage.setItem(key, JSON.stringify([artifact]));
   }
 }
 
@@ -194,7 +198,11 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
   );
 };
 
-export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, locale, onClose, onComplete }) => {
+export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, locale, onClose, onComplete, reviewOnly = false }) => {
+  const { reviewMission, completeMission, brainState } = useBrain();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => { dialogRef.current?.showModal(); }, []);
+  const [mistakes, setMistakes] = useState(0);
   const { setActiveView } = useT1ger();
   const { appUser } = useAuth();
   const [phaseIndex, setPhaseIndex] = useState(0);
@@ -207,7 +215,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
   const phase = lesson.phases[phaseIndex];
 
   const persistArtifact = (nextArtifact: SavedLearningArtifact) => {
-    saveArtifact(nextArtifact);
+    saveArtifact(nextArtifact, appUser?.uid || 'local');
     setArtifact(nextArtifact);
   };
 
@@ -216,7 +224,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
     setBridging(true);
     setBridgeError(null);
     try {
-      FieldMissionService.queueFromLesson(lesson, artifact, appUser?.uid || 'local', locale);
+      FieldMissionService.queueFromLesson(lesson, artifact, appUser?.uid || 'local', locale, mistakes === 0 ? 100 : mistakes === 1 ? 75 : 60);
       queuedRef.current = true;
       setPhaseIndex(3);
       navigator.vibrate?.([18, 28, 42]);
@@ -235,8 +243,14 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
 
   const next = () => {
     if (phaseIndex === 0 && impactStep < 2) setImpactStep((current) => current + 1);
-    else if (phaseIndex === 0) setPhaseIndex(1);
-    else if (phaseIndex === 1 && challengeMastered) setPhaseIndex(2);
+    else if (phaseIndex === 0) { setChallengeMastered(false); setPhaseIndex(1); }
+    else if (phaseIndex === 1 && challengeMastered) {
+      if (reviewOnly) {
+        if (brainState.missionHistory.some(record => record.missionId === lesson.id && record.completed)) reviewMission(lesson.id, mistakes === 0 ? 100 : 75);
+        else completeMission(lesson.id, mistakes === 0 ? 100 : 75);
+        onComplete(lesson.id);
+      } else setPhaseIndex(2);
+    }
     else if (phaseIndex === 2) prepareFieldMission();
   };
 
@@ -250,7 +264,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
     : (locale === 'es' ? 'Continuar' : 'Continue');
 
   const player = (
-    <div className="fixed inset-0 z-[200] min-h-[100dvh] overflow-hidden bg-[#09090B] text-white">
+    <dialog ref={dialogRef} onCancel={event => { event.preventDefault(); onClose(); }} aria-label={localizeLearning(lesson.title, locale)} className="fixed inset-0 z-[200] m-0 h-[100dvh] max-h-none w-full max-w-none overflow-hidden border-0 bg-[#09090B] p-0 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_82%_-8%,rgba(255,115,0,.15),transparent_34%),linear-gradient(180deg,#09090B_0%,#0D0D11_100%)]" />
       <div className="relative mx-auto flex h-[100dvh] w-full max-w-lg flex-col">
         <header className="border-b border-white/8 bg-[#09090B]/88 px-4 pb-3 pt-[calc(1rem+env(safe-area-inset-top))] backdrop-blur-xl">
@@ -258,7 +272,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
             <button type="button" onClick={onClose} className="t1ger-icon-button" aria-label={locale === 'es' ? 'Cerrar lección' : 'Close lesson'}><X size={19} weight="bold" /></button>
             <div className="min-w-0 text-center">
               <p className="truncate text-xs font-bold text-zinc-200">{localizeLearning(lesson.title, locale)}</p>
-              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">03:00 · {lesson.phases[3].xp + 50} XP LOCKED</p>
+              <p className="font-mono text-[9px] uppercase tracking-[0.18em] text-zinc-500">{reviewOnly ? (locale === 'es' ? 'REPASO · SIN DUPLICAR XP' : 'REVIEW · NO DUPLICATE XP') : `03:00 · ${lesson.phases[3].xp + 50} XP ${locale === 'es' ? 'al aplicar' : 'with Apply'}`}</p>
             </div>
             <span className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/8 bg-white/[0.035] text-[#FF8A2A]"><Sparkle size={19} weight="fill" /></span>
           </div>
@@ -302,14 +316,14 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
                   )}
                 </AnimatePresence>
               )}
-              {phase.type === 'challenge' && <ChallengeView lesson={lesson} locale={locale} onMastered={(correct) => setChallengeMastered(correct)} />}
+              {phase.type === 'challenge' && <ChallengeView lesson={lesson} locale={locale} onMastered={(correct) => { setChallengeMastered(correct); if (!correct) setMistakes(value => value + 1); }} />}
               {phase.type === 'action' && <MicroToolLab lessonId={lesson.id} trackId={lesson.trackId} widget={phase.widget} locale={locale} onCommit={persistArtifact} />}
               {phase.type === 'reward' && (
                 <div className="flex min-h-full flex-col items-center justify-center py-4 text-center">
                   <motion.div initial={{ scale: 0.72, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 150, damping: 17 }} className="h-44 w-44"><T1gerMascot3D mood="beast" className="h-full w-full" /></motion.div>
                   <span className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#FF8A2A]">{locale === 'es' ? 'MISIÓN DE CAMPO LISTA' : 'FIELD MISSION READY'}</span>
                   <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">{locale === 'es' ? 'Aprender no es terminar.' : 'Learning is not finishing.'}</h2>
-                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-400">{locale === 'es' ? 'Tu micro-herramienta está lista. Ejecuta la acción real y sube evidencia en Build para liberar XP, proteger la racha y rescatar a T1GER.' : 'Your micro-tool is ready. Execute the real action and upload proof in Build to unlock XP, protect your streak, and rescue T1GER.'}</p>
+                  <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-400">{locale === 'es' ? 'Tu herramienta está lista. Haz la acción a tu ritmo y márcala como completada en Aplicar. Sin fotos ni reflexión obligatoria. Suma XP personal, no puntos de liga.' : 'Your tool is ready. Do the action at your pace and mark it complete in Apply. No photos or required reflection. Earn personal XP, not league points.'}</p>
                   <div className="mt-7 grid w-full grid-cols-3 divide-x divide-white/8 border-y border-white/8 py-4">
                     <div><Sparkle className="mx-auto text-[#FF8A2A]" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">3:00</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">{locale === 'es' ? 'Aprendido' : 'Learned'}</span></div>
                     <div><LockKey className="mx-auto text-amber-400" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">+{lesson.phases[3].xp + 50}</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">XP {locale === 'es' ? 'pend.' : 'pending'}</span></div>
@@ -324,10 +338,10 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
         </main>
 
         <footer className="border-t border-white/8 bg-[#09090B]/92 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
-          {(phaseIndex > 0 && phaseIndex < 3 || phaseIndex === 0 && impactStep > 0) && <button type="button" onClick={() => { if (phaseIndex === 0) setImpactStep((current) => Math.max(0, current - 1)); else setPhaseIndex((current) => Math.max(0, current - 1)); }} className="mb-2 inline-flex items-center gap-1 text-xs font-semibold text-zinc-500 transition hover:text-zinc-200"><ArrowLeft size={15} weight="bold" />{locale === 'es' ? 'Anterior' : 'Previous'}</button>}
+          {(phaseIndex > 0 && phaseIndex < 3 || phaseIndex === 0 && impactStep > 0) && <button type="button" onClick={() => { setChallengeMastered(false); if (phaseIndex === 0) setImpactStep((current) => Math.max(0, current - 1)); else setPhaseIndex((current) => Math.max(0, current - 1)); }} className="mb-2 inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-zinc-400 transition hover:text-zinc-200"><ArrowLeft size={15} weight="bold" />{locale === 'es' ? 'Anterior' : 'Previous'}</button>}
           {phaseIndex === 3 ? (
             <button type="button" onClick={openBuild} className="t1ger-primary-button w-full">
-              {locale === 'es' ? 'Ejecutar ahora en Build' : 'Execute now in Build'}
+              {locale === 'es' ? 'Ir a mi acción' : 'Go to my action'}
               <ArrowRight size={20} weight="bold" />
             </button>
           ) : phaseIndex === 1 && !challengeMastered ? null : (
@@ -338,7 +352,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
           )}
         </footer>
       </div>
-    </div>
+    </dialog>
   );
 
   return createPortal(player, document.body);

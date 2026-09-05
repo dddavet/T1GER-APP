@@ -298,7 +298,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   const isEs = language === 'es';
   const tr = (es: string, en: string) => (isEs ? es : en);
 
-  const [draft, setDraft] = useState<OnboardingDraft>(() => loadDraft());
+  const [draft, setDraft] = useState<OnboardingDraft>(() => ({ ...loadDraft(), topic: 'finance' }));
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-up');
@@ -331,7 +331,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     if (step === 'access') {
       void (async () => {
         try {
-          const pkgs = await revenueCat.getAvailablePackages();
+          const pkgs: PurchasesPackage[] = []; // Waiting for deployed server entitlement verification.
           if (pkgs.length > 0) {
             setPaywallPackages(pkgs);
             const annual = pkgs.find(p => p.identifier.includes('annual'));
@@ -390,7 +390,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
   const currentTopicObj = COURSE_TOPICS.find((t) => t.id === draft.topic) || COURSE_TOPICS[0];
   const topicName = localize(currentTopicObj.title, language);
-  const primaryTrack = getOnboardingTrack(draft.topic);
+  const primaryTrack = 'investing' as const;
 
   const getProfilePatch = (onboardingComplete: boolean) => ({
     niche: primaryTrack,
@@ -431,9 +431,6 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       updatePetSettings(Math.round(draft.screenTimeHours * 60), Math.max(50, draft.dailyGoal * 10));
       await updateAppUser({
         ...getProfilePatch(true),
-        isPro: true,
-        isFounder: choice === 'super',
-        role: choice === 'super' ? 'founder' : undefined,
       });
       await ProofVerificationService.claimOnboardingReward().catch((claimError) => {
         console.warn('Onboarding cloud reward deferred:', claimError);
@@ -449,28 +446,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   };
 
   const handleOnboardingPurchase = async () => {
-    const pkg = paywallPackages.find(p => p.identifier === selectedPaywallPkgId) || paywallPackages[0];
-    if (!pkg) return;
-
-    setPurchasingPaywall(true);
-    setPaywallNotice('');
-    try {
-      const result = await revenueCat.purchase(pkg);
-      if (result.success && result.isPro) {
-        fireRewardConfetti();
-        await finalize('super');
-      } else {
-        setPaywallNotice(tr('Debes activar un plan para desbloquear la aplicación.', 'You must activate a plan to unlock the application.'));
-      }
-    } catch (err: any) {
-      if (err?.userCancelled) {
-        setPaywallNotice(tr('Compra cancelada. Se requiere una membresía activa para acceder a T1GER.', 'Purchase cancelled. An active membership is required to access T1GER.'));
-      } else {
-        setPaywallNotice(tr('No se pudo procesar el pago con Google Play.', 'Could not process payment with Google Play.'));
-      }
-    } finally {
-      setPurchasingPaywall(false);
-    }
+    await finalize('free');
   };
 
   const handleOnboardingRestore = async () => {
@@ -561,7 +537,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="space-y-2.5 my-auto">
-              {COURSE_TOPICS.map((topic) => {
+              {COURSE_TOPICS.filter(topic => topic.id === 'finance').map((topic) => {
                 const isSelected = draft.topic === topic.id;
                 return (
                   <button
@@ -1511,6 +1487,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 18: Elite Calm/Headspace Multi-Page Paywall Sequence (3 Pages)
       case 'access': {
+        if (paywallPackages.length === 0) return <div className="flex min-h-full flex-col justify-center gap-6 py-6"><OnboardingMascot mood="happy" className="mx-auto h-48 w-48" /><h1 className="text-center text-3xl font-bold">{tr('Tu camino empieza aquí.', 'Your journey starts here.')}</h1><p className="text-center text-sm leading-relaxed text-zinc-400">{tr('Aprende Inversiones y aplica una idea cada día. El acceso actual es gratuito; no se activará ninguna prueba ni suscripción.', 'Learn Investing and apply one idea each day. Current access is free; no trial or subscription will be started.')}</p>{error && <p role="alert" className="text-sm text-red-300">{error}</p>}<PrimaryAction onClick={() => void finalize('free')} disabled={finalizing}>{finalizing ? tr('GUARDANDO…', 'SAVING…') : tr('EMPEZAR MI CAMINO', 'START MY JOURNEY')}<ArrowRight size={20} /></PrimaryAction></div>;
         // --- SUB-PAGE 1: Personalization Climax & Projected Habit Formation Chart ---
         if (accessSubPage === 1) {
           return (
@@ -1905,11 +1882,11 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   </>
                 ) : isAnnualTrial ? (
                   <>
-                    {tr('EMPEZAR MIS 7 DÍAS GRATIS', 'START MY 7-DAY FREE TRIAL')} <ChevronRight size={18} />
+                    {tr('CONTINUAR GRATIS', 'CONTINUE FOR FREE')} <ChevronRight size={18} />
                   </>
                 ) : (
                   <>
-                    {tr('DESBLOQUEAR MI PLAN AHORA', 'UNLOCK MY PLAN NOW')} <Sparkles size={18} />
+                    {tr('CONTINUAR GRATIS', 'CONTINUE FOR FREE')} <Sparkles size={18} />
                   </>
                 )}
               </PrimaryAction>

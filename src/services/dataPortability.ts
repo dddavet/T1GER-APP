@@ -2,7 +2,6 @@ import { type AppUser } from '../contexts/AuthContext';
 import { type BrainState } from './brainService';
 
 const EXPORT_VERSION = 1;
-const LOCAL_PREFIXES = ['t1ger_', 'tiger_'];
 
 export interface T1gerDataExport {
   app: 'T1GER';
@@ -14,13 +13,14 @@ export interface T1gerDataExport {
   localData: Record<string, string>;
 }
 
-export function collectT1gerLocalData() {
+export function collectT1gerLocalData(userId: string) {
   const data: Record<string, string> = {};
+  const allowedKeys = new Set([`t1ger_field_missions_v1_${userId}`, `t1ger_paper_portfolio_${userId}`, `t1ger_learning_artifacts_v1_${userId}`, `tiger_brain_state_v3_${userId}`]);
 
   for (let index = 0; index < localStorage.length; index += 1) {
     const key = localStorage.key(index);
     if (!key) continue;
-    if (!LOCAL_PREFIXES.some(prefix => key.startsWith(prefix))) continue;
+    if (!allowedKeys.has(key)) continue;
 
     const value = localStorage.getItem(key);
     if (value !== null) {
@@ -47,7 +47,7 @@ export function buildT1gerDataExport(appUser: AppUser | null, brainState: BrainS
       : null,
     appUser,
     brainState,
-    localData: collectT1gerLocalData(),
+    localData: collectT1gerLocalData(appUser?.uid || 'local'),
   };
 }
 

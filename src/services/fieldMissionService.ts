@@ -1,11 +1,14 @@
-import { collection, doc, serverTimestamp, setDoc, onSnapshot, query, where } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { collection, doc, getDoc, serverTimestamp, setDoc, onSnapshot, query, where } from 'firebase/firestore';
+import { app, auth, db } from '../firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import type { AtomicLesson, LearningLocale, SavedLearningArtifact } from './interactiveCurriculumTypes';
 import { localizeLearning } from './interactiveCurriculumTypes';
 import type { BankMission } from './missionBank';
 import { FIELD_MISSION_CATALOG } from '../../functions/src/fieldMissionCatalog';
+import { IS_PROTOTYPE } from '../config/appMode';
 
-export type FieldMissionStatus = 'ready' | 'pending_review' | 'needs_revision' | 'verified';
+export type FieldMissionStatus = 'ready' | 'pending_review' | 'needs_revision' | 'verified' | 'completed';
+export const isFieldMissionComplete = (mission: FieldMission) => mission.status === 'verified' || mission.status === 'completed';
 export type FieldProofKind = 'camera' | 'screenshot' | 'text';
 
 export interface FieldMission {
@@ -26,6 +29,8 @@ export interface FieldMission {
   createdAt: number;
   updatedAt: number;
   autoOpen: boolean;
+  learningScore?: number;
+  completionMode?: 'self_reported' | 'verified';
   submission?: FieldSubmission;
 }
 
@@ -66,7 +71,10 @@ function emitChange() {
 }
 
 function readLocal(userId: string): FieldMission[] {
-  try { return JSON.parse(localStorage.getItem(storageKey(userId)) || '[]') as FieldMission[]; } catch { return []; }
+  try {
+    const value = JSON.parse(localStorage.getItem(storageKey(userId)) || '[]');
+    return Array.isArray(value) ? value.filter(item => item && typeof item.id === 'string' && typeof item.lessonId === 'string' && item.userId === userId) : [];
+  } catch { return []; }
 }
 
 function writeLocal(userId: string, missions: FieldMission[]) {
@@ -77,6 +85,13 @@ function writeLocal(userId: string, missions: FieldMission[]) {
 function upsertLocal(mission: FieldMission) {
   const current = readLocal(mission.userId);
   writeLocal(mission.userId, [mission, ...current.filter((item) => item.id !== mission.id)].sort((a, b) => b.updatedAt - a.updatedAt));
+}
+
+function persistPrepared(mission: FieldMission) {
+  if (auth.currentUser?.uid !== mission.userId) return;
+  void setDoc(doc(db, 'missions', `${mission.userId}_${mission.id}`), {
+    ...JSON.parse(JSON.stringify(mission)), missionId: mission.id, autoOpen: false, updatedAt: serverTimestamp(),
+  }, { merge: true }).catch(error => console.warn('Prepared mission sync deferred:', error.code));
 }
 
 function openCache(): Promise<IDBDatabase> {
@@ -144,15 +159,17 @@ export const FieldMissionService = {
     return onSnapshot(query(collection(db, 'missions'), where('userId', '==', userId)), snapshot => {
       for (const item of snapshot.docs) {
         const data = item.data();
-        if (data.status !== 'verified' || !data.lessonId || !data.submission) continue;
+        if (!['ready', 'pending_review', 'needs_revision', 'verified', 'completed'].includes(data.status) || !data.lessonId) continue;
         const previous = readLocal(userId).find(mission => mission.id === data.missionId);
         upsertLocal({
           ...previous, id: data.missionId, userId, lessonId: data.lessonId, trackId: data.trackId || '',
           title: data.title, description: data.description || data.title, instructions: data.instructions || [],
-          supportTitle: previous?.supportTitle || '', supportPayload: previous?.supportPayload || '',
-          proofPrompt: data.proofPrompt || '', proofKinds: data.proofKinds || ['text'], status: 'verified',
+          supportTitle: previous?.supportTitle || data.supportTitle || '', supportPayload: previous?.supportPayload || data.supportPayload || '',
+          learningScore: previous?.learningScore ?? data.learningScore,
+          proofPrompt: data.proofPrompt || '', proofKinds: data.proofKinds || ['text'], status: data.status,
+          completionMode: data.completionMode || (data.status === 'completed' ? 'self_reported' : data.status === 'verified' ? 'verified' : undefined),
           lessonXp: data.lessonXp, executionXp: 50, autoOpen: false,
-          createdAt: data.verifiedAt?.toMillis?.() || Date.now(), updatedAt: data.updatedAt?.toMillis?.() || Date.now(),
+          createdAt: data.completedAt?.toMillis?.() || data.verifiedAt?.toMillis?.() || previous?.createdAt || (typeof data.createdAt === 'number' ? data.createdAt : Date.now()), updatedAt: data.updatedAt?.toMillis?.() || Date.now(),
           submission: data.submission,
         });
       }
@@ -163,12 +180,12 @@ export const FieldMissionService = {
     return readLocal(userId);
   },
 
-  queueFromLesson(lesson: AtomicLesson, artifact: SavedLearningArtifact, userId: string, locale: LearningLocale): FieldMission {
+  queueFromLesson(lesson: AtomicLesson, artifact: SavedLearningArtifact, userId: string, locale: LearningLocale, learningScore = 100): FieldMission {
     const blueprint = blueprintByLesson[lesson.id];
     const now = Date.now();
     const previous = readLocal(userId).find((item) => item.lessonId === lesson.id);
     // Reviewing a completed lesson must never overwrite its verified artifact.
-    if (previous?.status === 'verified') return previous;
+    if (previous && isFieldMissionComplete(previous)) return previous;
     const mission: FieldMission = {
       id: `field-${lesson.id}`,
       userId,
@@ -187,9 +204,11 @@ export const FieldMissionService = {
       createdAt: previous?.createdAt || now,
       updatedAt: now,
       autoOpen: true,
+      learningScore,
       submission: previous?.submission,
     };
     upsertLocal(mission);
+    persistPrepared(mission);
     return mission;
   },
 
@@ -224,6 +243,32 @@ export const FieldMissionService = {
   clearAutoOpen(userId: string, missionId: string): void {
     const mission = readLocal(userId).find((item) => item.id === missionId);
     if (mission?.autoOpen) upsertLocal({ ...mission, autoOpen: false });
+  },
+
+  async completeSelfReported(mission: FieldMission, reflection = ''): Promise<number> {
+    if (!auth.currentUser && !IS_PROTOTYPE) throw new Error('AUTH_REQUIRED');
+    const existing = readLocal(mission.userId).find(item => item.id === mission.id);
+    if (existing && isFieldMissionComplete(existing)) return 0;
+    let rewardXP = mission.lessonXp + mission.executionXp;
+    let submissionId = `${mission.userId}_${mission.id}`;
+    let completedAt = Date.now();
+    if (auth.currentUser) {
+      if (auth.currentUser.uid !== mission.userId) throw new Error('ACCOUNT_CHANGED');
+      const complete = httpsCallable<Record<string, unknown>, { rewardXP: number; submissionId: string; completedAt: number; completionMode: string }>(getFunctions(app, 'us-central1'), 'completeApplyMission');
+      const result = await complete({ missionId: mission.id, lessonId: mission.lessonId, reflection: reflection.trim(), language: document.documentElement.lang.startsWith('es') ? 'es' : 'en', timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+      rewardXP = result.data.rewardXP;
+      submissionId = result.data.submissionId;
+      completedAt = result.data.completedAt;
+      if (result.data.completionMode === 'verified') {
+        const canonical = await getDoc(doc(db, 'missions', result.data.submissionId));
+        const data = canonical.data();
+        if (data) upsertLocal({ ...mission, status: 'verified', completionMode: 'verified', submission: data.submission, autoOpen: false });
+        return 0;
+      }
+    }
+    const submission: FieldSubmission = { id: submissionId, missionId: mission.id, lessonId: mission.lessonId, evidenceKind: 'text', proofText: reflection.trim(), verified: false, verificationMessage: '', createdAt: completedAt, cloudSynced: Boolean(auth.currentUser) };
+    upsertLocal({ ...mission, status: 'completed', completionMode: 'self_reported', submission, autoOpen: false, updatedAt: completedAt });
+    return rewardXP;
   },
 
   async submitApproved(mission: FieldMission, evidence: FieldEvidence, verificationMessage: string, cloudSubmissionId?: string, cloudProofURL?: string): Promise<FieldSubmission> {

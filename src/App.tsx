@@ -298,31 +298,15 @@ const AppContent = () => {
   };
 
   useEffect(() => {
-    const startDailyRescue = (event: Event) => {
-      const requestedMissionId = (event as CustomEvent<{ missionId?: string }>).detail?.missionId;
-      const requestedMission = requestedMissionId
-        ? MISSION_BANK.find((mission) => mission.id === requestedMissionId)
-        : undefined;
-      const dailyMission = getDailyPipelineMissions().learnNode;
-      const completedMissionIds = new Set(
-        brainState.missionHistory.filter((record) => record.completed).map((record) => record.missionId)
-      );
-      const fallbackMission = MISSION_BANK.find((mission) =>
-        (mission.nodeType === 'learn' || mission.type === 'book_lesson')
-        && !completedMissionIds.has(mission.id)
-      );
-      const targetMission = requestedMission || dailyMission || fallbackMission;
-
-      if (targetMission) {
-        void startMission(targetMission);
-      } else {
-        setActiveView('learn');
-      }
+    const startDailyRescue = () => {
+      // The guided journey owns readiness; never bypass it with an unrelated legacy mission.
+      setActiveMission(null);
+      setActiveView('learn');
     };
 
     window.addEventListener('t1ger_start_daily_rescue', startDailyRescue);
     return () => window.removeEventListener('t1ger_start_daily_rescue', startDailyRescue);
-  }, [brainState.missionHistory, getDailyPipelineMissions, setActiveView]);
+  }, [setActiveView]);
 
   const dayType = dailyTacticalStatus.dayType || 'focus';
 

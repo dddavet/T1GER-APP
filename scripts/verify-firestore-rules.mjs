@@ -15,12 +15,12 @@ try {
   const bob = env.authenticatedContext('bob', { email: 'bob@example.com' });
   const outsider = env.authenticatedContext('eve', { email: 'eve@example.com' });
   const user = { uid: 'alice', email: 'alice@example.com', niche: 'investing', xp: 0, streak: 0, level: 1, coins: 0 };
-  for (const override of [{ xp: 1000 }, { role: 'founder' }, { isPro: true }, { weeklyXP: 100 }, { uid: 'bob' }, { level: 20 }, { missionCompletedToday: true }, { lastMissionDate: serverTimestamp() }]) {
+  for (const override of [{ xp: 1000 }, { role: 'founder' }, { isPro: true }, { weeklyXP: 100 }, { uid: 'bob' }, { level: 20 }, { completedMissionCount: 100 }, { missionCompletedToday: true }, { lastMissionDate: serverTimestamp() }]) {
     await assertFails(setDoc(doc(alice.firestore(), 'users/alice'), { ...user, ...override }));
   }
   await assertSucceeds(setDoc(doc(alice.firestore(), 'users/alice'), user));
   await assertSucceeds(updateDoc(doc(alice.firestore(), 'users/alice'), { displayName: 'Alice', onboardingComplete: true }));
-  for (const field of ['xp', 'coins', 'streak', 'weeklyXP', 'verifiedXP', 'level', 'verifiedMissionCount', 'isPro', 'isSuperT1ger', 'role', 'isFounder', 'timeZone', 'leagueCohortId']) {
+  for (const field of ['xp', 'coins', 'streak', 'weeklyXP', 'verifiedXP', 'level', 'verifiedMissionCount', 'completedMissionCount', 'isPro', 'isSuperT1ger', 'role', 'isFounder', 'timeZone', 'leagueCohortId']) {
     await assertFails(updateDoc(doc(alice.firestore(), 'users/alice'), { [field]: field.startsWith('is') ? true : 999 }));
   }
   await assertFails(getDoc(doc(bob.firestore(), 'users/alice')));
@@ -30,6 +30,12 @@ try {
   await assertFails(updateDoc(doc(alice.firestore(), 'users_public/alice'), { leagueCohortId: 'easier-room' }));
   await assertFails(setDoc(doc(alice.firestore(), 'submissions/fake'), { userId: 'alice', verified: true, evidenceKind: 'text' }));
   await assertFails(setDoc(doc(alice.firestore(), 'missions/fake'), { userId: 'alice', status: 'verified' }));
+  await assertFails(setDoc(doc(alice.firestore(), 'missions/fake'), { userId: 'alice', status: 'completed', completionMode: 'self_reported' }));
+  await env.withSecurityRulesDisabled(async admin => {
+    await setDoc(doc(admin.firestore(), 'missions/completed-apply'), { userId: 'alice', status: 'completed', completionMode: 'self_reported' });
+  });
+  await assertFails(updateDoc(doc(alice.firestore(), 'missions/completed-apply'), { status: 'ready' }));
+  await assertFails(updateDoc(doc(alice.firestore(), 'missions/completed-apply'), { reflection: 'Replace canonical completion' }));
 
   const friendship = { userIds: ['alice', 'bob'], userId1: 'alice', userId2: 'bob', requesterId: 'alice', addresseeId: 'bob', status: 'pending', createdAt: serverTimestamp(), updatedAt: serverTimestamp() };
   await assertFails(setDoc(doc(alice.firestore(), 'friendships/forged'), { ...friendship, userIds: ['alice', 'eve'] }));

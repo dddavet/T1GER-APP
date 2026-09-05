@@ -827,3 +827,25 @@ html { scroll-behavior: smooth; }
     border: 1px solid rgba(255, 255, 255, 0.03) !important;
   }
 }
+/* Guided Investing trail: fixed node geometry, flexible text, no scroll-time JS. */
+.journey-progress { flex: 1; height: .5rem; appearance: none; border: 0; border-radius: 1rem; overflow: hidden; background: #27272a; }
+.journey-progress::-webkit-progress-bar { background: #27272a; }
+.journey-progress::-webkit-progress-value { background: #ff7300; transition: width .25s ease; }
+.journey-progress::-moz-progress-bar { background: #ff7300; }
+.journey-region { --landmark: #6ee7b7; position: relative; padding: 1.25rem; background: #101514; border: 1px solid #ffffff12; border-radius: 1.5rem; margin-top: 1rem; }
+.journey-region-compass { --landmark: #67e8f9; background: #101419; }
+.journey-region-summit { --landmark: #fdba74; background: #191410; }
+.journey-landmark { display: grid; place-items: center; flex-shrink: 0; width: 3rem; height: 3rem; border: 1px solid currentColor; border-radius: 1rem; color: var(--landmark); }
+.journey-trail { position: relative; padding-block: 1.5rem; }
+.journey-trail::before { content: ''; position: absolute; top: 2.5rem; bottom: 2.5rem; left: 24%; right: 24%; border: 3px dashed #ffffff20; border-radius: 45% 55% 45% 55%; transform: rotate(-15deg); }
+.journey-stop { position: relative; min-height: 10rem; display: flex; gap: 1rem; align-items: center; }
+.journey-stop-right { flex-direction: row-reverse; text-align: right; }
+.journey-caption { flex: 1; min-width: 0; background: inherit; }
+.journey-node { display: grid; place-items: center; flex-shrink: 0; width: 4.5rem; height: 4.5rem; border-radius: 50%; border: 2px solid #ffffff20; background: #ff7300; color: #170b02; box-shadow: 0 6px #a64200; transition: transform .16s ease; }
+.journey-node:not(:disabled):active { transform: translateY(3px); }
+.journey-node-completed { background: #34d399; box-shadow: 0 6px #087653; }
+.journey-node-locked { color: #a1a1aa; background: #27272a; box-shadow: 0 6px #18181b; }
+.journey-node-review { background: #67e8f9; box-shadow: 0 6px #0e7490; }
+.journey-node-current { outline: 5px solid #ff730022; outline-offset: 5px; }
+.journey-checkpoint { display: flex; align-items: center; justify-content: center; gap: .5rem; padding-top: .75rem; border-top: 1px solid #ffffff12; color: var(--landmark); font-size: .75rem; }
+@media (prefers-reduced-motion: reduce) { .journey-node, .journey-progress::-webkit-progress-value { transition: none; } }

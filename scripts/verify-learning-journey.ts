@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { DEFAULT_BRAIN_STATE, processMissionResult, processMissionReview } from '../src/services/brainService';
+import { getInteractiveTrack } from '../src/services/interactiveCurriculum';
+import { getJourneyNodes } from '../src/services/learningJourney';
+import { buildT1gerDataExport } from '../src/services/dataPortability';
+import type { AppUser } from '../src/contexts/AuthContext';
+
+const track = getInteractiveTrack('smart-money');
+let brain = structuredClone(DEFAULT_BRAIN_STATE);
+assert.deepEqual(getJourneyNodes(track, brain).map(node => node.state), ['current', 'locked', 'locked', 'locked', 'locked']);
+brain = processMissionResult(brain, track.lessons[0].id, true, 60);
+assert.equal(getJourneyNodes(track, brain)[1].state, 'locked', 'Quiz alone cannot skip Apply.');
+brain = processMissionResult(brain, `field-${track.lessons[0].id}`, true);
+assert.equal(getJourneyNodes(track, brain)[1].state, 'review', 'Low recall quality asks for reinforcement before harder material.');
+brain = processMissionReview(brain, track.lessons[0].id, 100);
+assert.equal(getJourneyNodes(track, brain)[1].state, 'current');
+brain.fsrsCards[track.lessons[0].id].due = new Date(0);
+assert.equal(getJourneyNodes(track, brain)[1].state, 'review', 'Due prerequisite cannot be bypassed.');
+assert.equal(getJourneyNodes(track, brain)[2].state, 'locked');
+console.log('Guided journey: ordered Apply gates, adaptive recall, due reviews and no skipping passed.');
+const local = new Map([['t1ger_field_missions_v1_alice', '[]'], ['t1ger_field_missions_v1_bob', '["private"]'], ['t1ger_email_link_sign_in', 'private@example.com']]);
+Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: { get length() { return local.size; }, key: (i: number) => [...local.keys()][i], getItem: (key: string) => local.get(key) ?? null } });
+const exported = buildT1gerDataExport({ uid: 'alice' } as AppUser, brain);
+assert.deepEqual(Object.keys(exported.localData), ['t1ger_field_missions_v1_alice'], 'Account export cannot include another account or sign-in data.');

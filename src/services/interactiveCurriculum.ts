@@ -71,13 +71,13 @@ const smartMoneyLessons: AtomicLesson[] = [
       eyebrow: l('SMART MONEY 01', 'SMART MONEY 01'), title: l('No invertir también es una decisión', 'Not investing is still a decision'),
       body: l('Cada dólar inmóvil compra menos con el tiempo. Antes de buscar la inversión perfecta, separa tu fondo de emergencia del dinero que puede trabajar.', 'Every idle dollar buys less over time. Before chasing the perfect investment, separate emergency cash from money that can work.'),
       tacticalRule: l('Protege tu colchón; asigna el excedente con una regla automática.', 'Protect your buffer; deploy the surplus with an automatic rule.'),
-      metric: { value: '16 h', label: l('de vigilia: tu capital también debe trabajar', 'awake each day: your capital should work too') },
+      metric: { value: '2', label: l('funciones distintas: liquidez y objetivos a largo plazo', 'different roles: liquidity and long-term goals') },
     },
     challenge: { title: l('Decisión de liquidez', 'Liquidity decision'), challenge: {
       kind: 'multiple_choice', prompt: l('Tienes $3,000 y tus gastos esenciales son $1,000 al mes. ¿Qué decisión tiene mejor control de riesgo?', 'You have $3,000 and essential expenses of $1,000 per month. Which decision controls risk best?'),
       options: [
         { id: 'a', label: l('Invertir los $3,000 hoy', 'Invest all $3,000 today') },
-        { id: 'b', label: l('Guardar $2,000 de colchón e invertir $1,000 con aportes futuros', 'Keep a $2,000 buffer and invest $1,000 with future contributions'), correct: true },
+        { id: 'b', label: l('Evaluar primero el colchón necesario y los gastos próximos, antes de decidir cuánto invertir', 'Assess the needed buffer and upcoming expenses before deciding how much to invest'), correct: true },
         { id: 'c', label: l('Dejar todo inmóvil sin una fecha de revisión', 'Leave everything idle without a review date') },
       ],
       feedback: { correct: l('Control primero, crecimiento después.', 'Control first, growth second.'), incorrect: l('Una estrategia sin liquidez o sin fecha no es una estrategia.', 'A plan without liquidity or a review date is not a plan.'), explanation: l('El colchón evita vender bajo presión; el excedente empieza a capturar crecimiento.', 'The buffer prevents forced selling; the surplus starts capturing growth.') },

@@ -37,12 +37,18 @@ const visitTab = async (buttonName, expectedText, forbiddenText, screenshotName)
 
 try {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  await page.getByText('ACTIVE PATH', { exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByRole('heading', { name: 'Invest in your judgment.', exact: true }).waitFor({ timeout: 60_000 });
   await page.screenshot({ path: `${outputDir}/learn.png`, fullPage: true });
-  await visitTab('Apply', 'What you build counts.', 'ACTIVE PATH', 'apply');
-  await visitTab('Compete', 'Discipline is visible.', 'What you build counts.', 'compete');
+  await visitTab('Apply', 'Make it part of your life.', 'Invest in your judgment.', 'apply');
+  await visitTab('Compete', 'Discipline is visible.', 'Make it part of your life.', 'compete');
   await visitTab('Profile', 'Investing profile', 'Discipline is visible.', 'profile');
-  await visitTab('Learn', 'ACTIVE PATH', 'Investing profile', 'learn-return');
+  await visitTab('Learn', 'Invest in your judgment.', 'Investing profile', 'learn-return');
+  for (const width of [320, 390, 768, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+    if (overflow) throw new Error(`Horizontal overflow at ${width}px`);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
   if (runtimeErrors.length) throw new Error(`Runtime errors: ${runtimeErrors.join(' | ')}`);
   console.log(JSON.stringify({ ok: true, results }, null, 2));
 } finally {

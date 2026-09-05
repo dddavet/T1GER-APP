@@ -95,6 +95,7 @@ service cloud.firestore {
         && request.resource.data.get('verifiedXP', 0) == 0
         && request.resource.data.get('weeklyXP', 0) == 0
         && request.resource.data.get('verifiedMissionCount', 0) == 0
+        && request.resource.data.get('completedMissionCount', 0) == 0
         && request.resource.data.get('streakShields', 0) == 0
         && request.resource.data.get('role', 'member') == 'member'
         && request.resource.data.get('isFounder', false) == false
@@ -102,6 +103,7 @@ service cloud.firestore {
         && request.resource.data.get('isSuperT1ger', false) == false
         && !request.resource.data.keys().hasAny(['currentWeekId', 'leagueTier', 'leagueCohortId', 'lastVerifiedMissionDay', 'timeZone', 'lastMissionDate', 'missionCompletedToday', 'tigerStatus', 'unlockedAccessories', 'unlockedDenItems', 'lastSupplyDropClaimed']);
       allow update: if isOwner(userId)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['completedMissionCount'])
         && (!('email' in request.resource.data) || request.resource.data.email == resource.data.email)
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['uid', 'xp', 'level', 'verifiedXP', 'coins', 'isPro', 'isSuperT1ger', 'role', 'isFounder', 'streak', 'streakShields', 'weeklyXP', 'currentWeekId', 'leagueTier', 'leagueCohortId', 'lastVerifiedMissionDay', 'verifiedMissionCount', 'timeZone', 'lastMissionDate', 'missionCompletedToday', 'tigerStatus', 'unlockedAccessories', 'unlockedDenItems', 'lastSupplyDropClaimed'])
         && (!('niche' in request.resource.data) || isValidString(request.resource.data.niche, 50))
@@ -137,12 +139,12 @@ service cloud.firestore {
       allow read: if isAuthenticated() && request.auth.uid == resource.data.userId;
       allow create: if isAuthenticated()
         && request.auth.uid == request.resource.data.userId
-        && request.resource.data.get('status', 'ready') != 'verified';
+        && !(request.resource.data.get('status', 'ready') in ['verified', 'completed']);
       allow update: if isAuthenticated()
         && request.auth.uid == resource.data.userId
         && request.auth.uid == request.resource.data.userId
-        && resource.data.get('status', 'ready') != 'verified'
-        && request.resource.data.get('status', 'ready') != 'verified';
+        && !(resource.data.get('status', 'ready') in ['verified', 'completed'])
+        && !(request.resource.data.get('status', 'ready') in ['verified', 'completed']);
       allow delete: if false;
     }
 

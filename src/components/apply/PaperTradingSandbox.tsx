@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useBrain } from '../../contexts/BrainContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useT1ger } from '../../contexts/T1gerContext';
 
 interface TradeRecord {
   id: string;
@@ -39,7 +38,6 @@ const SIMULATED_MARKET = [
 export const PaperTradingSandbox: React.FC = () => {
   const { language } = useBrain();
   const { appUser } = useAuth();
-  const { addXP } = useT1ger();
   const isEs = language === 'es';
 
   const storageKey = `t1ger_paper_portfolio_${appUser?.uid || 'local'}`;
@@ -55,7 +53,7 @@ export const PaperTradingSandbox: React.FC = () => {
 
   const [selectedTicker, setSelectedTicker] = useState('VTI');
   const [tradeAmount, setTradeAmount] = useState('2500');
-  const [thesisText, setThesisText] = useState('Margen de seguridad sólido por diversificación total en 3,700 empresas con bajo costo.');
+  const [thesisText, setThesisText] = useState('');
   const [error, setError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
 
@@ -101,8 +99,7 @@ export const PaperTradingSandbox: React.FC = () => {
       localStorage.setItem(storageKey, JSON.stringify(updated));
     }
 
-    await addXP(150, 1, 'paper_trade_executed');
-    setSuccessNotice(isEs ? `¡Orden ejecutada! Compraste ${shares} ${activeAsset.ticker} (+150 vXP)` : `Order executed! Bought ${shares} ${activeAsset.ticker} (+150 vXP)`);
+    setSuccessNotice(isEs ? `Simulación guardada: ${shares} ${activeAsset.ticker}. Sin dinero real ni XP verificado.` : `Simulation saved: ${shares} ${activeAsset.ticker}. No real money or verified XP.`);
     setThesisText('');
   };
 
@@ -117,7 +114,7 @@ export const PaperTradingSandbox: React.FC = () => {
             </span>
             <span className="inline-flex items-center gap-1 font-mono text-[9px] px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-bold">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              MERCADO ACTIVO
+              {isEs ? 'PRECIOS FICTICIOS' : 'FICTIONAL PRICES'}
             </span>
           </div>
 
@@ -263,7 +260,7 @@ export const PaperTradingSandbox: React.FC = () => {
             className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--ob-accent)] to-amber-400 text-black font-mono text-xs font-black tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,115,0,0.3)] active:scale-[0.98] transition cursor-pointer"
           >
             <Plus size={16} strokeWidth={3} />
-            <span>{isEs ? `EJECUTAR ORDEN DE $${tradeAmount} USD (+150 vXP)` : `EXECUTE ORDER (+150 vXP)`}</span>
+            <span>{isEs ? `SIMULAR ORDEN DE $${tradeAmount} USD` : 'SIMULATE ORDER'}</span>
           </button>
         </div>
       </div>

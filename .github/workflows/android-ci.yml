@@ -56,6 +56,7 @@ jobs:
           trap 'kill "$VITE_PID" || true' EXIT
           for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:3000 > /dev/null && break || sleep 1; done
           npm run test:shell
+          npm run test:apply
       - name: Optional native push configuration
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}

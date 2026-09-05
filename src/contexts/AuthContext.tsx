@@ -497,6 +497,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const serverOwnedFields = new Set(['uid', 'email', 'xp', 'level', 'verifiedXP', 'coins', 'isPro', 'isSuperT1ger', 'role', 'isFounder', 'streak', 'streakShields', 'weeklyXP', 'currentWeekId', 'leagueTier', 'leagueCohortId', 'lastVerifiedMissionDay', 'verifiedMissionCount', 'timeZone', 'lastMissionDate', 'missionCompletedToday', 'tigerStatus', 'unlockedAccessories', 'unlockedDenItems', 'lastSupplyDropClaimed']);
+    serverOwnedFields.add('completedMissionCount');
     const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
     setAppUser(prev => {
       const base = prev || { uid: user.uid, email: user.email || '', niche: 'none', level: 1, xp: 0, streak: 0 };
