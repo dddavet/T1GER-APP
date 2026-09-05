@@ -8,4 +8,4 @@
 - [x] Types, tests, production build and responsive browser verification (physical-device acceptance remains external).
 - [x] Final audit and deployment limitations documented.
 - [x] Android debug build and five native unit tests passed; generated Kotlin cache excluded from Git.
-- [ ] Push validated commits to origin/main and confirm synchronization.
+- [x] Push validated commits to origin/main and confirm synchronization.
