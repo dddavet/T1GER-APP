@@ -1,6 +1,14 @@
 # T1GER — entrega técnica y publicación
 
-Fecha de revisión: 2026-09-02. Rama de colaboración: `main`.
+Actualización: 2026-09-05. Rama de colaboración: `main`.
+
+## Actualización prioritaria: Investing y Apply
+
+Consultar [el informe del recorrido Investing](investing-journey-audit.md) para el alcance y las pruebas de esta entrega. El lanzamiento presenta cinco lecciones de Investing. Apply se completa por declaración del usuario, con reflexión opcional: otorga progreso personal, nunca XP competitivo. Los artefactos verificados anteriores se conservan.
+
+**Desplegar `completeApplyMission`, el cierre de `verifyStripeAccess` y las reglas actualizadas antes del nuevo frontend.** No se han desplegado estos cambios en esta entrega. Se detectó que el endpoint anterior de Stripe concedía acceso sin comprobar el pago; ahora rechaza la solicitud. No reactivar compras hasta implementar y probar entitlements validados en servidor. Revisar los accesos históricos concedidos por ese endpoint.
+
+Las evidencias y bloqueos del 2 de septiembre que siguen abajo son históricos, salvo las correcciones explícitas. No se ha vuelto a comprobar el plan de facturación de Firebase ni certificado servicios en vivo.
 
 ## Estado real
 
@@ -89,6 +97,7 @@ GitHub, mensajes de chat ni variables `VITE_` de producción.
 ```bash
 npx firebase functions:secrets:set GEMINI_API_KEY --project t1ger-69d6a
 npx firebase deploy --only firestore,storage --project t1ger-69d6a
+npx firebase deploy --only functions:completeApplyMission,functions:verifyStripeAccess --project t1ger-69d6a
 npx firebase deploy --only functions:verifyFieldMissionProof,functions:claimOnboardingReward,functions:askT1gerMentor,functions:deleteMyAccount,functions:acceptDirectChallenge,functions:interactWithSquadActivity,functions:queueSquadNudge,functions:countVerifiedChallengeMission,functions:settleExpiredChallenges --project t1ger-69d6a
 # Una vez configurado OneSignal/FCM:
 npx firebase functions:secrets:set ONESIGNAL_APP_ID --project t1ger-69d6a
@@ -114,9 +123,9 @@ Publicar `assetlinks.json` de `t1ger.app` solo con el certificado real de Play.
 
 ### 3. Alcance y Estado de las Tareas Técnicas Resueltas
 
-- **Cobros y Stripe**: Conectado el enlace real de Early Adopter / Fundador (`https://buy.stripe.com/fZueVeaebe5T5pvdpQaZi01`) con `client_reference_id`, `prefilled_email`, función en servidor `verifyStripeAccess` y feedback de confirmación.
+- **Cobros y Stripe**: no preparados para producción. El enlace de pago no demostraba el cobro; `verifyStripeAccess` queda cerrado y el onboarding permite empezar gratis sin fabricar Pro. RevenueCat exige plataforma, claves y entitlements reales, pero falta conectar la autoridad de acceso en servidor antes de ofrecer compras.
 - **Moderación UGC (Google Play Compliance)**: Implementado sistema completo de denuncia (`/reports`) con motivos estructurados (contenido inapropiado, acoso, spam, etc.) y bloqueo de usuarios (`/users/{uid}/blockedUsers/{blockedId}`) en `firestore.rules`, `socialService.ts` y `SquadTab.tsx`, filtrando en tiempo real las publicaciones, retos y ligas.
-- **Ligas Semanales**: Cohortes de 30 miembros delimitadas con división estricta de Zona de Ascenso (Top 5) y Zona de Descenso (Puestos 26–30), con protección en Liga Bronce (sin descenso) y separadores visuales claros.
+- **Ligas Semanales**: existen clasificación y zonas visuales; eso no acredita salas semanales cerradas de 30 miembros ni liquidación completa de ascensos y descensos. El agrupamiento del servidor necesita una revisión específica antes de prometer ese comportamiento.
 - **Seguridad OAuth Android**: Flujo de Google/Apple Sign-In protegido en WebView de Capacitor para evitar `disallowed_useragent: 403`, guiando a los usuarios de la app nativa al acceso por correo y contraseña.
 
 ### 4. Datos legales y Play Console
@@ -135,7 +144,7 @@ antes de solicitar acceso a producción. No se puede reemplazar con tests autom�
 
 ## Aceptación pendiente después del despliegue
 
-- Cuenta nueva real → onboarding → lección → evidencia rechazada/aprobada → misma recompensa tras reintento.
+- Cuenta nueva real → onboarding gratuito → lección → Apply sin reflexión → recompensa personal única tras reintento. Probar también la ruta anterior de evidencia rechazada/aprobada sin duplicar premios entre métodos.
 - Segundo dispositivo: progreso, vitrina de artefactos y XP recuperados del servidor.
 - Dos cuentas reales: solicitud, aceptación, reacción, reto, saldo, notificación y cancelación.
 - Android físico: permiso de uso denegado/otorgado, cámara, selector de fotos, proceso restaurado, teclado, botón Atrás, red lenta/sin red y rotación.

@@ -1,0 +1,11 @@
+# Full pass checklist
+- [x] Create backup and synchronize repository.
+- [x] Inspect Learn/Apply/progress and dispatch independent supporting-system audit.
+- [x] Self-reported backend with integrity regression tests.
+- [x] Investing-only guided path and readiness tests.
+- [x] Rich Apply completion and history connected end to end.
+- [x] Critical audit fixes and compatibility checks.
+- [x] Types, tests, production build and responsive browser verification (physical-device acceptance remains external).
+- [x] Final audit and deployment limitations documented.
+- [x] Android debug build and five native unit tests passed; generated Kotlin cache excluded from Git.
+- [ ] Push validated commits to origin/main and confirm synchronization.

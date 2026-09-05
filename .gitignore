@@ -15,6 +15,7 @@ tmp-*.png
 .firebase-emulator-data/
 .firebase/
 android/.idea/
+android/.kotlin/
 android/key.properties
 *.jks
 *.keystore
