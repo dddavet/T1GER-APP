@@ -41,7 +41,7 @@ import { fireRewardConfetti } from './ui/confetti';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
 import { OneSignalService } from '../services/oneSignalService';
 import { ProofVerificationService } from '../services/proofVerificationService';
-import { revenueCat } from '../services/revenueCatService';
+import { revenueCat, CHECKOUT_ENABLED } from '../services/revenueCatService';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import {
   getOnboardingExperienceLevel,
@@ -443,9 +443,6 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       updatePetSettings(Math.round(draft.screenTimeHours * 60), Math.max(50, draft.dailyGoal * 10));
       await updateAppUser({
         ...getProfilePatch(true),
-        isPro: choice === 'super',
-        isFounder: choice === 'super' && selectedPaywallPkgId.includes('lifetime'),
-        role: choice === 'super' && selectedPaywallPkgId.includes('lifetime') ? 'founder' : undefined,
       });
       await ProofVerificationService.claimOnboardingReward().catch((claimError) => {
         console.warn('Onboarding cloud reward deferred:', claimError);
@@ -461,6 +458,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   };
 
   const handleOnboardingPurchase = async () => {
+    if (!CHECKOUT_ENABLED) return;
     const pkg = paywallPackages.find(p => p.identifier === selectedPaywallPkgId) || paywallPackages[0];
     if (!pkg) return;
 
@@ -476,10 +474,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           setPaywallNotice(tr('Debes activar un plan para desbloquear la aplicación.', 'You must activate a plan to unlock the application.'));
         }
       } else {
-        // Web preview simulation
-        await new Promise(r => setTimeout(r, 600));
-        fireRewardConfetti();
-        await finalize('super');
+        setPaywallNotice(tr('Las compras no están disponibles en la web.', 'Purchases are unavailable on the web.'));
       }
     } catch (err: any) {
       if (err?.userCancelled) {
@@ -580,7 +575,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="space-y-2.5 my-auto">
-              {COURSE_TOPICS.map((topic) => {
+              {COURSE_TOPICS.filter(topic => ['technology', 'business', 'investing', 'finance', 'tech', 'skills'].includes(topic.id)).map((topic) => {
                 const isSelected = draft.topic === topic.id;
                 return (
                   <button
@@ -1596,6 +1591,13 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 18: Elite Calm/Headspace Multi-Page Paywall Sequence (3 Pages)
       case 'access': {
+        if (!CHECKOUT_ENABLED) return (
+          <div className="flex min-h-full flex-col justify-center gap-6 py-6">
+            <DuolingoHeader speech={tr('Tu siguiente paso es aprender y aplicar una idea.', 'Your next step is to learn and apply one idea.')} mood="happy" title={tr('Tu camino está listo', 'Your journey is ready')} />
+            <p className="text-sm leading-relaxed text-zinc-300">{tr('Empieza gratis. No se iniciará ninguna prueba ni suscripción. Podrás explorar una lección y completar tu primera acción.', 'Start free. No trial or subscription will begin. Explore a lesson and complete your first action.')}</p>
+            <PrimaryAction disabled={finalizing} onClick={() => finalize('free')}>{finalizing ? tr('Guardando…', 'Saving…') : tr('Empezar mi camino', 'Start my journey')}</PrimaryAction>
+          </div>
+        );
         // --- SUB-PAGE 1: Personalization Climax & Projected Habit Formation Chart ---
         if (accessSubPage === 1) {
           return (

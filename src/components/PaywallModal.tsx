@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Check, Star, Zap, Crown, Shield, Sparkles, HeartHandshake, RefreshCw, Calendar, Bell, CheckCircle2 } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { fireConfetti } from './ui/confetti';
-import { revenueCat } from '../services/revenueCatService';
+import { revenueCat, CHECKOUT_ENABLED } from '../services/revenueCatService';
 import { Capacitor } from '@capacitor/core';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 
@@ -16,7 +16,11 @@ interface PaywallModalProps {
 
 export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, source }) => {
   const { language } = useBrain();
-  const { appUser, updateAppUser } = useAuth();
+  const { appUser } = useAuth();
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (isOpen) dialogRef.current?.showModal();
+  }, [isOpen]);
   const isEs = language === 'es';
   const tr = (es: string, en: string) => isEs ? es : en;
   const [purchaseMessage, setPurchaseMessage] = useState('');
@@ -29,8 +33,8 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
   useEffect(() => {
     if (!isOpen) return;
 
-    if (appUser?.uid) {
-      void revenueCat.setAppUserId(appUser.uid);
+    if (appUser?.uid && revenueCat.isAvailable()) {
+      void revenueCat.setAppUserId(appUser.uid).catch(() => setPurchaseMessage(tr('No se pudo conectar con la tienda.', 'Could not connect to the store.')));
     }
 
     void (async () => {
@@ -51,6 +55,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
   if (!isOpen) return null;
 
   const handlePurchase = async () => {
+    if (!CHECKOUT_ENABLED) return;
     const pkg = packages.find(p => p.identifier === selectedPkgId) || packages[0];
     if (!pkg) return;
 
@@ -61,19 +66,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
         const result = await revenueCat.purchase(pkg);
         if (result.success && result.isPro) {
           fireConfetti();
-          setPurchaseMessage(tr('¡Compra confirmada! Estatus Fundador y T1GER Pro activados.', 'Purchase confirmed! Founder and T1GER Pro status activated.'));
-          if (updateAppUser) {
-            await updateAppUser({ isPro: true, isFounder: pkg.identifier.includes('lifetime'), role: pkg.identifier.includes('lifetime') ? 'founder' : undefined });
-          }
+          setPurchaseMessage(tr('Compra recibida. La activación requiere confirmación del servidor.', 'Purchase received. Activation requires server confirmation.'));
         }
       } else {
-        // Web preview simulation
-        await new Promise(r => setTimeout(r, 600));
-        fireConfetti();
-        setPurchaseMessage(tr('¡Modo de prueba web! T1GER Pro activado para tu sesión.', 'Web preview active! T1GER Pro unlocked for your session.'));
-        if (updateAppUser) {
-          await updateAppUser({ isPro: true, isFounder: pkg.identifier.includes('lifetime'), role: pkg.identifier.includes('lifetime') ? 'founder' : undefined });
-        }
+        setPurchaseMessage(tr('Las compras no están disponibles en la web.', 'Purchases are unavailable on the web.'));
       }
     } catch (error: any) {
       if (error?.userCancelled) {
@@ -94,19 +90,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
         const result = await revenueCat.restore();
         if (result.isPro) {
           fireConfetti();
-          setPurchaseMessage(tr('¡Compras restauradas con éxito!', 'Purchases restored successfully!'));
-          if (updateAppUser) {
-            await updateAppUser({ isPro: true, isFounder: true, role: 'founder' });
-          }
+          setPurchaseMessage(tr('Compra encontrada. Falta sincronizar el acceso con el servidor.', 'Purchase found. Access still needs server synchronization.'));
         } else {
           setPurchaseMessage(tr('No encontramos compras anteriores activas.', 'No active past purchases found.'));
         }
       } else {
-        fireConfetti();
-        setPurchaseMessage(tr('Modo vista previa: compras sincronizadas.', 'Preview mode: purchases synced.'));
-        if (updateAppUser) {
-          await updateAppUser({ isPro: true, isFounder: true, role: 'founder' });
-        }
+        setPurchaseMessage(tr('Restaura desde la aplicación donde compraste.', 'Restore from the app where you purchased.'));
       }
     } catch {
       setPurchaseMessage(tr('Error al restaurar compras.', 'Error restoring purchases.'));
@@ -127,7 +116,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[300] bg-black/85 backdrop-blur-xl flex items-center justify-center p-4">
+      <dialog ref={dialogRef} aria-label="T1GER Pro" onCancel={onClose} className="fixed inset-0 z-[300] m-0 h-dvh max-h-none w-screen max-w-none bg-black/85 backdrop-blur-xl p-4 open:flex items-center justify-center">
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -144,6 +133,16 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
             <X size={18} />
           </button>
 
+          {!CHECKOUT_ENABLED ? (
+            <section className="space-y-5 p-7 pt-14 text-white">
+              <Crown className="text-orange-400" aria-hidden="true" />
+              <h2 className="text-2xl font-bold">{isAlreadyPro ? tr('Tu membresía', 'Your membership') : tr('Sigue aprendiendo gratis', 'Keep learning for free')}</h2>
+              <p className="text-sm leading-relaxed text-zinc-300">{isAlreadyPro ? tr('Conservamos el acceso registrado en tu cuenta.', 'Your saved account access is preserved.') : tr('Las compras aún no están disponibles. Puedes continuar tu camino sin iniciar una prueba ni una suscripción.', 'Purchases are not available yet. Continue your journey without starting a trial or subscription.')}</p>
+              <button onClick={onClose} className="t1ger-primary-button w-full">{tr('Volver a la app', 'Back to the app')}</button>
+              {revenueCat.isAvailable() && <button disabled={loading} onClick={handleRestore} className="min-h-11 text-sm underline">{tr('Consultar compra anterior', 'Check previous purchase')}</button>}
+              {purchaseMessage && <p role="status" className="text-sm text-orange-300">{purchaseMessage}</p>}
+            </section>
+          ) : <>
           {/* Header Banner */}
           <div className="relative pt-6 pb-4 px-6 text-center border-b border-white/5 bg-gradient-to-b from-[#FF7300]/15 via-transparent to-transparent">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-400 font-mono text-[9px] font-extrabold uppercase tracking-widest mb-2">
@@ -341,9 +340,9 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
               </p>
             </div>
           </div>
+          </>}
         </motion.div>
-      </div>
+      </dialog>
     </AnimatePresence>
   );
 };
-

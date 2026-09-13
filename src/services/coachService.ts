@@ -138,8 +138,11 @@ export const getCoachResponse = async (
       }
     } catch (cloudErr) {
       console.warn('Cloud mentor call failed, falling back to tactical local engine:', cloudErr);
-      return cleanMarkdownArtifacts(getLocalCoachResponse(userMessage, language));
+      return language === 'en'
+        ? 'Your AI mentor is temporarily unavailable. Please try again. You can keep learning and applying in the meantime.'
+        : 'Tu mentor de IA no está disponible temporalmente. Inténtalo de nuevo. Mientras tanto, puedes seguir aprendiendo y aplicando.';
     }
+    return language === 'en' ? 'The mentor returned an empty response. Please try again.' : 'El mentor devolvió una respuesta vacía. Inténtalo de nuevo.';
   }
   // 1. Fetch user context & recent history with 300ms timeout so it never blocks
   let userData = {};

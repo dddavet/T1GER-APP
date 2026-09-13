@@ -177,7 +177,7 @@ export const Profile = () => {
         <SettingRow icon={Bell} title={isEs ? 'Recordatorios' : 'Reminders'} detail={notificationsEnabled ? (isEs ? 'Activados' : 'Enabled') : (isEs ? 'Desactivados' : 'Disabled')} onClick={toggleNotifications} />
         <SettingRow icon={Smartphone} title={isEs ? 'Redes vs Libertad' : 'Screen Time vs Wealth'} detail={isEs ? 'Auditoría' : 'Audit'} onClick={() => setShowScreenTimeModal(true)} />
         <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de aprendizaje' : 'Learning guidance'} onClick={() => setActiveView('coach')} />
-        <SettingRow icon={ShieldCheck} title="T1GER Plus / Founder" detail={appUser?.isPro || appUser?.isFounder ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Desbloquear ($5+)' : 'Unlock ($5+)')} onClick={() => setShowPaywallModal(true)} />
+        <SettingRow icon={ShieldCheck} title="T1GER Plus / Founder" detail={appUser?.isPro || appUser?.isFounder ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Información' : 'Details')} onClick={() => setShowPaywallModal(true)} />
         <SettingRow icon={UserRound} title={isEs ? 'Reiniciar Diagnóstico Táctico' : 'Reset Tactical Diagnostic'} detail={isEs ? 'Recalibrar ruta' : 'Recalibrate path'} onClick={() => { localStorage.removeItem('t1ger_onboarding_draft_v2'); void updateAppUser({ onboardingComplete: false }); }} />
       </motion.section>
 

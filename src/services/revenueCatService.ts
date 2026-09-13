@@ -7,6 +7,9 @@ export const REVENUECAT_PUBLIC_KEY =
 const hasProEntitlement = (info: CustomerInfo): boolean =>
   ['t1ger_pro', 'pro', 'founder'].some(id => Boolean(info.entitlements.active[id]));
 
+// Keep checkout closed until authenticated server entitlement synchronization exists.
+export const CHECKOUT_ENABLED = false;
+
 class RevenueCatService {
   private initialized = false;
   private currentUserId: string | null = null;
@@ -46,6 +49,7 @@ class RevenueCatService {
   }
 
   public async purchase(pkg: PurchasesPackage): Promise<{ success: boolean; isPro: boolean; customerInfo?: CustomerInfo }> {
+    if (!CHECKOUT_ENABLED) throw new Error('billing/entitlement-sync-unavailable');
     await this.initialize();
     try {
       const { customerInfo } = await Purchases.purchasePackage({ aPackage: pkg });
@@ -65,6 +69,7 @@ class RevenueCatService {
   }
 
   public async getDisplayPackages(): Promise<PurchasesPackage[]> {
+    if (!CHECKOUT_ENABLED) return [];
     if (this.isAvailable()) {
       try {
         const live = await this.getAvailablePackages();
@@ -127,4 +132,3 @@ export const FALLBACK_PACKAGES: PurchasesPackage[] = [
 ] as unknown as PurchasesPackage[];
 
 export const revenueCat = new RevenueCatService();
-

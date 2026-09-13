@@ -246,6 +246,7 @@ export const FieldMissionService = {
   },
 
   async completeSelfReported(mission: FieldMission, reflection = ''): Promise<number> {
+    if (!auth.currentUser && !IS_PROTOTYPE) throw new Error('AUTH_REQUIRED');
     const existing = readLocal(mission.userId).find(item => item.id === mission.id);
     if (existing && isFieldMissionComplete(existing)) return 0;
     let rewardXP = mission.lessonXp + mission.executionXp;
