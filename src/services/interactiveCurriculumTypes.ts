@@ -1,9 +1,16 @@
-import type { Competency, Difficulty } from './missionBank';
+import type { Competency, Difficulty, TrackType } from './missionBank';
 
 export type LearningLocale = 'es' | 'en';
 export type LocalizedText = Record<LearningLocale, string>;
 
-export type InteractiveTrackId = 'smart-money' | 'ai-automation' | 'viral-growth';
+export type InteractiveTrackId =
+  | 'smart-money'
+  | 'ai-automation'
+  | 'viral-growth'
+  | 'history-strategy'
+  | 'mindset-stoic'
+  | 'peak-performance'
+  | 'data-science';
 export type ChallengeKind = 'multiple_choice' | 'ordering' | 'matching' | 'error_detection';
 export type MicroToolEngine =
   | 'cash_cost'
@@ -20,7 +27,15 @@ export type MicroToolEngine =
   | 'pain_to_promise'
   | 'offer_value'
   | 'six_second_script'
-  | 'distribution_plan';
+  | 'distribution_plan'
+  | 'strategy_map'
+  | 'control_filter'
+  | 'focus_block'
+  | 'data_signal_filter'
+  | 'north_star_builder'
+  | 'ab_test_calc'
+  | 'overfitting_check'
+  | 'decision_analytics';
 
 export interface CurriculumSource {
   id: string;
@@ -180,7 +195,7 @@ export interface AtomicLesson {
 
 export interface InteractiveTrack {
   id: InteractiveTrackId;
-  legacyTrackId: 'investing' | 'ai' | 'business';
+  legacyTrackId: TrackType;
   title: LocalizedText;
   shortTitle: LocalizedText;
   promise: LocalizedText;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Lock, Crown, Star, BookOpen, Building2, TrendingUp, Cpu } from 'lucide-react';
+import { Lock, Crown, Star, BookOpen, Building2, TrendingUp, Cpu, Sparkles, Zap } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { type TrackType } from '../services/missionBank';
@@ -32,6 +32,24 @@ const TRACK_STYLES: Record<TrackType, TrackStyle> = {
     color: '#CE82FF', 
     borderColor: '#A559D6', 
     bgColor: '#FAF5FF' 
+  },
+  history: { 
+    icon: <Crown className="w-4 h-4" />, 
+    color: '#EAB308', 
+    borderColor: '#CA8A04', 
+    bgColor: '#FEFCE8' 
+  },
+  mindset: { 
+    icon: <Sparkles className="w-4 h-4" />, 
+    color: '#EC4899', 
+    borderColor: '#DB2777', 
+    bgColor: '#FDF2F8' 
+  },
+  performance: { 
+    icon: <Zap className="w-4 h-4" />, 
+    color: '#10B981', 
+    borderColor: '#059669', 
+    bgColor: '#ECFDF5' 
   },
 };
 

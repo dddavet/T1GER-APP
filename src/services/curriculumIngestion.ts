@@ -6,7 +6,15 @@ export interface CurriculumValidationResult {
   lesson?: AtomicLesson;
 }
 
-const TRACK_IDS = new Set<InteractiveTrackId>(['smart-money', 'ai-automation', 'viral-growth']);
+const TRACK_IDS = new Set<InteractiveTrackId>([
+  'smart-money',
+  'ai-automation',
+  'viral-growth',
+  'history-strategy',
+  'mindset-stoic',
+  'peak-performance',
+  'data-science',
+]);
 const PHASE_TYPES = ['impact', 'challenge', 'action', 'reward'];
 const PHASE_DURATIONS = [45, 60, 60, 15];
 

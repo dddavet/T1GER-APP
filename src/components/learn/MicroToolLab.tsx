@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { CheckCircle, Copy, FloppyDisk } from '@phosphor-icons/react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { CheckCircle, Copy, FloppyDisk, Sparkle } from '@phosphor-icons/react';
 import type { ActionWidget, LearningLocale, SavedLearningArtifact, ToolField } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
 
@@ -107,21 +107,159 @@ function calculateResult(widget: ActionWidget, values: Record<string, string | n
       const artifact = es ? `Tesis: ${text('thesis')}\nVideo: ${text('short')}\nEmail: ${text('email')}\nConversación: ${text('conversation')}` : `Thesis: ${text('thesis')}\nVideo: ${text('short')}\nEmail: ${text('email')}\nConversation: ${text('conversation')}`;
       return { headline: '1 → 4', detail: es ? 'una tesis, cuatro pruebas' : 'one thesis, four tests', artifact };
     }
+    case 'strategy_map': {
+      const artifact = es
+        ? `Terreno: ${text('terrain')}\nVentaja táctica: ${text('advantage')}\nPlan de contingencia: ${text('retreat')}`
+        : `Terrain: ${text('terrain')}\nTactical edge: ${text('advantage')}\nContingency plan: ${text('retreat')}`;
+      return { headline: es ? 'Posición inexpugnable' : 'Unassailable position', detail: es ? 'cálculo previo completado' : 'prior calculation complete', artifact };
+    }
+    case 'control_filter': {
+      const artifact = es
+        ? `Bajo mi control: ${text('internal')}\nFuera de mi control: ${text('external')}\nRespuesta deliberada: ${text('response')}`
+        : `Within my control: ${text('internal')}\nOutside my control: ${text('external')}\nDeliberate response: ${text('response')}`;
+      return { headline: es ? 'Dicotomía aplicada' : 'Dichotomy applied', detail: es ? 'enfoque 100% en lo interno' : '100% focus on internal', artifact };
+    }
+    case 'focus_block': {
+      const minutes = numberValue(values, 'minutes') || 90;
+      const artifact = es
+        ? `Bloque sagrado: ${minutes} min\nDistracción eliminada: ${text('distraction')}\nObjetivo único: ${text('goal')}`
+        : `Sacred block: ${minutes} min\nEliminated distraction: ${text('distraction')}\nSingle goal: ${text('goal')}`;
+      return { headline: `${minutes} min Deep Work`, detail: es ? 'cero notificaciones garantizadas' : 'zero notifications guaranteed', artifact };
+    }
+    case 'data_signal_filter': {
+      const correlation = text('correlation');
+      const confounder = text('confounder');
+      const experiment = text('experiment');
+      const artifact = es
+        ? `Correlación: ${correlation}\nConfusor sospechoso: ${confounder}\nPrueba causal: ${experiment}`
+        : `Correlation: ${correlation}\nSuspected confounder: ${confounder}\nCausal test: ${experiment}`;
+      return {
+        headline: es ? 'Hipótesis causal filtrada' : 'Causal hypothesis filtered',
+        detail: es ? 'variable confusora aislada con prueba de control' : 'confounding variable isolated with control test',
+        artifact,
+      };
+    }
+    case 'north_star_builder': {
+      const product = text('product');
+      const valueMoment = text('valueMoment');
+      const frequency = text('frequency');
+      const freqLabel = frequency === 'daily' ? (es ? 'diaria' : 'daily') : frequency === 'weekly' ? (es ? 'semanal' : 'weekly') : (es ? 'mensual' : 'monthly');
+      const artifact = es
+        ? `Producto: ${product}\nMomento Aha: ${valueMoment}\nCadencia: ${freqLabel}\nMétrica North Star: Usuarios activos con ${valueMoment} (${freqLabel}).`
+        : `Product: ${product}\nAha moment: ${valueMoment}\nCadence: ${freqLabel}\nNorth Star metric: Active users experiencing ${valueMoment} (${freqLabel}).`;
+      return {
+        headline: es ? `North Star (${freqLabel})` : `North Star (${freqLabel})`,
+        detail: `${product} → ${valueMoment}`,
+        artifact,
+      };
+    }
+    case 'ab_test_calc': {
+      const baseline = numberValue(values, 'baselineRate', 5);
+      const mde = numberValue(values, 'mde', 20);
+      const daily = numberValue(values, 'dailyTraffic', 500);
+      const p = baseline / 100;
+      const relMde = mde / 100;
+      const perVariant = Math.round((16 * (1 - p)) / (p * relMde * relMde));
+      const totalSample = perVariant * 2;
+      const daysNeeded = Math.max(1, Math.ceil(totalSample / daily));
+      const headline = es ? `${totalSample.toLocaleString()} visitantes (${daysNeeded} días)` : `${totalSample.toLocaleString()} visitors (${daysNeeded} days)`;
+      const detail = es ? `${perVariant.toLocaleString()} por variante (A/B) al 80% poder y 95% confianza` : `${perVariant.toLocaleString()} per variant (A/B) at 80% power & 95% confidence`;
+      const artifact = es
+        ? `Línea base: ${baseline}%. MDE: ${mde}%. Muestra total requerida: ${totalSample.toLocaleString()} usuarios. Duración mínima sin espiar: ${daysNeeded} días.`
+        : `Baseline: ${baseline}%. MDE: ${mde}%. Required total sample: ${totalSample.toLocaleString()} users. Minimum duration without peeking: ${daysNeeded} days.`;
+      return { headline, detail, artifact };
+    }
+    case 'overfitting_check': {
+      const trainAcc = numberValue(values, 'trainAccuracy', 98);
+      const testAcc = numberValue(values, 'testAccuracy', 62);
+      const features = numberValue(values, 'featureCount', 48);
+      const gap = trainAcc - testAcc;
+      const status = gap > 20
+        ? (es ? 'Overfitting severo (Varianza extrema)' : 'Severe overfitting (High variance)')
+        : gap > 10
+        ? (es ? 'Overfitting moderado' : 'Moderate overfitting')
+        : (es ? 'Modelo equilibrado' : 'Well-balanced model');
+      const recommendation = gap > 15
+        ? (es ? `Reducir variables (actuales: ${features}) y aplicar regularización L2/Dropout.` : `Prune features (current: ${features}) and apply L2/Dropout regularization.`)
+        : (es ? 'Brecha aceptable entre train y test. Listo para validación cruzada.' : 'Acceptable train/test gap. Ready for cross-validation.');
+      const artifact = es
+        ? `Train: ${trainAcc}% | Test: ${testAcc}% (Brecha: ${gap}%).\nDiagnóstico: ${status}.\nAcción: ${recommendation}`
+        : `Train: ${trainAcc}% | Test: ${testAcc}% (Gap: ${gap}%).\nDiagnosis: ${status}.\nAction: ${recommendation}`;
+      return {
+        headline: `${status} (Δ ${gap}%)`,
+        detail: recommendation,
+        artifact,
+      };
+    }
+    case 'decision_analytics': {
+      const metric = text('metricName');
+      const threshold = numberValue(values, 'threshold', 45);
+      const above = text('actionAbove');
+      const below = text('actionBelow');
+      const artifact = es
+        ? `Contrato de decisión: ${metric}\nSi > ${threshold}: ${above}\nSi ≤ ${threshold}: ${below}`
+        : `Decision contract: ${metric}\nIf > ${threshold}: ${above}\nIf ≤ ${threshold}: ${below}`;
+      return {
+        headline: es ? `Regla: ${metric} (Umbral ${threshold})` : `Rule: ${metric} (Threshold ${threshold})`,
+        detail: es ? `> ${threshold} → ${above} | ≤ ${threshold} → ${below}` : `> ${threshold} → ${above} | ≤ ${threshold} → ${below}`,
+        artifact,
+      };
+    }
   }
 }
 
-const initialValueForField = (field: ToolField): string | number => field.defaultValue ?? '';
+const initialValueForField = (field: ToolField, locale: LearningLocale): string | number => {
+  if (field.defaultValue !== undefined) return field.defaultValue;
+  if (field.kind === 'text' && field.placeholder) {
+    return localizeLearning(field.placeholder, locale);
+  }
+  return '';
+};
 
 export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, widget, locale, onCommit }) => {
-  const [values, setValues] = useState<Record<string, string | number>>(() => Object.fromEntries(widget.fields.map((field) => [field.id, initialValueForField(field)])));
+  const [values, setValues] = useState<Record<string, string | number>>(() =>
+    Object.fromEntries(widget.fields.map((field) => [field.id, initialValueForField(field, locale)]))
+  );
   const [committed, setCommitted] = useState(false);
   const [copied, setCopied] = useState(false);
   const result = useMemo(() => calculateResult(widget, values, locale), [locale, values, widget]);
   const isValid = widget.fields.every((field) => field.kind !== 'text' || String(values[field.id] || '').trim().length >= (field.minLength || 1));
 
+  const onCommitRef = useRef(onCommit);
+  onCommitRef.current = onCommit;
+  const lastCommittedSummaryRef = useRef<string>('');
+
+  // Auto-commit valid artifact to parent so player is never deadlocked
+  useEffect(() => {
+    if (isValid && result.artifact && result.artifact !== lastCommittedSummaryRef.current) {
+      lastCommittedSummaryRef.current = result.artifact;
+      const artifact: SavedLearningArtifact = {
+        lessonId,
+        trackId,
+        title: localizeLearning(widget.artifactTitle, locale),
+        summary: result.artifact,
+        values,
+        createdAt: Date.now(),
+      };
+      onCommitRef.current(artifact);
+    }
+  }, [isValid, lessonId, trackId, widget.artifactTitle, result.artifact, values, locale]);
+
   const updateValue = (id: string, value: string | number) => {
     setCommitted(false);
     setValues((current) => ({ ...current, [id]: value }));
+  };
+
+  const loadRecommendedTemplate = () => {
+    const updated = { ...values };
+    widget.fields.forEach((field) => {
+      if (field.kind === 'text' && field.placeholder) {
+        updated[field.id] = localizeLearning(field.placeholder, locale);
+      }
+    });
+    setValues(updated);
+    setCommitted(true);
+    navigator.vibrate?.(12);
   };
 
   const commit = () => {
@@ -149,12 +287,30 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
     }
   };
 
+  const hasTextFields = widget.fields.some((f) => f.kind === 'text');
+
   return (
     <div className="space-y-4">
       <div className="border-l-2 border-[#FF7300] pl-4">
         <h3 className="text-xl font-bold tracking-tight text-white">{localizeLearning(widget.title, locale)}</h3>
         <p className="mt-1 text-sm leading-relaxed text-zinc-400">{localizeLearning(widget.instruction, locale)}</p>
       </div>
+
+      {hasTextFields && (
+        <div className="flex items-center justify-between gap-2 pt-1">
+          <span className="text-[11px] text-zinc-400">
+            {locale === 'es' ? 'Plantilla precargada:' : 'Pre-loaded template:'}
+          </span>
+          <button
+            type="button"
+            onClick={loadRecommendedTemplate}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#FF7300]/30 bg-[#FF7300]/10 px-2.5 py-1 text-xs font-semibold text-[#FF9B4A] hover:bg-[#FF7300]/20 active:scale-95 transition-all cursor-pointer"
+          >
+            <Sparkle size={13} weight="fill" />
+            {locale === 'es' ? 'Restaurar plantilla recomendada' : 'Restore recommended template'}
+          </button>
+        </div>
+      )}
 
       <div className="space-y-4 border-y border-white/8 py-4">
         {widget.fields.map((field) => (
@@ -200,7 +356,7 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
 
       <button type="button" disabled={!isValid || committed} onClick={commit} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35">
         {committed ? <CheckCircle size={20} weight="fill" /> : <FloppyDisk size={20} weight="bold" />}
-        {committed ? (locale === 'es' ? 'Artefacto guardado' : 'Artifact saved') : localizeLearning(widget.commitLabel, locale)}
+        {committed ? (locale === 'es' ? '✓ Artefacto guardado' : '✓ Artifact saved') : localizeLearning(widget.commitLabel, locale)}
       </button>
       {!isValid && <p className="text-center text-xs text-amber-300">{locale === 'es' ? 'Completa todos los campos para generar un artefacto real.' : 'Complete every field to generate a real artifact.'}</p>}
     </div>

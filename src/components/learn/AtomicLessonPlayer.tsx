@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import {
@@ -22,8 +22,7 @@ import { useT1ger } from '../../contexts/T1gerContext';
 import { FieldMissionService } from '../../services/fieldMissionService';
 import type { AtomicLesson, ChallengeOption, LearningLocale, SavedLearningArtifact } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
-const LazyMascot = React.lazy(() => import('../T1gerMascot3D').then(module => ({ default: module.T1gerMascot3D })));
-const T1gerMascot3D = (props: { mood: 'thinking' | 'beast'; closeUp?: boolean; className: string }) => <React.Suspense fallback={<img src="/mascot/t1ger-icon.png" alt="" className={props.className} />}><LazyMascot {...props} /></React.Suspense>;
+import { T1gerMascot3D } from '../T1gerMascot3D';
 import { MicroToolLab } from './MicroToolLab';
 
 interface AtomicLessonPlayerProps {
@@ -214,10 +213,15 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
   const queuedRef = useRef(false);
   const phase = lesson.phases[phaseIndex];
 
-  const persistArtifact = (nextArtifact: SavedLearningArtifact) => {
+  const persistArtifact = useCallback((nextArtifact: SavedLearningArtifact) => {
     saveArtifact(nextArtifact, appUser?.uid || 'local');
-    setArtifact(nextArtifact);
-  };
+    setArtifact((current) => {
+      if (current && current.summary === nextArtifact.summary && current.title === nextArtifact.title) {
+        return current;
+      }
+      return nextArtifact;
+    });
+  }, [appUser?.uid]);
 
   const prepareFieldMission = () => {
     if (!artifact || bridging || queuedRef.current) return;
@@ -286,7 +290,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto px-5 py-5">
+        <main className="flex-1 overflow-y-auto px-5 pt-5 pb-20 sm:pb-24">
           <AnimatePresence mode="wait">
             <motion.section key={phase.type} initial={{ opacity: 0, x: 22 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -18 }} transition={{ type: 'spring', stiffness: 170, damping: 24 }} className="mx-auto min-h-full w-full max-w-md">
               {phase.type === 'impact' && (

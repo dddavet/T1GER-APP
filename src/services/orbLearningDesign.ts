@@ -106,12 +106,12 @@ export const ORB_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
     l('¿Cuáles son las tres piezas de un hook defendible?', 'What are the three parts of a defensible hook?'), l('Audiencia específica, tensión visible y payoff concreto.', 'Specific audience, visible tension, and concrete payoff.'),
   ),
   'learn-growth-02': design(
-    l('¿Puedes ver a tu “audiencia objetivo” en una escena de diez segundos?', 'Can you see your “target audience” in a ten-second scene?'),
-    l('Convierte “emprendedores” en una persona, un momento y una fricción.', 'Turn “entrepreneurs” into a person, a moment, and a friction.'),
-    [beat('La etiqueta', 'The label', '“Creadores” describe una categoría, pero no revela qué ocurre justo antes de buscar una solución.', '“Creators” describes a category, but not what happens right before they seek a solution.'), beat('La escena', 'The scene', 'Una escena muestra intento, pantalla, bloqueo y consecuencia. Entonces el mensaje puede usar palabras que la persona reconoce.', 'A scene shows attempt, screen, blockage, and consequence. Then the message can use words the person recognizes.'), beat('La promesa', 'The promise', 'Cuando el dolor es observable, el resultado también puede serlo. Eso vuelve la oferta medible y creíble.', 'When pain is observable, the outcome can be observable too. That makes the offer measurable and credible.')],
-    l('Error común: confundir demografía con situación de compra.', 'Common error: confusing demographics with a buying situation.'),
-    [l('Nombra una persona concreta.', 'Name a concrete person.'), l('Ubícala en el momento del problema.', 'Place them at the problem moment.'), l('Describe una fricción que alguien pueda observar.', 'Describe a friction someone can observe.')],
-    l('¿Qué fórmula convierte una audiencia vaga en un segmento utilizable?', 'What formula turns a vague audience into a usable segment?'), l('Persona + momento + fricción observable.', 'Person + moment + observable friction.'),
+    l('¿Por qué tus amigos y clientes te mienten cuando les presentas tu idea?', 'Why do friends and clients lie to you when you pitch your idea?'),
+    l('Convierte una pregunta hipotética sobre el futuro en una investigación de hechos pasados.', 'Turn a hypothetical future question into an investigation of past facts.'),
+    [beat('El cumplido mortal', 'The deadly compliment', 'Cuando preguntas si usarían tu producto, dicen que sí para ser amables. Los cumplidos matan startups.', 'When you ask if they would use your product, they say yes to be kind. Compliments kill startups.'), beat('La regla de oro', 'The golden rule', 'Pregunta sobre su vida, no sobre tu idea. Indaga en qué intentaron la semana pasada y qué software ya pagan.', 'Ask about their life, not your idea. Inquire into what they tried last week and what tools they already pay for.'), beat('La evidencia económica', 'Economic evidence', 'Si no han intentado resolverlo ni han gastado tiempo o dinero en el pasado, el dolor no existe.', 'If they have not tried solving it or spent time or money in the past, the pain does not exist.')],
+    l('Error común: preguntar «¿comprarías esto?» en vez de «¿cuánto gastaste resolviendo esto el mes pasado?».', 'Common error: asking «would you buy this?» instead of «how much did you spend solving this last month?».'),
+    [l('Cero pitcheo de tu idea durante la entrevista.', 'Zero idea pitching during the interview.'), l('Pregunta solo por comportamientos pasados y dinero gastado.', 'Ask only about past behavior and money spent.'), l('Escucha el 80% del tiempo y toma notas literales.', 'Listen 80% of the time and write literal notes.')],
+    l('¿Cuál es la regla sagrada de The Mom Test?', 'What is the sacred rule of The Mom Test?'), l('Hablar de su vida en el pasado, nunca de tu idea en el futuro.', 'Talk about their past life, never your future idea.'),
   ),
   'learn-growth-03': design(
     l('¿Qué deberías mejorar antes de bajar el precio?', 'What should you improve before lowering price?'),
@@ -136,6 +136,226 @@ export const ORB_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
     l('Error común: copiar y pegar el mismo activo en todos los canales y llamarlo distribución.', 'Common error: copying the same asset into every channel and calling it distribution.'),
     [l('Conserva una tesis central.', 'Keep one core thesis.'), l('Adapta entrada y formato por canal.', 'Adapt opening and format by channel.'), l('Asigna una señal diagnóstica a cada versión.', 'Assign a diagnostic signal to each version.')],
     l('¿Qué cambia y qué permanece al distribuir?', 'What changes and what remains when distributing?'), l('Permanece la tesis; cambian entrada, formato, CTA y métrica.', 'The thesis remains; opening, format, CTA, and metric change.'),
+  ),
+  'learn-history-01': design(
+    l('¿Por qué el 80% de las batallas históricas se decidían antes del primer choque?', 'Why were 80% of historical battles decided before the first clash?'),
+    l('Predice qué factor pesa más: el número de soldados o la elección del terreno.', 'Predict which factor matters more: troop count or choice of terrain.'),
+    [beat('La ilusión de la fuerza', 'The illusion of force', 'Tener más tropas no garantiza nada si el terreno te atrapa o agota tus suministros.', 'Having more troops guarantees nothing if terrain traps you or drains your supplies.'), beat('El cálculo previo', 'The prior calculation', 'El estratega calcula cinco factores: clima, terreno, doctrina, mando y disciplina. Si los números no favorecen, no combate.', 'The strategist calculates five factors beforehand: weather, terrain, doctrine, command, and discipline. If odds are poor, they do not fight.'), beat('La posición inexpugnable', 'The unassailable position', 'Colocarte donde no puedes ser derrotado y esperar el error del rival convierte la victoria en consecuencia, no en azar.', 'Standing where you cannot be defeated and awaiting the rival’s mistake turns victory into consequence, not chance.')],
+    l('Error común: creer que el coraje sustituye al reconocimiento previo del terreno y la información.', 'Common error: believing courage replaces terrain reconnaissance and intelligence.'),
+    [l('El terreno determina la táctica.', 'Terrain dictates tactics.'), l('Conoce a tu adversario y a ti mismo.', 'Know your rival and yourself.'), l('Gana primero en el mapa antes de marchar.', 'Win first on the map before marching.')],
+    l('¿Cuál es la máxima fundamental de Sun Tzu sobre la victoria?', 'What is Sun Tzu’s core maxim on victory?'),
+    l('Los guerreros victoriosos ganan primero y luego van a la guerra; los derrotados van a la guerra primero y luego buscan ganar.', 'Victorious warriors win first and then go to war, while defeated warriors go to war first and then seek to win.'),
+  ),
+  'learn-history-02': design(
+    l('¿Cómo se somete al enemigo sin librar una sola batalla sangrienta?', 'How do you subdue the enemy without fighting a single bloody battle?'),
+    l('Piensa qué desarma a un rival más rápido: destruir sus murallas o quebrar sus alianzas.', 'Think what disarms a rival faster: destroying their walls or breaking their alliances.'),
+    [beat('El coste de la fuerza', 'The cost of force', 'Sitiar ciudades amuralladas consume meses y desgasta tus propias reservas.', 'Besieging walled cities drains months and burns your own reserves.'), beat('El ataque a la estrategia', 'Attacking strategy', 'La suprema excelencia consiste en desarticular los planes del adversario antes de que maduren.', 'Supreme excellence consists in breaking the enemy’s plans before they mature.'), beat('El aislamiento diplomático', 'Diplomatic isolation', 'Cortar sus suministros y aislarlo de aliados fuerza la rendición con mínima pérdida de vidas.', 'Cutting supplies and severing alliances forces surrender with minimal casualties.')],
+    l('Error común: medir el éxito por el número de bajas causadas en lugar de objetivos estratégicos cumplidos.', 'Common error: measuring success by enemy casualties rather than strategic goals achieved.'),
+    [l('La mejor victoria preserva tus propios recursos.', 'The best victory preserves your own resources.'), l('Ataca primero la mente y alianzas del rival.', 'Attack the rival’s mind and alliances first.'), l('La diplomacia armada supera al combate frontal.', 'Armed diplomacy beats frontal slaughter.')],
+    l('¿Qué constituye la suprema excelencia en el mando estratégico?', 'What constitutes supreme excellence in strategic command?'),
+    l('Someter al adversario sin librar combate directo.', 'Subduing the enemy without direct fighting.'),
+  ),
+  'learn-history-03': design(
+    l('¿Por qué la fuerza bruta frontal pierde sistemáticamente ante la maniobra?', 'Why does frontal brute force lose consistently to maneuver?'),
+    l('Analiza cómo Aníbal rodeó y destruyó un ejército romano dos veces mayor en Cannas.', 'Analyze how Hannibal encircled and crushed a Roman army twice his size at Cannae.'),
+    [beat('El cebo central', 'The central bait', 'Aníbal colocó a sus tropas más débiles en el centro para retroceder ordenadamente ante la embestida romana.', 'Hannibal placed his weakest troops in the center to retreat orderly under the Roman assault.'), beat('El arco inverso', 'The inverted arc', 'A medida que Roma empujaba creyendo que ganaba, sus flancos quedaron atrapados entre la caballería de élite cartaginesa.', 'As Rome pushed forward believing it was winning, its flanks were trapped by elite Carthaginian cavalry.'), beat('El cerco perfecto', 'The perfect envelopment', 'La victoria no fue de músculo, sino de geometría táctica y gestión de las expectativas del enemigo.', 'Victory came not from muscle, but from tactical geometry and managing enemy expectations.')],
+    l('Error común: confundir empuje agresivo con ventaja táctica real.', 'Common error: confusing aggressive push with real tactical leverage.'),
+    [l('El centro cede para absorber energía.', 'The center yields to absorb momentum.'), l('Los flancos cierran la trampa.', 'The flanks spring the trap.'), l('La maniobra geométrica vence al volumen.', 'Geometric maneuver beats brute volume.')],
+    l('¿Cuál fue el principio clave de la maniobra de Cannas?', 'What was the key principle of the Cannae maneuver?'),
+    l('Usar el ímpetu y agresividad del enemigo para cerrarle el cerco.', 'Using the enemy’s own aggression and momentum to close the trap.'),
+  ),
+  'learn-history-04': design(
+    l('¿Cómo tomar decisiones críticas cuando el 70% de los datos son confusos o falsos?', 'How do you make critical decisions when 70% of data is noisy or false?'),
+    l('Identifica qué guía a un comandante en la niebla: la intuición ciega o reglas de decisión robustas.', 'Identify what guides a commander in the fog: blind hunch or robust decision heuristics.'),
+    [beat('La fricción constante', 'Constant friction', 'En la teoría todo es simple; en el terreno real, el lodo, el miedo y las órdenes mal transmitidas crean caos.', 'In theory all is simple; in reality mud, fear, and garbled orders create friction and chaos.'), beat('El margen de seguridad', 'The margin of safety', 'Los planes que requieren precisión milimétrica fracasan. Los planes resilientes toleran errores masivos de comunicación.', 'Plans requiring millimeter precision collapse. Resilient plans tolerate major communications failures.'), beat('La iniciativa local', 'Local initiative', 'Dar libertad de ejecución a los mandos subordinados sobre el terreno vence a la microgestión centralizada.', 'Granting tactical freedom to frontline officers beats centralized micromanagement.')],
+    l('Error común: paralizarse esperando certeza total que nunca llegará.', 'Common error: freezing while waiting for 100% certainty that never comes.'),
+    [l('Asume fricción y retrasos en cada orden.', 'Assume friction and delays in every command.'), l('Diseña planes tolerantes a fallos.', 'Design fault-tolerant plans.'), l('Empodera la decisión en primera línea.', 'Empower frontline decision-making.')],
+    l('¿Cómo define Clausewitz la fricción militar?', 'How does Clausewitz define military friction?'),
+    l('La acumulación de innumerables pequeños factores que hacen que lo más sencillo resulte sumamente difícil.', 'The countless small factors that make the simplest things excruciatingly difficult.'),
+  ),
+  'learn-history-05': design(
+    l('¿Qué debilita a los imperios más poderosos antes de que caigan?', 'What weakens mighty empires long before they fall?'),
+    l('Compara si Roma cayó por invasiones bárbaras o por erosión interna previa.', 'Compare whether Rome fell to barbarian invasions or prior internal decay.'),
+    [beat('La complacencia', 'Complacency', 'Generaciones nacidas en abundancia olvidan la disciplina y el rigor que construyeron las instituciones.', 'Generations born into abundance forget the discipline that forged their institutions.'), beat('La degradación del valor', 'Currency debasement', 'El gasto descontrolado y la devaluación constante de la moneda destruyen la confianza del ciudadano en el futuro.', 'Unchecked spending and persistent debasement destroy public confidence in the future.'), beat('La fractura cívica', 'Civic fracturing', 'Cuando los intereses facciosos superan al deber colectivo, el sistema se quiebra al primer choque externo.', 'When factional interests overwhelm collective duty, the system fractures on the first external shock.')],
+    l('Error común: atribuir el colapso al enemigo exterior ignorando la fragilidad estructural interna.', 'Common error: blaming external enemies while ignoring structural internal fragility.'),
+    [l('La disciplina precede a la prosperidad.', 'Discipline precedes prosperity.'), l('La devaluación mina la confianza en el sistema.', 'Debasement undermines institutional trust.'), l('La resiliencia exige renovación continua.', 'Resilience demands continuous renewal.')],
+    l('¿Cuál es la principal causa histórica de declive sistémico?', 'What is the primary historical cause of systemic decline?'),
+    l('La pérdida de disciplina institucional interna y la degradación de la cohesión cívica.', 'The loss of internal institutional discipline and the decay of civic cohesion.'),
+  ),
+  'learn-mindset-01': design(
+    l('¿Qué porcentaje de tu estrés proviene de cosas que no puedes alterar?', 'What percentage of your daily stress stems from things you cannot alter?'),
+    l('Separa mentalmente las variables de hoy en dos columnas: bajo tu control y fuera de tu control.', 'Mentally split today’s variables into two columns: within your control and outside your control.'),
+    [beat('La división fundamental', 'The core divide', 'Tus pensamientos, decisiones y esfuerzo están bajo tu gobierno. La economía, las opiniones ajenas y el clima no lo están.', 'Your thoughts, decisions, and effort are under your rule. The economy, other opinions, and the weather are not.'), beat('El drenaje de energía', 'Energy drain', 'Cada minuto gastado en quejarse de lo incontrolable es energía que le robas a tu ejecución deliberada.', 'Every minute spent lamenting the uncontrollable is energy stolen from deliberate execution.'), beat('La fortaleza interior', 'The inner fortress', 'Cuando anclas tu serenidad únicamente en la calidad de tus acciones, nada externo puede desestabilizarte.', 'When your calm is anchored only in the quality of your own actions, nothing external can shake you.')],
+    l('Error común: creer que el estoicismo es apatía o resignación pasiva.', 'Common error: believing Stoicism is cold apathy or passive resignation.'),
+    [l('Identifica qué depende de ti.', 'Identify what is in your control.'), l('Acepta con calma lo que no puedes gobernar.', 'Accept what you cannot govern calmly.'), l('Dedica el 100% de tu energía a tu respuesta interna.', 'Pour 100% of your energy into your internal response.')],
+    l('¿Dónde reside el único poder del estoico según Epicteto?', 'Where does the Stoic’s only true power reside according to Epictetus?'),
+    l('En el juicio que emite y en las acciones que decide tomar ante los hechos.', 'In their own judgments and the deliberate actions they choose in response to events.'),
+  ),
+  'learn-mindset-02': design(
+    l('¿Por qué perder $100 duele el doble de lo que alegra ganar $100?', 'Why does losing $100 hurt twice as much as gaining $100 feels good?'),
+    l('Evalúa cómo la aversión a la pérdida te paraliza antes de lanzar un proyecto o cerrar una mala posición.', 'Evaluate how loss aversion paralyzes you before launching an idea or cutting a bad position.'),
+    [beat('El sesgo evolutivo', 'The evolutionary bias', 'Para nuestros antepasados, evitar la muerte era vital; perder una oportunidad era secundario. El cerebro sobrevalora la pérdida.', 'For early humans, avoiding death was vital; missing a reward was secondary. The brain overweighs loss.'), beat('La trampa del coste hundido', 'The sunk cost trap', 'Mantener una inversión fallida solo para no admitir la pérdida inicial multiplica el daño a largo plazo.', 'Clinging to a failing bet just to avoid acknowledging the loss multiplies long-term damage.'), beat('La regla de decisión asimétrica', 'Asymmetric decision rule', 'Decidir mirando el valor esperado futuro y no el dinero gastado en el pasado libera la mente de ataduras emocionales.', 'Deciding based on expected future value rather than past sunk costs frees the mind from emotional drag.')],
+    l('Error común: no cortar pérdidas temprano por el apego al orgullo personal.', 'Common error: refusing to cut losses early due to ego attachment.'),
+    [l('Reconoce la aversión biológica a la pérdida.', 'Acknowledge the biological fear of loss.'), l('Ignora los costes que ya no puedes recuperar.', 'Ignore sunk costs you cannot recover.'), l('Decide basado en la expectativa hacia adelante.', 'Decide on forward-looking expected value.')],
+    l('¿Qué sesgo documentado por Kahneman explica la reticencia a vender en pérdida?', 'Which bias documented by Kahneman explains the reluctance to sell at a loss?'),
+    l('La aversión a la pérdida combinada con la falacia del coste hundido.', 'Loss aversion combined with the sunk cost fallacy.'),
+  ),
+  'learn-mindset-03': design(
+    l('¿Cómo convertir cada obstáculo que encuentras en combustible puro?', 'How do you turn every obstacle you face into raw fuel?'),
+    l('Recuerda el último contratiempo grave y busca la oportunidad oculta que forzó en ti.', 'Recall the last severe setback and find the hidden opportunity it forced into you.'),
+    [beat('La resistencia natural', 'The natural friction', 'Cuando el camino se bloquea, la reacción inmediata es frustración y resentimiento.', 'When the path is blocked, the immediate human reaction is frustration and resentment.'), beat('El giro mental', 'The mental pivot', 'Marco Aurelio observó: el impedimento a la acción hace avanzar la acción. Lo que se interpone en el camino se convierte en el camino.', 'Marcus Aurelius noted: the impediment to action advances action. What stands in the way becomes the way.'), beat('Amor Fati en la práctica', 'Amor Fati in practice', 'No solo tolerar lo que ocurre, sino amarlo como una oportunidad de forjar paciencia, coraje o astucia.', 'Not merely tolerating what occurs, but loving it as a crucible to forge patience, courage, or resourcefulness.')],
+    l('Error común: quejarse del obstáculo en lugar de usarlo como banco de pruebas.', 'Common error: complaining about obstacles rather than using them as testing grounds.'),
+    [l('El obstáculo revela debilidades a subsanar.', 'The obstacle exposes weaknesses to fix.'), l('Cambia la pregunta de “¿por qué a mí?” a “¿cómo uso esto?”.', 'Shift from “why me?” to “how do I use this?”.'), l('El fuego convierte cualquier leña en llama.', 'Fire turns any fuel into flame.')],
+    l('¿Qué enseña el principio del obstáculo es el camino?', 'What does the obstacle is the way principle teach?'),
+    l('Que los reveses no detienen el progreso, sino que se convierten en la materia prima para crecer.', 'That setbacks do not halt progress; they become the raw material for growth.'),
+  ),
+  'learn-mindset-04': design(
+    l('¿Qué te dices a ti mismo en el primer segundo tras cometer un error?', 'What do you say to yourself in the first second after making a mistake?'),
+    l('Identifica la voz interna de autocrítica destructiva y sustitúyela por una evaluación neutral.', 'Identify the voice of destructive self-criticism and replace it with neutral diagnostics.'),
+    [beat('El eco catastrófico', 'The catastrophic echo', 'Un error menor genera frases absolutas: “siempre arruino todo” o “no sirvo para esto”.', 'A minor slip triggers absolute statements: “I always mess up” or “I am not cut out for this”.'), beat('La separación del observador', 'Observer separation', 'Tú no eres tus pensamientos automáticos; eres la consciencia que decide si creerles o descartarlos.', 'You are not your automatic thoughts; you are the awareness choosing whether to believe or discard them.'), beat('El diagnóstico objetivo', 'Objective diagnosis', 'Sustituye juicios morales por preguntas operativas: ¿qué dato falló y cómo corrijo el sistema?', 'Replace moral self-judgments with operational questions: what data was flawed, and how do I fix the system?')],
+    l('Error común: identificarse con la emoción transitoria de culpa.', 'Common error: over-identifying with transient guilt feelings.'),
+    [l('Trata los fallos como datos experimentales.', 'Treat mistakes as experimental data points.'), l('Elimina las palabras “siempre” y “nunca”.', 'Eliminate the words “always” and “never”.'), l('Corrige el proceso, no castigues tu identidad.', 'Fix the process; do not beat down your identity.')],
+    l('¿Cómo se desarma un bucle de rumiación negativa?', 'How do you dismantle a negative rumination loop?'),
+    l('Describiendo los hechos de forma fría y haciendo una pregunta orientada a la acción inmediata.', 'Describing facts objectively and asking an action-oriented diagnostic question.'),
+  ),
+  'learn-mindset-05': design(
+    l('¿Cómo construir una mente que no dependa del aplauso ni tema la crítica?', 'How do you build a mind that craves no applause and fears no criticism?'),
+    l('Reflexiona: ¿cuántas decisiones tomaste este año solo para complacer a personas que no respetas?', 'Reflect: how many choices did you make this year just to please people you do not respect?'),
+    [beat('La aprobación prestada', 'Borrowed approval', 'Buscar validación ajena pone la llave de tu autoestima en el bolsillo de extraños.', 'Seeking external validation puts the key to your self-worth in strangers’ pockets.'), beat('La brújula interna', 'The internal compass', 'El guerrero y el pensador definen su estándar antes de salir al mundo. Si la acción fue recta, el ruido exterior carece de peso.', 'The warrior and thinker set their standard before entering the arena. If the act was just, noise holds no weight.'), beat('La ecuanimidad', 'Equanimity', 'Tratar al éxito y al fracaso como dos impostores idénticos preserva la claridad mental a largo plazo.', 'Treating triumph and disaster as identical impostors preserves long-term lucidity.')],
+    l('Error común: cambiar de rumbo ante la primera crítica superficial de redes sociales.', 'Common error: changing direction at the first wave of casual internet criticism.'),
+    [l('Define tu propio estándar de excelencia.', 'Define your own standard of excellence.'), l('La crítica sin experiencia es solo ruido.', 'Criticism without skin in the game is mere noise.'), l('Mantén la mente imperturbable ante elogios y censuras.', 'Remain steady in the face of both praise and blame.')],
+    l('¿Qué define a la mente verdaderamente libre según Séneca?', 'What defines a truly free mind according to Seneca?'),
+    l('Aquella que no se eleva con la prosperidad ni se doblega con la adversidad.', 'One that neither inflates with prosperity nor bends under adversity.'),
+  ),
+  'learn-perf-01': design(
+    l('¿Por qué 90 minutos de foco absoluto superan a 8 horas de trabajo interrumpido?', 'Why do 90 minutes of pure focus beat 8 hours of interrupted work?'),
+    l('Calcula cuántas veces revisas WhatsApp, correo o redes durante una sesión típica de trabajo.', 'Count how many times you check notifications during a typical work session.'),
+    [beat('La fragmentación letal', 'Lethal fragmentation', 'Cada interrupción de 2 segundos deja un “residuo de atención” que tarda hasta 20 minutos en limpiarse.', 'Every 2-second ping leaves an “attention residue” that takes up to 20 minutes to clear.'), beat('La ley del trabajo profundo', 'The law of deep work', 'La producción de alto valor no responde a horas sentado, sino a intensidad de atención multiplicada por tiempo ininterrumpido.', 'High-value output is not hours in a chair; it is intensity of attention multiplied by uninterrupted time.'), beat('El santuario cognitivo', 'The cognitive sanctuary', 'Aislar un bloque matutino sin teléfonos ni alertas crea una ventaja competitiva imposible de igualar.', 'Carving out an early block with zero phones or alerts creates an unassailable competitive advantage.')],
+    l('Error común: confundir estar ocupado con estar creando valor real.', 'Common error: confusing being busy with producing actual high-leverage value.'),
+    [l('El multitasking es una ilusión biológica.', 'Multitasking is a biological illusion.'), l('El residuo de atención degrada el razonamiento.', 'Attention residue degrades complex reasoning.'), l('Protege 90 minutos de oro cada mañana.', 'Guard 90 golden minutes every morning.')],
+    l('¿Cuál es la fórmula del Deep Work formulada por Cal Newport?', 'What is Cal Newport’s formula for Deep Work?'),
+    l('Trabajo de alto valor = Tiempo dedicado × Intensidad de la concentración.', 'High-value work produced = Time spent × Intensity of concentration.'),
+  ),
+  'learn-perf-02': design(
+    l('¿Por qué cuesta tanto empezar un buen hábito y es tan fácil caer en la distracción?', 'Why is starting a good habit so hard while falling into distraction is so easy?'),
+    l('Mide la fricción en segundos que existe entre tu mano y tu teléfono vs. tu mano y tu libro.', 'Measure the friction in seconds between your hand and phone vs. your hand and book.'),
+    [beat('La regla de los 2 minutos', 'The 2-minute rule', 'Cualquier hábito nuevo debe poder iniciarse en menos de dos minutos. No intentes correr un maratón; ponte las zapatillas.', 'Every new habit should take under two minutes to start. Do not try to run a marathon; just tie your shoes.'), beat('El diseño de la fricción', 'Friction engineering', 'Reduce la fricción de lo productivo (deja la libreta abierta) y aumenta la fricción del vicio (guarda el teléfono en otra habitación).', 'Lower friction for good habits (leave the notepad open) and raise friction for vices (keep phone in another room).'), beat('La identidad atómica', 'Atomic identity', 'Cada pequeña acción es un voto por la persona en la que te estás convirtiendo.', 'Every small action is a vote for the type of person you wish to become.')],
+    l('Error común: depender de la fuerza de voluntad en lugar de rediseñar el entorno físico.', 'Common error: relying on sheer willpower instead of redesigning physical surroundings.'),
+    [l('Haz que lo productivo sea evidente y fácil.', 'Make productive habits obvious and frictionless.'), l('Haz que la distracción sea invisible y difícil.', 'Make distraction invisible and high-friction.'), l('La consistencia atómica supera a los esfuerzos heroicos.', 'Atomic consistency beats intermittent heroics.')],
+    l('¿Cuál es la mejor manera de vencer la procrastinación según James Clear?', 'What is the best way to defeat procrastination according to James Clear?'),
+    l('Reducir la fricción inicial para que el primer paso tome menos de dos minutos.', 'Reducing initial friction so the very first action takes under two minutes.'),
+  ),
+  'learn-perf-03': design(
+    l('¿Qué hábito matutino de 10 minutos calibra tu energía y claridad para todo el día?', 'What 10-minute morning habit calibrates energy and clarity for your entire day?'),
+    l('Descubre cómo la luz solar temprana programa tus relojes biológicos y niveles de dopamina.', 'Discover how early sunlight sets your biological clocks and baseline dopamine.'),
+    [beat('El reloj celular', 'The cellular clock', 'Tus ojos tienen neuronas especializadas que le indican al núcleo supraquiasmático cuándo es hora de producir cortisol activo.', 'Your eyes have neurons telling the suprachiasmatic nucleus when to release active cortisol.'), beat('El bloqueo del bajón', 'Preventing the afternoon slump', 'Retrasar la ingesta de cafeína 60–90 minutos tras despertar evita el temido colapso de adenosina de la tarde.', 'Delaying caffeine 60–90 minutes after waking prevents the notorious afternoon adenosine crash.'), beat('La higiene lumínica nocturna', 'Night light hygiene', 'La luz brillante después de las 9:00 PM suprime la melatonina y destruye la arquitectura reparadora del sueño profundo.', 'Bright screens after 9:00 PM suppress melatonin and shatter deep restorative sleep architecture.')],
+    l('Error común: mirar pantallas con luz artificial en la cama antes de salir al sol.', 'Common error: scrolling phones in bed under dim artificial light before seeing natural sun.'),
+    [l('Obtén 10 minutos de luz solar directa al despertar.', 'Get 10 minutes of direct morning sunlight.'), l('Pospón el café 90 minutos para regular adenosina.', 'Postpone caffeine 90 minutes for adenosine clearance.'), l('Atenúa luces al anochecer para proteger el sueño.', 'Dim lights after dusk to protect deep recovery.')],
+    l('¿Por qué es fundamental la luz natural matutina según la neurobiología moderna?', 'Why is early natural light essential in modern neurobiology?'),
+    l('Porque activa el pico saludable de cortisol diurno e inicia el temporizador de melatonina para la noche.', 'Because it triggers a healthy daytime cortisol pulse and starts the 14-hour melatonin timer for sleep.'),
+  ),
+  'learn-perf-04': design(
+    l('¿De qué te sirve tener 4 horas libres si tu energía ejecutiva está en cero?', 'What good are 4 open hours if your executive energy is depleted to zero?'),
+    l('Analiza a qué hora del día tu cerebro rinde con máxima lucidez y si estás usando ese tiempo en tonterías.', 'Analyze what time of day your mind peaks and whether you are wasting it on low-leverage trivia.'),
+    [beat('La falacia del tiempo', 'The time fallacy', 'Gestionar el calendario sin gestionar la glucosa, el descanso y el estrés crea agotamiento crónico.', 'Managing calendars without managing glucose, rest, and stress leads to chronic burnout.'), beat('Los ritmos ultradianos', 'Ultradian rhythms', 'El cerebro opera en ciclos de 90 minutos de alto rendimiento seguidos de 10 a 20 minutos de recuperación obligatoria.', 'The human brain operates in 90-minute high-focus cycles followed by 10–20 minutes of required downshift.'), beat('La asignación táctica', 'Tactical allocation', 'Reserva tu ventana de mayor energía biológica para la tarea que mueve la aguja, no para responder correos.', 'Reserve your peak biological window for the single needle-moving task, not for answering email.')],
+    l('Error común: agotar tu mejor energía matutina en tareas reactivas de bajo impacto.', 'Common error: burning your best morning energy on reactive low-value chores.'),
+    [l('Gestiona tu energía, no solo tus horas.', 'Manage your energy, not just your hours.'), l('Trabaja en bloques ultradianos de 90 minutos.', 'Work in 90-minute ultradian rhythms.'), l('El descanso estratégico es parte de la producción.', 'Strategic recovery is part of elite production.')],
+    l('¿Cuál es la duración óptima de un ciclo de foco intenso según la fisiología del cerebro?', 'What is the optimal focus cycle length according to brain physiology?'),
+    l('Aproximadamente 90 minutos seguidos de una pausa de descanso fisiológico.', 'Approximately 90 minutes followed by a brief physiological recovery window.'),
+  ),
+  'learn-perf-05': design(
+    l('¿Cómo apagar la mente del trabajo al terminar la tarde sin rumiar problemas toda la noche?', 'How do you turn off work at the end of the day without ruminating all night?'),
+    l('Prueba el ritual de cierre: si no le dices a tu cerebro que el día terminó, seguirá gastando RAM en segundo plano.', 'Try the shutdown ritual: if you do not declare the day closed, your brain runs background RAM all night.'),
+    [beat('El efecto Zeigarnik', 'The Zeigarnik effect', 'Las tareas abiertas e incompletas permanecen vivas en la memoria de trabajo generando ansiedad difusa.', 'Unfinished, open tasks linger in working memory, creating background cognitive anxiety.'), beat('El plan de contingencia', 'The contingency plan', 'Al anotar exactamente qué harás con cada tema abierto mañana a primera hora, el cerebro libera la alerta.', 'By noting exactly how you will tackle open items tomorrow, the brain safely releases the alert.'), beat('La frase de apagado', 'The shutdown phrase', 'Cerrar la libreta o laptop y pronunciar un comando verbal explícito (“cierre completado”) entrena al sistema nervioso.', 'Closing the laptop and stating an explicit verbal command (“shutdown complete”) trains the nervous system.')],
+    l('Error común: dejar la laptop abierta y revisar mensajes de trabajo a las 11:00 PM.', 'Common error: leaving laptops open and checking slack at 11:00 PM.'),
+    [l('Vacía tus pendientes en una lista antes de parar.', 'Capture all loose loops into a trusted list before stopping.'), l('Asigna una acción para mañana.', 'Assign the first action for tomorrow.'), l('Desconecta formalmente y no vuelvas a entrar.', 'Formally disconnect and do not log back in.')],
+    l('¿Qué problema psicológico resuelve el ritual de cierre?', 'What psychological problem does the shutdown ritual resolve?'),
+    l('Elimina el efecto Zeigarnik asegurando al cerebro que las tareas pendientes están bajo control.', 'It silences the Zeigarnik effect by assuring the brain that pending tasks are safely captured.')
+  ),
+  'learn-data-01': design(
+    l('¿Por qué el 90% de los patrones que ves en gráficos son ilusiones de tu cerebro?', 'Why are 90% of patterns you spot in charts sheer illusions of your brain?'),
+    l('Predice por qué dos métricas que suben juntas casi nunca significan que una causa a la otra.', 'Predict why two metrics rising together almost never mean one causes the other.'),
+    [
+      beat('La ilusión del patrón', 'The pattern illusion', 'El cerebro humano evolucionó para ver amenazas y caras en las nubes. En big data, dos series cualesquiera pueden correlacionar 0.95 por pura coincidencia estacional.', 'The human brain evolved to spot threats and faces in clouds. In big data, any two series can show 0.95 correlation purely by seasonal luck.'),
+      beat('El mecanismo causal', 'The causal mechanism', 'Para que los datos sean accionables, necesitas una hipótesis de causa verificable: si cambio X, Y debe moverse debido a Z.', 'For data to be actionable, you need a testable causal hypothesis: if I change X, Y moves because of Z.'),
+      beat('El sesgo de confirmación', 'Confirmation bias', 'Si buscas en un dataset sin hipótesis previa, siempre encontrarás un gráfico que justifique lo que ya querías hacer.', 'If you search a dataset without a prior hypothesis, you will always find a chart justifying what you already wanted to do.')
+    ],
+    l('Error común: confundir correlación con causalidad y tomar decisiones caras basadas en ruido.', 'Common error: confusing correlation with causation and making expensive decisions on noise.'),
+    [
+      l('Plantea la hipótesis antes de mirar los datos.', 'State the hypothesis before looking at the data.'),
+      l('Busca el mecanismo causal observable.', 'Look for the observable causal mechanism.'),
+      l('Distingue coincidencia de significancia.', 'Distinguish coincidence from statistical significance.')
+    ],
+    l('¿Cuál es la regla de oro para validar una relación entre dos métricas?', 'What is the golden rule to validate a relation between two metrics?'),
+    l('Exigir un mecanismo causal observable y contrastarlo con una prueba controlada.', 'Demand an observable causal mechanism and test it against a controlled experiment.')
+  ),
+  'learn-data-02': design(
+    l('¿Por qué tus métricas favoritas pueden estar subiendo mientras tu negocio se muere?', 'Why can your favorite metrics climb while your business is quietly dying?'),
+    l('Identifica cuál de tus números actuales infla el ego y cuál mide retención real.', 'Identify which of your current numbers flatters ego and which measures true retention.'),
+    [
+      beat('La trampa de vanidad', 'The vanity trap', 'Visitas web, descargas acumuladas y seguidores son acumulativos: siempre suben, pero no pagan las cuentas.', 'Pageviews, cumulative downloads, and follower counts are cumulative: they always rise, but pay no bills.'),
+      beat('La métrica North Star', 'The North Star metric', 'Es el único número que captura el momento exacto en que el usuario recibe el valor principal prometido.', 'It is the single number capturing the exact moment the user receives core promised value.'),
+      beat('La cohorte que no miente', 'Cohorts that never lie', 'Agrupar usuarios por semana de llegada y medir quién sigue activo a 30 días revela la verdad desnuda.', 'Grouping users by week of arrival and measuring who stays active at 30 days reveals raw reality.')
+    ],
+    l('Error común: celebrar picos de tráfico que no convierten en usuarios recurrentes.', 'Common error: celebrating traffic spikes that convert zero retained repeat users.'),
+    [
+      l('Mide valor entregado, no solo actividad.', 'Measure value delivered, not just activity.'),
+      l('Analiza cohortes por fecha de entrada.', 'Analyze cohorts by join date.'),
+      l('Elimina métricas acumulativas engañosas.', 'Discard misleading cumulative metrics.')
+    ],
+    l('¿Qué define a una verdadera métrica North Star?', 'What defines a true North Star metric?'),
+    l('Mide la frecuencia con la que los usuarios experimentan el valor central del producto.', 'It measures how frequently users experience core product value.')
+  ),
+  'learn-data-03': design(
+    l('¿Por qué mirar los resultados de un test A/B todos los días garantiza que tomes la decisión equivocada?', 'Why does peeking at A/B test results every day ensure you make the wrong decision?'),
+    l('Predice qué pasa cuando declaras victoria en un test con solo 50 conversiones.', 'Predict what happens when declaring victory on a test with only 50 conversions.'),
+    [
+      beat('El problema del espía', 'The peeking problem', 'Si revisas un test continuo cada hora, la probabilidad de ver un falso positivo supera el 30% debido a varianza temporal.', 'If you check an ongoing test hourly, false positive probability exceeds 30% due to temporary variance.'),
+      beat('La significancia estadística', 'Statistical significance', 'Un p-value < 0.05 significa que la diferencia observada tiene menos del 5% de probabilidad de ser casualidad.', 'A p-value < 0.05 means the observed delta has less than 5% probability of being sheer chance.'),
+      beat('El tamaño de muestra previo', 'Pre-calculated sample size', 'Calcula cuántos usuarios necesitas antes de empezar y no toques el experimento hasta alcanzarlos.', 'Calculate required sample size upfront and do not touch the experiment until reached.')
+    ],
+    l('Error común: apagar una prueba B ganadora el día 2 sin poder estadístico suficiente.', 'Common error: shutting down a test on day 2 without statistical power.'),
+    [
+      l('Calcula el tamaño de muestra antes de lanzar.', 'Calculate sample size before launching.'),
+      l('No tomes decisiones basadas en fluctuaciones iniciales.', 'Do not decide on early fluctuations.'),
+      l('Comprueba significancia estadística y poder.', 'Verify statistical significance and power.')
+    ],
+    l('¿Qué se requiere antes de declarar un ganador en una prueba A/B?', 'What is required before declaring an A/B test winner?'),
+    l('Alcanzar el tamaño de muestra calculado y un p-value estadísticamente significativo (< 0.05).', 'Reach target sample size and statistically significant p-value (< 0.05).')
+  ),
+  'learn-data-04': design(
+    l('¿Por qué un modelo predictivo con 99% de precisión en tu laptop puede quebrar tu empresa mañana?', 'Why can a predictive model with 99% accuracy on your laptop bankrupt you tomorrow?'),
+    l('Entiende la diferencia entre memorizar el examen y aprender la materia.', 'Understand the difference between memorizing the test and learning the subject.'),
+    [
+      beat('El monstruo del Overfitting', 'The overfitting beast', 'Un modelo con demasiados parámetros memoriza el ruido y las peculiaridades del pasado en vez de la regla general.', 'A model with too many parameters memorizes historical noise and quirks rather than the general rule.'),
+      beat('El trade-off Sesgo vs Varianza', 'The Bias-Variance tradeoff', 'Modelos demasiado simples no capturan la realidad; modelos demasiado complejos se rompen ante datos nuevos.', 'Overly simple models underfit; overly complex models break upon seeing fresh data.'),
+      beat('La validación cruzada', 'Cross-validation', 'Separa siempre un conjunto ciego de datos de prueba (test set) que el modelo jamás haya visto.', 'Always isolate a blind holdout test set that the model has never seen.')
+    ],
+    l('Error común: evaluar modelos usando los mismos datos con los que fueron entrenados.', 'Common error: evaluating models on the exact data they trained on.'),
+    [
+      l('Separa siempre datos de entrenamiento y prueba.', 'Always split train and test holdouts.'),
+      l('Prefiere modelos simples y robustos.', 'Favor simple, robust architectures.'),
+      l('Monitorea la degradación en producción.', 'Monitor drift in production.')
+    ],
+    l('¿Cómo detectas si un modelo sufre de sobreajuste (overfitting)?', 'How do you detect if a model suffers from overfitting?'),
+    l('Alta precisión en datos de entrenamiento, pero caída drástica en datos nuevos o de prueba.', 'High accuracy on train data, but sharp performance drop on fresh test data.')
+  ),
+  'learn-data-05': design(
+    l('¿De qué sirve un dashboard con 50 gráficos si nadie sabe qué hacer el lunes por la mañana?', 'What good is a 50-chart dashboard if nobody knows what to do Monday morning?'),
+    l('Transforma un reporte pasivo de datos en una decisión binaria con impacto económico.', 'Transform a passive data report into a binary decision with financial impact.'),
+    [
+      beat('La trampa del cementerio de dashboards', 'The dashboard graveyard trap', 'La mayoría de dashboards en empresas solo sirven para que los ejecutivos asientan con la cabeza sin cambiar nada.', 'Most enterprise dashboards only serve to let executives nod without changing anything.'),
+      beat('Decisiones antes de datos', 'Decisions before data', 'Formula la pregunta: «Si esta métrica está por debajo de X, detendremos la campaña; si está por encima, doblaremos presupuesto».', 'Frame the rule: “If metric is below X, we pause campaign; if above, we double budget.”'),
+      beat('El coste de la inacción', 'The cost of inaction', 'Un dato solo tiene valor si cambia el curso de una acción y el beneficio supera el coste de recopilarlo.', 'Data only has value if it changes action and return exceeds collection cost.')
+    ],
+    l('Error común: pedir más análisis para postergar una decisión incómoda que ya es obvia.', 'Common error: requesting more analysis to postpone an obvious hard decision.'),
+    [
+      l('Fija los umbrales de decisión antes de medir.', 'Set decision thresholds before measuring.'),
+      l('Vincula cada métrica a una acción concreta.', 'Tie each metric to a concrete action.'),
+      l('Descarta reportes que no cambian decisiones.', 'Eliminate reports that alter no decisions.')
+    ],
+    l('¿Cuál es la prueba definitiva de que un análisis de datos valió la pena?', 'What is the ultimate test that a data analysis was worth it?'),
+    l('Que alteró una decisión de negocio y generó un impacto económico verificable.', 'It altered a business decision and created verifiable economic impact.')
   ),
 };
 

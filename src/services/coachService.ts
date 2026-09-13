@@ -23,11 +23,10 @@ PRINCIPIOS DE COMUNICACIÓN:
 `;
 
 const FREE_MODELS_CHAIN = [
-  'nvidia/nemotron-3-ultra-550b-a55b:free',
-  'nvidia/llama-3.1-nemotron-70b-instruct:free',
-  'meta-llama/llama-3.3-70b-instruct:free',
-  'google/gemini-2.0-flash-exp:free',
-  'deepseek/deepseek-chat',
+  'minimax/minimax-m3:free',
+  'inclusionai/ling-3.0-flash-fin:free',
+  'liquid/lfm-2.5-2.6b:free',
+  'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
 ];
 
 const getLocalCoachResponse = (message: string, language: string) => {
@@ -61,7 +60,7 @@ const callOpenRouterWithFallback = async (
 ): Promise<string> => {
   const formattedMessages = [
     { role: 'system', content: systemPrompt },
-    ...history.slice(-10).map(m => ({
+    ...history.slice(-8).map(m => ({
       role: m.role === 'model' || m.role === 'assistant' ? 'assistant' : 'user',
       content: m.text || m.content || ''
     })),
@@ -69,22 +68,26 @@ const callOpenRouterWithFallback = async (
   ];
 
   for (const modelName of FREE_MODELS_CHAIN) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 4500);
     try {
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
+        signal: controller.signal,
         headers: {
           'Authorization': `Bearer ${apiKey}`,
           'HTTP-Referer': 'https://t1ger.app',
-          'X-Title': 'T1GER Profesor AI',
+          'X-Title': 'T1GER Mentor AI',
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           model: modelName,
           messages: formattedMessages,
           temperature: 0.65,
-          max_tokens: 350
+          max_tokens: 300
         })
       });
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -97,6 +100,7 @@ const callOpenRouterWithFallback = async (
         console.warn(`OpenRouter model ${modelName} returned status ${response.status}:`, errorText);
       }
     } catch (err) {
+      clearTimeout(timeoutId);
       console.warn(`Failed to call OpenRouter model ${modelName}:`, err);
     }
   }
@@ -125,30 +129,35 @@ export const getCoachResponse = async (
     if (!auth.currentUser) return language === 'en'
       ? 'Sign in to talk with your AI mentor. Your learning path remains available offline.'
       : 'Inicia sesión para hablar con tu mentor de IA. Tu ruta de aprendizaje sigue disponible sin conexión.';
-    const response = await httpsCallable<Record<string, unknown>, { text: string }>(getFunctions(app), 'askT1gerMentor')({
-      message: userMessage, history: history.slice(-8), language,
-    });
-    return response.data.text;
-  }
-  // 1. Fetch user context & recent history if available
-  let userData = {};
-  if (userId && userId !== 'anonymous') {
     try {
-      const userDoc = await getDoc(doc(db, "users", userId));
-      userData = userDoc.data() || {};
-    } catch {
-      // fallback
+      const response = await httpsCallable<Record<string, unknown>, { text: string }>(getFunctions(app), 'askT1gerMentor')({
+        message: userMessage, history: history.slice(-8), language,
+      });
+      if (response?.data?.text) {
+        return cleanMarkdownArtifacts(response.data.text);
+      }
+    } catch (cloudErr) {
+      console.warn('Cloud mentor call failed, falling back to tactical local engine:', cloudErr);
+      return cleanMarkdownArtifacts(getLocalCoachResponse(userMessage, language));
     }
   }
-
+  // 1. Fetch user context & recent history with 300ms timeout so it never blocks
+  let userData = {};
   let sessionHistory: any[] = [];
-  if (userId && userId !== 'anonymous') {
+  if (userId && userId !== 'anonymous' && typeof navigator !== 'undefined' && navigator.onLine) {
     try {
-      const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(4));
-      const sessionsSnapshot = await getDocs(sessionsQ);
-      sessionHistory = sessionsSnapshot.docs.map(d => d.data());
+      await Promise.race([
+        (async () => {
+          const userDoc = await getDoc(doc(db, "users", userId));
+          userData = userDoc.data() || {};
+          const sessionsQ = query(collection(db, "users", userId, "coachingSessions"), orderBy("timestamp", "desc"), limit(4));
+          const sessionsSnapshot = await getDocs(sessionsQ);
+          sessionHistory = sessionsSnapshot.docs.map(d => d.data());
+        })(),
+        new Promise(resolve => setTimeout(resolve, 300))
+      ]);
     } catch {
-      // fallback
+      // fallback smoothly
     }
   }
 
@@ -156,8 +165,22 @@ export const getCoachResponse = async (
   const languageInstruction = `IDIOMA OBLIGATORIO: DEBES RESPONDER 100% EN ${language === 'en' ? 'INGLÉS (ENGLISH)' : 'ESPAÑOL'}.`;
   const fullSystemPrompt = `${PROFESOR_SYSTEM_PROMPT}\n\n${languageInstruction}\n\n${context}`;
 
-  // Priority 1: Google Gemini Flash (Instant, sub-second responses)
   const clientAiEnabled = import.meta.env.DEV && import.meta.env.VITE_ENABLE_CLIENT_AI === 'true';
+
+  // Priority 1: OpenRouter (Ultra-fast 1-2s response with Minimax M3)
+  const openRouterKey = clientAiEnabled ? import.meta.env.VITE_OPENROUTER_API_KEY : '';
+  if (openRouterKey && openRouterKey.trim() !== '') {
+    try {
+      const res = await callOpenRouterWithFallback(fullSystemPrompt, userMessage, history, openRouterKey.trim());
+      if (res && res.trim().length > 0) {
+        return cleanMarkdownArtifacts(res);
+      }
+    } catch (openRouterErr) {
+      console.warn("OpenRouter call failed, falling back:", openRouterErr);
+    }
+  }
+
+  // Priority 2: Google Gemini Flash
   const geminiKey = clientAiEnabled ? import.meta.env.VITE_GEMINI_API_KEY : '';
   if (geminiKey && geminiKey.trim() !== '') {
     try {
@@ -183,17 +206,6 @@ export const getCoachResponse = async (
     }
   }
 
-  // Priority 2: OpenRouter Fallback
-  const openRouterKey = clientAiEnabled ? import.meta.env.VITE_OPENROUTER_API_KEY : '';
-  if (openRouterKey && openRouterKey.trim() !== '') {
-    try {
-      const res = await callOpenRouterWithFallback(fullSystemPrompt, userMessage, history, openRouterKey.trim());
-      return cleanMarkdownArtifacts(res);
-    } catch (openRouterErr) {
-      console.warn("OpenRouter fallback failed:", openRouterErr);
-    }
-  }
-
-  // Priority 3: Built-in local offline engine
+  // Priority 3: Built-in local offline engine (Instant, 0ms)
   return cleanMarkdownArtifacts(getLocalCoachResponse(userMessage, language));
 };

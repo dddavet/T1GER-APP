@@ -47,7 +47,7 @@ let currentState = readStoredState();
 
 export const isDevHarnessEnabled = (): boolean => {
   if (!IS_DEV_BUILD || typeof window === 'undefined') return false;
-  return new URLSearchParams(window.location.search).get('devHarness') !== '0';
+  return new URLSearchParams(window.location.search).get('devHarness') === '1';
 };
 
 export const getDevHarnessState = (): DevHarnessState => currentState;

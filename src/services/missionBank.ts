@@ -2,7 +2,7 @@ export type Competency = 'offer' | 'sales' | 'marketing' | 'mindset' | 'operatio
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type MissionType = 'flashcard' | 'scenario_quiz' | 'real_world_task' | 'book_and_build' | 'book_lesson';
 
-export type TrackType = 'investing' | 'business' | 'ai';
+export type TrackType = 'investing' | 'business' | 'ai' | 'history' | 'mindset' | 'performance';
 
 export interface CurriculumDay {
   dayId: string;
@@ -775,6 +775,48 @@ export const CURRICULUM_TRACKS: Record<TrackType, CurriculumTrack> = {
     trackId: 'ai',
     title: 'ARTIFICIAL INTELLIGENCE',
     levels: aiLevels
+  },
+  history: {
+    trackId: 'history',
+    title: 'ESTRATEGIA & HISTORIA',
+    levels: [
+      {
+        levelId: 'hist-level-1',
+        levelNumber: 1,
+        title: 'El Arte de la Guerra',
+        subtitle: 'Sun Tzu · Terreno, Maniobra y Victoria Anticipada',
+        applyNodeId: 'field-learn-history-01',
+        days: [{ dayId: 'hist-1-d1', dayNumber: 1, missionIds: ['learn-history-01'] }]
+      }
+    ]
+  },
+  mindset: {
+    trackId: 'mindset',
+    title: 'MENTE & ESTOICISMO',
+    levels: [
+      {
+        levelId: 'mind-level-1',
+        levelNumber: 1,
+        title: 'Meditaciones',
+        subtitle: 'Marco Aurelio · Dicotomía del Control y Fortaleza Emocional',
+        applyNodeId: 'field-learn-mindset-01',
+        days: [{ dayId: 'mind-1-d1', dayNumber: 1, missionIds: ['learn-mindset-01'] }]
+      }
+    ]
+  },
+  performance: {
+    trackId: 'performance',
+    title: 'RENDIMIENTO & FOCO',
+    levels: [
+      {
+        levelId: 'perf-level-1',
+        levelNumber: 1,
+        title: 'Deep Work',
+        subtitle: 'Cal Newport · Concentración Extrema en un Mundo de Distracciones',
+        applyNodeId: 'field-learn-perf-01',
+        days: [{ dayId: 'perf-1-d1', dayNumber: 1, missionIds: ['learn-perf-01'] }]
+      }
+    ]
   }
 };
 

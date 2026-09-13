@@ -6,7 +6,7 @@ import { useBrain } from '../contexts/BrainContext';
 import { PouAudio } from '../services/pouAudioService';
 
 export const TacticalPomodoro: React.FC = () => {
-  const { addXP, addCoins } = useT1ger();
+  const { addXP, addCoins, activeView } = useT1ger();
   const { feedPet } = useBrain();
   
   const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +14,8 @@ export const TacticalPomodoro: React.FC = () => {
   const [timeLeft, setTimeLeft] = useState(25 * 60); // Default 25 min
   const [sessionDuration, setSessionDuration] = useState(25 * 60);
   const [strikes, setStrikes] = useState(0);
+
+  const shouldShowIdleFab = false;
 
   useEffect(() => {
     let interval: number;
@@ -89,30 +91,41 @@ export const TacticalPomodoro: React.FC = () => {
   return (
     <>
       {/* FAB to open */}
-      {!isOpen && !isActive && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 z-50 w-12 h-12 rounded-full bg-red-600 border border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center justify-center text-white cursor-pointer"
-        >
-          <Timer size={20} />
-        </motion.button>
+      {!isOpen && !isActive && shouldShowIdleFab && (
+        <div className="absolute bottom-[calc(5.2rem+env(safe-area-inset-bottom))] left-4 z-40 pointer-events-none">
+          <motion.button
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={() => setIsOpen(true)}
+            className="pointer-events-auto relative flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-950/90 border border-red-500/40 text-red-400 shadow-[0_4px_20px_rgba(220,38,38,0.3)] hover:border-red-500 hover:text-white cursor-pointer transition-colors backdrop-blur-md"
+            aria-label="Abrir Modo Monje / Pomodoro"
+          >
+            {/* Subtle pulse aura */}
+            <div className="absolute inset-0 rounded-2xl bg-red-600 opacity-20 blur-md animate-pulse" />
+            <Timer size={22} className="relative z-10" />
+          </motion.button>
+        </div>
       )}
 
       {/* Active Mini-Timer FAB */}
       {!isOpen && isActive && (
-        <motion.button
-          onClick={() => setIsOpen(true)}
-          className="fixed bottom-24 right-4 z-50 px-4 h-12 rounded-full bg-black/80 backdrop-blur-xl border border-red-500 shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center justify-center gap-2 text-white cursor-pointer"
-        >
-          <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 2 }}>
-            <div className="w-2 h-2 rounded-full bg-red-500" />
-          </motion.div>
-          <span className="font-mono font-bold text-red-400">{formatTime(timeLeft)}</span>
-        </motion.button>
+        <div className="absolute bottom-[calc(5.2rem+env(safe-area-inset-bottom))] left-4 z-40 pointer-events-none">
+          <motion.button
+            onClick={() => setIsOpen(true)}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="pointer-events-auto relative flex h-12 px-3.5 items-center justify-center gap-2 rounded-2xl bg-zinc-950/95 border border-red-500 shadow-[0_0_24px_rgba(220,38,38,0.45)] text-white cursor-pointer backdrop-blur-md"
+            aria-label="Ver temporizador activo"
+          >
+            <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+              <div className="w-2 h-2 rounded-full bg-red-500" />
+            </motion.div>
+            <span className="font-mono font-bold text-red-400 text-sm">{formatTime(timeLeft)}</span>
+          </motion.button>
+        </div>
       )}
 
       {/* Full Screen Monk Mode Modal */}

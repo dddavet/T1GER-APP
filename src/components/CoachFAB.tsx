@@ -23,7 +23,7 @@ export const CoachFAB = React.memo(() => {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
         transition={{ type: 'spring', stiffness: 380, damping: 20 }}
-        className="pointer-events-auto relative flex h-13 w-13 items-center justify-center rounded-2xl bg-[var(--t1ger-orange)] text-[#102622] shadow-[0_4px_20px_rgba(255,115,0,0.4)] cursor-pointer"
+        className="pointer-events-auto relative flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--t1ger-orange)] text-[#102622] shadow-[0_4px_20px_rgba(255,115,0,0.4)] cursor-pointer"
         aria-label="Abrir Profesor T1GER AI"
       >
         {/* Glowing aura */}
@@ -35,7 +35,7 @@ export const CoachFAB = React.memo(() => {
         </div>
 
         {/* Bot Icon */}
-        <Bot size={26} className="relative z-10" />
+        <Bot size={24} className="relative z-10" />
       </motion.button>
     </div>
   );

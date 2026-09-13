@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Bell, Bot, Check, ChevronRight, Download, FileText, Globe2, LogOut, ShieldCheck, Smartphone, Trash2, UserRound } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -97,17 +97,24 @@ export const Profile = () => {
     }
   };
 
+  const profileTrackKicker = useMemo(() => {
+    const track = appUser?.primaryTrack || brainState.currentTrackId || 'investing';
+    if (track === 'ai') return isEs ? 'Perfil IA & Automatización' : 'AI & Automation profile';
+    if (track === 'business') return isEs ? 'Perfil Growth & Negocios' : 'Growth & Business profile';
+    return isEs ? 'Perfil de inversión' : 'Investing profile';
+  }, [appUser?.primaryTrack, brainState.currentTrackId, isEs]);
+
   if (legalView === 'privacy') return <PrivacyPolicy onBack={() => setLegalView(null)} />;
   if (legalView === 'terms') return <TermsOfService onBack={() => setLegalView(null)} />;
 
   return (
-    <div className="space-y-5 pb-8 pt-5">
+    <div className="space-y-5 pb-32 pt-5">
       <header className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.35rem] bg-[var(--t1ger-orange)] text-xl font-semibold text-[#102622]">
           {appUser?.photoURL ? <img src={appUser.photoURL} alt={`${appUser.displayName || 'T1GER'} profile`} className="h-full w-full object-cover" /> : (appUser?.displayName || 'T').charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="t1ger-kicker">{isEs ? 'Perfil de inversión' : 'Investing profile'}</p>
+          <p className="t1ger-kicker">{profileTrackKicker}</p>
           {editingName ? (
             <div className="mt-2 flex gap-2">
               <input autoFocus value={name} onChange={event => setName(event.target.value)} className="t1ger-input min-w-0" />

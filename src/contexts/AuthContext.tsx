@@ -19,6 +19,8 @@ import { Capacitor } from '@capacitor/core';
 import { app, auth, db } from '../firebase';
 import { AUTH_BYPASS_ENABLED } from '../config/appMode';
 import { useDevHarnessState } from '../dev/devHarnessState';
+import type { TrackType } from '../services/missionBank';
+import { FieldMissionService } from '../services/fieldMissionService';
 
 export interface InvestmentProfile {
   goal: 'first-investment' | 'long-term-wealth' | 'company-analysis' | 'retirement' | 'investing' | 'ai' | 'sales';
@@ -77,7 +79,7 @@ export interface AppUser {
   equippedAccessories?: string[];
   unlockedAchievements?: string[];
   lastSupplyDropClaimed?: number;
-  primaryTrack?: 'investing' | 'business' | 'ai';
+  primaryTrack?: TrackType;
   investmentProfile?: InvestmentProfile;
   personalizedPlan?: {
     title: string;
@@ -469,8 +471,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
     if (currentUid) {
       Object.keys(localStorage).filter(key => key.includes(currentUid)).forEach(key => localStorage.removeItem(key));
-        const { FieldMissionService } = await import('../services/fieldMissionService');
-        await FieldMissionService.clearUserCache(currentUid);
+      await FieldMissionService.clearUserCache(currentUid);
     }
     localStorage.removeItem('t1ger_onboarding_completed');
     localStorage.removeItem('t1ger_onboarding_draft_v2');

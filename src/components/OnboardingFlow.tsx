@@ -30,11 +30,12 @@ import {
   WalletCards,
   Zap,
 } from 'lucide-react';
+import { Capacitor } from '@capacitor/core';
 import { useAuth, type InvestmentProfile } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import type { Language } from '../services/i18n';
-import type { MascotReaction } from './T1gerMascot3D';
+import { T1gerMascot3D, type MascotReaction } from './T1gerMascot3D';
 import { MISSION_BANK } from '../services/missionBank';
 import { fireRewardConfetti } from './ui/confetti';
 import { AndroidScreenTimeService } from '../services/androidScreenTimeService';
@@ -49,20 +50,12 @@ import {
   type OnboardingKnowledgeLevel,
 } from '../services/onboardingProfile';
 
-const LazyT1gerMascot3D = React.lazy(() =>
-  import('./T1gerMascot3D').then((module) => ({ default: module.T1gerMascot3D })),
-);
-
 const OnboardingMascot: React.FC<{
   mood: MascotReaction;
   className: string;
   closeUp?: boolean;
 }> = ({ mood, className, closeUp }) => (
-  <React.Suspense
-    fallback={<img src="/mascot/t1ger-icon.png" alt="" aria-hidden="true" className={`${className} object-contain`} />}
-  >
-    <LazyT1gerMascot3D mood={mood} closeUp={closeUp} className={className} />
-  </React.Suspense>
+  <T1gerMascot3D mood={mood} closeUp={closeUp} className={className} />
 );
 
 export type OnboardingStep =
@@ -134,7 +127,7 @@ const STEP_ORDER: OnboardingStep[] = [
 const defaultDraft: OnboardingDraft = {
   version: 2,
   step: 'welcome',
-  topic: 'finance',
+  topic: 'technology',
   acquisitionSource: null,
   knowledgeLevel: 'zero',
   motivation: null,
@@ -146,7 +139,7 @@ const defaultDraft: OnboardingDraft = {
   accessChoice: null,
 };
 
-// Course Categories
+// Course Categories (Canonical Kinnu Domains)
 const COURSE_TOPICS: Array<{
   id: CourseTopic;
   title: LocalizedText;
@@ -155,23 +148,42 @@ const COURSE_TOPICS: Array<{
   badge?: LocalizedText;
 }> = [
   {
-    id: 'finance',
-    title: { es: 'Finanzas & Inversión', en: 'Finance & Investing' },
-    subtitle: { es: 'Acciones, interés compuesto, balances y negocios', en: 'Stocks, compounding, balance sheets & business' },
-    icon: '💰',
-    badge: { es: 'POPULAR', en: 'POPULAR' },
-  },
-  {
-    id: 'tech',
-    title: { es: 'IA & Automatización', en: 'AI & Automation' },
-    subtitle: { es: 'Prompts, agentes y flujos que puedes construir hoy', en: 'Prompts, agents, and workflows you can build today' },
+    id: 'technology',
+    title: { es: 'Technology', en: 'Technology' },
+    subtitle: { es: 'IA, Data Science, Ciberseguridad & Computación', en: 'AI, Data Science, Cybersecurity & Computing' },
     icon: '🤖',
+    badge: { es: 'POPULAR', en: 'TRENDING' },
   },
   {
-    id: 'skills',
-    title: { es: 'Growth & Marketing', en: 'Growth & Marketing' },
-    subtitle: { es: 'Hooks, ofertas y sistemas de distribución que convierten', en: 'Hooks, offers, and distribution systems that convert' },
+    id: 'business',
+    title: { es: 'Business', en: 'Business' },
+    subtitle: { es: 'Entrepreneurship, Ventas, Capital & Producto', en: 'Entrepreneurship, Sales, Capital & Product' },
+    icon: '💼',
+    badge: { es: 'TOP', en: 'CORE' },
+  },
+  {
+    id: 'investing',
+    title: { es: 'Investing & Markets', en: 'Investing & Markets' },
+    subtitle: { es: 'Value Investing, Mercados & Apuestas Asimétricas', en: 'Value Investing, Markets & Asymmetric Bets' },
+    icon: '💰',
+  },
+  {
+    id: 'mindset',
+    title: { es: 'Mental Health & Mindset', en: 'Mental Health & Mindset' },
+    subtitle: { es: 'Estoicismo, Modelos Mentales & Pensamiento Crítico', en: 'Stoicism, Mental Models & Critical Thinking' },
+    icon: '🧠',
+  },
+  {
+    id: 'productivity',
+    title: { es: 'Productivity', en: 'Productivity' },
+    subtitle: { es: 'Deep Work, Hábitos Atómicos & Maestría del Tiempo', en: 'Deep Work, Atomic Habits & Time Mastery' },
     icon: '⚡',
+  },
+  {
+    id: 'history',
+    title: { es: 'Strategic History', en: 'Strategic History' },
+    subtitle: { es: 'Estrategia Militar, Grandes Imperios & Geopolítica', en: 'Military Strategy, Great Empires & Geopolitics' },
+    icon: '🏛️',
   },
 ];
 
@@ -298,7 +310,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   const isEs = language === 'es';
   const tr = (es: string, en: string) => (isEs ? es : en);
 
-  const [draft, setDraft] = useState<OnboardingDraft>(() => ({ ...loadDraft(), topic: 'finance' }));
+  const [draft, setDraft] = useState<OnboardingDraft>(() => loadDraft());
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authMode, setAuthMode] = useState<'sign-in' | 'sign-up'>('sign-up');
@@ -331,7 +343,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
     if (step === 'access') {
       void (async () => {
         try {
-          const pkgs: PurchasesPackage[] = []; // Waiting for deployed server entitlement verification.
+          const pkgs = await revenueCat.getDisplayPackages();
           if (pkgs.length > 0) {
             setPaywallPackages(pkgs);
             const annual = pkgs.find(p => p.identifier.includes('annual'));
@@ -390,7 +402,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
   const currentTopicObj = COURSE_TOPICS.find((t) => t.id === draft.topic) || COURSE_TOPICS[0];
   const topicName = localize(currentTopicObj.title, language);
-  const primaryTrack = 'investing' as const;
+  const primaryTrack = getOnboardingTrack(draft.topic);
 
   const getProfilePatch = (onboardingComplete: boolean) => ({
     niche: primaryTrack,
@@ -431,6 +443,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       updatePetSettings(Math.round(draft.screenTimeHours * 60), Math.max(50, draft.dailyGoal * 10));
       await updateAppUser({
         ...getProfilePatch(true),
+        isPro: choice === 'super',
+        isFounder: choice === 'super' && selectedPaywallPkgId.includes('lifetime'),
+        role: choice === 'super' && selectedPaywallPkgId.includes('lifetime') ? 'founder' : undefined,
       });
       await ProofVerificationService.claimOnboardingReward().catch((claimError) => {
         console.warn('Onboarding cloud reward deferred:', claimError);
@@ -446,7 +461,35 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
   };
 
   const handleOnboardingPurchase = async () => {
-    await finalize('free');
+    const pkg = paywallPackages.find(p => p.identifier === selectedPaywallPkgId) || paywallPackages[0];
+    if (!pkg) return;
+
+    setPurchasingPaywall(true);
+    setPaywallNotice('');
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const result = await revenueCat.purchase(pkg);
+        if (result.success && result.isPro) {
+          fireRewardConfetti();
+          await finalize('super');
+        } else {
+          setPaywallNotice(tr('Debes activar un plan para desbloquear la aplicación.', 'You must activate a plan to unlock the application.'));
+        }
+      } else {
+        // Web preview simulation
+        await new Promise(r => setTimeout(r, 600));
+        fireRewardConfetti();
+        await finalize('super');
+      }
+    } catch (err: any) {
+      if (err?.userCancelled) {
+        setPaywallNotice(tr('Compra cancelada. Se requiere una membresía activa para acceder a T1GER.', 'Purchase cancelled. An active membership is required to access T1GER.'));
+      } else {
+        setPaywallNotice(tr('No se pudo procesar el pago con Google Play.', 'Could not process payment with Google Play.'));
+      }
+    } finally {
+      setPurchasingPaywall(false);
+    }
   };
 
   const handleOnboardingRestore = async () => {
@@ -487,9 +530,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div className="flex flex-col items-center text-center my-auto">
               {/* Speech bubble */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                initial={{ opacity: 0, scale: 0.95, y: 5 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
+                transition={{ duration: 0.2 }}
                 className="relative rounded-2xl border border-white/15 bg-[#121216] px-6 py-3.5 text-base font-black text-white shadow-2xl mb-4"
               >
                 {tr('¡Hola! ¡Soy T1GER!', "Hi there! I'm T1GER!")}
@@ -537,7 +580,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="space-y-2.5 my-auto">
-              {COURSE_TOPICS.filter(topic => topic.id === 'finance').map((topic) => {
+              {COURSE_TOPICS.map((topic) => {
                 const isSelected = draft.topic === topic.id;
                 return (
                   <button
@@ -1104,15 +1147,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       // Frame 14: Hands-on Micro-Lesson
       case 'micro_lesson': {
         const lessonByTopic: Record<CourseTopic, { prompt: string; promptEn: string; explanation: string; explanationEn: string; options: Array<{ es: string; en: string; correct: boolean }> }> = {
-          finance: {
-            prompt: '¿Qué acción aprovecha mejor el interés compuesto?',
-            promptEn: 'Which action uses compound growth best?',
-            explanation: 'Invertir una cantidad constante y reinvertir rendimientos convierte el tiempo en tu ventaja.',
-            explanationEn: 'Investing consistently and reinvesting returns turns time into your advantage.',
+          technology: {
+            prompt: '¿Qué mejora más la respuesta de un modelo de IA en una tarea real?',
+            promptEn: 'What improves an AI model’s output most for a real task?',
+            explanation: 'Un objetivo, contexto, restricciones y formato de salida reducen la ambigüedad y hacen el resultado utilizable.',
+            explanationEn: 'A goal, context, constraints, and output format reduce ambiguity and make the result usable.',
             options: [
-              { es: 'Invertir cada mes y reinvertir los rendimientos.', en: 'Invest monthly and reinvest the returns.', correct: true },
-              { es: 'Esperar a encontrar el momento perfecto.', en: 'Wait until you find the perfect moment.', correct: false },
-              { es: 'Cambiar de estrategia cada semana.', en: 'Change strategies every week.', correct: false },
+              { es: 'Definir objetivo, contexto, restricciones y formato.', en: 'Define the goal, context, constraints, and format.', correct: true },
+              { es: 'Pedir simplemente que sea “mejor y más inteligente”.', en: 'Simply ask it to be “better and smarter”.', correct: false },
+              { es: 'Hacer el prompt larguísimo sin estructura alguna.', en: 'Make the prompt extremely long without structure.', correct: false },
             ],
           },
           tech: {
@@ -1126,6 +1169,17 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               { es: 'Hacer el prompt largo sin estructura.', en: 'Make the prompt long without structure.', correct: false },
             ],
           },
+          business: {
+            prompt: '¿Qué hace que una oferta o producto gane tracción real de cero a uno?',
+            promptEn: 'What gives an offer or product real zero-to-one traction?',
+            explanation: 'Resolver un dolor urgente y específico para una persona identificable supera a cualquier marketing masivo.',
+            explanationEn: 'Solving an urgent, specific pain for an identifiable customer beats any mass marketing.',
+            options: [
+              { es: 'Resolver un dolor urgente y específico para un cliente claro.', en: 'Solving an urgent, specific pain for a clear customer.', correct: true },
+              { es: 'Gastar mucho en anuncios antes de tener clientes felices.', en: 'Spending heavily on ads before having happy customers.', correct: false },
+              { es: 'Esperar a que el producto tenga 50 funciones terminadas.', en: 'Waiting until the product has 50 finished features.', correct: false },
+            ],
+          },
           skills: {
             prompt: '¿Qué hace fuerte a un hook de tres segundos?',
             promptEn: 'What makes a three-second hook strong?',
@@ -1135,6 +1189,61 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               { es: 'Tensión específica y una recompensa clara.', en: 'Specific tension and a clear payoff.', correct: true },
               { es: 'Una introducción larga sobre el creador.', en: 'A long introduction about the creator.', correct: false },
               { es: 'Muchos temas diferentes a la vez.', en: 'Many different topics at once.', correct: false },
+            ],
+          },
+          investing: {
+            prompt: '¿Cuál es el motor matemático más potente de la creación de riqueza?',
+            promptEn: 'What is the most powerful mathematical engine of wealth creation?',
+            explanation: 'Aportes consistentes reinvertidos durante décadas generan retornos exponenciales que superan cualquier especulación.',
+            explanationEn: 'Consistent contributions reinvested over decades create exponential returns beating any speculation.',
+            options: [
+              { es: 'Aportar periódicamente y reinvertir rendimientos con horizonte largo.', en: 'Contribute regularly and reinvest returns with a long horizon.', correct: true },
+              { es: 'Intentar adivinar el suelo y techo del mercado cada semana.', en: 'Try to guess market bottoms and tops every week.', correct: false },
+              { es: 'Mantener todo el capital en efectivo bajo el colchón.', en: 'Keep all capital in cash under the mattress.', correct: false },
+            ],
+          },
+          finance: {
+            prompt: '¿Qué acción aprovecha mejor el interés compuesto?',
+            promptEn: 'Which action uses compound growth best?',
+            explanation: 'Invertir una cantidad constante y reinvertir rendimientos convierte el tiempo en tu ventaja.',
+            explanationEn: 'Investing consistently and reinvesting returns turns time into your advantage.',
+            options: [
+              { es: 'Invertir cada mes y reinvertir los rendimientos.', en: 'Invest monthly and reinvest the returns.', correct: true },
+              { es: 'Esperar a encontrar el momento perfecto.', en: 'Wait until you find the perfect moment.', correct: false },
+              { es: 'Cambiar de estrategia cada semana.', en: 'Change strategies every week.', correct: false },
+            ],
+          },
+          mindset: {
+            prompt: '¿Cuál es el principio central de la dicotomía estoica del control?',
+            promptEn: 'What is the core principle of the Stoic dichotomy of control?',
+            explanation: 'Separar lo que depende 100% de ti (tus acciones y juicios) de lo externo elimina la ansiedad improductiva.',
+            explanationEn: 'Separating what is 100% within your control (actions & judgments) from the external eliminates useless anxiety.',
+            options: [
+              { es: 'Enfocar tu energía solo en lo que depende 100% de ti.', en: 'Focus your energy only on what is 100% within your control.', correct: true },
+              { es: 'Preocuparse por eventos externos para intentar prevenirlos.', en: 'Worry about external events to try to prevent them.', correct: false },
+              { es: 'Suprimir todas las emociones sin analizarlas.', en: 'Suppress all emotions without analyzing them.', correct: false },
+            ],
+          },
+          productivity: {
+            prompt: '¿Qué protege la calidad de una sesión de Deep Work (trabajo profundo)?',
+            promptEn: 'What protects the quality of a Deep Work session?',
+            explanation: 'Eliminar el cambio de contexto y notificaciones permite alcanzar el estado de flujo cognitivo máximo.',
+            explanationEn: 'Eliminating context switching and notifications allows reaching peak cognitive flow.',
+            options: [
+              { es: 'Cero notificaciones y una sola tarea de alto impacto.', en: 'Zero notifications and a single high-impact task.', correct: true },
+              { es: 'Responder mensajes mientras trabajas en el proyecto.', en: 'Replying to messages while working on the project.', correct: false },
+              { es: 'Trabajar 10 horas seguidas sin pausas planificadas.', en: 'Working 10 straight hours without planned breaks.', correct: false },
+            ],
+          },
+          history: {
+            prompt: 'Según el arte de la estrategia, ¿cuándo se decide la victoria?',
+            promptEn: 'According to the art of strategy, when is victory decided?',
+            explanation: 'Los estrategas victoriosos vencen primero mediante cálculo previo de terreno y recursos antes de entrar en batalla.',
+            explanationEn: 'Victorious strategists win first through prior calculation of terrain and resources before entering battle.',
+            options: [
+              { es: 'Antes de la batalla, mediante cálculo previo de terreno y recursos.', en: 'Before battle, through prior calculation of terrain and resources.', correct: true },
+              { es: 'Confiando en la suerte y la improvisación durante el conflicto.', en: 'Relying on luck and improvisation during the conflict.', correct: false },
+              { es: 'Atacando frontalmente donde el enemigo es más fuerte.', en: 'Attacking head-on where the enemy is strongest.', correct: false },
             ],
           },
         };
@@ -1487,7 +1596,6 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 18: Elite Calm/Headspace Multi-Page Paywall Sequence (3 Pages)
       case 'access': {
-        if (paywallPackages.length === 0) return <div className="flex min-h-full flex-col justify-center gap-6 py-6"><OnboardingMascot mood="happy" className="mx-auto h-48 w-48" /><h1 className="text-center text-3xl font-bold">{tr('Tu camino empieza aquí.', 'Your journey starts here.')}</h1><p className="text-center text-sm leading-relaxed text-zinc-400">{tr('Aprende Inversiones y aplica una idea cada día. El acceso actual es gratuito; no se activará ninguna prueba ni suscripción.', 'Learn Investing and apply one idea each day. Current access is free; no trial or subscription will be started.')}</p>{error && <p role="alert" className="text-sm text-red-300">{error}</p>}<PrimaryAction onClick={() => void finalize('free')} disabled={finalizing}>{finalizing ? tr('GUARDANDO…', 'SAVING…') : tr('EMPEZAR MI CAMINO', 'START MY JOURNEY')}<ArrowRight size={20} /></PrimaryAction></div>;
         // --- SUB-PAGE 1: Personalization Climax & Projected Habit Formation Chart ---
         if (accessSubPage === 1) {
           return (
@@ -1680,201 +1788,123 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         const isLifetime = selectedPaywallPkgId.includes('lifetime');
 
         return (
-          <div className="flex min-h-full flex-col justify-between py-2 text-left">
-            <DuolingoHeader
-              speech={tr(
-                'Tu protocolo está bloqueado. Activa tu membresía o prueba de 7 días para ingresar a T1GER.',
-                'Your protocol is locked. Activate your membership or 7-day trial to enter T1GER.'
-              )}
-              mood="celebrate"
-              eyebrow={tr('OFERTA DE LANZAMIENTO // 50% OFF', 'LAUNCH OFFER // 50% OFF')}
-              title={tr('Desbloquea Acceso Completo', 'Unlock Full Access')}
-            />
+          <div className="flex h-full flex-col justify-between py-1 text-left overflow-hidden select-none">
+            {/* Top Badge & Header */}
+            <div className="text-center pt-0.5">
+              <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-mono font-black uppercase bg-gradient-to-r from-emerald-500/20 via-[#FF7300]/20 to-transparent text-orange-400 border border-orange-500/30">
+                🔥 {tr('OFERTA DE LANZAMIENTO // 50% OFF', 'LAUNCH OFFER // 50% OFF')}
+              </span>
+              <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1.5 leading-tight">
+                {tr('Desbloquea tu potencial táctico', 'Unlock your tactical potential')}
+              </h2>
+              <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 max-w-xs mx-auto leading-relaxed">
+                {tr(
+                  'Entrena tu criterio diario, pon a prueba tus decisiones y domina tu mercado.',
+                  'Train your daily judgment, test your decisions, and master your market.'
+                )}
+              </p>
+            </div>
 
-            <div className="space-y-3 my-auto overflow-y-auto max-h-[calc(100dvh-235px)] pr-0.5 hide-scrollbar">
-              {/* Special Launch Discount Banner */}
-              <div className="rounded-2xl border border-emerald-500/40 bg-gradient-to-r from-emerald-500/15 via-[#FF7300]/10 to-transparent p-3 flex items-center justify-between shadow-[0_0_20px_rgba(16,185,129,0.15)]">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-lg">🔥</span>
-                  <div>
-                    <strong className="text-[11px] text-emerald-300 font-black uppercase tracking-wider block">
-                      {tr('DESCUENTO DE LANZAMIENTO APLICADO', 'LAUNCH DISCOUNT APPLIED')}
-                    </strong>
-                    <span className="text-[10px] text-zinc-300">
-                      {tr('Ahorra hasta un 50% en tu membresía hoy', 'Save up to 50% on your membership today')}
-                    </span>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-400 text-black text-[9px] font-black uppercase">
-                  -50% OFF
-                </span>
-              </div>
+            {/* Plan Cards - Compact 2-option selector */}
+            <div className="space-y-2 my-auto py-1">
+              <p className="text-[9px] font-mono font-black uppercase tracking-widest text-zinc-400 px-1">
+                {tr('Elige tu modalidad de acceso', 'Choose your access tier')}
+              </p>
 
-              {/* Calm/Headspace Hard Gate Banner */}
-              <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/15 via-[#FF7300]/10 to-transparent p-3.5 flex items-start gap-3 shadow-[0_0_25px_rgba(245,158,11,0.15)]">
-                <div className="w-8 h-8 shrink-0 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 border border-amber-500/30">
-                  <Lock size={16} />
-                </div>
-                <div>
-                  <strong className="text-xs text-amber-300 font-black uppercase tracking-wider block">
-                    {tr('Membresía Requerida // Sin Atajos', 'Membership Required // No Shortcuts')}
-                  </strong>
-                  <p className="text-[11px] text-zinc-300 leading-snug mt-1">
-                    {tr(
-                      'T1GER no ofrece versión gratuita sin compromiso. Para usar la app, debes activar un plan o iniciar tu prueba de 7 días. Si no pagas, el acceso permanecerá cerrado.',
-                      'T1GER does not offer a free tier. Real discipline requires commitment. An active membership or 7-day trial is required to use the app.'
-                    )}
-                  </p>
-                </div>
-              </div>
+              {paywallPackages.length > 0 ? (
+                paywallPackages.slice(0, 2).map(pkg => {
+                  const isSelected = selectedPaywallPkgId === pkg.identifier;
+                  const isPkgAnnual = pkg.identifier.includes('annual');
 
-              {/* Plan Options Selector with Price Anchoring */}
-              <div className="space-y-2">
-                <p className="text-[10px] font-mono font-black uppercase tracking-wider text-zinc-400 px-1">
-                  {tr('Elige tu plan de entrenamiento', 'Choose your training plan')}
-                </p>
+                  return (
+                    <button
+                      key={pkg.identifier}
+                      type="button"
+                      onClick={() => setSelectedPaywallPkgId(pkg.identifier)}
+                      className={`relative w-full p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        isSelected
+                          ? 'bg-[#FF7300]/15 border-[#FF7300] shadow-[0_0_18px_rgba(255,115,0,0.2)]'
+                          : 'bg-white/[.03] border-white/10 hover:border-white/20'
+                      }`}
+                    >
+                      {isPkgAnnual && (
+                        <span className="absolute -top-2 right-3 px-2 py-0.2 rounded-full text-[8px] font-black uppercase bg-gradient-to-r from-emerald-400 to-[#3FC78E] text-black shadow-sm">
+                          {tr('⭐ 7 DÍAS GRATIS · $0 HOY', '⭐ 7 DAYS FREE · $0 TODAY')}
+                        </span>
+                      )}
 
-                {paywallPackages.length > 0 ? (
-                  paywallPackages.map(pkg => {
-                    const isSelected = selectedPaywallPkgId === pkg.identifier;
-                    const isPkgAnnual = pkg.identifier.includes('annual');
-                    const isPkgLifetime = pkg.identifier.includes('lifetime');
-
-                    return (
-                      <button
-                        key={pkg.identifier}
-                        type="button"
-                        onClick={() => setSelectedPaywallPkgId(pkg.identifier)}
-                        className={`relative w-full p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
-                          isSelected
-                            ? 'bg-[#FF7300]/15 border-[#FF7300] shadow-[0_0_20px_rgba(255,115,0,0.25)]'
-                            : 'bg-white/[.03] border-white/10 hover:border-white/20'
-                        }`}
-                      >
-                        {isPkgAnnual && (
-                          <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-gradient-to-r from-emerald-400 to-[#3FC78E] text-black shadow-md">
-                            {tr('⭐ RECOMENDADO // 7 DÍAS GRATIS', '⭐ RECOMMENDED // 7 DAYS FREE')}
-                          </span>
-                        )}
-                        {isPkgLifetime && (
-                          <span className="absolute -top-2.5 right-3 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase bg-gradient-to-r from-amber-400 to-[#FF7300] text-black shadow-md">
-                            {tr('💎 PAGO ÚNICO VITALICIO', '💎 LIFETIME ONE-TIME')}
-                          </span>
-                        )}
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                              isSelected ? 'border-[#FF7300] bg-[#FF7300]' : 'border-zinc-500'
-                            }`}>
-                              {isSelected && <Check className="w-3 h-3 text-black stroke-[3]" />}
-                            </div>
-                            <div>
-                              <h4 className="text-xs font-black text-white">{pkg.product.title}</h4>
-                              <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
-                                {isPkgAnnual 
-                                  ? tr('7 días gratis, luego $59.99/año ($4.99/mes)', '7 days free, then $59.99/year ($4.99/mo)')
-                                  : pkg.product.description}
-                              </p>
-                            </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 ${
+                            isSelected ? 'border-[#FF7300] bg-[#FF7300]' : 'border-zinc-500'
+                          }`}>
+                            {isSelected && <Check className="w-2.5 h-2.5 text-black stroke-[3]" />}
                           </div>
-                          <div className="text-right">
-                            {isPkgAnnual && (
-                              <span className="text-[10px] text-zinc-500 line-through font-mono block">
-                                $119.99
-                              </span>
-                            )}
-                            {isPkgLifetime && (
-                              <span className="text-[10px] text-zinc-500 line-through font-mono block">
-                                $149.99
-                              </span>
-                            )}
-                            <span className="text-sm font-black text-white font-mono block">
-                              {isPkgAnnual ? '$4.99/mes' : pkg.product.priceString}
-                            </span>
-                            {isPkgAnnual && (
-                              <span className="text-[9px] text-emerald-400 font-mono font-bold block">
-                                {tr('Ahorras 50%', 'Save 50%')}
-                              </span>
-                            )}
+                          <div>
+                            <h4 className="text-xs font-black text-white leading-tight">{pkg.product.title}</h4>
+                            <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
+                              {isPkgAnnual
+                                ? tr('7 días gratis, luego $59.99/año', '7 days free, then $59.99/year')
+                                : pkg.product.description}
+                            </p>
                           </div>
                         </div>
-                      </button>
-                    );
-                  })
-                ) : (
-                  <div className="p-4 rounded-2xl bg-white/[.03] border border-white/10 text-center text-xs text-zinc-400">
-                    {tr('Cargando planes de Google Play...', 'Loading Google Play plans...')}
-                  </div>
-                )}
-              </div>
 
-              {/* Calm / Headspace Interactive Timeline */}
-              <div className="rounded-2xl border border-white/10 bg-white/[.02] p-3.5 space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-[#FF7300]" />
-                  <span className="text-[10px] font-mono font-black uppercase tracking-wider text-zinc-300">
-                    {tr('Línea de tiempo de tu acceso', 'Access timeline')}
-                  </span>
+                        <div className="text-right shrink-0">
+                          {isPkgAnnual && (
+                            <span className="text-[9px] text-zinc-500 line-through font-mono block">
+                              $119.99
+                            </span>
+                          )}
+                          <span className="text-xs sm:text-sm font-black text-white font-mono block">
+                            {isPkgAnnual ? '$4.99/mes' : pkg.product.priceString}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="p-3 rounded-2xl bg-white/[.03] border border-white/10 text-center text-xs text-zinc-400">
+                  {tr('Cargando planes de Google Play...', 'Loading Google Play plans...')}
                 </div>
+              )}
 
-                <div className="space-y-3 relative pl-5 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-emerald-500 before:via-amber-500 before:to-[#FF7300]">
-                  {/* Point 1 */}
-                  <div className="relative">
-                    <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-black" />
-                    <p className="text-[11px] font-bold text-white leading-tight">
-                      {tr('Hoy: Acceso Total Inmediato', 'Today: Full Instant Access')}
-                    </p>
-                    <p className="text-[10px] text-zinc-400">
-                      {isAnnualTrial
-                        ? tr('Comienza tu entrenamiento. Cobro de $0 hoy.', 'Start your training. $0 charged today.')
-                        : tr('Acceso ilimitado desbloqueado en tu cuenta.', 'Unlimited access unlocked on your account.')}
-                    </p>
-                  </div>
-
-                  {/* Point 2 */}
-                  {isAnnualTrial && (
-                    <div className="relative">
-                      <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-amber-400 ring-4 ring-black" />
-                      <p className="text-[11px] font-bold text-white leading-tight">
-                        {tr('Día 5: Notificación de Recordatorio', 'Day 5: Reminder Notification')}
-                      </p>
-                      <p className="text-[10px] text-zinc-400">
-                        {tr('Te avisaremos 48h antes de que concluya tu prueba.', 'We will notify you 48h before your trial ends.')}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Point 3 */}
-                  <div className="relative">
-                    <span className="absolute -left-5 top-0.5 w-2.5 h-2.5 rounded-full bg-[#FF7300] ring-4 ring-black" />
-                    <p className="text-[11px] font-bold text-white leading-tight">
-                      {isAnnualTrial ? tr('Día 7: Comienza tu Plan', 'Day 7: Plan Starts') : tr('Control Total en Google Play', 'Full Control on Google Play')}
-                    </p>
-                    <p className="text-[10px] text-zinc-400">
-                      {tr('Cancela en 1 toque en Google Play sin penalizaciones.', 'Cancel anytime in 1 tap on Google Play.')}
-                    </p>
-                  </div>
+              {/* Calm-Style Micro Timeline */}
+              <div className="rounded-xl border border-white/8 bg-white/[.02] px-3 py-2 flex items-center justify-between text-[10px]">
+                <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <span>📅</span>
+                  <span>{tr('Hoy: $0', 'Today: $0')}</span>
                 </div>
-              </div>
-
-              {/* Trust Badge */}
-              <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-400 pt-1">
-                <Shield size={13} className="text-emerald-400" />
-                <span>{tr('Garantía oficial y pagos seguros de Google Play', 'Official Google Play guarantee & secure payments')}</span>
+                <span className="text-zinc-600 font-mono">→</span>
+                <div className="flex items-center gap-1.5 text-amber-400 font-bold">
+                  <span>🔔</span>
+                  <span>{tr('Día 5: Aviso', 'Day 5: Notice')}</span>
+                </div>
+                <span className="text-zinc-600 font-mono">→</span>
+                <div className="flex items-center gap-1.5 text-orange-400 font-bold">
+                  <span>🛡️</span>
+                  <span>{tr('Día 7: Cancela fácil', 'Day 7: Easy cancel')}</span>
+                </div>
               </div>
             </div>
 
             {/* Error / Notice message */}
             {(paywallNotice || error) && (
-              <p role="alert" className="rounded-xl border border-[#FF4B4B]/30 bg-[#FF4B4B]/10 p-2 text-center text-xs font-bold text-[#FF8F8F] my-1.5">
+              <p role="alert" className="rounded-xl border border-[#FF4B4B]/30 bg-[#FF4B4B]/10 p-1.5 text-center text-[11px] font-bold text-[#FF8F8F] my-1">
                 {paywallNotice || error}
               </p>
             )}
 
-            {/* CTAs & Footer */}
-            <div className="pt-2 space-y-2">
-              <PrimaryAction onClick={handleOnboardingPurchase} disabled={purchasingPaywall || finalizing}>
+            {/* Dual CTAs: Start Free Trial & Empezar Gratis */}
+            <div className="space-y-2 pt-1">
+              {/* Button 1: Big Start Free Trial Button */}
+              <button
+                type="button"
+                onClick={handleOnboardingPurchase}
+                disabled={purchasingPaywall || finalizing}
+                className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#FF7300] to-[#FF8C33] text-black font-black text-xs sm:text-sm uppercase tracking-wider shadow-[0_4px_22px_rgba(255,115,0,0.38)] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
                 {purchasingPaywall ? (
                   <>
                     <RefreshCw size={18} className="animate-spin" />
@@ -1882,26 +1912,48 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   </>
                 ) : isAnnualTrial ? (
                   <>
-                    {tr('CONTINUAR GRATIS', 'CONTINUE FOR FREE')} <ChevronRight size={18} />
+                    <span>{tr('INICIAR PRUEBA GRATUITA DE 7 DÍAS', 'START 7-DAY FREE TRIAL')}</span>
+                    <ChevronRight size={18} className="stroke-[3]" />
                   </>
                 ) : (
                   <>
-                    {tr('CONTINUAR GRATIS', 'CONTINUE FOR FREE')} <Sparkles size={18} />
+                    <span>{tr('DESBLOQUEAR PLAN PRO', 'UNLOCK PRO PLAN')}</span>
+                    <Sparkles size={18} />
                   </>
                 )}
-              </PrimaryAction>
+              </button>
 
-              <div className="flex items-center justify-between px-2 pt-0.5 text-[10px] font-mono text-zinc-400">
+              {/* Button 2: Big Empezar Gratis Button */}
+              <button
+                type="button"
+                onClick={() => finalize('free')}
+                disabled={purchasingPaywall || finalizing}
+                className="w-full py-3 px-4 rounded-2xl border border-white/20 bg-white/[0.04] text-zinc-200 hover:text-white hover:bg-white/[0.08] font-bold text-xs sm:text-sm tracking-wide active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                {finalizing ? (
+                  <>
+                    <RefreshCw size={16} className="animate-spin" />
+                    {tr('PREPARANDO ACCESO...', 'PREPARING ACCESS...')}
+                  </>
+                ) : (
+                  <span>{tr('Empezar gratis', 'Start for free')}</span>
+                )}
+              </button>
+
+              {/* Footer Trust & Restore */}
+              <div className="flex items-center justify-between px-2 pt-0.5 text-[9px] font-mono text-zinc-500">
                 <button
                   type="button"
                   onClick={handleOnboardingRestore}
                   disabled={restoringPaywall || purchasingPaywall}
-                  className="hover:text-zinc-200 underline cursor-pointer"
+                  className="hover:text-zinc-300 underline cursor-pointer"
                 >
                   {restoringPaywall ? tr('Restaurando...', 'Restoring...') : tr('Restaurar compras', 'Restore purchases')}
                 </button>
-                <span className="text-zinc-600">•</span>
-                <span className="text-zinc-500">{tr('Google Play Billing', 'Google Play Billing')}</span>
+                <div className="flex items-center gap-1 text-zinc-400">
+                  <Shield size={11} className="text-emerald-400" />
+                  <span>{tr('Google Play Seguro · Cancela en 1 toque', 'Google Play Secure · Cancel anytime')}</span>
+                </div>
               </div>
             </div>
           </div>

@@ -37,9 +37,18 @@ export const HUD = React.memo(() => {
         <div className="mx-auto flex w-full max-w-lg items-center justify-between rounded-2xl border border-white/[0.08] bg-[#0D0D11] px-3 py-1.5 shadow-[0_10px_26px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.05)]">
           {/* Left: T1GER Logo & Prestige Level */}
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.04] border border-white/10 shadow-inner">
-              <img src="/t1ger-avatar.png" alt="T1GER Mascot" className="h-5 w-5 object-contain filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]" />
-            </div>
+            <button
+              onClick={() => { haptic(); setActiveView('profile'); }}
+              className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-b from-amber-500/20 via-orange-500/10 to-transparent border border-amber-500/35 shadow-[0_0_14px_rgba(255,115,0,0.25)] overflow-hidden cursor-pointer active:scale-95 transition-transform group"
+              aria-label="T1GER Mascot"
+            >
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,140,0,0.35),transparent_70%)] group-hover:opacity-100 transition-opacity" />
+              <img
+                src="/t1ger-avatar.png"
+                alt="T1GER Mascot"
+                className="relative z-10 h-full w-full object-contain scale-[1.48] filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]"
+              />
+            </button>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-mono text-xs font-black tracking-tight text-white leading-none">T1GER</span>

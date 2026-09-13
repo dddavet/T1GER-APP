@@ -24,21 +24,19 @@ type ActiveMission = BankMission & {
   mission_brief?: string;
 };
 
-const loadBuildTab = () => import('./components/BuildTab').then(module => ({ default: module.BuildTab }));
-const loadLearn = () => import('./pages/Learn').then(module => ({ default: module.Learn }));
-const loadProfile = () => import('./pages/Profile').then(module => ({ default: module.Profile }));
-const loadSquadTab = () => import('./components/social/SquadTab').then(module => ({ default: module.SquadTab }));
-const BuildTab = lazy(loadBuildTab);
-const Learn = lazy(loadLearn);
-const Profile = lazy(loadProfile);
+import { BuildTab } from './components/BuildTab';
+import { Learn } from './pages/Learn';
+import { Profile } from './pages/Profile';
+import { SquadTab } from './components/social/SquadTab';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { OneSignalService } from './services/oneSignalService';
+
 const Coach = lazy(() => import('./pages/Coach').then(module => ({ default: module.Coach })));
 const MissionEngine = lazy(() => import('./components/MissionEngine').then(module => ({ default: module.MissionEngine })));
 const CuratedLessonPlayer = lazy(() => import('./components/learn/CuratedLessonPlayer').then(module => ({ default: module.CuratedLessonPlayer })));
-const SquadTab = lazy(loadSquadTab);
 const EveningInterrogation = lazy(() => import('./components/EveningInterrogation').then(module => ({ default: module.EveningInterrogation })));
 const OnboardingFlow = lazy(() => import('./components/OnboardingFlow').then(module => ({ default: module.OnboardingFlow })));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(module => ({ default: module.PrivacyPolicy })));
-const TermsOfService = lazy(() => import('./pages/TermsOfService').then(module => ({ default: module.TermsOfService })));
 const DeleteAccount = lazy(() => import('./pages/DeleteAccount').then(module => ({ default: module.DeleteAccount })));
 const Simulator = lazy(() => import('./pages/Simulator').then(module => ({ default: module.Simulator })));
 const DevHarness = import.meta.env.DEV
@@ -68,6 +66,7 @@ const AppContent = () => {
   const { dailyTacticalStatus, brainState, language, getDailyPipelineMissions } = useBrain();
   const { appUser, loading } = useAuth();
   const [activeMission, setActiveMission] = useState<ActiveMission | null>(null);
+  console.log('[DEBUG AppContent]', { loading, hasUser: !!appUser, activeView });
   const mainRef = useRef<HTMLElement>(null);
   const previousViewRef = useRef(activeView);
   const urlViewAppliedRef = useRef(false);
@@ -139,14 +138,14 @@ const AppContent = () => {
   useEffect(() => {
     if (appUser?.uid) {
       let cancelled = false;
-      import('./services/oneSignalService').then(async ({ OneSignalService }) => {
+      void (async () => {
         await OneSignalService.init();
         if (cancelled) return;
         await OneSignalService.identifyUser(appUser.uid, {
           streak_days: brainState.learnStreak,
           language,
         });
-      });
+      })();
 
       return () => {
         cancelled = true;
@@ -154,17 +153,6 @@ const AppContent = () => {
     }
   }, [appUser?.uid, brainState.learnStreak, language]);
 
-  // Warm the primary tab chunks after the first screen is interactive. This
-  // keeps the initial bundle small while making the first tab switch instant.
-  useEffect(() => {
-    if (!appUser?.onboardingComplete && !onboardingBypassed) return;
-    const timers = [
-      window.setTimeout(() => { void loadBuildTab(); }, 900),
-      window.setTimeout(() => { void loadSquadTab(); }, 1700),
-      window.setTimeout(() => { void loadProfile(); }, 2500),
-    ];
-    return () => timers.forEach(window.clearTimeout);
-  }, [appUser?.onboardingComplete, onboardingBypassed]);
 
 
   useEffect(() => {
@@ -422,7 +410,7 @@ const AppContent = () => {
         className={`t1ger-scroll-area flex-1 min-h-0 ${
           isFullscreen
             ? 'overflow-hidden flex flex-col'
-            : 'overflow-y-auto overflow-x-hidden px-3.5 sm:px-4 pb-[calc(5rem+env(safe-area-inset-bottom))]'
+            : 'overflow-y-auto overflow-x-hidden px-3.5 sm:px-4 pb-[calc(6.75rem+env(safe-area-inset-bottom))]'
         }`}
         style={{ WebkitOverflowScrolling: 'touch' }}
       >
@@ -435,7 +423,9 @@ const AppContent = () => {
             animate="animate"
             className={isFullscreen ? 'h-full flex flex-col w-full' : 'min-h-full w-full'}
           >
-            {activeContent}
+            <Suspense fallback={null}>
+              {activeContent}
+            </Suspense>
           </motion.div>
         )}
       </main>
