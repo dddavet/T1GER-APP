@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Check,
   LockKey,
@@ -33,6 +33,7 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
   onOpenNode,
 }) => {
   const tr = (es: string, en: string) => (locale === 'es' ? es : en);
+  const reducedMotion = useReducedMotion();
 
   // Determine zigzag horizontal offset for Duolingo snake trail
   const getZigzagClass = (index: number) => {
@@ -101,9 +102,9 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                     {isCurrent && (
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: [0, -6, 0] }}
+                        animate={{ opacity: 1, y: reducedMotion ? 0 : [0, -6, 0] }}
                         transition={{
-                          repeat: Infinity,
+                          repeat: reducedMotion ? 0 : Infinity,
                           duration: 1.8,
                           ease: 'easeInOut',
                         }}
@@ -186,9 +187,9 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                       </p>
                       <span className="inline-block mt-0.5 text-[10px] font-mono text-zinc-400">
                         {isCompleted
-                          ? tr('✓ Dominado', '✓ Mastered')
+                          ? tr('✓ Completado · Repasar', '✓ Completed · Review')
                           : isCurrent
-                          ? tr('⚡ +20 XP · 3 min', '⚡ +20 XP · 3 min')
+                          ? tr('3 min + Aplicar', '3 min + Apply')
                           : isReview
                           ? tr('Refresco', 'Refresh')
                           : tr('Bloqueado', 'Locked')}
@@ -210,7 +211,7 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                   {allCompleted ? <Trophy size={26} weight="fill" /> : <Gift size={26} weight="duotone" />}
                 </div>
                 <span className="mt-1.5 text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">
-                  {allCompleted ? tr('¡Recompensa Reclamada!', 'Reward Claimed!') : tr('Cofre de Etapa (+50 XP)', 'Stage Chest (+50 XP)')}
+                  {allCompleted ? tr('Etapa completada', 'Chapter complete') : tr('Hito de etapa', 'Chapter milestone')}
                 </span>
               </div>
             </div>

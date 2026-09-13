@@ -1,13 +1,22 @@
 import { ALL_ATOMIC_LESSONS, INTERACTIVE_MISSION_BANK, INTERACTIVE_TRACKS } from '../src/services/interactiveCurriculum';
 import { validateAtomicLesson } from '../src/services/curriculumIngestion';
 import { DEFAULT_BRAIN_STATE, processMissionReview } from '../src/services/brainService';
+import { KINNU_DOMAINS, isPathwayAvailable, getReadyPathwayForTrack } from '../src/services/curriculumCatalog';
+import { FIELD_MISSION_CATALOG } from '../functions/src/fieldMissionCatalog';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
 }
 
-assert(INTERACTIVE_TRACKS.length === 3, 'Curriculum must contain exactly three launch tracks.');
-assert(ALL_ATOMIC_LESSONS.length === 15, 'Curriculum must contain exactly fifteen launch lessons.');
+assert(INTERACTIVE_TRACKS.length === 7, 'Curriculum contains seven authored tracks, including unreleased content.');
+assert(ALL_ATOMIC_LESSONS.length === 35, 'Curriculum contains thirty-five authored lessons.');
+const ready = KINNU_DOMAINS.flatMap(domain => domain.pathways).filter(isPathwayAvailable);
+assert(new Set(ready.map(path => path.interactiveTrackId)).size === ready.length, 'Available courses cannot alias the same lessons under different titles.');
+assert(getReadyPathwayForTrack('smart-money').id === 'biz-capital', 'Investing must open Investing, not the first Business course.');
+for (const path of ready) {
+  const track = INTERACTIVE_TRACKS.find(track => track.id === path.interactiveTrackId)!;
+  assert(track.lessons.every(lesson => FIELD_MISSION_CATALOG[lesson.id]?.lessonXP === lesson.phases[3].xp), `${path.id} needs matching backend rewards for every Apply mission.`);
+}
 assert(INTERACTIVE_MISSION_BANK.length === ALL_ATOMIC_LESSONS.length, 'Every atomic lesson must have a Brain mission adapter.');
 
 const ids = new Set<string>();
@@ -34,7 +43,7 @@ for (const track of INTERACTIVE_TRACKS) {
 }
 
 assert(challengeKinds.size === 4, 'Launch curriculum must exercise all four challenge types.');
-assert(engines.size === 15, 'Every launch lesson must have a purpose-built micro-tool engine.');
+assert(engines.size >= 15, 'Keep the original purpose-built micro-tools when extending the curriculum.');
 
 const learnedOrbState = {
   ...DEFAULT_BRAIN_STATE,

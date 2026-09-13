@@ -37,12 +37,17 @@ const visitTab = async (buttonName, expectedText, forbiddenText, screenshotName)
 
 try {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 120_000 });
-  await page.getByRole('heading', { name: 'Invest in your judgment.', exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByRole('button', { name: 'Start lesson 1', exact: true }).waitFor({ timeout: 60_000 });
   await page.screenshot({ path: `${outputDir}/learn.png`, fullPage: true });
-  await visitTab('Apply', 'Make it part of your life.', 'Invest in your judgment.', 'apply');
+  await visitTab('Apply', 'Make it part of your life.', 'Start lesson 1', 'apply');
   await visitTab('Compete', 'Discipline is visible.', 'Make it part of your life.', 'compete');
   await visitTab('Profile', 'Investing profile', 'Discipline is visible.', 'profile');
-  await visitTab('Learn', 'Invest in your judgment.', 'Investing profile', 'learn-return');
+  await page.getByRole('button').filter({ hasText: 'T1GER Plus / Founder' }).click();
+  await page.getByRole('dialog').getByText('Keep learning for free', { exact: true }).waitFor();
+  if (await page.getByRole('dialog').getByText('START MY 7-DAY FREE TRIAL', { exact: true }).count()) throw new Error('Unavailable checkout advertised a trial');
+  await page.keyboard.press('Escape');
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  await visitTab('Learn', 'Start lesson 1', 'Investing profile', 'learn-return');
   for (const width of [320, 390, 768, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);

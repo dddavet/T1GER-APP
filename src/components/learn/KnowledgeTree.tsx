@@ -30,6 +30,7 @@ import {
   TreeStructure,
 } from '@phosphor-icons/react';
 import type { KinnuDomain, KinnuPathway } from '../../services/curriculumCatalog';
+import { isPathwayAvailable } from '../../services/curriculumCatalog';
 
 // Icon resolver for dynamic pathway & domain icons
 export const resolveCurriculumIcon = (name: string, size = 20, weight: 'bold' | 'fill' | 'regular' = 'bold') => {
@@ -153,14 +154,16 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.2, delay: index * 0.05 }}
               role="button"
+              aria-disabled={!isPathwayAvailable(pathway)}
               tabIndex={0}
               onKeyDown={(e) => {
+                if (!isPathwayAvailable(pathway)) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
                   onSelectPathway(pathway);
                 }
               }}
-              onClick={() => onSelectPathway(pathway)}
+              onClick={() => { if (isPathwayAvailable(pathway)) onSelectPathway(pathway); }}
               className={`group relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer select-none ${
                 isActive
                   ? 'bg-gradient-to-r from-white/[0.08] to-white/[0.03] border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
@@ -252,7 +255,7 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
                     boxShadow: isActive ? 'none' : `0 3px 0 ${domain.accentColor}88`,
                   }}
                 >
-                  <span>{isActive ? tr('Ruta activa', 'Active path') : tr('Aprender', 'Start')}</span>
+                  <span>{!isPathwayAvailable(pathway) ? tr('Próximamente', 'Coming soon') : isActive ? tr('Ruta activa', 'Active path') : tr('Aprender', 'Start')}</span>
                   <ArrowRight size={13} weight="bold" />
                 </div>
               </div>

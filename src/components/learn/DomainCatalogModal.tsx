@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkle, ArrowRight, CheckCircle, BookOpen } from '@phosphor-icons/react';
 import {
   KINNU_DOMAINS,
+  isPathwayAvailable,
   type DomainId,
   type KinnuDomain,
   type KinnuPathway,
@@ -131,15 +132,16 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                     data-pathway-id={pathway.id}
                     role="button"
                     tabIndex={0}
+                    aria-disabled={!isPathwayAvailable(pathway)}
                     onClick={() => {
-                      console.log('[DomainCatalogModal] Clicked pathway:', pathway.id);
+                      if (!isPathwayAvailable(pathway)) return;
                       onSelectPathway(pathway, activeDomain);
                       onClose();
                     }}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        console.log('[DomainCatalogModal] Key select pathway:', pathway.id);
+                        if (!isPathwayAvailable(pathway)) return;
                         onSelectPathway(pathway, activeDomain);
                         onClose();
                       }
@@ -167,6 +169,7 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                           <h4 className="text-sm font-bold text-white group-hover:text-orange-300 transition-colors">
                             {pathway.title[locale]}
                           </h4>
+                          {!isPathwayAvailable(pathway) && <span className="text-xs text-zinc-400">{tr('Próximamente', 'Coming soon')}</span>}
                           {pathway.badge && (
                             <span
                               className="text-[9px] font-mono font-black uppercase px-2 py-0.5 rounded-full border"

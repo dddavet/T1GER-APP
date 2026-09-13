@@ -6,7 +6,7 @@ import { useT1ger } from '../contexts/T1gerContext';
 import { useFieldMissions } from '../hooks/useFieldMissions';
 import { FieldMissionService, isFieldMissionComplete, type FieldMission } from '../services/fieldMissionService';
 import { getApplyDesign } from '../services/applyMissionDesign';
-import { PaperTradingSandbox as Trading } from './apply/PaperTradingSandbox';
+const Trading = React.lazy(() => import('./apply/PaperTradingSandbox').then(m => ({ default: m.PaperTradingSandbox })));
 import { ApplyMissionModal } from './apply/ApplyMissionModal';
 
 export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }) => {
@@ -191,4 +191,3 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
     </div>
   );
 };
-

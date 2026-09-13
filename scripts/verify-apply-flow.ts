@@ -15,10 +15,10 @@ await page.addInitScript(() => {
 });
 try {
   await page.goto('http://127.0.0.1:3000/?previewApp=1&view=learn');
-  await page.getByRole('heading', { name: 'Invest in your judgment.' }).waitFor({ timeout: 90000 });
+  await page.getByRole('button', { name: 'Start lesson 1', exact: true }).waitFor({ timeout: 90000 });
   let count = 0;
   for (const lesson of getInteractiveTrack('smart-money').lessons) {
-    await page.getByRole('button', { name: 'Start lesson', exact: true }).click();
+    await page.getByRole('button', { name: `Start lesson ${count + 1}`, exact: true }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByRole('button', { name: 'Open Orb', exact: true }).click();
     await dialog.getByRole('heading', { name: lesson.phases[0].title.en, exact: true }).waitFor();
@@ -49,13 +49,12 @@ try {
     await page.getByRole('heading', { name: 'You put it into practice.' }).waitFor();
     await page.getByRole('button', { name: 'Back to my journey', exact: true }).click();
     count++;
-    assert.equal(await page.getByRole('progressbar', { name: 'Investing progress' }).getAttribute('value'), String(count));
+    assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), String(count));
   }
   await page.reload();
-  await page.getByRole('heading', { name: 'Your foundation is built.' }).waitFor();
-  await page.getByText('1060 XP personal', { exact: true }).waitFor();
+  await page.getByRole('button', { name: 'See my actions', exact: true }).waitFor();
   assert.equal(await page.locator('[aria-label="0 verified XP"]').count(), 1, 'Self-reported progress never reaches the verified XP counter.');
-  assert.equal(await page.getByRole('progressbar', { name: 'Investing progress' }).getAttribute('value'), '5');
+  assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), '5');
   await page.screenshot({ path: 'test-results/app-shell/journey-completed.png', fullPage: true });
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
   await page.getByRole('button', { name: 'Wins', exact: true }).click();

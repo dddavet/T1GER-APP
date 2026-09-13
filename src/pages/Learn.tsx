@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   CaretDown,
@@ -13,13 +13,15 @@ import { useAuth } from '../contexts/AuthContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useFieldMissions } from '../hooks/useFieldMissions';
 import { isFieldMissionComplete } from '../services/fieldMissionService';
+import { getLocalDateString } from '../services/brainService';
 import { getInteractiveTrack, getInteractiveTrackIdFromLegacy } from '../services/interactiveCurriculum';
 import { getJourneyNodes, getSectionsForTrack, type JourneyNode } from '../services/learningJourney';
 import { type AtomicLesson, type InteractiveTrackId } from '../services/interactiveCurriculumTypes';
 import type { BankMission } from '../services/missionBank';
 import {
   getDomainById,
-  getDomainForTrackId,
+  getReadyPathwayForTrack,
+  isPathwayAvailable,
   type DomainId,
   type KinnuDomain,
   type KinnuPathway,
@@ -27,7 +29,7 @@ import {
 import { KnowledgeTree, resolveCurriculumIcon } from '../components/learn/KnowledgeTree';
 import { DuolingoOrbTrail } from '../components/learn/DuolingoOrbTrail';
 import { DomainCatalogModal } from '../components/learn/DomainCatalogModal';
-import { T1gerMascot3D } from '../components/T1gerMascot3D';
+const T1gerMascot3D = React.lazy(() => import('../components/T1gerMascot3D').then(m => ({ default: m.T1gerMascot3D })));
 const Player = React.lazy(() =>
   import('../components/learn/AtomicLessonPlayer').then(m => ({ default: m.AtomicLessonPlayer }))
 );
@@ -45,13 +47,13 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
     return getInteractiveTrackIdFromLegacy(brainState.currentTrackId || 'investing');
   }, [brainState.currentTrackId]);
 
-  const initialDomain = useMemo(() => getDomainForTrackId(activeTrackId), [activeTrackId]);
 
-  const [selectedDomainId, setSelectedDomainId] = useState<DomainId>(initialDomain.id);
+  const [selectedPathway, setSelectedPathway] = useState<KinnuPathway>(() => getReadyPathwayForTrack(activeTrackId));
+  const selectedDomainId = selectedPathway.domainId;
   const currentDomain: KinnuDomain = useMemo(() => getDomainById(selectedDomainId), [selectedDomainId]);
 
   // Selected pathway inside the domain (defaults to first pathway of domain)
-  const [selectedPathway, setSelectedPathway] = useState<KinnuPathway>(() => currentDomain.pathways[0]);
+  useEffect(() => { setSelectedPathway(getReadyPathwayForTrack(activeTrackId)); }, [activeTrackId, appUser?.uid]);
 
   // View mode: defaults to 'path' (Duolingo-style winding orb trail) for immediate action and motivation
   const [viewMode, setViewMode] = useState<'path' | 'tree'>('path');
@@ -70,30 +72,17 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
   }, [currentTrack, brainState, missions]);
 
   const completed = nodes.filter(node => node.state === 'completed').length;
+  const completedToday = missions.some(m => isFieldMissionComplete(m) && getLocalDateString(new Date(m.submission?.createdAt || m.updatedAt)) === getLocalDateString());
   const next = nodes.find(node => node.state !== 'completed');
   const pending = next && missions.find(m => m.lessonId === next.lesson.id && !isFieldMissionComplete(m));
   const [lesson, setLesson] = useState<AtomicLesson | null>(null);
   const [review, setReview] = useState(false);
 
   const handleSelectPathway = (pathway: KinnuPathway, domain?: KinnuDomain) => {
-    if (domain && domain.id !== selectedDomainId) {
-      setSelectedDomainId(domain.id);
-    }
+    if (!isPathwayAvailable(pathway)) return;
     setSelectedPathway(pathway);
     setViewMode('path');
-    selectTrack(
-      pathway.interactiveTrackId === 'smart-money'
-        ? 'investing'
-        : pathway.interactiveTrackId === 'history-strategy'
-        ? 'history'
-        : pathway.interactiveTrackId === 'mindset-stoic'
-        ? 'mindset'
-        : pathway.interactiveTrackId === 'peak-performance'
-        ? 'performance'
-        : pathway.interactiveTrackId === 'data-science' || pathway.interactiveTrackId === 'ai-automation'
-        ? 'ai'
-        : 'business'
-    );
+    selectTrack(getInteractiveTrack(pathway.interactiveTrackId).legacyTrackId);
   };
 
   const open = (node: JourneyNode) => {
@@ -104,13 +93,14 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
     } else if (node.state !== 'completed' && missions.some(m => m.lessonId === node.lesson.id && !isFieldMissionComplete(m))) {
       setActiveView('build');
     } else {
-      setReview(false);
+      setReview(node.state === 'completed');
       setLesson(node.lesson);
     }
   };
 
   return (
     <div className="journey-page mx-auto max-w-lg pb-32 text-white px-2 sm:px-3">
+      <h1 className="sr-only">{selectedPathway.title[locale]}</h1>
       {/* Top Header: Duolingo Course Picker & Streak Status */}
       <header className="px-1 pt-2 pb-2">
         <div className="flex items-center justify-between gap-2">
@@ -210,7 +200,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                 <React.Suspense
                   fallback={
                     <img
-                      src="/t1ger-avatar.png"
+                      src="/mascot/t1ger-avatar.png"
                       alt="T1ger"
                       className="w-20 h-20 sm:w-24 sm:h-24 object-contain drop-shadow-[0_8px_16px_rgba(255,115,0,0.3)]"
                     />
@@ -228,7 +218,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
               <div className="relative flex-1 rounded-2xl border border-white/15 bg-[#141419]/90 backdrop-blur-md p-3 text-left shadow-md">
                 <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-45 border-b border-l border-white/15 bg-[#141419]" />
                 <p className="text-xs sm:text-sm text-white font-bold leading-snug">
-                  {learnStreak === 0
+                  {!next ? tr('¡Base completada! Repasa lo aprendido o revisa tus acciones.', 'Foundation complete! Review what you learned or revisit your actions.') : learnStreak === 0
                     ? tr(
                         '¡Enciende tu racha hoy! Conquista tu primer orbe en solo 3 minutos.',
                         'Ignite your streak today! Conquer your first orb in just 3 minutes.'
@@ -254,11 +244,11 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                   {completed}/{nodes.length} {tr('Orbes', 'Orbs')}
                 </span>
               </div>
-              <div className="h-2 w-full rounded-full bg-black/50 border border-white/10 overflow-hidden">
+              <div role="progressbar" aria-label={tr('Progreso del camino', 'Journey progress')} aria-valuemin={0} aria-valuemax={nodes.length} aria-valuenow={completed} className="h-2 w-full rounded-full bg-black/50 border border-white/10 overflow-hidden">
                 <div
                   className="h-full transition-all duration-500 rounded-full"
                   style={{
-                    width: `${Math.max(8, (completed / nodes.length) * 100)}%`,
+                    width: `${nodes.length ? (completed / nodes.length) * 100 : 0}%`,
                     backgroundColor: currentDomain.accentColor,
                     boxShadow: `0 0 12px ${currentDomain.accentColor}`,
                   }}
@@ -277,10 +267,10 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
               <span>
                 {next
                   ? next.state === 'review'
-                    ? tr('Reforzar memoria (+15 XP)', 'Refresh memory (+15 XP)')
+                    ? tr('Reforzar memoria', 'Refresh memory')
                     : pending
                     ? tr('Continuar en Aplicar', 'Continue in Apply')
-                    : tr(`Empezar Orbe ${completed + 1} (+20 XP)`, `Start Orb ${completed + 1} (+20 XP)`)
+                    : tr(`Empezar lección ${completed + 1}`, `Start lesson ${completed + 1}`)
                   : tr('Ver mis acciones', 'See my actions')}
               </span>
               <ArrowRight size={18} weight="bold" />
@@ -298,14 +288,14 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                   {tr('Meta Diaria', 'Daily Goal')}
                 </p>
                 <p className="text-[10px] text-zinc-400">
-                  {completed > 0
-                    ? tr('1 / 1 Orbe completado ✓', '1 / 1 Orb completed ✓')
-                    : tr('0 / 1 Orbe completado', '0 / 1 Orb completed')}
+                  {completedToday
+                    ? tr('Acción de hoy completada ✓', 'Today’s action completed ✓')
+                    : tr('Aprende y completa una acción hoy', 'Learn and complete an action today')}
                 </p>
               </div>
             </div>
             <span className="text-[11px] font-mono font-bold text-amber-400 bg-amber-950/40 px-2.5 py-1 rounded-lg border border-amber-500/30">
-              +20 XP
+              {tr('Aprender → Aplicar', 'Learn → Apply')}
             </span>
           </div>
 

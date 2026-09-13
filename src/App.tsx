@@ -24,12 +24,12 @@ type ActiveMission = BankMission & {
   mission_brief?: string;
 };
 
-import { BuildTab } from './components/BuildTab';
-import { Learn } from './pages/Learn';
-import { Profile } from './pages/Profile';
-import { SquadTab } from './components/social/SquadTab';
-import { PrivacyPolicy } from './pages/PrivacyPolicy';
-import { TermsOfService } from './pages/TermsOfService';
+const BuildTab = lazy(() => import('./components/BuildTab').then(m => ({ default: m.BuildTab })));
+const Learn = lazy(() => import('./pages/Learn').then(m => ({ default: m.Learn })));
+const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
+const SquadTab = lazy(() => import('./components/social/SquadTab').then(m => ({ default: m.SquadTab })));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
+const TermsOfService = lazy(() => import('./pages/TermsOfService').then(m => ({ default: m.TermsOfService })));
 import { OneSignalService } from './services/oneSignalService';
 
 const Coach = lazy(() => import('./pages/Coach').then(module => ({ default: module.Coach })));
@@ -66,7 +66,6 @@ const AppContent = () => {
   const { dailyTacticalStatus, brainState, language, getDailyPipelineMissions } = useBrain();
   const { appUser, loading } = useAuth();
   const [activeMission, setActiveMission] = useState<ActiveMission | null>(null);
-  console.log('[DEBUG AppContent]', { loading, hasUser: !!appUser, activeView });
   const mainRef = useRef<HTMLElement>(null);
   const previousViewRef = useRef(activeView);
   const urlViewAppliedRef = useRef(false);
@@ -423,7 +422,7 @@ const AppContent = () => {
             animate="animate"
             className={isFullscreen ? 'h-full flex flex-col w-full' : 'min-h-full w-full'}
           >
-            <Suspense fallback={null}>
+            <Suspense fallback={<div role="status" className="p-6 text-center text-sm text-zinc-400">{language === 'es' ? 'Cargando…' : 'Loading…'}</div>}>
               {activeContent}
             </Suspense>
           </motion.div>

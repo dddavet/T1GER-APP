@@ -581,3 +581,14 @@ export function getDomainForTrackId(trackId: InteractiveTrackId): KinnuDomain {
   if (trackId === 'smart-money') return getDomainById('business');
   return getDomainById('technology');
 }
+
+// These pathways have distinct lessons and a matching server-side Apply catalog.
+const READY_PATHWAYS = ['tech-ai', 'biz-capital', 'biz-marketing'];
+export function isPathwayAvailable(pathway: KinnuPathway): boolean {
+  return READY_PATHWAYS.includes(pathway.id);
+}
+export function getReadyPathwayForTrack(trackId: InteractiveTrackId): KinnuPathway {
+  const pathways = KINNU_DOMAINS.flatMap(domain => domain.pathways);
+  return pathways.find(pathway => isPathwayAvailable(pathway) && pathway.interactiveTrackId === trackId)
+    || pathways.find(pathway => pathway.id === 'biz-capital')!;
+}
