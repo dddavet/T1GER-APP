@@ -576,14 +576,22 @@ export function getDomainForTrackId(trackId: InteractiveTrackId): KinnuDomain {
   if (trackId === 'ai-automation') return getDomainById('technology');
   if (trackId === 'viral-growth') return getDomainById('business');
   if (trackId === 'history-strategy') return getDomainById('history');
-  if (trackId === 'mindset-stoic') return getDomainById('psychology');
+  if (trackId === 'mindset-stoic') return getDomainById('philosophy');
   if (trackId === 'peak-performance') return getDomainById('science');
   if (trackId === 'smart-money') return getDomainById('business');
   return getDomainById('technology');
 }
 
 // These pathways have distinct lessons and a matching server-side Apply catalog.
-const READY_PATHWAYS = ['tech-ai', 'biz-capital', 'biz-marketing'];
+const READY_PATHWAYS = [
+  'tech-ai',
+  'biz-capital',
+  'biz-marketing',
+  'tech-datascience',
+  'hist-rome',
+  'sci-physiology',
+  'phil-stoicism',
+];
 export function isPathwayAvailable(pathway: KinnuPathway): boolean {
   return READY_PATHWAYS.includes(pathway.id);
 }

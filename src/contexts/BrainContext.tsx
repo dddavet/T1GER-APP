@@ -257,8 +257,16 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     const refreshClock = () => setClockNow(Date.now());
     const timer = window.setInterval(refreshClock, 60_000);
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') refreshClock();
+    };
     window.addEventListener('focus', refreshClock);
-    return () => { window.clearInterval(timer); window.removeEventListener('focus', refreshClock); };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshClock);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
   const devHarness = useDevHarnessState();
   const [brainState, setBrainState] = useState<BrainState>(DEFAULT_BRAIN_STATE);
@@ -365,7 +373,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         pipeline.completedApply !== brainState.dailyPipeline.completedApply) {
       setBrainState(prev => ({ ...prev, dailyPipeline: pipeline }));
     }
-  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards]);
+  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards, clockNow]);
 
   // Keep the legacy session consumers on the same durable curriculum position.
   useEffect(() => {
@@ -376,7 +384,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         current.completedIds.join('|') !== session.completedIds.join('|')) {
       setBrainState(prev => ({ ...prev, dailySession: session }));
     }
-  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards]);
+  }, [brainState.currentTrackId, brainState.completedDayIds, brainState.missionHistory, brainState.fsrsCards, clockNow]);
 
   const competencies = useMemo(() => applyDecay(brainState), [brainState]);
 

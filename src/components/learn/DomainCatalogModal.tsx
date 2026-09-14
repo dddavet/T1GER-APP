@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkle, ArrowRight, CheckCircle, BookOpen } from '@phosphor-icons/react';
 import {
@@ -30,6 +30,25 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
 }) => {
   const tr = (es: string, en: string) => (locale === 'es' ? es : en);
   const [activeTabDomainId, setActiveTabDomainId] = useState<DomainId>(selectedDomainId);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  // Sync selected domain if changed while closed
+  useEffect(() => {
+    setActiveTabDomainId(selectedDomainId);
+  }, [selectedDomainId, isOpen]);
+
+  // Handle Escape key dismiss
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const activeDomain = KINNU_DOMAINS.find(d => d.id === activeTabDomainId) || KINNU_DOMAINS[0];
 
@@ -48,6 +67,9 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
 
           {/* Bottom Sheet Modal */}
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="domain-catalog-title"
             initial={{ y: '100%', opacity: 0.5 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
@@ -65,14 +87,15 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                 <p className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-400">
                   {tr('Universo del Conocimiento', 'Knowledge Universe')}
                 </p>
-                <h2 className="text-lg sm:text-xl font-black text-white">
+                <h2 id="domain-catalog-title" className="text-lg sm:text-xl font-black text-white">
                   {tr('Explora Dominios & Rutas', 'Explore Domains & Paths')}
                 </h2>
               </div>
               <button
+                ref={closeButtonRef}
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={onClose}
-                aria-label={tr('Cerrar', 'Close')}
+                aria-label={tr('Cerrar catálogo de dominios', 'Close domain catalog')}
                 className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
               >
                 <X size={16} weight="bold" />
