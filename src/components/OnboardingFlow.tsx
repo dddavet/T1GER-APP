@@ -265,8 +265,8 @@ const DuolingoHeader: React.FC<{
       </motion.div>
 
       {/* 3D Mascot */}
-      <div className="h-32 w-32 relative flex items-center justify-center pointer-events-none">
-        <OnboardingMascot mood={mood} closeUp className="h-32 w-32" />
+      <div className="h-28 w-28 sm:h-32 sm:w-32 relative flex items-center justify-center pointer-events-none">
+        <OnboardingMascot mood={mood} closeUp className="h-28 w-28 sm:h-32 sm:w-32" />
       </div>
     </div>
 
@@ -575,26 +575,27 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="space-y-2.5 my-auto">
-              {COURSE_TOPICS.filter(topic => ['technology', 'business', 'investing', 'finance', 'tech', 'skills'].includes(topic.id)).map((topic) => {
+              {COURSE_TOPICS.map((topic) => {
                 const isSelected = draft.topic === topic.id;
                 return (
                   <button
                     key={topic.id}
+                    type="button"
                     onClick={() => patchDraft({ topic: topic.id })}
-                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                    className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[60px] ${
                       isSelected
                         ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_20px_rgba(255,115,0,0.25)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
                     }`}
                   >
                     <span className="text-2xl shrink-0">{topic.icon}</span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <strong className="text-sm font-bold text-white block">
+                        <strong className="text-sm font-bold text-white block truncate">
                           {localize(topic.title, language)}
                         </strong>
                         {topic.badge && (
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase">
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase shrink-0">
                             {localize(topic.badge, language)}
                           </span>
                         )}
@@ -604,7 +605,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       </span>
                     </div>
                     <span
-                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 ${
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
                         isSelected
                           ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
                           : 'border-white/20 text-transparent'
@@ -671,11 +672,12 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 return (
                   <button
                     key={src.id}
+                    type="button"
                     onClick={() => patchDraft({ acquisitionSource: src.id })}
-                    className={`relative flex min-h-20 items-center gap-2.5 rounded-2xl border p-3 text-left transition-all active:scale-[0.985] cursor-pointer ${
+                    className={`relative flex min-h-[58px] sm:min-h-16 items-center gap-2.5 rounded-2xl border py-2.5 px-3 text-left transition-all active:scale-[0.985] cursor-pointer ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
                     }`}
                   >
                     <span className="text-lg shrink-0">{src.icon}</span>
@@ -711,11 +713,12 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 return (
                   <button
                     key={lvl.id}
+                    type="button"
                     onClick={() => patchDraft({ knowledgeLevel: lvl.id })}
-                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                    className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[58px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
                     }`}
                   >
                     {/* Signal strength bars */}
@@ -723,7 +726,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       {[1, 2, 3, 4, 5].map((bar) => (
                         <div
                           key={bar}
-                          className={`w-1 rounded-full ${
+                          className={`w-1 rounded-full transition-colors ${
                             bar <= lvl.bars
                               ? isSelected
                                 ? 'bg-[var(--ob-accent)]'
@@ -738,7 +741,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     <span className="text-sm font-semibold flex-1">
                       {localize(lvl.title, language)}
                     </span>
-                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                    <span
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
+                          : 'border-white/20 text-transparent'
+                      }`}
+                    >
+                      {isSelected && <Check size={14} strokeWidth={3} />}
+                    </span>
                   </button>
                 );
               })}
@@ -793,18 +804,27 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 return (
                   <button
                     key={mot.id}
+                    type="button"
                     onClick={() => patchDraft({ motivation: mot.id })}
-                    className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
+                    className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[58px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
                     }`}
                   >
                     <span className="text-xl shrink-0">{mot.icon}</span>
                     <span className="text-sm font-semibold flex-1">
                       {localize(mot.title, language)}
                     </span>
-                    {isSelected && <Check size={16} className="text-[var(--ob-accent)]" />}
+                    <span
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                        isSelected
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
+                          : 'border-white/20 text-transparent'
+                      }`}
+                    >
+                      {isSelected && <Check size={14} strokeWidth={3} />}
+                    </span>
                   </button>
                 );
               })}
@@ -949,9 +969,43 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       }
 
       // Frame 10: Daily Commitment ("How much time can you commit?")
-      case 'daily_goal':
+      case 'daily_goal': {
+        const GOAL_OPTIONS: Array<{
+          minutes: number;
+          tag: LocalizedText;
+          icon: string;
+          desc: LocalizedText;
+          featured?: boolean;
+        }> = [
+          {
+            minutes: 5,
+            tag: { es: 'Relajado', en: 'Casual' },
+            icon: '🌱',
+            desc: { es: '1 lección diaria', en: '1 daily lesson' },
+          },
+          {
+            minutes: 10,
+            tag: { es: 'Recomendado', en: 'Recommended' },
+            icon: '⚡',
+            desc: { es: '2 lecciones diarias', en: '2 daily lessons' },
+            featured: true,
+          },
+          {
+            minutes: 15,
+            tag: { es: 'Enfocado', en: 'Focused' },
+            icon: '🎯',
+            desc: { es: '3 lecciones diarias', en: '3 daily lessons' },
+          },
+          {
+            minutes: 20,
+            tag: { es: 'Modo Bestia', en: 'Beast Mode' },
+            icon: '🔥',
+            desc: { es: 'Dominio acelerado', en: 'Fast-track mastery' },
+          },
+        ];
+
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
               speech={tr('¿Cuánto tiempo puedes proteger cada día?', 'How much time can you protect each day?')}
               mood="happy"
@@ -959,25 +1013,53 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="grid grid-cols-2 gap-3 my-auto">
-              {[5, 10, 15, 20].map((minutes) => (
-                <button
-                  key={minutes}
-                  onClick={() => patchDraft({ dailyGoal: minutes })}
-                  className={`min-h-28 rounded-2xl border p-4 text-left transition-all active:scale-95 cursor-pointer ${
-                    draft.dailyGoal === minutes
-                      ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 shadow-[0_0_15px_rgba(255,115,0,0.25)]'
-                      : 'border-white/10 bg-white/[.03]'
-                  }`}
-                >
-                  {minutes === 10 && (
-                    <span className="mb-2 inline-flex rounded-full bg-[var(--ob-accent)] px-2 py-0.5 text-[9px] font-black uppercase text-black">
-                      {tr('Recomendado', 'Recommended')}
-                    </span>
-                  )}
-                  <strong className="block text-2xl font-black text-white">{minutes}</strong>
-                  <span className="text-xs text-zinc-400">{tr('min al día', 'min/day')}</span>
-                </button>
-              ))}
+              {GOAL_OPTIONS.map((opt) => {
+                const isSelected = draft.dailyGoal === opt.minutes;
+                return (
+                  <button
+                    key={opt.minutes}
+                    type="button"
+                    onClick={() => patchDraft({ dailyGoal: opt.minutes })}
+                    className={`relative flex flex-col justify-between min-h-32 rounded-2xl border p-3.5 text-left transition-all active:scale-[0.97] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 shadow-[0_0_20px_rgba(255,115,0,0.25)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] hover:border-white/20 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    {/* Top row: Symmetrical badge and check indicator */}
+                    <div className="flex items-center justify-between gap-1 w-full mb-1">
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                          opt.featured
+                            ? 'bg-[var(--ob-accent)] text-black'
+                            : isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-white/10 text-zinc-300'
+                        }`}
+                      >
+                        <span>{opt.icon}</span>
+                        <span>{localize(opt.tag, language)}</span>
+                      </span>
+                      {isSelected && (
+                        <Check size={14} className="text-[var(--ob-accent)] shrink-0" strokeWidth={3} />
+                      )}
+                    </div>
+
+                    {/* Middle row: Big number */}
+                    <div className="my-1">
+                      <div className="flex items-baseline gap-1">
+                        <strong className="text-3xl font-black text-white leading-none">{opt.minutes}</strong>
+                        <span className="text-xs font-semibold text-zinc-400">{tr('min', 'min')}</span>
+                      </div>
+                    </div>
+
+                    {/* Bottom row: Cadence description */}
+                    <p className="text-[11px] text-zinc-400 font-medium leading-tight">
+                      {localize(opt.desc, language)}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="pt-4">
@@ -987,6 +1069,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
           </div>
         );
+      }
 
       // Frame 11: Home Screen Widget Preview
       case 'widget_preview':
@@ -1093,42 +1176,69 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               mood="idle"
             />
 
-            <div className="space-y-3 my-auto">
-              <button
-                onClick={() => {
-                  patchDraft({ startingPoint: 'scratch' });
-                  advance();
-                }}
-                className="w-full p-5 rounded-2xl border border-[#3FC78E]/40 bg-[#3FC78E]/10 text-left transition-all active:scale-[0.985] cursor-pointer"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-full bg-[#3FC78E] text-black text-[9px] font-black uppercase">
-                    {tr('RECOMENDADO', 'RECOMMENDED')}
-                  </span>
-                  <CheckCircle2 className="text-[#3FC78E]" size={20} />
-                </div>
-                <strong className="text-base font-bold text-white block mt-2">
-                  {tr(`¿Aprendiendo ${topicName} por primera vez?`, `Learning ${topicName} for the first time?`)}
-                </strong>
-                <p className="text-xs text-zinc-300 mt-1">
-                  {tr('Empieza desde las bases con micro-lecciones interactivas.', 'Start from scratch with interactive lessons.')}
-                </p>
-              </button>
-
-              <button
-                onClick={() => {
-                  patchDraft({ startingPoint: 'placement' });
-                  advance();
-                }}
-                className="w-full p-5 rounded-2xl border border-white/10 bg-white/[.03] text-left transition-all active:scale-[0.985] cursor-pointer hover:bg-white/[.06]"
-              >
-                <strong className="text-base font-bold text-white block">
-                  {tr(`¿Ya conoces las bases de ${topicName}?`, `Already know some ${topicName}?`)}
-                </strong>
-                <p className="text-xs text-zinc-400 mt-1">
-                  {tr('Haremos un test rápido para ubicar tu nivel.', "Let's find your starting point with a quick check!")}
-                </p>
-              </button>
+            <div className="space-y-3.5 my-auto">
+              {[
+                {
+                  id: 'scratch' as const,
+                  badge: { es: 'RECOMENDADO', en: 'RECOMMENDED' },
+                  icon: '🌱',
+                  title: tr(`¿Aprendiendo ${topicName} por primera vez?`, `Learning ${topicName} for the first time?`),
+                  desc: tr('Empieza desde las bases con micro-lecciones interactivas.', 'Start from scratch with interactive lessons.'),
+                  featured: true,
+                },
+                {
+                  id: 'placement' as const,
+                  badge: { es: 'TEST DE NIVEL', en: 'PLACEMENT TEST' },
+                  icon: '⚡',
+                  title: tr(`¿Ya conoces las bases de ${topicName}?`, `Already know some ${topicName}?`),
+                  desc: tr('Haremos una comprobación rápida para ubicar tu punto óptimo.', "Let's find your starting point with a quick check!"),
+                  featured: false,
+                },
+              ].map((opt) => {
+                const isSelected = draft.startingPoint === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => patchDraft({ startingPoint: opt.id })}
+                    className={`w-full p-4 sm:p-5 rounded-2xl border text-left transition-all active:scale-[0.98] cursor-pointer ${
+                      isSelected
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_20px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
+                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${
+                          opt.featured
+                            ? 'bg-[var(--ob-accent)] text-black'
+                            : isSelected
+                            ? 'bg-white/20 text-white'
+                            : 'bg-white/10 text-zinc-300'
+                        }`}
+                      >
+                        <span>{opt.icon}</span>
+                        <span>{localize(opt.badge, language)}</span>
+                      </span>
+                      <span
+                        className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                          isSelected
+                            ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
+                            : 'border-white/20 text-transparent'
+                        }`}
+                      >
+                        {isSelected && <Check size={14} strokeWidth={3} />}
+                      </span>
+                    </div>
+                    <strong className="text-sm sm:text-base font-bold text-white block">
+                      {opt.title}
+                    </strong>
+                    <p className="text-xs text-zinc-400 mt-1 leading-relaxed">
+                      {opt.desc}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="pt-4">
