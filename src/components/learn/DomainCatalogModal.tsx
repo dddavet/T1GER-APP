@@ -9,6 +9,7 @@ import {
   type KinnuPathway,
 } from '../../services/curriculumCatalog';
 import { resolveCurriculumIcon } from './KnowledgeTree';
+import { SoundEffects } from '../../services/soundEffects';
 
 interface DomainCatalogModalProps {
   isOpen: boolean;
@@ -69,9 +70,10 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                 </h2>
               </div>
               <button
+                onPointerDown={() => SoundEffects.playTap()}
                 onClick={onClose}
                 aria-label={tr('Cerrar', 'Close')}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -84,8 +86,9 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                 return (
                   <button
                     key={domain.id}
+                    onPointerDown={() => SoundEffects.playToggle()}
                     onClick={() => setActiveTabDomainId(domain.id)}
-                    className={`flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
+                    className={`flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-100 ease-out cursor-pointer select-none active:scale-[0.93] ${
                       isActive
                         ? 'bg-white/15 text-white shadow-sm border'
                         : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 border border-transparent'
@@ -133,6 +136,9 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                     role="button"
                     tabIndex={0}
                     aria-disabled={!isPathwayAvailable(pathway)}
+                    onPointerDown={() => {
+                      if (isPathwayAvailable(pathway)) SoundEffects.playTap();
+                    }}
                     onClick={() => {
                       if (!isPathwayAvailable(pathway)) return;
                       onSelectPathway(pathway, activeDomain);
@@ -142,11 +148,12 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
                         if (!isPathwayAvailable(pathway)) return;
+                        SoundEffects.playTap();
                         onSelectPathway(pathway, activeDomain);
                         onClose();
                       }
                     }}
-                    className={`group relative rounded-2xl border p-3.5 text-left transition-all cursor-pointer select-none ${
+                    className={`group relative rounded-2xl border p-3.5 text-left transition-all duration-100 ease-out cursor-pointer select-none active:scale-[0.98] active:translate-y-0.5 ${
                       isCurrent
                         ? 'bg-gradient-to-r from-white/[0.08] to-white/[0.03] border-white/40 shadow-lg'
                         : 'bg-[#14141A] hover:bg-[#1A1A22] border-white/10 hover:border-white/20'

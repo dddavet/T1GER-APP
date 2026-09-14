@@ -1,9 +1,10 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Bell, Fire, Robot, ShieldCheck } from '@phosphor-icons/react';
+import { Bell, Fire, ShieldCheck } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { NotificationService } from '../services/notificationService';
+import { SoundEffects } from '../services/soundEffects';
 
 const StreakModal = lazy(() => import('./StreakModal').then(module => ({ default: module.StreakModal })));
 const NotificationCenterModal = lazy(() => import('./NotificationCenterModal').then(module => ({ default: module.NotificationCenterModal })));
@@ -25,6 +26,7 @@ export const HUD = React.memo(() => {
   }, []);
 
   const haptic = () => {
+    SoundEffects.playTap();
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
       window.navigator.vibrate(12);
     }
@@ -38,8 +40,9 @@ export const HUD = React.memo(() => {
           {/* Left: T1GER Logo & Prestige Level */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => { haptic(); setActiveView('profile'); }}
-              className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-b from-amber-500/20 via-orange-500/10 to-transparent border border-amber-500/35 shadow-[0_0_14px_rgba(255,115,0,0.25)] overflow-hidden cursor-pointer active:scale-95 transition-transform group"
+              onPointerDown={haptic}
+              onClick={() => setActiveView('profile')}
+              className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-b from-amber-500/20 via-orange-500/10 to-transparent border border-amber-500/35 shadow-[0_0_14px_rgba(255,115,0,0.25)] overflow-hidden cursor-pointer active:scale-90 active:translate-y-0.5 transition-transform duration-100 ease-out group"
               aria-label="T1GER Mascot"
             >
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,140,0,0.35),transparent_70%)] group-hover:opacity-100 transition-opacity" />
@@ -59,22 +62,13 @@ export const HUD = React.memo(() => {
             </div>
           </div>
 
-          {/* Right Actions: Mentor, Notifications, Streak, Verified XP */}
-          <div className="flex items-center gap-1">
-            {/* Dedicated AI Mentor Action */}
-            <button
-              onClick={() => { haptic(); setActiveView('coach'); }}
-              className="flex h-7 items-center gap-1 rounded-lg border border-[var(--ob-accent)]/40 bg-[var(--ob-accent)]/15 px-2 font-mono text-[10px] font-bold text-[var(--ob-accent)] hover:bg-[var(--ob-accent)]/25 transition cursor-pointer active:scale-95 shadow-[0_0_10px_rgba(255,115,0,0.15)]"
-              aria-label={isEs ? 'Profesor T1GER AI' : 'Professor T1GER AI'}
-            >
-              <Robot size={13} weight="bold" />
-              <span>{isEs ? 'Mentor' : 'Mentor'}</span>
-            </button>
-
+          {/* Right Actions: Notifications, Streak, Verified XP */}
+          <div className="flex items-center gap-1.5">
             {/* Streak Flame Badge */}
             <button
-              onClick={() => { haptic(); setShowStreakModal(true); }}
-              className={`relative flex h-7 items-center gap-1 rounded-lg border px-2 font-mono text-[10.5px] font-bold transition cursor-pointer active:scale-95 ${isLearnStreakAtRisk ? 'border-red-500/45 bg-red-500/12 text-red-300 shadow-[0_0_14px_rgba(239,68,68,.22)]' : 'border-white/8 bg-white/[0.04] text-amber-400 hover:bg-white/8'}`}
+              onPointerDown={haptic}
+              onClick={() => setShowStreakModal(true)}
+              className={`relative flex h-7 items-center gap-1 rounded-lg border px-2 font-mono text-[10.5px] font-bold transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 ${isLearnStreakAtRisk ? 'border-red-500/45 bg-red-500/12 text-red-300 shadow-[0_0_14px_rgba(239,68,68,.22)]' : 'border-white/8 bg-white/[0.04] text-amber-400 hover:bg-white/8'}`}
               aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
             >
               {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-red-400" />}
@@ -93,8 +87,9 @@ export const HUD = React.memo(() => {
 
             {/* Notification Center Bell */}
             <button
-              onClick={() => { haptic(); setShowNotificationCenter(true); }}
-              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition cursor-pointer active:scale-95"
+              onPointerDown={haptic}
+              onClick={() => setShowNotificationCenter(true)}
+              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
               <Bell size={13} />

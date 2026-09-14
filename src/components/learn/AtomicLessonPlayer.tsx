@@ -22,6 +22,8 @@ import { useT1ger } from '../../contexts/T1gerContext';
 import { FieldMissionService } from '../../services/fieldMissionService';
 import type { AtomicLesson, ChallengeOption, LearningLocale, SavedLearningArtifact } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
+import { SoundEffects } from '../../services/soundEffects';
+import { fireRewardConfetti } from '../ui/confetti';
 import { T1gerMascot3D } from '../T1gerMascot3D';
 import { MicroToolLab } from './MicroToolLab';
 
@@ -37,24 +39,10 @@ const ARTIFACT_STORAGE_KEY = 't1ger_learning_artifacts_v1';
 
 const playFeedback = (correct: boolean) => {
   navigator.vibrate?.(correct ? [18, 24, 36] : [45, 35, 45]);
-  try {
-    const AudioContextConstructor = window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextConstructor) return;
-    const context = new AudioContextConstructor();
-    const oscillator = context.createOscillator();
-    const gain = context.createGain();
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(correct ? 520 : 170, context.currentTime);
-    if (correct) oscillator.frequency.exponentialRampToValueAtTime(760, context.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.04, context.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, context.currentTime + 0.16);
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    oscillator.start();
-    oscillator.stop(context.currentTime + 0.16);
-    oscillator.addEventListener('ended', () => void context.close(), { once: true });
-  } catch {
-    // Audio feedback is progressive enhancement; haptics and visual feedback remain.
+  if (correct) {
+    SoundEffects.playCorrect();
+  } else {
+    SoundEffects.playIncorrect();
   }
 };
 
@@ -83,6 +71,8 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
   const [checked, setChecked] = useState(false);
   const [correct, setCorrect] = useState(false);
 
+  const mascotMood = !checked ? 'thinking' : correct ? 'celebrate' : 'mistake';
+
   const rightOptions = useMemo(() => [...(challenge.pairs || [])].reverse(), [challenge.pairs]);
   const ready = challenge.kind === 'matching'
     ? Object.keys(matches).length === (challenge.pairs?.length || 0)
@@ -102,6 +92,7 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
   };
 
   const retry = () => {
+    SoundEffects.playTap();
     setChecked(false);
     setCorrect(false);
     if (challenge.kind === 'matching') setMatches({});
@@ -117,15 +108,21 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
       return next;
     });
     navigator.vibrate?.(8);
+    SoundEffects.playTap();
   };
 
   return (
     <div className="space-y-5">
-      <div>
-        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FF8A2A]">{locale === 'es' ? 'DESAFÍO FLASH' : 'FLASH CHALLENGE'}</span>
-        <h2 className="mt-2 text-2xl font-bold leading-tight tracking-tight text-white">{localizeLearning(lesson.phases[1].title, locale)}</h2>
-        <p className="mt-3 text-[15px] leading-relaxed text-zinc-300">{localizeLearning(challenge.prompt, locale)}</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#FF8A2A]">{locale === 'es' ? 'DESAFÍO FLASH' : 'FLASH CHALLENGE'}</span>
+          <h2 className="mt-1 text-xl sm:text-2xl font-bold leading-tight tracking-tight text-white">{localizeLearning(lesson.phases[1].title, locale)}</h2>
+        </div>
+        <div className="h-16 w-16 shrink-0 sm:h-20 sm:w-20">
+          <T1gerMascot3D mood={mascotMood} closeUp className="h-full w-full" />
+        </div>
       </div>
+      <p className="text-[15px] leading-relaxed text-zinc-300">{localizeLearning(challenge.prompt, locale)}</p>
 
       {(challenge.kind === 'multiple_choice' || challenge.kind === 'error_detection') && (
         <div className="space-y-2.5">
@@ -134,9 +131,32 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
             const revealCorrect = checked && option.correct;
             const revealWrong = checked && selected && !option.correct;
             return (
-              <button key={option.id} type="button" disabled={checked} onClick={() => { setSelectedId(option.id); navigator.vibrate?.(8); }} className={`w-full rounded-2xl border p-4 text-left transition active:scale-[0.985] ${revealCorrect ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-100' : revealWrong ? 'border-red-400/60 bg-red-400/10 text-red-100' : selected ? 'border-[#FF7300]/70 bg-[#FF7300]/10 text-white' : 'border-white/10 bg-white/[0.025] text-zinc-300 hover:border-white/20'}`}>
+              <button
+                key={option.id}
+                type="button"
+                disabled={checked}
+                onPointerDown={() => {
+                  if (!checked) SoundEffects.playTap();
+                }}
+                onClick={() => {
+                  setSelectedId(option.id);
+                }}
+                className={`w-full rounded-2xl border p-4 text-left cursor-pointer select-none transition-all duration-100 ease-out active:scale-[0.985] active:translate-y-0.5 ${
+                  revealCorrect
+                    ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-100 shadow-[0_3px_0_#065f46]'
+                    : revealWrong
+                    ? 'border-red-400/60 bg-red-400/10 text-red-100 shadow-[0_3px_0_#991b1b]'
+                    : selected
+                    ? 'border-[#FF7300] bg-[#FF7300]/15 text-white shadow-[0_4px_0_#9a3412] active:shadow-[0_1px_0_#9a3412]'
+                    : 'border-white/10 bg-white/[0.025] text-zinc-300 hover:border-white/20 shadow-[0_3px_0_rgba(0,0,0,0.3)] active:shadow-[0_1px_0_rgba(0,0,0,0.3)]'
+                }`}
+              >
                 <span className="flex items-start gap-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-current/30 font-mono text-xs font-bold">{String.fromCharCode(65 + index)}</span>
+                  <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-mono text-xs font-bold ${
+                    selected ? 'bg-[#FF7300] text-black shadow-sm' : 'border border-current/30'
+                  }`}>
+                    {String.fromCharCode(65 + index)}
+                  </span>
                   <span className="pt-0.5 text-sm leading-relaxed">{localizeLearning(option.label, locale)}</span>
                 </span>
               </button>
@@ -152,8 +172,8 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.06] font-mono text-xs font-bold text-[#FF9B4A]">{index + 1}</span>
               <span className="text-sm leading-snug text-zinc-200">{localizeLearning(option.label, locale)}</span>
               <span className="grid grid-cols-2 gap-1">
-                <button type="button" disabled={checked || index === 0} onClick={() => move(index, -1)} className="t1ger-icon-button h-8 w-8 disabled:opacity-20" aria-label={locale === 'es' ? 'Mover arriba' : 'Move up'}><ArrowUp size={15} weight="bold" /></button>
-                <button type="button" disabled={checked || index === order.length - 1} onClick={() => move(index, 1)} className="t1ger-icon-button h-8 w-8 disabled:opacity-20" aria-label={locale === 'es' ? 'Mover abajo' : 'Move down'}><ArrowDown size={15} weight="bold" /></button>
+                <button type="button" disabled={checked || index === 0} onPointerDown={() => SoundEffects.playTap()} onClick={() => move(index, -1)} className="t1ger-icon-button h-8 w-8 disabled:opacity-20" aria-label={locale === 'es' ? 'Mover arriba' : 'Move up'}><ArrowUp size={15} weight="bold" /></button>
+                <button type="button" disabled={checked || index === order.length - 1} onPointerDown={() => SoundEffects.playTap()} onClick={() => move(index, 1)} className="t1ger-icon-button h-8 w-8 disabled:opacity-20" aria-label={locale === 'es' ? 'Mover abajo' : 'Move down'}><ArrowDown size={15} weight="bold" /></button>
               </span>
             </motion.div>
           ))}
@@ -189,9 +209,25 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
       </AnimatePresence>
 
       {!checked ? (
-        <button type="button" disabled={!ready} onClick={checkAnswer} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35"><Check size={20} weight="bold" />{locale === 'es' ? 'Comprobar decisión' : 'Check decision'}</button>
+        <button
+          type="button"
+          disabled={!ready}
+          onPointerDown={() => { if (ready) SoundEffects.playTap(); }}
+          onClick={checkAnswer}
+          className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35"
+        >
+          <Check size={20} weight="bold" />
+          {locale === 'es' ? 'Comprobar decisión' : 'Check decision'}
+        </button>
       ) : !correct ? (
-        <button type="button" onClick={retry} className="t1ger-secondary-button w-full">{locale === 'es' ? 'Corregir y dominar' : 'Correct and master'}</button>
+        <button
+          type="button"
+          onPointerDown={() => SoundEffects.playTap()}
+          onClick={retry}
+          className="t1ger-secondary-button w-full"
+        >
+          {locale === 'es' ? 'Corregir y dominar' : 'Correct and master'}
+        </button>
       ) : null}
     </div>
   );
@@ -244,6 +280,13 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
     onComplete(lesson.id);
     setActiveView('build');
   };
+
+  useEffect(() => {
+    if (phaseIndex === 3) {
+      fireRewardConfetti();
+      SoundEffects.playCompletionFanfare();
+    }
+  }, [phaseIndex]);
 
   const next = () => {
     if (phaseIndex === 0 && impactStep < 2) setImpactStep((current) => current + 1);
@@ -342,14 +385,38 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
         </main>
 
         <footer className="border-t border-white/8 bg-[#09090B]/92 px-5 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
-          {(phaseIndex > 0 && phaseIndex < 3 || phaseIndex === 0 && impactStep > 0) && <button type="button" onClick={() => { setChallengeMastered(false); if (phaseIndex === 0) setImpactStep((current) => Math.max(0, current - 1)); else setPhaseIndex((current) => Math.max(0, current - 1)); }} className="mb-2 inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-zinc-400 transition hover:text-zinc-200"><ArrowLeft size={15} weight="bold" />{locale === 'es' ? 'Anterior' : 'Previous'}</button>}
+          {(phaseIndex > 0 && phaseIndex < 3 || phaseIndex === 0 && impactStep > 0) && (
+            <button
+              type="button"
+              onPointerDown={() => SoundEffects.playTap()}
+              onClick={() => { setChallengeMastered(false); if (phaseIndex === 0) setImpactStep((current) => Math.max(0, current - 1)); else setPhaseIndex((current) => Math.max(0, current - 1)); }}
+              className="mb-2 inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-zinc-400 transition hover:text-zinc-200 active:scale-95"
+            >
+              <ArrowLeft size={15} weight="bold" />
+              {locale === 'es' ? 'Anterior' : 'Previous'}
+            </button>
+          )}
           {phaseIndex === 3 ? (
-            <button type="button" onClick={openBuild} className="t1ger-primary-button w-full">
+            <button
+              type="button"
+              onPointerDown={() => SoundEffects.playTap()}
+              onClick={openBuild}
+              className="t1ger-primary-button w-full"
+            >
               {locale === 'es' ? 'Ir a mi acción' : 'Go to my action'}
               <ArrowRight size={20} weight="bold" />
             </button>
           ) : phaseIndex === 1 && !challengeMastered ? null : (
-            <button type="button" onClick={next} disabled={(phaseIndex === 1 && !challengeMastered) || (phaseIndex === 2 && !artifact) || bridging} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35">
+            <button
+              type="button"
+              onPointerDown={() => {
+                const canProceed = !((phaseIndex === 1 && !challengeMastered) || (phaseIndex === 2 && !artifact) || bridging);
+                if (canProceed) SoundEffects.playTap();
+              }}
+              onClick={next}
+              disabled={(phaseIndex === 1 && !challengeMastered) || (phaseIndex === 2 && !artifact) || bridging}
+              className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35"
+            >
               {phaseIndex === 2 ? (locale === 'es' ? 'Crear Misión de Campo' : 'Create Field Mission') : continueLabel}
               <ArrowRight size={20} weight="bold" />
             </button>

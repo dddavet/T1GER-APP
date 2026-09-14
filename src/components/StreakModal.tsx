@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Flame, Shield, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { T1gerMascot3D } from './T1gerMascot3D';
+import { SoundEffects } from '../services/soundEffects';
 
 interface StreakModalProps {
   isOpen: boolean;
@@ -18,6 +19,20 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
   const { language, learnStreak, tacticalStreak } = useBrain();
   const { stats } = useT1ger();
   const isEs = language === 'es';
+
+  useEffect(() => {
+    if (isOpen) {
+      SoundEffects.playStreakFlame();
+    }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        SoundEffects.playTap();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const freezes = appUser?.streakShields || 0;
   const hasStreak = streak > 0;
@@ -58,7 +73,11 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
         <div className="relative shrink-0 overflow-hidden bg-gradient-to-b from-[#180A04] via-[#0E201B] to-[#09090B] px-5 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
           <div className="relative z-20 flex items-center justify-between gap-3">
             <button
-              onClick={onClose}
+              onClick={() => {
+                SoundEffects.playTap();
+                onClose();
+              }}
+              aria-label={isEs ? 'Cerrar racha' : 'Close streak'}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
             >
               <X size={22} />
@@ -79,7 +98,10 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
               className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors relative ${
                 activeTab === 'personal' ? 'text-white' : 'text-white/40 hover:text-white/70'
               }`}
-              onClick={() => setActiveTab('personal')}
+              onClick={() => {
+                SoundEffects.playTap();
+                setActiveTab('personal');
+              }}
             >
               {isEs ? 'Personal' : 'Personal'}
               {activeTab === 'personal' && (
@@ -90,7 +112,10 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
               className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors relative ${
                 activeTab === 'squad' ? 'text-white' : 'text-white/40 hover:text-white/70'
               }`}
-              onClick={() => setActiveTab('squad')}
+              onClick={() => {
+                SoundEffects.playTap();
+                setActiveTab('squad');
+              }}
             >
               {isEs ? 'Squad' : 'Squad'}
               {activeTab === 'squad' && (

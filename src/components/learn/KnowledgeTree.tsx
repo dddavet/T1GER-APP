@@ -31,6 +31,7 @@ import {
 } from '@phosphor-icons/react';
 import type { KinnuDomain, KinnuPathway } from '../../services/curriculumCatalog';
 import { isPathwayAvailable } from '../../services/curriculumCatalog';
+import { SoundEffects } from '../../services/soundEffects';
 
 // Icon resolver for dynamic pathway & domain icons
 export const resolveCurriculumIcon = (name: string, size = 20, weight: 'bold' | 'fill' | 'regular' = 'bold') => {
@@ -160,11 +161,15 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
                 if (!isPathwayAvailable(pathway)) return;
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
+                  SoundEffects.playTap();
                   onSelectPathway(pathway);
                 }
               }}
+              onPointerDown={() => {
+                if (isPathwayAvailable(pathway)) SoundEffects.playTap();
+              }}
               onClick={() => { if (isPathwayAvailable(pathway)) onSelectPathway(pathway); }}
-              className={`group relative rounded-2xl border p-4 text-left transition-all duration-200 cursor-pointer select-none ${
+              className={`group relative rounded-2xl border p-4 text-left transition-all duration-100 ease-out cursor-pointer select-none active:scale-[0.98] active:translate-y-0.5 ${
                 isActive
                   ? 'bg-gradient-to-r from-white/[0.08] to-white/[0.03] border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
                   : 'bg-[#121216]/80 hover:bg-[#181820] border-white/10 hover:border-white/20'

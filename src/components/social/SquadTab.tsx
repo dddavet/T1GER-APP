@@ -33,6 +33,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBrain } from '../../contexts/BrainContext';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { LeagueService, LEAGUE_TIERS, type LeagueMember, type LeagueTier } from '../../services/leagueService';
+import { SoundEffects } from '../../services/soundEffects';
 import {
   SocialService,
   type DirectChallenge,
@@ -191,19 +192,33 @@ function FeedCard({ activity, isEs, onReact, onComment, onModerate }: {
             <motion.button
               key={reaction.id}
               type="button"
-              whileTap={{ scale: 0.9 }}
+              whileTap={{ scale: 0.85 }}
+              onPointerDown={() => SoundEffects.playOrbPress()}
               onClick={() => onReact(activity, reaction.id)}
               aria-pressed={active}
               aria-label={`${isEs ? reaction.es : reaction.en}: ${activity.reactionCounts[reaction.id]}`}
-              className={`flex min-h-9 items-center gap-1.5 rounded-xl border px-2.5 font-mono text-[10px] font-bold transition-colors ${active ? 'border-[#FF7300]/45 bg-[#FF7300]/13 text-white' : 'border-white/[0.07] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.05]'}`}
+              className={`flex min-h-[44px] items-center gap-1.5 rounded-xl border px-3 font-mono text-[11px] font-bold transition-all cursor-pointer ${
+                active
+                  ? 'border-[#FF7300]/55 bg-[#FF7300]/16 text-white shadow-[0_0_12px_rgba(255,115,0,0.2)]'
+                  : 'border-white/[0.08] bg-white/[0.025] text-zinc-400 hover:bg-white/[0.06] hover:text-zinc-200'
+              }`}
             >
-              <motion.span animate={active ? { scale: [1, 1.35, 1], rotate: [0, -8, 8, 0] } : {}}>{reaction.icon}</motion.span>
+              <motion.span animate={active ? { scale: [1, 1.4, 1], rotate: [0, -10, 10, 0] } : {}}>
+                {reaction.icon}
+              </motion.span>
               <span className="tabular-nums">{activity.reactionCounts[reaction.id]}</span>
             </motion.button>
           );
         })}
-        <button type="button" onClick={() => onComment(activity)} className="ml-auto flex min-h-9 items-center gap-1.5 rounded-xl px-2 text-zinc-400 transition-colors hover:bg-white/[0.05] hover:text-white" aria-label={isEs ? 'Comentar' : 'Comment'}>
-          <MessageCircle size={15} /> <span className="font-mono text-[10px] tabular-nums">{activity.commentCount}</span>
+        <button
+          type="button"
+          onPointerDown={() => SoundEffects.playToggle()}
+          onClick={() => onComment(activity)}
+          className="ml-auto flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
+          aria-label={isEs ? 'Comentar' : 'Comment'}
+        >
+          <MessageCircle size={16} />{' '}
+          <span className="font-mono text-[11px] tabular-nums">{activity.commentCount}</span>
         </button>
       </div>
     </motion.article>
@@ -224,6 +239,132 @@ function FeedView({ activities, loading, isEs, onReact, onComment, onInvite, onM
   return <div className="space-y-3">{activities.map(activity => <FeedCard key={`${activity.circleId}:${activity.id}`} activity={activity} isEs={isEs} onReact={onReact} onComment={onComment} onModerate={onModerate} />)}</div>;
 }
 
+function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolean }) {
+  if (members.length < 3) return null;
+  const first = members[0];
+  const second = members[1];
+  const third = members[2];
+
+  return (
+    <Surface className="relative overflow-hidden p-4 pt-5">
+      {/* Background ambient glow behind 1st place */}
+      <div className="pointer-events-none absolute left-1/2 -top-10 h-36 w-36 -translate-x-1/2 rounded-full bg-amber-400/15 blur-3xl" />
+
+      <p className="text-center font-mono text-[9px] font-black uppercase tracking-[.22em] text-amber-400">
+        {isEs ? 'PODIO DE HONOR // TOP 3' : 'HONOR PODIUM // TOP 3'}
+      </p>
+
+      {/* 3 Pedestal Columns: 2nd (Left), 1st (Center), 3rd (Right) */}
+      <div className="mt-4 flex items-end justify-center gap-2 sm:gap-3 px-1">
+        {/* 2nd Place (Silver) */}
+        <div className="flex flex-1 flex-col items-center">
+          <div className="relative mb-2 flex flex-col items-center">
+            <div className="relative">
+              <Avatar
+                name={second.name}
+                profile={{ photoURL: second.avatar.startsWith('http') ? second.avatar : undefined }}
+                size="md"
+              />
+              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-300 bg-slate-200 text-[11px] shadow">
+                🥈
+              </span>
+            </div>
+            <p className="mt-1.5 max-w-[80px] truncate text-[11px] font-black text-slate-200 text-center">
+              {second.name}
+            </p>
+            {second.isCurrentUser && (
+              <span className="rounded bg-[#FF7300]/20 px-1.5 py-0.2 font-mono text-[7px] font-black uppercase text-[#FF9A3D]">
+                {isEs ? 'Tú' : 'You'}
+              </span>
+            )}
+            <p className="font-mono text-[10px] font-bold text-slate-400 tabular-nums">
+              {second.vXP.toLocaleString()} <span className="text-[7px]">vXP</span>
+            </p>
+          </div>
+          {/* Silver Pedestal */}
+          <div className="flex h-20 w-full flex-col items-center justify-center rounded-t-2xl border-t border-x border-slate-300/30 bg-gradient-to-b from-slate-400/20 to-slate-500/5 shadow-inner">
+            <span className="font-mono text-xl font-black text-slate-300">#2</span>
+            <span className="font-mono text-[8px] uppercase tracking-wider text-slate-400 font-bold">
+              {isEs ? 'Plata' : 'Silver'}
+            </span>
+          </div>
+        </div>
+
+        {/* 1st Place (Gold) - Tallest */}
+        <div className="flex flex-1 flex-col items-center z-10">
+          <div className="relative mb-2 flex flex-col items-center">
+            <span className="text-base -mb-1 select-none animate-bounce">👑</span>
+            <div className="relative">
+              <div className="rounded-2xl p-0.5 bg-gradient-to-tr from-amber-400 to-yellow-200 shadow-[0_0_16px_rgba(245,158,11,0.4)]">
+                <Avatar
+                  name={first.name}
+                  profile={{ photoURL: first.avatar.startsWith('http') ? first.avatar : undefined }}
+                  size="lg"
+                />
+              </div>
+              <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full border border-amber-300 bg-amber-400 text-[13px] shadow">
+                🥇
+              </span>
+            </div>
+            <p className="mt-1.5 max-w-[96px] truncate text-xs font-black text-amber-200 text-center">
+              {first.name}
+            </p>
+            {first.isCurrentUser && (
+              <span className="rounded bg-[#FF7300]/20 px-1.5 py-0.2 font-mono text-[7px] font-black uppercase text-[#FF9A3D]">
+                {isEs ? 'Tú' : 'You'}
+              </span>
+            )}
+            <p className="font-mono text-[11px] font-black text-amber-400 tabular-nums">
+              {first.vXP.toLocaleString()} <span className="text-[8px]">vXP</span>
+            </p>
+          </div>
+          {/* Gold Pedestal */}
+          <div className="flex h-28 w-full flex-col items-center justify-center rounded-t-2xl border-t border-x border-amber-400/50 bg-gradient-to-b from-amber-400/30 to-amber-600/10 shadow-[0_0_24px_rgba(245,158,11,0.2)]">
+            <span className="font-mono text-2xl font-black text-amber-300">#1</span>
+            <span className="font-mono text-[8px] uppercase tracking-wider text-amber-400 font-extrabold">
+              {isEs ? 'Líder' : 'Leader'}
+            </span>
+          </div>
+        </div>
+
+        {/* 3rd Place (Bronze) */}
+        <div className="flex flex-1 flex-col items-center">
+          <div className="relative mb-2 flex flex-col items-center">
+            <div className="relative">
+              <Avatar
+                name={third.name}
+                profile={{ photoURL: third.avatar.startsWith('http') ? third.avatar : undefined }}
+                size="md"
+              />
+              <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-amber-700 bg-amber-600 text-[11px] shadow">
+                🥉
+              </span>
+            </div>
+            <p className="mt-1.5 max-w-[80px] truncate text-[11px] font-black text-amber-100 text-center">
+              {third.name}
+            </p>
+            {third.isCurrentUser && (
+              <span className="rounded bg-[#FF7300]/20 px-1.5 py-0.2 font-mono text-[7px] font-black uppercase text-[#FF9A3D]">
+                {isEs ? 'Tú' : 'You'}
+              </span>
+            )}
+            <p className="font-mono text-[10px] font-bold text-amber-600 tabular-nums">
+              {third.vXP.toLocaleString()} <span className="text-[7px]">vXP</span>
+            </p>
+          </div>
+          {/* Bronze Pedestal */}
+          <div className="flex h-16 w-full flex-col items-center justify-center rounded-t-2xl border-t border-x border-amber-700/40 bg-gradient-to-b from-amber-700/20 to-amber-900/5 shadow-inner">
+            <span className="font-mono text-xl font-black text-amber-600">#3</span>
+            <span className="font-mono text-[8px] uppercase tracking-wider text-amber-700 font-bold">
+              {isEs ? 'Bronce' : 'Bronze'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </Surface>
+  );
+}
+
 function LeagueView({ members, loading, tier, isEs, onApply, onModerate }: { members: LeagueMember[]; loading: boolean; tier: LeagueTier; isEs: boolean; onApply: () => void; onModerate?: (target: { uid: string; name: string }) => void }) {
   const config = LEAGUE_TIERS[tier];
   const currentRank = Math.max(1, members.findIndex(member => member.isCurrentUser) + 1);
@@ -235,6 +376,10 @@ function LeagueView({ members, loading, tier, isEs, onApply, onModerate }: { mem
     const timer = window.setInterval(() => setRemaining(LeagueService.getTimeRemaining()), 60_000);
     return () => window.clearInterval(timer);
   }, []);
+
+  const hasPodium = !loading && members.length >= 3;
+  const listMembers = hasPodium ? members.slice(3) : members;
+  const rankOffset = hasPodium ? 4 : 1;
 
   return (
     <div className="space-y-3">
@@ -261,9 +406,12 @@ function LeagueView({ members, loading, tier, isEs, onApply, onModerate }: { mem
         <p className="relative mt-3 text-[10px] leading-relaxed text-zinc-400">{nextTier ? (isEs ? `Termina en el Top 5 para ascender a ${LEAGUE_TIERS[nextTier].nameEs}. Solo cuenta el XP verificado.` : `Finish Top 5 to reach ${LEAGUE_TIERS[nextTier].nameEn}. Only verified XP counts.`) : (isEs ? 'Estás en la élite. Defiende Obsidiana con XP verificado.' : 'You are in the elite. Defend Obsidian with verified XP.')}</p>
       </Surface>
 
+      {/* Visual Podium for Top 3 */}
+      {hasPodium && <LeaguePodium members={members} isEs={isEs} />}
+
       <Surface className="overflow-hidden">
-        {loading ? <div className="space-y-2 p-3">{[0, 1, 2, 3, 4].map(item => <div key={item} className="h-14 animate-pulse rounded-xl bg-white/[0.035]" />)}</div> : members.map((member, index) => {
-          const rank = index + 1;
+        {loading ? <div className="space-y-2 p-3">{[0, 1, 2, 3, 4].map(item => <div key={item} className="h-14 animate-pulse rounded-xl bg-white/[0.035]" />)}</div> : listMembers.map((member, index) => {
+          const rank = index + rankOffset;
           const promotion = rank <= zones.promotionEnd;
           const danger = tier !== 'bronze' && rank >= zones.demotionStart;
           return (
@@ -301,7 +449,7 @@ function LeagueView({ members, loading, tier, isEs, onApply, onModerate }: { mem
         {!loading && !members.length && <div className="p-8 text-center text-xs text-zinc-400">{isEs ? 'Creando tu sala semanal…' : 'Creating your weekly room…'}</div>}
       </Surface>
 
-      <button type="button" onClick={onApply} className="t1ger-primary-button flex w-full items-center justify-center gap-2 py-3.5 text-[11px]"><Target size={15} /> {isEs ? 'GANAR XP EN APLICAR' : 'EARN XP IN APPLY'} <ChevronRight size={14} /></button>
+      <button type="button" onPointerDown={() => SoundEffects.playTap()} onClick={onApply} className="t1ger-primary-button flex w-full items-center justify-center gap-2 py-3.5 text-[11px] cursor-pointer"><Target size={15} /> {isEs ? 'GANAR XP EN APLICAR' : 'EARN XP IN APPLY'} <ChevronRight size={14} /></button>
     </div>
   );
 }
@@ -685,16 +833,69 @@ export const SquadTab: React.FC = () => {
   ];
 
   return (
-    <div className="mx-auto max-w-lg space-y-4 px-0.5 pb-28 pt-1 font-sans text-white selection:bg-[#FF7300]/35">
+    <div className="mx-auto max-w-lg space-y-4 px-0.5 pb-40 pt-1 font-sans text-white selection:bg-[#FF7300]/35">
       <header className="flex items-end justify-between gap-4 px-1">
-        <div><p className="font-mono text-[8px] font-black uppercase tracking-[.24em] text-[#FF8A1F]">T1GER // COMPETE</p><h1 className="mt-1 text-[25px] font-black leading-none tracking-[-.035em]">{isEs ? 'La disciplina es visible.' : 'Discipline is visible.'}</h1><p className="mt-2 text-[10px] text-zinc-500">{isEs ? 'Prueba real. Estatus ganado. Nadie desaparece.' : 'Real proof. Earned status. Nobody disappears.'}</p></div>
-        <button type="button" onClick={() => setFinderOpen(true)} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF8A1F] shadow-[0_0_20px_rgba(255,115,0,.12)]" aria-label={isEs ? 'Agregar amigos' : 'Add friends'}><UserPlus size={19} /></button>
+        <div>
+          <p className="font-mono text-[9px] font-black uppercase tracking-[.24em] text-[#FF8A1F]">
+            T1GER // COMPETE
+          </p>
+          <h1 className="mt-1 text-2xl sm:text-3xl font-black leading-none tracking-[-.035em] text-white">
+            {isEs ? 'La disciplina es visible.' : 'Discipline is visible.'}
+          </h1>
+          <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
+            {isEs
+              ? 'Compite con hechos. Sube de división cada domingo con tu XP verificado.'
+              : 'Proof over words. Climb divisions every Sunday with verified XP.'}
+          </p>
+        </div>
+        <button
+          type="button"
+          onPointerDown={() => SoundEffects.playTap()}
+          onClick={() => setFinderOpen(true)}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF8A1F] shadow-[0_0_20px_rgba(255,115,0,.12)] cursor-pointer active:scale-95 transition-transform"
+          aria-label={isEs ? 'Agregar amigos' : 'Add friends'}
+        >
+          <UserPlus size={19} />
+        </button>
       </header>
 
       {error && <ErrorBanner message={error} />}
 
       <nav aria-label={isEs ? 'Secciones de competencia' : 'Competition sections'} className="grid grid-cols-3 gap-1 rounded-[1.25rem] border border-white/[0.08] bg-[#121216] p-1">
-        {tabs.map(tab => { const Icon = tab.icon; const active = view === tab.id; return <button key={tab.id} type="button" onClick={() => { SocialService.haptic(8); setView(tab.id); }} aria-current={active ? 'page' : undefined} className={`relative flex min-h-11 items-center justify-center gap-1.5 rounded-[.95rem] font-mono text-[9px] font-black uppercase tracking-wider transition-colors ${active ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'}`}>{active && <motion.span layoutId="compete-tab" className="absolute inset-0 rounded-[.95rem] border border-[#FF7300]/25 bg-[#FF7300]/10" transition={{ type: 'spring', stiffness: 600, damping: 38 }} />}<Icon size={14} className={`relative ${active ? 'text-[#FF8A1F]' : ''}`} /><span className="relative">{tab.label}</span>{tab.id === 'squad' && requests.length > 0 && <span className="relative flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FF4B4B] px-1 text-[7px] text-white">{requests.length}</span>}</button>; })}
+        {tabs.map(tab => {
+          const Icon = tab.icon;
+          const active = view === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onPointerDown={() => SoundEffects.playToggle()}
+              onClick={() => {
+                SocialService.haptic(8);
+                setView(tab.id);
+              }}
+              aria-current={active ? 'page' : undefined}
+              className={`relative flex min-h-[44px] items-center justify-center gap-1.5 rounded-[.95rem] font-mono text-[10px] font-black uppercase tracking-wider transition-colors cursor-pointer active:scale-[0.96] ${
+                active ? 'text-white' : 'text-zinc-500 hover:text-zinc-300'
+              }`}
+            >
+              {active && (
+                <motion.span
+                  layoutId="compete-tab"
+                  className="absolute inset-0 rounded-[.95rem] border border-[#FF7300]/30 bg-gradient-to-b from-[#FF7300]/20 to-[#FF7300]/10 shadow-[0_2px_8px_rgba(255,115,0,0.15)]"
+                  transition={{ type: 'spring', stiffness: 600, damping: 38 }}
+                />
+              )}
+              <Icon size={15} className={`relative ${active ? 'text-[#FF8A1F]' : ''}`} />
+              <span className="relative">{tab.label}</span>
+              {tab.id === 'squad' && requests.length > 0 && (
+                <span className="relative flex h-4 min-w-4 items-center justify-center rounded-full bg-[#FF4B4B] px-1 text-[7px] text-white">
+                  {requests.length}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </nav>
 
       <AnimatePresence mode="wait" initial={false}>

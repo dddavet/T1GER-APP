@@ -138,29 +138,132 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: .55rem;
-  border-radius: 1rem;
-  padding: .8rem 1.1rem;
+  border-radius: 1.15rem;
+  padding: .85rem 1.25rem;
   font-size: .875rem;
-  font-weight: 600;
+  font-weight: 800;
+  letter-spacing: .03em;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transform: translateY(0) translateZ(0);
   transition:
-    transform 120ms cubic-bezier(.23, 1, .32, 1),
-    background-color 120ms ease-out,
-    border-color 120ms ease-out,
-    opacity 120ms ease-out,
-    box-shadow 120ms ease-out;
+    transform 90ms cubic-bezier(.23, 1, .32, 1),
+    box-shadow 90ms cubic-bezier(.23, 1, .32, 1),
+    background-color 100ms ease-out,
+    border-color 100ms ease-out,
+    filter 100ms ease-out,
+    opacity 100ms ease-out;
 }
 
 .t1ger-primary-button {
   background: #FF7300;
   color: #160A02;
-  box-shadow: 0 5px 0 #A83D00, 0 12px 24px rgba(255,115,0,.14);
+  box-shadow: 0 6px 0 #9A3412, 0 14px 28px rgba(255,115,0,.22);
 }
 
-.t1ger-primary-button:not(:disabled):hover { background: #FF8426; transform: translateY(-1px); }
-.t1ger-primary-button:not(:disabled):active { transform: translateY(3px) scale(.985); box-shadow: 0 2px 0 #A83D00, 0 5px 12px rgba(255,115,0,.12); }
-.t1ger-primary-button:disabled { box-shadow: none; }
+.t1ger-primary-button:not(:disabled):hover {
+  background: #FF8426;
+  filter: brightness(1.05);
+}
+
+.t1ger-primary-button:not(:disabled):active {
+  transform: translateY(5px) scale(.985);
+  box-shadow: 0 1px 0 #9A3412, 0 4px 12px rgba(255,115,0,.14);
+}
+
+.t1ger-primary-button:disabled {
+  background: #27272A !important;
+  color: #71717A !important;
+  box-shadow: 0 4px 0 #18181B !important;
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.t1ger-secondary-button {
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.05);
+  color: #DBE9E6;
+  box-shadow: 0 4px 0 rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+.t1ger-secondary-button:not(:disabled):hover {
+  border-color: rgba(255,115,0,.4);
+  background: rgba(255,115,0,.09);
+  color: #FFFFFF;
+}
+
+.t1ger-secondary-button:not(:disabled):active {
+  transform: translateY(3px) scale(.985);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.5);
+}
+
+.t1ger-secondary-button:disabled {
+  opacity: .4;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Authentic 3D Extruded Button (Duolingo / Cyberpunk Mechanical) */
+.t1ger-btn-3d {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  border-radius: 1.15rem;
+  box-shadow: 0 6px 0 #9A3412, 0 14px 26px rgba(255,115,0,.24);
+  transform: translateY(0) translateZ(0);
+  transition: transform 90ms cubic-bezier(.23, 1, .32, 1), box-shadow 90ms cubic-bezier(.23, 1, .32, 1), filter 90ms ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.t1ger-btn-3d:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.t1ger-btn-3d:not(:disabled):active {
+  transform: translateY(5px) scale(.985);
+  box-shadow: 0 1px 0 #9A3412, 0 4px 10px rgba(255,115,0,.15);
+}
+
+.t1ger-btn-3d:disabled {
+  opacity: .45;
+  box-shadow: 0 4px 0 #27272A;
+  cursor: not-allowed;
+  filter: grayscale(.6);
+}
+
+/* Tactile Spring Squish for secondary pills, modal options, and cards */
+.t1ger-btn-squish {
+  position: relative;
+  transform: translateY(0) scale(1) translateZ(0);
+  transition: transform 90ms cubic-bezier(.23, 1, .32, 1), background-color 100ms ease-out, border-color 100ms ease-out, box-shadow 90ms ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.t1ger-btn-squish:not(:disabled):active {
+  transform: translateY(2px) scale(.95);
+}
+
+/* Micro-spring for icon buttons, close buttons, notification bells */
+.t1ger-btn-spring {
+  transform: scale(1) translateZ(0);
+  transition: transform 90ms cubic-bezier(.34, 1.56, .64, 1), background-color 100ms ease-out, border-color 100ms ease-out, color 100ms ease-out;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.t1ger-btn-spring:active {
+  transform: scale(.88);
+}
 
 .learn-range {
   height: 1.6rem;
@@ -202,15 +305,6 @@ html, body {
   background: #FF7300;
 }
 
-.t1ger-secondary-button {
-  border: 1px solid rgba(255,255,255,.1);
-  background: rgba(255,255,255,.045);
-  color: #dbe9e6;
-}
-
-.t1ger-secondary-button:not(:disabled):hover { border-color: rgba(255,115,0,.35); background: rgba(255,115,0,.08); }
-.t1ger-secondary-button:not(:disabled):active { transform: translateY(1px) scale(.975); }
-
 .t1ger-icon-button {
   display: inline-flex;
   height: 2.75rem;
@@ -224,19 +318,22 @@ html, body {
   color: #b9cfca;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 120ms cubic-bezier(.23, 1, .32, 1), border-color 120ms ease-out, color 120ms ease-out, background-color 120ms ease-out;
+  box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+  transform: translateY(0) scale(1) translateZ(0);
+  transition: transform 90ms cubic-bezier(.23, 1, .32, 1), box-shadow 90ms cubic-bezier(.23, 1, .32, 1), border-color 100ms ease-out, color 100ms ease-out, background-color 100ms ease-out;
 }
 
 .t1ger-icon-button:hover { border-color: rgba(239,112,48,.35); color: #fff; }
-.t1ger-icon-button:active { transform: scale(.94); }
+.t1ger-icon-button:active { transform: translateY(2px) scale(.92); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
 
 .t1ger-tap-row {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 120ms cubic-bezier(.23, 1, .32, 1), background-color 120ms ease-out, border-color 120ms ease-out, opacity 120ms ease-out;
+  transform: translateY(0) scale(1) translateZ(0);
+  transition: transform 90ms cubic-bezier(.23, 1, .32, 1), background-color 100ms ease-out, border-color 100ms ease-out, opacity 100ms ease-out;
 }
 
-.t1ger-tap-row:not(:disabled):active { transform: scale(.985); }
+.t1ger-tap-row:not(:disabled):active { transform: translateY(2px) scale(.975); }
 
 .t1ger-scroll-area {
   overscroll-behavior-y: contain;

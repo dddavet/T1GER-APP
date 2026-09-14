@@ -108,7 +108,7 @@ export const Profile = () => {
   if (legalView === 'terms') return <TermsOfService onBack={() => setLegalView(null)} />;
 
   return (
-    <div className="space-y-5 pb-32 pt-5">
+    <div className="space-y-5 pb-36 pt-5">
       <header className="flex items-center gap-4">
         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-[1.35rem] bg-[var(--t1ger-orange)] text-xl font-semibold text-[#102622]">
           {appUser?.photoURL ? <img src={appUser.photoURL} alt={`${appUser.displayName || 'T1GER'} profile`} className="h-full w-full object-cover" /> : (appUser?.displayName || 'T').charAt(0)}

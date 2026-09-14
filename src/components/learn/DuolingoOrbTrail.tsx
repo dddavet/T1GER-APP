@@ -14,6 +14,7 @@ import {
 import type { JourneyNode } from '../../services/learningJourney';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
 import type { JourneySection } from '../../services/learningJourney';
+import { SoundEffects } from '../../services/soundEffects';
 
 interface DuolingoOrbTrailProps {
   sections: JourneySection[];
@@ -49,7 +50,7 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
   let globalOrbCounter = 0;
 
   return (
-    <div className="w-full relative py-6 flex flex-col items-center">
+    <div className="w-full relative pt-2 pb-8 flex flex-col items-center">
       {sections.map((section, sectionIdx) => {
         const sectionNodes = nodes.filter(n => section.lessonIds.includes(n.lesson.id));
         const allCompleted =
@@ -58,7 +59,7 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
         return (
           <div key={section.id} className="w-full max-w-sm relative flex flex-col items-center mb-10">
             {/* Section Milestone Divider / Mini Banner */}
-            <div className="w-full flex items-center justify-between px-3 py-2.5 mb-12 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md">
+            <div className="w-full flex items-center justify-between px-3 py-2.5 mb-6 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-black uppercase text-orange-400">
                   {tr('Etapa', 'Chapter')} {sectionIdx + 1}
@@ -133,26 +134,43 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                           style={{ backgroundColor: `${accentColor}45` }}
                         />
                       )}
+                      {isReview && (
+                        <div
+                          className="absolute -inset-2 rounded-full animate-pulse blur-sm -z-10 bg-cyan-400/35"
+                        />
+                      )}
 
                       <button
-                        onClick={() => onOpenNode(node)}
+                        onPointerDown={() => {
+                          if (!isLocked) {
+                            SoundEffects.playOrbPress();
+                          }
+                        }}
+                        onClick={() => {
+                          if (!isLocked) {
+                            onOpenNode(node);
+                          }
+                        }}
                         disabled={isLocked}
                         aria-label={`${localizeLearning(node.lesson.title, locale)}`}
-                        className={`group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all cursor-pointer select-none ${
+                        className={`group relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center cursor-pointer select-none touch-manipulation transform-gpu transition-all duration-100 ease-out active:scale-[0.96] ${
                           isCompleted
-                            ? 'bg-emerald-500 text-black shadow-[0_7px_0_#065f46] hover:brightness-110 active:translate-y-1.5 active:shadow-[0_1px_0_#065f46]'
+                            ? 'bg-emerald-500 text-black shadow-[0_8px_0_#065f46] hover:brightness-110 active:translate-y-[6px] active:shadow-[0_2px_0_#065f46]'
                             : isCurrent
-                            ? 'text-black shadow-[0_8px_0_#9a3412] hover:brightness-110 active:translate-y-2 active:shadow-[0_1px_0_#9a3412]'
+                            ? 'text-black shadow-[0_9px_0_#9a3412] hover:brightness-110 active:translate-y-[6px] active:shadow-[0_2px_0_#9a3412]'
                             : isReview
-                            ? 'bg-cyan-400 text-black shadow-[0_7px_0_#0e7490] hover:brightness-110 active:translate-y-1.5 active:shadow-[0_1px_0_#0e7490]'
+                            ? 'bg-cyan-400 text-black shadow-[0_8px_0_#0e7490] hover:brightness-110 active:translate-y-[6px] active:shadow-[0_2px_0_#0e7490]'
                             : 'bg-[#181820] text-zinc-500 border border-white/10 shadow-[0_6px_0_#0d0d12] cursor-not-allowed opacity-80'
                         }`}
                         style={{
                           backgroundColor: isCurrent ? accentColor : undefined,
                         }}
                       >
+                        {/* 3D Specular Dome Gloss - Signature Duolingo Liquid Bubble */}
+                        <div className="absolute inset-x-3.5 top-1.5 h-6 rounded-t-full bg-gradient-to-b from-white/35 to-transparent pointer-events-none opacity-80" />
+
                         {/* Tactile Highlight Ring */}
-                        <div className="absolute inset-1.5 rounded-full border border-white/25 pointer-events-none" />
+                        <div className="absolute inset-1.5 rounded-full border border-white/25 pointer-events-none shadow-[inset_0_2px_4px_rgba(255,255,255,0.2)]" />
 
                         {/* Node Icon */}
                         {isCompleted ? (
