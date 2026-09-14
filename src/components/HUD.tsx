@@ -68,7 +68,7 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setShowStreakModal(true)}
-              className={`relative flex h-7 items-center gap-1 rounded-lg border px-2 font-mono text-[10.5px] font-bold transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 ${isLearnStreakAtRisk ? 'border-red-500/45 bg-red-500/12 text-red-300 shadow-[0_0_14px_rgba(239,68,68,.22)]' : 'border-white/8 bg-white/[0.04] text-amber-400 hover:bg-white/8'}`}
+              className={`relative flex h-7 items-center gap-1 rounded-lg border px-2 font-mono text-[10.5px] font-bold transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] ${isLearnStreakAtRisk ? 'border-red-500/45 bg-red-500/12 text-red-300 shadow-[0_0_14px_rgba(239,68,68,.22)]' : 'border-white/8 bg-white/[0.04] text-amber-400 hover:bg-white/8'}`}
               aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
             >
               {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-red-400" />}
@@ -89,7 +89,7 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setShowNotificationCenter(true)}
-              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5"
+              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 before:absolute before:-inset-2 before:content-['']"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
               <Bell size={13} />

@@ -137,7 +137,7 @@ export const Profile = () => {
           { value: learnStreak, label: isEs ? 'racha' : 'streak' },
           { value: stats.verifiedXP, label: 'vXP' },
         ].map(item => (
-          <div key={item.label} className="rounded-[1.15rem] border border-white/8 bg-[#121216] p-4 text-center">
+          <div key={item.label} className="rounded-2xl border border-white/8 bg-[#121216] p-4 text-center">
             <span className="block font-mono text-lg font-semibold text-white">{item.value}</span>
             <span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span>
           </div>
