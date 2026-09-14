@@ -95,9 +95,17 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                 const zigzag = getZigzagClass(orbIndex);
 
                 return (
-                  <div
+                  <motion.div
                     key={node.lesson.id}
-                    className={`relative flex flex-col items-center transition-transform z-10 ${zigzag}`}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 350,
+                      damping: 26,
+                      delay: reducedMotion ? 0 : Math.min(orbIndex * 0.05, 0.4),
+                    }}
+                    className={`relative flex flex-col items-center z-10 ${zigzag}`}
                   >
                     {/* Bouncing "START HERE" Speech Tooltip over the Active Orb */}
                     {isCurrent && (
@@ -127,11 +135,24 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
 
                     {/* The 3D Tactile Orb Button */}
                     <div className="relative">
-                      {/* Active Pulsing Aura */}
+                      {/* Active Breathing Aura */}
                       {isCurrent && (
-                        <div
-                          className="absolute -inset-2.5 rounded-full animate-pulse blur-sm -z-10"
-                          style={{ backgroundColor: `${accentColor}45` }}
+                        <motion.div
+                          animate={
+                            reducedMotion
+                              ? undefined
+                              : {
+                                  scale: [1, 1.12, 1],
+                                  opacity: [0.55, 0.85, 0.55],
+                                }
+                          }
+                          transition={{
+                            repeat: Infinity,
+                            duration: 2.4,
+                            ease: 'easeInOut',
+                          }}
+                          className="absolute -inset-2.5 rounded-full blur-md -z-10"
+                          style={{ backgroundColor: `${accentColor}55` }}
                         />
                       )}
                       {isReview && (
@@ -213,21 +234,33 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                           : tr('Bloqueado', 'Locked')}
                       </span>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
 
               {/* End of Section Reward / Milestone Chest */}
               <div className="mt-4 flex flex-col items-center">
-                <div
+                <motion.div
+                  animate={
+                    reducedMotion
+                      ? undefined
+                      : allCompleted
+                      ? { y: [0, -6, 0], rotate: [-1.5, 1.5, -1.5] }
+                      : { y: [0, -3, 0] }
+                  }
+                  transition={{
+                    repeat: Infinity,
+                    duration: allCompleted ? 2.2 : 3,
+                    ease: 'easeInOut',
+                  }}
                   className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${
                     allCompleted
-                      ? 'bg-gradient-to-b from-amber-400 to-amber-600 text-black shadow-[0_6px_0_#92400e] border-amber-300 animate-pulse'
+                      ? 'bg-gradient-to-b from-amber-400 to-amber-600 text-black shadow-[0_6px_0_#92400e] border-amber-300'
                       : 'bg-[#15151C] text-zinc-600 border-white/10 shadow-[0_4px_0_#0a0a0f]'
                   }`}
                 >
                   {allCompleted ? <Trophy size={26} weight="fill" /> : <Gift size={26} weight="duotone" />}
-                </div>
+                </motion.div>
                 <span className="mt-1.5 text-[10px] font-mono font-semibold text-zinc-400 uppercase tracking-wider">
                   {allCompleted ? tr('Etapa completada', 'Chapter complete') : tr('Hito de etapa', 'Chapter milestone')}
                 </span>

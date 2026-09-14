@@ -1,6 +1,6 @@
 import React, { useState, Suspense } from 'react';
 import { BookOpen, Target, Trophy, UserCircle } from '@phosphor-icons/react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,6 +17,7 @@ interface NavTab {
 }
 
 export const NavDock = React.memo(() => {
+  const reducedMotion = useReducedMotion();
   const { activeView, setActiveView } = useT1ger();
   const { language } = useBrain();
   const { appUser } = useAuth();
@@ -114,10 +115,26 @@ export const NavDock = React.memo(() => {
                 type="button"
                 whileTap={{ scale: 0.88, y: 3 }}
                 whileHover={{ scale: 1.06 }}
+                animate={
+                  reducedMotion
+                    ? undefined
+                    : {
+                        boxShadow: [
+                          '0 10px 24px rgba(255,115,0,0.45)',
+                          '0 14px 30px rgba(255,115,0,0.7)',
+                          '0 10px 24px rgba(255,115,0,0.45)',
+                        ],
+                      }
+                }
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.8,
+                  ease: 'easeInOut',
+                }}
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={handleMentorClick}
                 aria-label={isEs ? 'Mentor IA T1GER' : 'T1GER AI Mentor'}
-                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-tr from-[#FF5500] via-[#FF7300] to-[#FFA033] p-[2px] shadow-[0_10px_24px_rgba(255,115,0,0.5)] ring-4 ring-[#121216] cursor-pointer active:shadow-[0_4px_12px_rgba(255,115,0,0.4)]"
+                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-tr from-[#FF5500] via-[#FF7300] to-[#FFA033] p-[2px] ring-4 ring-[#121216] cursor-pointer"
               >
                 <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-b from-[#FF8A2A] to-[#E65100] shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden">
                   <img

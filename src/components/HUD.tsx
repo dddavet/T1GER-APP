@@ -1,4 +1,5 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { Bell, Fire, ShieldCheck } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
@@ -72,7 +73,17 @@ export const HUD = React.memo(() => {
               aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
             >
               {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-red-400" />}
-              <Fire size={13} weight="fill" className={isLearnStreakAtRisk ? 'text-red-300' : 'text-amber-400'} />
+              <motion.span
+                animate={
+                  isLearnStreakAtRisk
+                    ? { scale: [1, 1.25, 1], rotate: [-4, 4, -4] }
+                    : { scale: [1, 1.1, 1] }
+                }
+                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                className="inline-flex items-center"
+              >
+                <Fire size={13} weight="fill" className={isLearnStreakAtRisk ? 'text-red-300' : 'text-amber-400'} />
+              </motion.span>
               <span className="tabular-nums">{learnStreak}</span>
             </button>
 
@@ -92,7 +103,13 @@ export const HUD = React.memo(() => {
               className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 before:absolute before:-inset-2 before:content-['']"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
-              <Bell size={13} />
+              <motion.span
+                animate={unreadCount > 0 ? { rotate: [0, -12, 12, -8, 8, 0] } : {}}
+                transition={{ repeat: Infinity, repeatDelay: 3.5, duration: 0.6 }}
+                className="inline-flex items-center justify-center"
+              >
+                <Bell size={13} />
+              </motion.span>
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[var(--ob-accent)] text-[7.5px] font-black text-black shadow-md">
                   {unreadCount}

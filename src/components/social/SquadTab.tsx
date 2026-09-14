@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import {
   Activity,
   ArrowDown,
@@ -210,8 +210,9 @@ function FeedCard({ activity, isEs, onReact, onComment, onModerate }: {
             </motion.button>
           );
         })}
-        <button
+        <motion.button
           type="button"
+          whileTap={{ scale: 0.92 }}
           onPointerDown={() => SoundEffects.playToggle()}
           onClick={() => onComment(activity)}
           className="ml-auto flex min-h-[44px] items-center gap-1.5 rounded-xl px-3 text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white cursor-pointer"
@@ -219,7 +220,7 @@ function FeedCard({ activity, isEs, onReact, onComment, onModerate }: {
         >
           <MessageCircle size={16} />{' '}
           <span className="font-mono text-[11px] tabular-nums">{activity.commentCount}</span>
-        </button>
+        </motion.button>
       </div>
     </motion.article>
   );
@@ -240,6 +241,7 @@ function FeedView({ activities, loading, isEs, onReact, onComment, onInvite, onM
 }
 
 function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolean }) {
+  const reducedMotion = useReducedMotion();
   if (members.length < 3) return null;
   const first = members[0];
   const second = members[1];
@@ -257,7 +259,12 @@ function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolea
       {/* 3 Pedestal Columns: 2nd (Left), 1st (Center), 3rd (Right) */}
       <div className="mt-4 flex items-end justify-center gap-2 sm:gap-3 px-1">
         {/* 2nd Place (Silver) */}
-        <div className="flex flex-1 flex-col items-center">
+        <motion.div
+          initial={reducedMotion ? undefined : { opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 24, delay: 0.1 }}
+          className="flex flex-1 flex-col items-center"
+        >
           <div className="relative mb-2 flex flex-col items-center">
             <div className="relative">
               <Avatar
@@ -288,12 +295,34 @@ function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolea
               {isEs ? 'Plata' : 'Silver'}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* 1st Place (Gold) - Tallest */}
-        <div className="flex flex-1 flex-col items-center z-10">
+        <motion.div
+          initial={reducedMotion ? undefined : { opacity: 0, y: 44 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.2 }}
+          className="flex flex-1 flex-col items-center z-10"
+        >
           <div className="relative mb-2 flex flex-col items-center">
-            <span className="text-base -mb-1 select-none animate-bounce">👑</span>
+            <motion.span
+              animate={
+                reducedMotion
+                  ? undefined
+                  : {
+                      y: [0, -4, 0],
+                      rotate: [-2, 2, -2],
+                    }
+              }
+              transition={{
+                repeat: Infinity,
+                duration: 2.2,
+                ease: 'easeInOut',
+              }}
+              className="text-base -mb-1 select-none inline-block"
+            >
+              👑
+            </motion.span>
             <div className="relative">
               <div className="rounded-2xl p-0.5 bg-gradient-to-tr from-amber-400 to-yellow-200 shadow-[0_0_16px_rgba(245,158,11,0.4)]">
                 <Avatar
@@ -325,10 +354,15 @@ function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolea
               {isEs ? 'Líder' : 'Leader'}
             </span>
           </div>
-        </div>
+        </motion.div>
 
         {/* 3rd Place (Bronze) */}
-        <div className="flex flex-1 flex-col items-center">
+        <motion.div
+          initial={reducedMotion ? undefined : { opacity: 0, y: 26 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 24, delay: 0.3 }}
+          className="flex flex-1 flex-col items-center"
+        >
           <div className="relative mb-2 flex flex-col items-center">
             <div className="relative">
               <Avatar
@@ -359,7 +393,7 @@ function LeaguePodium({ members, isEs }: { members: LeagueMember[]; isEs: boolea
               {isEs ? 'Bronce' : 'Bronze'}
             </span>
           </div>
-        </div>
+        </motion.div>
       </div>
     </Surface>
   );

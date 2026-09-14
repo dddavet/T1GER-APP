@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, useReducedMotion } from 'motion/react';
 import {
   Cpu,
   Robot,
@@ -79,6 +79,7 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
   onSelectPathway,
 }) => {
   const tr = (es: string, en: string) => (locale === 'es' ? es : en);
+  const reducedMotion = useReducedMotion();
 
   return (
     <div className="w-full relative px-2 py-3">
@@ -101,13 +102,25 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
       {/* Central Domain Node (The Tree Root) */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.25 }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          boxShadow: reducedMotion
+            ? `0 0 25px ${domain.glowColor}`
+            : [
+                `0 0 20px ${domain.glowColor}`,
+                `0 0 35px ${domain.glowColor}`,
+                `0 0 20px ${domain.glowColor}`,
+              ],
+        }}
+        transition={{
+          y: { duration: 0.25 },
+          boxShadow: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+        }}
         className="relative mx-auto max-w-sm rounded-2xl border p-4 text-center backdrop-blur-md overflow-hidden mb-6"
         style={{
           borderColor: `${domain.accentColor}50`,
           backgroundColor: '#121216',
-          boxShadow: `0 0 25px ${domain.glowColor}`,
         }}
       >
         {/* Subtle top glow bar */}
@@ -153,7 +166,22 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
               key={pathway.id}
               initial={{ opacity: 0, x: index % 2 === 0 ? -12 : 12 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.2, delay: index * 0.05 }}
+              transition={{
+                type: 'spring',
+                stiffness: 350,
+                damping: 28,
+                delay: reducedMotion ? 0 : index * 0.05,
+              }}
+              whileHover={
+                reducedMotion
+                  ? undefined
+                  : { y: -2, transition: { duration: 0.15, ease: 'easeOut' } }
+              }
+              whileTap={
+                reducedMotion
+                  ? undefined
+                  : { scale: 0.98, transition: { duration: 0.1 } }
+              }
               role="button"
               aria-disabled={!isPathwayAvailable(pathway)}
               tabIndex={0}
@@ -169,10 +197,10 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
                 if (isPathwayAvailable(pathway)) SoundEffects.playTap();
               }}
               onClick={() => { if (isPathwayAvailable(pathway)) onSelectPathway(pathway); }}
-              className={`group relative rounded-2xl border p-4 text-left transition-all duration-100 ease-out cursor-pointer select-none active:scale-[0.98] active:translate-y-0.5 ${
+              className={`group relative rounded-2xl border p-4 text-left transition-all duration-200 ease-out cursor-pointer select-none active:scale-[0.98] ${
                 isActive
-                  ? 'bg-gradient-to-r from-white/[0.08] to-white/[0.03] border-white/40 shadow-[0_0_20px_rgba(255,255,255,0.08)]'
-                  : 'bg-[#121216]/80 hover:bg-[#181820] border-white/10 hover:border-white/20'
+                  ? 'bg-gradient-to-r from-white/[0.08] to-white/[0.03] border-white/40 shadow-[0_0_24px_rgba(255,255,255,0.09)]'
+                  : 'bg-[#121216]/80 hover:bg-[#181820] border-white/10 hover:border-white/30 hover:shadow-[0_12px_28px_-12px_rgba(0,0,0,0.5)]'
               }`}
             >
               {/* Active / Featured indicator left accent */}
@@ -247,7 +275,8 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
                 </div>
 
                 {/* Duolingo-style 3D Tactile Mini-Button */}
-                <div
+                <motion.div
+                  whileTap={{ scale: 0.94 }}
                   className={`flex items-center gap-1.5 font-black text-xs py-1.5 px-3.5 rounded-xl transition-all shadow-sm ${
                     isActive
                       ? 'border'
@@ -262,7 +291,7 @@ export const KnowledgeTree: React.FC<KnowledgeTreeProps> = ({
                 >
                   <span>{!isPathwayAvailable(pathway) ? tr('Próximamente', 'Coming soon') : isActive ? tr('Ruta activa', 'Active path') : tr('Aprender', 'Start')}</span>
                   <ArrowRight size={13} weight="bold" />
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           );

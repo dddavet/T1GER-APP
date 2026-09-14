@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { ArrowRight, CheckCircle, Flag, Target } from '@phosphor-icons/react';
 import { Check, Flame, Trophy, TrendingUp, Calculator, ChevronRight } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,6 +26,7 @@ function DailyMomentumCard({
   streak: number;
   isEs: boolean;
 }) {
+  const reducedMotion = useReducedMotion();
   const isDoneToday = completedCount > 0 && activeCount === 0;
   const progressPercent = isDoneToday ? 100 : activeCount > 0 ? 35 : 0;
   const radius = 28;
@@ -57,26 +59,35 @@ function DailyMomentumCard({
               fill="transparent"
             />
             {/* Progress Arc */}
-            <circle
+            <motion.circle
               cx="36"
               cy="36"
               r={radius}
               stroke={isDoneToday ? '#10B981' : '#FF7300'}
               strokeWidth="6"
               strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
+              initial={{ strokeDashoffset: circumference }}
+              animate={{ strokeDashoffset }}
+              transition={{
+                duration: reducedMotion ? 0 : 0.9,
+                ease: [0.23, 1, 0.32, 1],
+              }}
               strokeLinecap="round"
               fill="transparent"
-              className="transition-all duration-700 ease-out"
             />
           </svg>
-          <div className="absolute inset-0 flex items-center justify-center">
+          <motion.div
+            initial={reducedMotion ? undefined : { scale: 0.7, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 22, delay: 0.15 }}
+            className="absolute inset-0 flex items-center justify-center"
+          >
             {isDoneToday ? (
               <Check className="text-emerald-400" size={24} strokeWidth={3} />
             ) : (
               <Flame className="text-[#FF8A1F]" size={22} />
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Metrics Column */}
@@ -102,7 +113,12 @@ function DailyMomentumCard({
           </h3>
 
           <div className="mt-2.5 grid grid-cols-3 gap-2">
-            <div className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center">
+            <motion.div
+              initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.1 }}
+              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+            >
               <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Hoy' : 'Today'}
               </p>
@@ -113,23 +129,33 @@ function DailyMomentumCard({
               >
                 {isDoneToday ? '1 / 1' : `${Math.min(1, completedCount)} / 1`}
               </p>
-            </div>
-            <div className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center">
+            </motion.div>
+            <motion.div
+              initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.16 }}
+              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+            >
               <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Racha' : 'Streak'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-amber-400">
                 {streak}d 🔥
               </p>
-            </div>
-            <div className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center">
+            </motion.div>
+            <motion.div
+              initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, delay: 0.22 }}
+              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+            >
               <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Victorias' : 'Wins'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-white">
                 {completedCount} 🏆
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -138,6 +164,7 @@ function DailyMomentumCard({
 }
 
 export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }) => {
+  const reducedMotion = useReducedMotion();
   const { language, completeMission } = useBrain();
   const { stats, addXP, setActiveView } = useT1ger();
   const { appUser } = useAuth();
@@ -249,12 +276,21 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
             </div>
           )}
 
-          {active.map(mission => {
+          {active.map((mission, idx) => {
             const design = getApplyDesign(mission.lessonId, locale);
             return (
-              <article
+              <motion.article
                 key={mission.id}
-                className="relative overflow-hidden rounded-[1.75rem] border border-[#FF7300]/35 bg-[#121216] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)]"
+                initial={reducedMotion ? undefined : { opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 350,
+                  damping: 28,
+                  delay: reducedMotion ? 0 : idx * 0.08,
+                }}
+                whileHover={reducedMotion ? undefined : { y: -2, transition: { duration: 0.15 } }}
+                className="relative overflow-hidden rounded-[1.75rem] border border-[#FF7300]/35 bg-[#121216] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)] transition-colors hover:border-[#FF7300]/50"
               >
                 {/* Ambient glow */}
                 <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#FF7300]/12 blur-3xl" />
@@ -303,15 +339,16 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                 )}
 
                 {/* Tactile 3D Action Button */}
-                <button
+                <motion.button
+                  whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                   onPointerDown={() => SoundEffects.playTap()}
                   onClick={() => setSelected(mission)}
                   className="t1ger-primary-button mt-4 w-full flex items-center justify-center gap-2"
                 >
                   <span>{tr('Ver mi acción', 'Open my action')}</span>
                   <ArrowRight size={18} />
-                </button>
-              </article>
+                </motion.button>
+              </motion.article>
             );
           })}
 
@@ -327,11 +364,13 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
             </div>
 
             <div className="grid grid-cols-2 gap-2.5">
-              <button
+              <motion.button
                 type="button"
+                whileHover={reducedMotion ? undefined : { y: -2 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={() => setView('tools')}
-                className="group flex flex-col justify-between rounded-[1.4rem] border border-white/[0.08] bg-[#121216] p-3.5 text-left transition-all duration-150 active:scale-[0.97] hover:border-white/20 cursor-pointer shadow-sm min-h-[44px]"
+                className="group flex flex-col justify-between rounded-[1.4rem] border border-white/[0.08] bg-[#121216] p-3.5 text-left transition-all duration-150 hover:border-white/20 cursor-pointer shadow-sm min-h-[44px]"
               >
                 <div>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 mb-2.5">
@@ -348,13 +387,15 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                   <span>{tr('Abrir terminal', 'Open terminal')}</span>
                   <ChevronRight size={12} className="ml-1" />
                 </div>
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 type="button"
+                whileHover={reducedMotion ? undefined : { y: -2 }}
+                whileTap={reducedMotion ? undefined : { scale: 0.97 }}
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={() => setView('tools')}
-                className="group flex flex-col justify-between rounded-[1.4rem] border border-white/[0.08] bg-[#121216] p-3.5 text-left transition-all duration-150 active:scale-[0.97] hover:border-white/20 cursor-pointer shadow-sm min-h-[44px]"
+                className="group flex flex-col justify-between rounded-[1.4rem] border border-white/[0.08] bg-[#121216] p-3.5 text-left transition-all duration-150 hover:border-white/20 cursor-pointer shadow-sm min-h-[44px]"
               >
                 <div>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-amber-400/25 bg-amber-400/10 text-amber-300 mb-2.5">
@@ -371,7 +412,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                   <span>{tr('Calcular ahora', 'Calculate now')}</span>
                   <ChevronRight size={12} className="ml-1" />
                 </div>
-              </button>
+              </motion.button>
             </div>
           </div>
         </section>
