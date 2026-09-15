@@ -21,7 +21,13 @@ export function ApplyMissionModal({ mission, locale, onClose, onComplete, onRetu
   const [error, setError] = useState('');
   const tr = (es: string, en: string) => locale === 'es' ? es : en;
   const design = getApplyDesign(mission.lessonId, locale);
-  useEffect(() => { dialog.current?.showModal(); }, []);
+  useEffect(() => {
+    const el = dialog.current;
+    if (el && !el.open) el.showModal();
+    return () => {
+      if (el?.open) el.close();
+    };
+  }, []);
   const complete = async () => {
     if (inFlight.current) return;
     inFlight.current = true; setSaving(true); setError('');

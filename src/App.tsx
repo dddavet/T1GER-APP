@@ -298,9 +298,18 @@ const AppContent = () => {
   const dayType = dailyTacticalStatus.dayType || 'focus';
 
   const viewFromUrl = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('view') : null;
-  if (viewFromUrl === 'privacy') return <PrivacyPolicy onBack={() => window.history.back()} />;
-  if (viewFromUrl === 'terms') return <TermsOfService onBack={() => window.history.back()} />;
-  if (window.location.pathname === '/delete-account') return <DeleteAccount />;
+  const handleLegalBack = () => {
+    if (typeof window !== 'undefined') {
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/';
+      }
+    }
+  };
+  if (viewFromUrl === 'privacy') return <PrivacyPolicy onBack={handleLegalBack} />;
+  if (viewFromUrl === 'terms') return <TermsOfService onBack={handleLegalBack} />;
+  if (typeof window !== 'undefined' && window.location.pathname === '/delete-account') return <DeleteAccount />;
 
   useEffect(() => {
     if (!activeView) {
@@ -380,12 +389,12 @@ const AppContent = () => {
 
   const activeContent = (() => {
     if (activeView === 'debrief') return <EveningInterrogation onComplete={() => setActiveView('learn')} />;
-    if (activeView === 'build') return <BuildTab onStartMission={startMission} />;
+    if (activeView === 'build' || activeView === 'tactical') return <BuildTab onStartMission={startMission} />;
     if (activeView === 'learn') return <Learn onStartMission={startMission} />;
-    if (activeView === 'compete') return <SquadTab />;
+    if (activeView === 'compete' || activeView === 'friends') return <SquadTab />;
     if (activeView === 'profile') return <Profile />;
     if (activeView === 'coach') return <Coach />;
-    return null;
+    return <Learn onStartMission={startMission} />;
   })();
 
   const mainLayout = (

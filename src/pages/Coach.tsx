@@ -20,6 +20,7 @@ type ChatMessage = {
 
 const sanitizeStoredMessage = (message: ChatMessage): ChatMessage => ({
   ...message,
+  image: message.image && !message.image.startsWith('blob:') ? message.image : undefined,
   checklist: message.checklist
     ?.filter(item => !/^(example|ejemplo):/i.test(item.text.trim()))
     .slice(0, 5),
@@ -159,16 +160,19 @@ export const Coach: React.FC = () => {
       setMessages(prev => [...prev, modelMsg]);
       setLoading(false);
 
+      const persistUserMsg = sanitizeStoredMessage(userMsg);
+      const persistModelMsg = sanitizeStoredMessage(modelMsg);
+
       if (user) {
         addDoc(collection(db, 'users', appUser.uid, 'coachingSessions'), {
           coachId: 't1ger',
           schemaVersion: 2,
-          messages: [userMsg, modelMsg],
+          messages: [persistUserMsg, persistModelMsg],
           summary: responseText.slice(0, 100),
           timestamp: serverTimestamp(),
         }).catch(console.warn);
       } else {
-        const localHistory = [...messages, userMsg, modelMsg].slice(-12);
+        const localHistory = [...messages.map(sanitizeStoredMessage), persistUserMsg, persistModelMsg].slice(-12);
         localStorage.setItem(`t1ger_coach_${appUser.uid}`, JSON.stringify(localHistory));
       }
     } catch {
@@ -330,6 +334,9 @@ export const Coach: React.FC = () => {
                           <img
                             src={message.image}
                             alt="Uploaded"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = 'none';
+                            }}
                             className="mb-2 max-h-48 rounded-xl object-cover border border-white/10 max-w-full"
                           />
                         )}

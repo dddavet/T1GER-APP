@@ -236,7 +236,13 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
 export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, locale, onClose, onComplete, reviewOnly = false }) => {
   const { reviewMission, completeMission, brainState } = useBrain();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  useEffect(() => { dialogRef.current?.showModal(); }, []);
+  useEffect(() => {
+    const el = dialogRef.current;
+    if (el && !el.open) el.showModal();
+    return () => {
+      if (el?.open) el.close();
+    };
+  }, []);
   const [mistakes, setMistakes] = useState(0);
   const { setActiveView } = useT1ger();
   const { appUser } = useAuth();

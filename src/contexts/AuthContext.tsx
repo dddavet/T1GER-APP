@@ -445,11 +445,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const sendEmailSignInLink = useCallback(async (email: string) => {
     const cleanEmail = email.trim();
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://t1ger.app';
     await sendSignInLinkToEmail(auth, cleanEmail, {
-      url: window.location.origin,
+      url: baseUrl,
       handleCodeInApp: true,
     });
-    window.localStorage.setItem(EMAIL_LINK_KEY, cleanEmail);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(EMAIL_LINK_KEY, cleanEmail);
+    }
   }, []);
 
   const logout = useCallback(async () => {

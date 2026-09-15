@@ -19,7 +19,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
   const { appUser } = useAuth();
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (isOpen) dialogRef.current?.showModal();
+    const el = dialogRef.current;
+    if (isOpen) {
+      if (el && !el.open) el.showModal();
+    } else {
+      if (el?.open) el.close();
+    }
+    return () => {
+      if (el?.open) el.close();
+    };
   }, [isOpen]);
   const isEs = language === 'es';
   const tr = (es: string, en: string) => isEs ? es : en;

@@ -349,9 +349,7 @@ export const BrainProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const syncTimer = window.setTimeout(async () => {
         try {
           const userRef = doc(db, 'users', appUser.uid);
-          const cleanBrainState = Object.fromEntries(
-            Object.entries(brainState).filter(([_, v]) => v !== undefined)
-          );
+          const cleanBrainState = JSON.parse(JSON.stringify(brainState));
           await setDoc(userRef, { brainState: cleanBrainState }, { merge: true });
         } catch (err) {
           console.error("Failed to sync to Firestore", err);

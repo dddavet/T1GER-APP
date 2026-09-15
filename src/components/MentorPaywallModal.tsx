@@ -25,12 +25,16 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const el = dialogRef.current;
     if (isOpen) {
       SoundEffects.playTap();
-      dialogRef.current?.showModal();
+      if (el && !el.open) el.showModal();
     } else {
-      dialogRef.current?.close();
+      if (el?.open) el.close();
     }
+    return () => {
+      if (el?.open) el.close();
+    };
   }, [isOpen]);
 
   useEffect(() => {
