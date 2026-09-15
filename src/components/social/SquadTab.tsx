@@ -886,7 +886,7 @@ export const SquadTab: React.FC = () => {
           type="button"
           onPointerDown={() => SoundEffects.playTap()}
           onClick={() => setFinderOpen(true)}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF8A1F] shadow-[0_0_20px_rgba(255,115,0,.12)] cursor-pointer active:scale-95 transition-transform"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-[#FF7300]/30 bg-[#FF7300]/10 text-[#FF8A1F] shadow-[0_0_20px_rgba(255,115,0,.15),inset_0_1px_0_rgba(255,255,255,0.08)] cursor-pointer active:scale-92 transition-all hover:bg-[#FF7300]/15"
           aria-label={isEs ? 'Agregar amigos' : 'Add friends'}
         >
           <UserPlus size={19} />
@@ -895,7 +895,7 @@ export const SquadTab: React.FC = () => {
 
       {error && <ErrorBanner message={error} />}
 
-      <nav aria-label={isEs ? 'Secciones de competencia' : 'Competition sections'} className="grid grid-cols-3 gap-1 rounded-[1.25rem] border border-white/[0.08] bg-[#121216] p-1">
+      <nav aria-label={isEs ? 'Secciones de competencia' : 'Competition sections'} className="grid grid-cols-3 gap-1 rounded-[1.25rem] border border-white/10 bg-[#121216]/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
         {tabs.map(tab => {
           const Icon = tab.icon;
           const active = view === tab.id;

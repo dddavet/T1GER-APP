@@ -59,9 +59,9 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
         return (
           <div key={section.id} className="w-full max-w-sm relative flex flex-col items-center mb-10">
             {/* Section Milestone Divider / Mini Banner */}
-            <div className="w-full flex items-center justify-between px-3 py-2.5 mb-6 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md">
+            <div className="w-full flex items-center justify-between px-3.5 py-2.5 mb-6 rounded-2xl bg-[#121216]/80 border border-white/10 shadow-[0_4px_16px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-black uppercase text-orange-400">
+                <span className="text-xs font-mono font-black uppercase text-[#FF8A2A]">
                   {tr('Etapa', 'Chapter')} {sectionIdx + 1}
                 </span>
                 <span className="text-zinc-600">·</span>
@@ -70,11 +70,11 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                 </h3>
               </div>
               {allCompleted ? (
-                <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded-full border border-emerald-500/40">
+                <span className="flex items-center gap-1 text-[10px] font-mono font-bold text-emerald-400 bg-emerald-950/80 px-2.5 py-0.5 rounded-full border border-emerald-500/40 shadow-sm">
                   <Check size={10} weight="bold" /> {tr('Completada', 'Done')}
                 </span>
               ) : (
-                <span className="text-[10px] font-mono text-zinc-400">
+                <span className="text-[10px] font-mono text-zinc-400 font-semibold px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/8">
                   {sectionNodes.filter(n => n.state === 'completed').length}/{sectionNodes.length}
                 </span>
               )}
@@ -253,9 +253,9 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                     duration: allCompleted ? 2.2 : 3,
                     ease: 'easeInOut',
                   }}
-                  className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all ${
+                  className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all cursor-default ${
                     allCompleted
-                      ? 'bg-gradient-to-b from-amber-400 to-amber-600 text-black shadow-[0_6px_0_#92400e] border-amber-300'
+                      ? 'bg-gradient-to-b from-amber-400 to-amber-600 text-black shadow-[0_6px_0_#92400e,0_0_20px_rgba(245,158,11,0.35)] border-amber-300'
                       : 'bg-[#15151C] text-zinc-600 border-white/10 shadow-[0_4px_0_#0a0a0f]'
                   }`}
                 >

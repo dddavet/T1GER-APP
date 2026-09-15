@@ -290,12 +290,12 @@ export const Coach: React.FC = () => {
                   key={idx}
                   onClick={() => handleSend(pill.text)}
                   disabled={loading}
-                  className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/8 bg-white/[.03] hover:bg-white/[.07] hover:border-white/15 text-left transition-all active:scale-[0.98] cursor-pointer group"
+                  className="flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#121216]/80 hover:bg-white/[.08] hover:border-[#FF7300]/30 text-left transition-all active:scale-[0.97] cursor-pointer group shadow-[0_4px_16px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-md"
                 >
-                  <div className="p-2 rounded-xl bg-white/5 group-hover:scale-110 transition-transform shrink-0">
+                  <div className="p-2 rounded-xl bg-white/[0.06] border border-white/8 group-hover:scale-110 group-hover:border-[#FF7300]/30 transition-all shrink-0">
                     {pill.icon}
                   </div>
-                  <span className="text-xs font-medium text-zinc-300 group-hover:text-white leading-tight break-words [overflow-wrap:anywhere]">
+                  <span className="text-xs font-semibold text-zinc-300 group-hover:text-white leading-tight break-words [overflow-wrap:anywhere]">
                     {pill.text}
                   </span>
                 </button>
@@ -326,7 +326,7 @@ export const Coach: React.FC = () => {
                       <div
                         className={`text-[14px] leading-relaxed break-words [overflow-wrap:anywhere] ${
                           isUser
-                            ? 'rounded-2xl rounded-br-xs bg-white/[.08] border border-white/12 px-4 py-3 text-zinc-100 shadow-md backdrop-blur-md'
+                            ? 'rounded-2xl rounded-br-xs bg-white/[.09] border border-white/15 px-4 py-3 text-zinc-100 shadow-[0_4px_16px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-md'
                             : 'text-zinc-200 py-1'
                         }`}
                       >

@@ -57,7 +57,8 @@ export const NavDock = React.memo(() => {
       <motion.button
         key={tab.id}
         type="button"
-        whileTap={{ scale: 0.89 }}
+        whileTap={{ scale: 0.92 }}
+        whileHover={{ scale: 1.02 }}
         onPointerDown={() => {
           if (!active) SoundEffects.playToggle();
         }}
@@ -74,8 +75,8 @@ export const NavDock = React.memo(() => {
         {active && (
           <motion.span
             layoutId="navdock-active-pill"
-            className="absolute inset-0 rounded-2xl border border-[var(--ob-accent)]/30 bg-[var(--ob-accent)]/13"
-            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+            className="absolute inset-0 rounded-2xl border border-[var(--ob-accent)]/35 bg-[var(--ob-accent)]/15 shadow-[0_0_12px_rgba(255,115,0,0.15)]"
+            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
           />
         )}
         <motion.span
@@ -101,10 +102,10 @@ export const NavDock = React.memo(() => {
   return (
     <>
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[calc(.5rem+env(safe-area-inset-bottom))] select-none">
-        <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.75rem] border border-white/10 bg-[#121216] p-1.5 shadow-[0_18px_42px_rgba(0,0,0,0.58)]">
+        <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.75rem] border border-white/12 bg-[#121216]/85 backdrop-blur-2xl p-1.5 shadow-[0_20px_48px_rgba(0,0,0,0.65),0_0_1px_rgba(255,255,255,0.15)]">
           <nav
             aria-label={isEs ? 'Navegación principal' : 'Primary navigation'}
-            className="flex w-full items-center gap-1 rounded-[1.4rem] border border-white/[0.08] bg-[#09090B] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="flex w-full items-center gap-1 rounded-[1.4rem] border border-white/[0.08] bg-[#09090B]/90 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
           >
             {/* Left tabs: Learn, Apply */}
             {leftTabs.map(renderTab)}
@@ -134,7 +135,7 @@ export const NavDock = React.memo(() => {
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={handleMentorClick}
                 aria-label={isEs ? 'Mentor IA T1GER' : 'T1GER AI Mentor'}
-                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-tr from-[#FF5500] via-[#FF7300] to-[#FFA033] p-[2px] ring-4 ring-[#121216] cursor-pointer"
+                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-tr from-[#FF5500] via-[#FF7300] to-[#FFA033] p-[2px] ring-4 ring-[#121216]/90 shadow-[0_8px_20px_rgba(255,115,0,0.4)] cursor-pointer"
               >
                 <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-b from-[#FF8A2A] to-[#E65100] shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden">
                   <img

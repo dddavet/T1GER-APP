@@ -37,7 +37,7 @@ export const HUD = React.memo(() => {
     <>
       <header className="sticky top-0 z-40 w-full px-2 sm:px-3 pt-[calc(.45rem+env(safe-area-inset-top))] pb-2 select-none pointer-events-auto">
         {/* Floating Glass Dynamic Island Bar */}
-        <div className="mx-auto flex w-full max-w-lg items-center justify-between rounded-2xl border border-white/[0.08] bg-[#0D0D11] px-3 py-1.5 shadow-[0_10px_26px_rgba(0,0,0,0.52),inset_0_1px_0_rgba(255,255,255,0.05)]">
+        <div className="mx-auto flex w-full max-w-lg items-center justify-between rounded-2xl border border-white/10 bg-[#0D0D11]/85 backdrop-blur-xl px-3 py-1.5 shadow-[0_12px_28px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.08)]">
           {/* Left: T1GER Logo & Prestige Level */}
           <div className="flex items-center gap-2">
             <button
@@ -56,7 +56,7 @@ export const HUD = React.memo(() => {
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-mono text-xs font-black tracking-tight text-white leading-none">T1GER</span>
-                <span className="font-mono text-[8px] font-extrabold uppercase px-1 py-0.2 rounded bg-[var(--ob-accent)]/20 text-[var(--ob-accent)] border border-[var(--ob-accent)]/30">
+                <span className="font-mono text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-[var(--ob-accent)]/20 text-[var(--ob-accent)] border border-[var(--ob-accent)]/30">
                   LVL {appUser?.level || 1}
                 </span>
               </div>
@@ -69,7 +69,11 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setShowStreakModal(true)}
-              className={`relative flex h-7 items-center gap-1 rounded-lg border px-2 font-mono text-[10.5px] font-bold transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] ${isLearnStreakAtRisk ? 'border-red-500/45 bg-red-500/12 text-red-300 shadow-[0_0_14px_rgba(239,68,68,.22)]' : 'border-white/8 bg-white/[0.04] text-amber-400 hover:bg-white/8'}`}
+              className={`relative flex h-7 items-center gap-1.5 rounded-xl border px-2 font-mono text-[11px] font-bold transition-all duration-150 ease-out cursor-pointer active:scale-92 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] ${
+                isLearnStreakAtRisk
+                  ? 'border-red-500/45 bg-red-500/15 text-red-300 shadow-[0_0_16px_rgba(239,68,68,.3)]'
+                  : 'border-white/10 bg-white/[0.05] text-amber-400 hover:bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+              }`}
               aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
             >
               {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-red-400" />}
@@ -89,10 +93,10 @@ export const HUD = React.memo(() => {
 
             {/* Verified XP Badge */}
             <div
-              className="flex h-7 items-center gap-1 rounded-lg bg-[#3FC78E]/10 border border-[#3FC78E]/25 px-2 font-mono text-[10.5px] font-bold text-[#78DDB0]"
+              className="flex h-7 items-center gap-1.5 rounded-xl bg-[#3FC78E]/10 border border-[#3FC78E]/30 px-2 font-mono text-[11px] font-bold text-[#78DDB0] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               aria-label={`${stats.verifiedXP} ${isEs ? 'XP verificado' : 'verified XP'}`}
             >
-              <ShieldCheck size={13} />
+              <ShieldCheck size={14} weight="bold" />
               <span className="tabular-nums">{stats.verifiedXP}</span>
             </div>
 
@@ -100,7 +104,7 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setShowNotificationCenter(true)}
-              className="relative flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.04] border border-white/8 text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90 active:translate-y-0.5 before:absolute before:-inset-2 before:content-['']"
+              className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white transition-all duration-150 ease-out cursor-pointer active:scale-92 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
               <motion.span
@@ -108,10 +112,10 @@ export const HUD = React.memo(() => {
                 transition={{ repeat: Infinity, repeatDelay: 3.5, duration: 0.6 }}
                 className="inline-flex items-center justify-center"
               >
-                <Bell size={13} />
+                <Bell size={14} weight="bold" />
               </motion.span>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 flex h-3 w-3 items-center justify-center rounded-full bg-[var(--ob-accent)] text-[7.5px] font-black text-black shadow-md">
+                <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--ob-accent)] text-[8px] font-black text-black shadow-md ring-2 ring-[#0D0D11]">
                   {unreadCount}
                 </span>
               )}

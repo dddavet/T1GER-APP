@@ -34,14 +34,14 @@ function DailyMomentumCard({
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/[0.09] bg-[#121216] p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)]">
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216]/85 p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
       {/* Background ambient glow */}
       <div
         className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full blur-3xl"
         style={{
           background: isDoneToday
-            ? 'radial-gradient(circle, rgba(16,185,129,0.18) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(255,115,0,0.18) 0%, transparent 70%)',
+            ? 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)'
+            : 'radial-gradient(circle, rgba(255,115,0,0.2) 0%, transparent 70%)',
         }}
       />
 
@@ -117,9 +117,9 @@ function DailyMomentumCard({
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
             >
-              <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
+              <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Hoy' : 'Today'}
               </p>
               <p
@@ -134,9 +134,9 @@ function DailyMomentumCard({
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.16 }}
-              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
             >
-              <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
+              <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Racha' : 'Streak'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-amber-400">
@@ -147,9 +147,9 @@ function DailyMomentumCard({
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.22 }}
-              className="rounded-xl border border-white/[0.06] bg-black/25 p-1.5 text-center"
+              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
             >
-              <p className="font-mono text-[8px] uppercase tracking-wider text-zinc-500">
+              <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Victorias' : 'Wins'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-white">
@@ -220,7 +220,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
       {/* Navigation Tabs (Apple Segmented Style with 44pt touch targets) */}
       <nav
         aria-label={tr('Secciones de Aplicar', 'Apply sections')}
-        className="flex gap-1 rounded-[1.25rem] border border-white/[0.08] bg-[#121216] p-1 shadow-inner"
+        className="flex gap-1 rounded-[1.25rem] border border-white/10 bg-[#121216]/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
       >
         {(['active', 'history', 'tools'] as const).map(id => {
           const isActive = view === id;
@@ -290,7 +290,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                   delay: reducedMotion ? 0 : idx * 0.08,
                 }}
                 whileHover={reducedMotion ? undefined : { y: -2, transition: { duration: 0.15 } }}
-                className="relative overflow-hidden rounded-[1.75rem] border border-[#FF7300]/35 bg-[#121216] p-5 shadow-[0_16px_36px_rgba(0,0,0,0.35)] transition-colors hover:border-[#FF7300]/50"
+                className="relative overflow-hidden rounded-[1.75rem] border border-[#FF7300]/35 bg-[#121216]/90 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-[#FF7300]/50"
               >
                 {/* Ambient glow */}
                 <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#FF7300]/12 blur-3xl" />
@@ -323,7 +323,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
 
                 {/* Step checklist preview (Duolingo / Apple Checklist) */}
                 {design?.steps && design.steps.length > 0 && (
-                  <div className="mt-3.5 space-y-1.5 rounded-2xl border border-white/[0.06] bg-black/25 p-3">
+                  <div className="mt-3.5 space-y-1.5 rounded-2xl border border-white/[0.08] bg-black/40 p-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
                     <p className="font-mono text-[9px] uppercase tracking-wider text-zinc-500 font-bold">
                       {tr('PASOS SENCILLOS HOY:', 'SIMPLE STEPS TODAY:')}
                     </p>
