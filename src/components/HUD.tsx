@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { Bell, Fire, ShieldCheck } from '@phosphor-icons/react';
+import { Bell, Fire, Shield, ShieldCheck } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
@@ -89,6 +89,14 @@ export const HUD = React.memo(() => {
                 <Fire size={13} weight="fill" className={isLearnStreakAtRisk ? 'text-red-300' : 'text-amber-400'} />
               </motion.span>
               <span className="tabular-nums">{learnStreak}</span>
+              {Boolean(appUser?.streakShields && appUser.streakShields > 0) && (
+                <span
+                  title={isEs ? `${appUser?.streakShields} Escudo${(appUser?.streakShields || 0) > 1 ? 's' : ''} de racha activo` : `${appUser?.streakShields} active streak shield${(appUser?.streakShields || 0) > 1 ? 's' : ''}`}
+                  className="flex items-center text-cyan-400 pl-1 border-l border-white/10"
+                >
+                  <Shield size={11} weight="fill" />
+                </span>
+              )}
             </button>
 
             {/* Verified XP Badge */}

@@ -14,6 +14,7 @@ import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
 import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
 import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
 import { PaywallModal } from '../components/PaywallModal';
+import { SoundEffects } from '../services/soundEffects';
 
 type LegalView = 'privacy' | 'terms' | null;
 
@@ -229,8 +230,18 @@ export const Profile = () => {
 
 const SettingRow = ({ icon: Icon, title, detail, onClick }: { icon: React.ComponentType<{ size?: number; className?: string }>; title: string; detail?: string; onClick?: () => void }) => {
   const Component = onClick ? 'button' : 'div';
+  const handleClick = onClick
+    ? () => {
+        SoundEffects.playTap();
+        onClick();
+      }
+    : undefined;
   return (
-    <Component onClick={onClick} className={`group flex w-full items-center gap-3 border-b border-white/6 px-5 py-4 text-left last:border-b-0 ${onClick ? 't1ger-tap-row hover:bg-white/[.025]' : ''}`}>
+    <Component
+      type={onClick ? 'button' : undefined}
+      onClick={handleClick}
+      className={`group flex w-full items-center gap-3 border-b border-white/6 px-5 py-4 text-left last:border-b-0 ${onClick ? 't1ger-tap-row hover:bg-white/[.025] cursor-pointer' : ''}`}
+    >
       <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[.045] text-[#7EA39B] transition-colors duration-200 group-hover:bg-white/[.07] group-hover:text-[#A9C6C0]"><Icon size={17} /></span>
       <span className="flex-1 text-sm font-medium text-[#E2EFEC]">{title}</span>
       {detail && <span className="text-xs text-[#6F918A]">{detail}</span>}
