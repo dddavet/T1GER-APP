@@ -117,6 +117,7 @@ const STEP_ORDER: OnboardingStep[] = [
   'motivation_reason',
   'screen_time',
   'daily_goal',
+  'course_building',
   'micro_lesson',
   'success',
   'save_progress',
@@ -218,6 +219,125 @@ const MOTIVATION_REASONS: Array<{ id: string; title: LocalizedText; icon: string
   { id: 'other', title: { es: 'Otro motivo', en: 'Other reason' }, icon: '✨' },
 ];
 
+const triggerHaptic = (duration = 10) => {
+  try {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate(duration);
+    }
+  } catch {
+    // Safe fallback for browsers/platforms without vibration
+  }
+};
+
+// Dynamic contextual mascot responses (Active Personalization & Commitment Bias)
+const TOPIC_FEEDBACK: Record<CourseTopic, LocalizedText> = {
+  technology: {
+    es: '¡Excelente elección! La IA es el multiplicador de ingresos #1 de esta década.',
+    en: 'Great choice! AI is the #1 income multiplier of this decade.',
+  },
+  tech: {
+    es: '¡Excelente elección! La IA es el multiplicador de ingresos #1 de esta década.',
+    en: 'Great choice! AI is the #1 income multiplier of this decade.',
+  },
+  business: {
+    es: '¡Mentalidad de fundador! Aprenderás a crear ofertas irresistibles y validar clientes.',
+    en: 'Founder mindset! You will learn to craft irresistible offers and validate customers.',
+  },
+  skills: {
+    es: '¡Mentalidad de fundador! Aprenderás a crear ofertas irresistibles y validar clientes.',
+    en: 'Founder mindset! You will learn to craft irresistible offers and validate customers.',
+  },
+  investing: {
+    es: '¡Hacer que el capital trabaje para ti 24/7! La clave del 1% financieramente libre.',
+    en: 'Make capital work for you 24/7! The secret of the financially free 1%.',
+  },
+  finance: {
+    es: '¡Hacer que el capital trabaje para ti 24/7! La clave del 1% financieramente libre.',
+    en: 'Make capital work for you 24/7! The secret of the financially free 1%.',
+  },
+  mindset: {
+    es: '¡Control estoico y modelos mentales para tomar decisiones bajo máxima presión!',
+    en: 'Stoic control and mental models to execute under extreme pressure!',
+  },
+  productivity: {
+    es: '¡Deep Work sin distracciones! Multiplicarás tu rendimiento y tiempo libre.',
+    en: 'Deep Work with zero distractions! Multiply your output and reclaim free time.',
+  },
+  history: {
+    es: '¡Estrategia pura! Aplica las tácticas maestras de los imperios más influyentes.',
+    en: 'Pure strategy! Apply the master tactics of history’s greatest leaders.',
+  },
+};
+
+const KNOWLEDGE_FEEDBACK: Record<KnowledgeLevel, LocalizedText> = {
+  zero: {
+    es: '¡Perfecto! Sin tecnicismos vacíos. Aprenderás con decisiones prácticas desde el día 1.',
+    en: 'Perfect! Zero fluff. You will learn with real decisions from day 1.',
+  },
+  basic: {
+    es: '¡Buen punto de partida! Nos saltaremos lo obvio e iremos directo a lo que funciona.',
+    en: 'Great starting point! We’ll skip the obvious and focus on what works.',
+  },
+  intermediate: {
+    es: '¡Sólido! Puliremos tus puntos ciegos para que tomes decisiones de alto calibre.',
+    en: 'Solid! We’ll sharpen your blind spots so you can make high-stakes decisions.',
+  },
+  competent: {
+    es: '¡Nivel avanzado! Te desafiaremos con escenarios complejos y de alta presión.',
+    en: 'Advanced tier! We’ll challenge you with complex, high-pressure scenarios.',
+  },
+  advanced: {
+    es: '¡Nivel maestro! Escenarios tácticos extremos para llevar tu criterio al 1%.',
+    en: 'Mastery level! Extreme tactical scenarios to bring your edge into the top 1%.',
+  },
+};
+
+const MOTIVATION_FEEDBACK: Record<string, LocalizedText> = {
+  career: {
+    es: '¡La ventaja competitiva que necesitas para destacar y liderar tu sector!',
+    en: 'The competitive edge you need to stand out and lead your industry!',
+  },
+  wealth: {
+    es: '¡Construir activos reales y flujo de caja constante es la meta #1!',
+    en: 'Building real assets and consistent cash flow is the #1 goal!',
+  },
+  productivity: {
+    es: '¡Reclamar tu atención del algoritmo es el superpoder más valioso!',
+    en: 'Reclaiming your attention from the algorithm is the ultimate superpower!',
+  },
+  future_tech: {
+    es: '¡Dominar herramientas de IA te convertirá en un operador 10x!',
+    en: 'Mastering AI tools will transform you into a 10x operator!',
+  },
+  fun: {
+    es: '¡Aprender jugando con misiones tácticas es la forma más rápida de absorber!',
+    en: 'Learning through gamified tactical missions is the fastest way to grow!',
+  },
+  other: {
+    es: '¡Cualquiera sea tu meta, T1GER estará contigo en cada paso diario!',
+    en: 'Whatever your goal, T1GER will be with you every single day!',
+  },
+};
+
+const GOAL_FEEDBACK: Record<number, LocalizedText> = {
+  5: {
+    es: '¡5 minutos consistentes vencen a 2 horas de motivación esporádica!',
+    en: '5 consistent minutes beat 2 hours of sporadic motivation!',
+  },
+  10: {
+    es: '¡La dosis óptima! 10 min al día equivalen a dominar 18 libros al año.',
+    en: 'The sweet spot! 10 min a day equals reading 18 books a year.',
+  },
+  15: {
+    es: '¡Ritmo enfocado! Construirás un hábito blindado y avanzarás 2x más rápido.',
+    en: 'Focused rhythm! You will build an ironclad habit and progress 2x faster.',
+  },
+  20: {
+    es: '¡Modo Bestia! Entrarás en el top 5% de mayor disciplina y retención.',
+    en: 'Beast Mode! You’ll enter the top 5% in discipline and retention.',
+  },
+};
+
 function loadDraft(): OnboardingDraft {
   if (typeof window === 'undefined') return defaultDraft;
   try {
@@ -256,9 +376,11 @@ const DuolingoHeader: React.FC<{
     <div className="flex flex-col items-center relative w-full max-w-xs mb-3">
       {/* Speech Bubble with pointer pointing down at mascot */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 5 }}
+        key={speech}
+        initial={{ opacity: 0, scale: 0.92, y: 5 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative z-10 rounded-2xl border border-white/15 bg-[#121216]/95 backdrop-blur-md px-5 py-3 text-sm font-bold leading-5 text-white shadow-xl max-w-sm mb-2"
+        transition={{ type: 'spring', stiffness: 450, damping: 26 }}
+        className="relative z-10 rounded-2xl border border-white/15 bg-[#121216]/95 backdrop-blur-md px-5 py-3 text-sm font-bold leading-5 text-white shadow-[0_8px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.08)] max-w-sm mb-2 text-center"
       >
         {speech}
         <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-b border-r border-white/15 bg-[#121216]" />
@@ -277,6 +399,133 @@ const DuolingoHeader: React.FC<{
     )}
   </div>
 );
+
+// Labor Illusion Synthesis Screen (Buell & Norton, HBS Framework)
+const CourseBuildingView: React.FC<{
+  topicName: string;
+  dailyGoal: number;
+  language: Language;
+  onDone: () => void;
+}> = ({ topicName, dailyGoal, language, onDone }) => {
+  const [percent, setPercent] = useState(14);
+  const [phase, setPhase] = useState<1 | 2 | 3 | 4>(1);
+  const isEs = language === 'es';
+  const tr = (es: string, en: string) => (isEs ? es : en);
+
+  useEffect(() => {
+    const startTime = Date.now();
+    const duration = 2400;
+
+    const interval = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(100, Math.round(14 + (elapsed / duration) * 86));
+      setPercent(progress);
+
+      if (progress >= 38 && progress < 72) {
+        setPhase(2);
+      } else if (progress >= 72 && progress < 100) {
+        setPhase(3);
+      } else if (progress >= 100) {
+        setPhase(4);
+        clearInterval(interval);
+        triggerHaptic(25);
+        fireRewardConfetti();
+      }
+    }, 40);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const mood: MascotReaction = phase === 4 ? 'celebrate' : phase === 3 ? 'beast' : 'thinking';
+
+  return (
+    <div className="flex min-h-full flex-col justify-between py-5 text-center select-none">
+      <div className="pt-2">
+        <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[var(--ob-accent)]">
+          {phase === 4 ? tr('PLAN BLINDADO', 'IRONCLAD PLAN') : tr('SÍNTESIS INTELIGENTE', 'SMART SYNTHESIS')}
+        </span>
+        <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
+          {phase === 4
+            ? tr('¡Tu Plan Táctico está Listo!', 'Your Tactical Plan is Ready!')
+            : tr('Creando tu Ruta de Maestría', 'Building Your Mastery Path')}
+        </h2>
+      </div>
+
+      <div className="flex flex-col items-center my-auto py-2">
+        {/* Mascot */}
+        <motion.div
+          animate={phase === 4 ? { scale: [1, 1.06, 1] } : { scale: [1, 1.02, 1] }}
+          transition={{ repeat: Infinity, duration: 2.2 }}
+          className="h-36 w-36 sm:h-40 sm:w-40 relative flex items-center justify-center pointer-events-none mb-3"
+        >
+          <OnboardingMascot mood={mood} className="h-36 w-36 sm:h-40 sm:w-40" />
+        </motion.div>
+
+        {/* Progress Meter with Glowing Gradient */}
+        <div className="w-full max-w-xs space-y-2 mb-4">
+          <div className="flex items-center justify-between text-xs font-mono">
+            <span className="text-zinc-400 font-bold truncate max-w-[200px] text-left">
+              {phase === 1 && tr('Analizando perfil y nivel...', 'Analyzing profile & level...')}
+              {phase === 2 && tr('Calibrando ritmo diario...', 'Calibrating daily pace...')}
+              {phase === 3 && tr(`Sintetizando ruta de ${topicName}...`, `Synthesizing ${topicName}...`)}
+              {phase === 4 && tr('¡100% Calibrado con éxito!', '100% Calibrated!')}
+            </span>
+            <span className="font-black text-[var(--ob-accent)] shrink-0">{percent}%</span>
+          </div>
+
+          <div className="h-2.5 w-full rounded-full bg-white/10 overflow-hidden p-0.5 border border-white/5">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[var(--ob-accent)] to-[#FF8C33] shadow-[0_0_12px_rgba(255,115,0,0.5)] transition-all duration-75"
+              style={{ width: `${percent}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Milestones Checklist (Labor Illusion) */}
+        <div className="w-full max-w-xs space-y-2 text-left">
+          <div className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-300 ${
+            phase >= 1
+              ? 'border-emerald-500/30 bg-emerald-500/[.06] text-white shadow-[0_0_15px_rgba(16,185,129,0.08)]'
+              : 'border-white/5 bg-[#121216]/60 text-zinc-500'
+          }`}>
+            <CheckCircle2 size={16} className={phase >= 2 ? 'text-emerald-400 shrink-0' : 'text-zinc-500 animate-pulse shrink-0'} />
+            <span className="text-xs font-semibold leading-tight">
+              {tr('Perfil de aprendizaje diagnosticado', 'Learning profile diagnosed')}
+            </span>
+          </div>
+
+          <div className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-300 ${
+            phase >= 2
+              ? 'border-emerald-500/30 bg-emerald-500/[.06] text-white shadow-[0_0_15px_rgba(16,185,129,0.08)]'
+              : 'border-white/5 bg-[#121216]/60 text-zinc-500'
+          }`}>
+            <CheckCircle2 size={16} className={phase >= 3 ? 'text-emerald-400 shrink-0' : phase === 2 ? 'text-amber-400 animate-pulse shrink-0' : 'text-zinc-600 shrink-0'} />
+            <span className="text-xs font-semibold leading-tight">
+              {tr(`${dailyGoal} min/día · Protección de racha blindada`, `${dailyGoal} min/day · Streak armor calibrated`)}
+            </span>
+          </div>
+
+          <div className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all duration-300 ${
+            phase >= 3
+              ? 'border-emerald-500/30 bg-emerald-500/[.06] text-white shadow-[0_0_15px_rgba(16,185,129,0.08)]'
+              : 'border-white/5 bg-[#121216]/60 text-zinc-500'
+          }`}>
+            <CheckCircle2 size={16} className={phase >= 4 ? 'text-emerald-400 shrink-0' : phase === 3 ? 'text-cyan-400 animate-pulse shrink-0' : 'text-zinc-600 shrink-0'} />
+            <span className="text-xs font-semibold leading-tight">
+              {tr(`Ruta de 30 días para ${topicName} lista`, `30-day ${topicName} pathway ready`)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="pt-3">
+        <PrimaryAction disabled={phase < 4} onClick={() => { triggerHaptic(); onDone(); }}>
+          {tr('COMENZAR MI PRIMERA LECCIÓN', 'START MY FIRST LESSON')} <ArrowRight size={18} />
+        </PrimaryAction>
+      </div>
+    </div>
+  );
+};
 
 // 3D Tactile Primary Button (Duolingo Style)
 export const PrimaryAction: React.FC<
@@ -356,14 +605,16 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
       })();
     }
   }, [step]);
-  const currentStepIndex = STEP_ORDER.indexOf(step);
+  const currentStepIndex = Math.max(0, STEP_ORDER.indexOf(step));
+  const baseEndowed = 18;
+  const totalSteps = Math.max(1, STEP_ORDER.length - 1);
   const progressPercent = Math.min(
     100,
     Math.max(
-      5,
+      baseEndowed,
       step === 'access'
-        ? ((currentStepIndex + (accessSubPage - 1) / 2) / STEP_ORDER.length) * 100
-        : ((currentStepIndex + 1) / STEP_ORDER.length) * 100
+        ? Math.round(baseEndowed + ((currentStepIndex + (accessSubPage - 1) / 2) / totalSteps) * (100 - baseEndowed))
+        : Math.round(baseEndowed + (currentStepIndex / totalSteps) * (100 - baseEndowed))
     )
   );
 
@@ -565,13 +816,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         );
 
       // Frame 2: Topic Selection ("What would you like to learn?")
-      case 'topic_select':
+      case 'topic_select': {
+        const topicFeedback = draft.topic ? TOPIC_FEEDBACK[draft.topic] : null;
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={tr('¿Qué te gustaría aprender hoy?', 'What would you like to learn?')}
-              mood="thinking"
-              eyebrow={tr('Elige tu tema', 'Choose your path')}
+              speech={topicFeedback ? localize(topicFeedback, language) : tr('¿Qué habilidad de alto impacto quieres dominar?', 'What high-impact skill do you want to master?')}
+              mood={draft.topic ? 'beast' : 'thinking'}
+              eyebrow={tr('Elige tu ruta táctica', 'Choose your tactical path')}
+              title={tr('¿Qué te gustaría aprender?', 'What would you like to learn?')}
             />
 
             <div className="space-y-2.5 my-auto">
@@ -581,21 +834,28 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={topic.id}
                     type="button"
-                    onClick={() => patchDraft({ topic: topic.id })}
+                    onClick={() => {
+                      triggerHaptic();
+                      patchDraft({ topic: topic.id });
+                    }}
                     className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[60px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_20px_rgba(255,115,0,0.25)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-gradient-to-r from-[var(--ob-accent)]/20 to-[var(--ob-accent)]/5 text-white shadow-[0_0_20px_rgba(255,115,0,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
-                    <span className="text-2xl shrink-0">{topic.icon}</span>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 transition-colors ${
+                      isSelected ? 'bg-[var(--ob-accent)]/20 border border-[var(--ob-accent)]/40 shadow-sm' : 'bg-white/[.04] border border-white/5'
+                    }`}>
+                      {topic.icon}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <strong className="text-sm font-bold text-white block truncate">
                           {localize(topic.title, language)}
                         </strong>
                         {topic.badge && (
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase shrink-0">
+                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
                             {localize(topic.badge, language)}
                           </span>
                         )}
@@ -605,10 +865,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       </span>
                     </div>
                     <span
-                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-all duration-150 ${
                         isSelected
-                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
-                          : 'border-white/20 text-transparent'
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black shadow-[0_0_10px_rgba(255,115,0,0.5)]'
+                          : 'border-white/20 bg-white/[.03] text-transparent'
                       }`}
                     >
                       {isSelected && <Check size={14} strokeWidth={3} />}
@@ -619,79 +879,69 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             <div className="pt-4">
-              <PrimaryAction onClick={advance}>
+              <PrimaryAction onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
           </div>
         );
+      }
 
-      // Frame 3: Course Building Interstitial
+      // Frame 3: Course Building (Labor Illusion & Operational Transparency)
       case 'course_building':
         return (
-          <div className="flex min-h-full flex-col justify-between py-8 text-center">
-            <div />
-            <div className="flex flex-col items-center">
-              <motion.div
-                animate={{ scale: [1, 1.08, 1], rotate: [0, 2, -2, 0] }}
-                transition={{ repeat: Infinity, duration: 2.5 }}
-                className="h-48 w-48 relative flex items-center justify-center pointer-events-none mb-4"
-              >
-                <OnboardingMascot mood="celebrate" className="h-48 w-48" />
-              </motion.div>
-
-              <p className="font-mono text-xs font-black uppercase tracking-[0.2em] text-[var(--ob-accent)]">
-                {tr('CREANDO TU CURSO...', 'COURSE BUILDING...')}
-              </p>
-              <h2 className="text-2xl font-black text-white mt-2 max-w-xs">
-                {tr(
-                  `Prepárate para dominar ${topicName} con la mejor educación del mundo.`,
-                  `Get ready to master ${topicName} with world-class frameworks.`
-                )}
-              </h2>
-            </div>
-
-            <PrimaryAction onClick={advance}>
-              {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
-            </PrimaryAction>
-          </div>
+          <CourseBuildingView
+            topicName={topicName}
+            dailyGoal={draft.dailyGoal}
+            language={language}
+            onDone={advance}
+          />
         );
 
       // Frame 4: Acquisition Source ("How did you hear about T1GER?")
       case 'acquisition_source':
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
-              mood="happy"
+              speech={draft.acquisitionSource ? tr('¡Increíble! Cada vez más emprendedores se unen a la manada.', 'Awesome! More founders join the pack every day.') : tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
+              mood={draft.acquisitionSource ? 'happy' : 'idle'}
+              eyebrow={tr('Comunidad T1GER', 'T1GER Community')}
+              title={tr('¿De dónde vienes?', 'Where are you from?')}
             />
 
-            <div className="grid grid-cols-2 gap-2 my-auto">
+            <div className="grid grid-cols-2 gap-2.5 my-auto">
               {ACQUISITION_SOURCES.map((src) => {
                 const isSelected = draft.acquisitionSource === src.id;
                 return (
                   <button
                     key={src.id}
                     type="button"
-                    onClick={() => patchDraft({ acquisitionSource: src.id })}
+                    onClick={() => {
+                      triggerHaptic();
+                      patchDraft({ acquisitionSource: src.id });
+                    }}
                     className={`relative flex min-h-[58px] sm:min-h-16 items-center gap-2.5 rounded-2xl border py-2.5 px-3 text-left transition-all active:scale-[0.985] cursor-pointer ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_18px_rgba(255,115,0,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-[var(--ob-accent)]/50'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]'
                     }`}
                   >
-                    <span className="text-lg shrink-0">{src.icon}</span>
+                    <span className="text-xl shrink-0">{src.icon}</span>
                     <span className="text-xs font-semibold leading-snug flex-1">
                       {localize(src.title, language)}
                     </span>
-                    {isSelected && <Check size={14} className="absolute right-2 top-2 text-[var(--ob-accent)]" />}
+                    {isSelected && (
+                      <div className="h-5 w-5 rounded-full bg-[var(--ob-accent)] text-black flex items-center justify-center shrink-0">
+                        <Check size={12} strokeWidth={3} />
+                      </div>
+                    )}
                   </button>
                 );
               })}
             </div>
 
             <div className="pt-4">
-              <PrimaryAction disabled={!draft.acquisitionSource} onClick={advance}>
+              <PrimaryAction disabled={!draft.acquisitionSource} onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
@@ -699,12 +949,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         );
 
       // Frame 5: Knowledge Level ("How much do you know?")
-      case 'knowledge_level':
+      case 'knowledge_level': {
+        const knowledgeFeedback = KNOWLEDGE_FEEDBACK[draft.knowledgeLevel];
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={tr(`¿Cuál es tu nivel en ${topicName}?`, `What is your level in ${topicName}?`)}
-              mood="thinking"
+              speech={localize(knowledgeFeedback, language)}
+              mood={draft.knowledgeLevel === 'zero' ? 'happy' : 'beast'}
+              eyebrow={tr('Diagnóstico Inicial', 'Initial Diagnostic')}
+              title={tr(`¿Cuál es tu nivel en ${topicName}?`, `What is your level in ${topicName}?`)}
             />
 
             <div className="space-y-2.5 my-auto">
@@ -714,24 +967,27 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={lvl.id}
                     type="button"
-                    onClick={() => patchDraft({ knowledgeLevel: lvl.id })}
+                    onClick={() => {
+                      triggerHaptic();
+                      patchDraft({ knowledgeLevel: lvl.id });
+                    }}
                     className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[58px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-gradient-to-r from-[var(--ob-accent)]/20 to-[var(--ob-accent)]/5 text-white shadow-[0_0_20px_rgba(255,115,0,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
                     {/* Signal strength bars */}
-                    <div className="flex items-end gap-1 h-5 shrink-0">
+                    <div className="flex items-end gap-1 h-5 shrink-0 px-1">
                       {[1, 2, 3, 4, 5].map((bar) => (
                         <div
                           key={bar}
                           className={`w-1 rounded-full transition-colors ${
                             bar <= lvl.bars
                               ? isSelected
-                                ? 'bg-[var(--ob-accent)]'
+                                ? 'bg-[var(--ob-accent)] shadow-[0_0_6px_rgba(255,115,0,0.6)]'
                                 : 'bg-white/80'
-                              : 'bg-white/20'
+                              : 'bg-white/15'
                           }`}
                           style={{ height: `${bar * 20}%` }}
                         />
@@ -742,10 +998,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       {localize(lvl.title, language)}
                     </span>
                     <span
-                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-all duration-150 ${
                         isSelected
-                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
-                          : 'border-white/20 text-transparent'
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black shadow-[0_0_10px_rgba(255,115,0,0.5)]'
+                          : 'border-white/20 bg-white/[.03] text-transparent'
                       }`}
                     >
                       {isSelected && <Check size={14} strokeWidth={3} />}
@@ -756,12 +1012,13 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             <div className="pt-4">
-              <PrimaryAction onClick={advance}>
+              <PrimaryAction onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
           </div>
         );
+      }
 
       // Frame 6: Encouragement Interstitial
       case 'encouragement':
@@ -790,12 +1047,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         );
 
       // Frame 7: Motivation Reason ("Why are you learning?")
-      case 'motivation_reason':
+      case 'motivation_reason': {
+        const motFeedback = draft.motivation ? MOTIVATION_FEEDBACK[draft.motivation] : null;
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={tr(`¿Por qué quieres aprender ${topicName}?`, `Why are you learning ${topicName}?`)}
-              mood="happy"
+              speech={motFeedback ? localize(motFeedback, language) : tr(`¿Por qué quieres dominar ${topicName}?`, `Why do you want to master ${topicName}?`)}
+              mood={draft.motivation ? 'beast' : 'happy'}
+              eyebrow={tr('Tu Gran Porqué', 'Your Core Why')}
+              title={tr('Tu Motivación Principal', 'Your Main Motivation')}
             />
 
             <div className="space-y-2.5 my-auto">
@@ -805,22 +1065,29 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={mot.id}
                     type="button"
-                    onClick={() => patchDraft({ motivation: mot.id })}
+                    onClick={() => {
+                      triggerHaptic();
+                      patchDraft({ motivation: mot.id });
+                    }}
                     className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[58px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:border-white/20 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-gradient-to-r from-[var(--ob-accent)]/20 to-[var(--ob-accent)]/5 text-white shadow-[0_0_20px_rgba(255,115,0,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
-                    <span className="text-xl shrink-0">{mot.icon}</span>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 ${
+                      isSelected ? 'bg-[var(--ob-accent)]/20 border border-[var(--ob-accent)]/40' : 'bg-white/[.04] border border-white/5'
+                    }`}>
+                      {mot.icon}
+                    </div>
                     <span className="text-sm font-semibold flex-1">
                       {localize(mot.title, language)}
                     </span>
                     <span
-                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                      className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-all duration-150 ${
                         isSelected
-                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
-                          : 'border-white/20 text-transparent'
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black shadow-[0_0_10px_rgba(255,115,0,0.5)]'
+                          : 'border-white/20 bg-white/[.03] text-transparent'
                       }`}
                     >
                       {isSelected && <Check size={14} strokeWidth={3} />}
@@ -831,17 +1098,18 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             <div className="pt-4">
-              <PrimaryAction disabled={!draft.motivation} onClick={advance}>
+              <PrimaryAction disabled={!draft.motivation} onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
           </div>
         );
+      }
 
       // Frame 8: Weekly Promise Interstitial
       case 'weekly_promise':
         return (
-          <div className="flex min-h-full flex-col justify-between py-8 text-center">
+          <div className="flex min-h-full flex-col justify-between py-8 text-center select-none">
             <div />
             <div className="flex flex-col items-center">
               <div className="h-44 w-44 relative flex items-center justify-center pointer-events-none mb-3">
@@ -857,16 +1125,17 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               </h2>
             </div>
 
-            <PrimaryAction onClick={advance}>
+            <PrimaryAction onClick={() => { triggerHaptic(); advance(); }}>
               {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
             </PrimaryAction>
           </div>
         );
 
-      // Frame 9: Screen Time Hook & T1GER Health Pact
+      // Frame 9: Screen Time Hook & T1GER Health Pact (Loss Aversion Engine)
       case 'screen_time': {
         const hours = [0.75, 1, 1.5, 2].includes(draft.screenTimeHours) ? draft.screenTimeHours : 1.5;
         const selectedApps = draft.selectedDistractions || ['instagram', 'tiktok'];
+        const reclaimedHoursYear = Math.round(Math.max(0.5, 3.5 - hours) * 365);
 
         const DISTRACTION_APPS = [
           { id: 'tiktok', name: { es: 'TikTok', en: 'TikTok' }, icon: '🎵' },
@@ -874,10 +1143,11 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           { id: 'youtube', name: { es: 'YouTube', en: 'YouTube' }, icon: '▶️' },
           { id: 'x', name: { es: 'X (Twitter)', en: 'X (Twitter)' }, icon: '𝕏' },
           { id: 'games', name: { es: 'Juegos', en: 'Games' }, icon: '🎮' },
-          { id: 'browse', name: { es: 'Scroll infinito', en: 'Doomscroll' }, icon: '📱' },
+          { id: 'browse', name: { es: 'Doomscroll', en: 'Doomscroll' }, icon: '📱' },
         ];
 
         const toggleApp = (appId: string) => {
+          triggerHaptic();
           const current = new Set(selectedApps);
           if (current.has(appId)) current.delete(appId);
           else current.add(appId);
@@ -897,44 +1167,56 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             {/* App Pickers */}
-            <div className="grid grid-cols-3 gap-2 mb-3.5">
+            <div className="grid grid-cols-3 gap-2 mb-3">
               {DISTRACTION_APPS.map((app) => {
                 const isSel = selectedApps.includes(app.id);
                 return (
                   <button
                     key={app.id}
                     onClick={() => toggleApp(app.id)}
-                    className={`flex items-center justify-center gap-1.5 p-2 rounded-xl border transition-all active:scale-95 cursor-pointer ${
+                    className={`flex items-center justify-center gap-1.5 p-2.5 rounded-2xl border transition-all active:scale-95 cursor-pointer ${
                       isSel
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/20 text-white font-bold'
-                        : 'border-white/10 bg-white/[.03] text-zinc-400'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/20 text-white font-bold shadow-[0_0_14px_rgba(255,115,0,0.25)]'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-400 hover:border-white/20'
                     }`}
                   >
-                    <span>{app.icon}</span>
+                    <span className="text-base">{app.icon}</span>
                     <span className="text-xs">{localize(app.name, language)}</span>
                   </button>
                 );
               })}
             </div>
 
+            {/* Loss Aversion / Opportunity Cost Reclaimed Metric */}
+            <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[.07] px-3.5 py-2.5 mb-3 flex items-center gap-2.5 text-left shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <span className="text-xl shrink-0">⏳</span>
+              <p className="text-xs text-emerald-300 leading-snug">
+                {tr(
+                  `Recuperarás ~${reclaimedHoursYear} horas al año para construir tu negocio e invertir.`,
+                  `You will reclaim ~${reclaimedHoursYear} hours/year to build your business & wealth.`
+                )}
+              </p>
+            </div>
+
             {/* Target Daily Limit Selector */}
             <p className="text-xs font-bold text-zinc-300 mb-2">
               {tr('Tu límite máximo diario en estas apps:', 'Your max daily target limit on these apps:')}
             </p>
-            <div className="grid grid-cols-4 gap-1.5 mb-3.5">
+            <div className="grid grid-cols-4 gap-1.5 mb-3">
               {[0.75, 1.0, 1.5, 2.0].map((h) => (
                 <button
                   key={h}
                   onClick={() => {
+                    triggerHaptic();
                     patchDraft({ screenTimeHours: h });
                     if (typeof window !== 'undefined') {
                       localStorage.setItem('t1ger_screen_time_hours', h.toString());
                     }
                   }}
-                  className={`flex flex-col items-center justify-center rounded-xl border p-2 transition active:scale-95 cursor-pointer ${
+                  className={`flex flex-col items-center justify-center rounded-2xl border p-2 transition-all active:scale-95 cursor-pointer ${
                     hours === h
-                      ? 'border-cyan-500 bg-cyan-950/40 text-white font-bold shadow-[0_0_12px_rgba(6,182,212,0.25)]'
-                      : 'border-white/10 bg-white/[.03] text-zinc-400'
+                      ? 'border-cyan-500 bg-cyan-950/40 text-white font-bold shadow-[0_0_14px_rgba(6,182,212,0.3)] ring-1 ring-cyan-500/50'
+                      : 'border-white/10 bg-[#121216]/80 text-zinc-400 hover:border-white/20'
                   }`}
                 >
                   <span className="text-sm font-black">{h === 0.75 ? '45m' : `${h}h`}</span>
@@ -944,7 +1226,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             {/* Health Mechanics Alert Card */}
-            <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-b from-rose-500/10 to-transparent p-3.5 space-y-2 shadow-lg mb-2">
+            <div className="rounded-2xl border border-rose-500/30 bg-gradient-to-b from-rose-500/10 to-transparent p-3.5 space-y-1.5 shadow-lg mb-2 text-left">
               <div className="flex items-center gap-2">
                 <span className="text-rose-400 text-base">❤️</span>
                 <span className="font-mono text-xs font-bold text-rose-300">
@@ -960,7 +1242,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             <div className="pt-2">
-              <PrimaryAction onClick={advance}>
+              <PrimaryAction onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('PROTEGER MI TIEMPO & T1GER', 'PROTECT MY TIME & T1GER')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
@@ -970,6 +1252,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
 
       // Frame 10: Daily Commitment ("How much time can you commit?")
       case 'daily_goal': {
+        const goalFeedback = GOAL_FEEDBACK[draft.dailyGoal] || GOAL_FEEDBACK[10];
         const GOAL_OPTIONS: Array<{
           minutes: number;
           tag: LocalizedText;
@@ -1007,9 +1290,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         return (
           <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={tr('¿Cuánto tiempo puedes proteger cada día?', 'How much time can you protect each day?')}
-              mood="happy"
+              speech={localize(goalFeedback, language)}
+              mood={draft.dailyGoal >= 15 ? 'beast' : 'happy'}
               eyebrow={tr('Ritmo Diario', 'Daily Rhythm')}
+              title={tr('¿Cuánto tiempo puedes proteger cada día?', 'How much time can you protect each day?')}
             />
 
             <div className="grid grid-cols-2 gap-3 my-auto">
@@ -1019,11 +1303,14 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={opt.minutes}
                     type="button"
-                    onClick={() => patchDraft({ dailyGoal: opt.minutes })}
+                    onClick={() => {
+                      triggerHaptic();
+                      patchDraft({ dailyGoal: opt.minutes });
+                    }}
                     className={`relative flex flex-col justify-between min-h-32 rounded-2xl border p-3.5 text-left transition-all active:scale-[0.97] cursor-pointer ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 shadow-[0_0_20px_rgba(255,115,0,0.25)] ring-1 ring-[var(--ob-accent)]'
-                        : 'border-white/10 bg-white/[.03] hover:border-white/20 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-gradient-to-br from-[var(--ob-accent)]/20 to-[var(--ob-accent)]/5 shadow-[0_0_22px_rgba(255,115,0,0.25),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
                     {/* Top row: Symmetrical badge and check indicator */}
@@ -1031,7 +1318,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       <span
                         className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${
                           opt.featured
-                            ? 'bg-[var(--ob-accent)] text-black'
+                            ? 'bg-[var(--ob-accent)] text-black font-black'
                             : isSelected
                             ? 'bg-white/20 text-white'
                             : 'bg-white/10 text-zinc-300'
@@ -1063,7 +1350,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             </div>
 
             <div className="pt-4">
-              <PrimaryAction onClick={advance}>
+              <PrimaryAction onClick={() => { triggerHaptic(); advance(); }}>
                 {tr('CONTINUAR', 'CONTINUE')} <ArrowRight size={18} />
               </PrimaryAction>
             </div>
@@ -1367,13 +1654,13 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         const isCorrect = Boolean(selectedOption?.correct);
 
         return (
-          <div className="flex min-h-full flex-col py-3">
+          <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
               speech={
                 lessonChecked
                   ? isCorrect
-                    ? tr('¡Extraordinario! Los activos generan flujo positivo.', 'Awesome! Assets generate positive cash flow.')
-                    : tr('Cuidado: recuerda la regla de flujos de efectivo.', 'Careful: remember the cash flow rule.')
+                    ? tr('¡Extraordinario! Demostraste criterio de alto nivel.', 'Awesome! You proved high-level judgment.')
+                    : tr('Cuidado: reflexiona sobre la regla fundamental.', 'Careful: reflect on the core principle.')
                   : tr('Demuestra tu criterio para ganar tus primeros +100 XP.', 'Prove your judgement to earn your first +100 XP.')
               }
               mood={lessonChecked ? (isCorrect ? 'celebrate' : 'warning') : 'idle'}
@@ -1381,7 +1668,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               title={tr('Tu Primera Decisión', 'Your First Decision')}
             />
 
-            <p className="text-sm font-semibold text-zinc-300 text-center mb-3">
+            <p className="text-sm font-bold text-zinc-200 text-center mb-3.5 px-2 leading-snug">
               {questionPrompt}
             </p>
 
@@ -1392,23 +1679,34 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={opt.id}
                     onClick={() => {
-                      if (!lessonChecked) setSelectedLessonOption(opt.id);
+                      if (!lessonChecked) {
+                        triggerHaptic();
+                        setSelectedLessonOption(opt.id);
+                      }
                     }}
                     className={`flex items-center gap-3.5 w-full p-4 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer ${
                       lessonChecked
                         ? opt.correct
-                          ? 'border-[#3FC78E] bg-[#3FC78E]/15 text-white shadow-[0_0_15px_rgba(63,199,142,0.25)]'
+                          ? 'border-[#3FC78E] bg-[#3FC78E]/15 text-white shadow-[0_0_22px_rgba(63,199,142,0.28)] ring-1 ring-[#3FC78E]/60'
                           : isSelected
-                          ? 'border-[#E56A65] bg-[#E56A65]/15 text-white'
+                          ? 'border-[#E56A65] bg-[#E56A65]/15 text-white shadow-[0_0_18px_rgba(229,106,101,0.2)] ring-1 ring-[#E56A65]/60'
                           : 'border-white/5 bg-white/[.02] text-zinc-500 opacity-40'
                         : isSelected
-                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_15px_rgba(255,115,0,0.2)]'
-                        : 'border-white/10 bg-white/[.03] text-zinc-300 hover:bg-white/[.06]'
+                        ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/15 text-white shadow-[0_0_20px_rgba(255,115,0,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
                     <span
-                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-bold text-xs ${
-                        isSelected ? 'bg-[var(--ob-accent)] text-black' : 'bg-white/10 text-zinc-400'
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-black text-xs transition-colors ${
+                        lessonChecked
+                          ? opt.correct
+                            ? 'bg-[#3FC78E] text-black shadow-sm'
+                            : isSelected
+                            ? 'bg-[#E56A65] text-white shadow-sm'
+                            : 'bg-white/10 text-zinc-500'
+                          : isSelected
+                          ? 'bg-[var(--ob-accent)] text-black shadow-sm'
+                          : 'bg-white/10 text-zinc-400'
                       }`}
                     >
                       {String.fromCharCode(65 + opt.id)}
@@ -1425,8 +1723,8 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 animate={{ opacity: 1, y: 0 }}
                 className={`my-3 rounded-2xl p-3.5 border text-xs leading-relaxed ${
                   isCorrect
-                    ? 'border-[#3FC78E]/40 bg-[#3FC78E]/10 text-[#C5E8DE]'
-                    : 'border-[#E56A65]/40 bg-[#E56A65]/10 text-[#FADBD8]'
+                    ? 'border-[#3FC78E]/40 bg-[#3FC78E]/10 text-[#C5E8DE] shadow-[0_0_20px_rgba(63,199,142,0.15)]'
+                    : 'border-[#E56A65]/40 bg-[#E56A65]/10 text-[#FADBD8] shadow-[0_0_15px_rgba(229,106,101,0.1)]'
                 }`}
               >
                 <strong className="block text-sm font-bold text-white mb-0.5">
@@ -1443,13 +1741,18 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               {!lessonChecked ? (
                 <PrimaryAction
                   disabled={selectedLessonOption === null}
-                  onClick={() => setLessonChecked(true)}
+                  onClick={() => {
+                    triggerHaptic(isCorrect ? 20 : 35);
+                    if (isCorrect) fireRewardConfetti();
+                    setLessonChecked(true);
+                  }}
                 >
                   {tr('COMPROBAR', 'CHECK')} <Check size={18} />
                 </PrimaryAction>
               ) : isCorrect ? (
                 <PrimaryAction
                   onClick={() => {
+                    triggerHaptic();
                     patchDraft({ lessonCompleted: true, step: 'success' });
                   }}
                 >
@@ -1458,6 +1761,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               ) : (
                 <PrimaryAction
                   onClick={() => {
+                    triggerHaptic();
                     setSelectedLessonOption(null);
                     setLessonChecked(false);
                   }}
