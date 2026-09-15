@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Flag, X, CheckCircle2, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useBrain } from '../../contexts/BrainContext';
@@ -22,6 +22,15 @@ export const ReportAIModal: React.FC<ReportAIModalProps> = ({
   const [selectedReason, setSelectedReason] = useState<string>('inaccurate');
   const [comments, setComments] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const reasons = [
     { id: 'inaccurate', label: isEs ? 'Información inexacta o confusa' : 'Inaccurate or confusing info' },
@@ -60,7 +69,10 @@ export const ReportAIModal: React.FC<ReportAIModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none">
+      <div
+        onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm select-none"
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 10 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -78,8 +90,10 @@ export const ReportAIModal: React.FC<ReportAIModalProps> = ({
                 </h3>
               </div>
               <button
+                type="button"
                 onClick={onClose}
-                className="p-1 rounded-lg text-zinc-400 hover:text-white bg-white/5 border border-white/10 transition cursor-pointer"
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl text-zinc-400 hover:text-white bg-white/5 border border-white/10 transition cursor-pointer"
               >
                 <X size={16} />
               </button>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Trophy, Gift, ArrowRight, Award, Download, Check, Coins } from 'lucide-react';
+import { Sparkles, Trophy, Gift, ArrowRight, Award, Download, Check, Coins, X } from 'lucide-react';
 import { T1gerMascot3D } from '../T1gerMascot3D';
 import { fireRewardConfetti } from '../ui/confetti';
 import { useT1ger } from '../../contexts/T1gerContext';
@@ -31,6 +31,15 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleOpenChest = async () => {
@@ -51,6 +60,16 @@ export const BookChestRewardModal: React.FC<BookChestRewardModalProps> = ({
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[10000] flex flex-col items-center justify-between bg-gradient-to-b from-[#1C0F05] via-[#0D0907] to-[#09090B] px-6 py-8 font-sans text-white select-none overflow-y-auto"
       >
+        {/* Top Close Button for Immediate Exit */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={isEs ? 'Cerrar' : 'Close'}
+          className="absolute top-4 right-4 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+        >
+          <X size={18} />
+        </button>
+
         {/* Header */}
         <div className="w-full max-w-sm text-center pt-4">
           <span className="inline-flex items-center gap-1 font-mono text-[10px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-400/10 px-3 py-1 rounded-full border border-amber-400/25">

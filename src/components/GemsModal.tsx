@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Shield } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
@@ -12,6 +12,15 @@ interface GemsModalProps {
 export const GemsModal: React.FC<GemsModalProps> = ({ isOpen, onClose, coins }) => {
   const { language } = useBrain();
   const isEs = language === 'es';
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -37,8 +46,10 @@ export const GemsModal: React.FC<GemsModalProps> = ({ isOpen, onClose, coins }) 
                 {isEs ? 'Tienda de Gemas' : 'Gems Shop'}
               </h2>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} />
               </button>

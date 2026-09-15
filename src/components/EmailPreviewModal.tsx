@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Copy, Eye, Mail, Send, Smartphone, Sparkles, X } from 'lucide-react';
 import {
@@ -25,6 +25,15 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
   const [deviceView, setDeviceView] = useState<'mobile' | 'desktop'>('mobile');
   const [copied, setCopied] = useState(false);
   const [sentStatus, setSentStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   const getTemplateHtml = (key: TemplateKey): string => {
     switch (key) {
@@ -115,8 +124,10 @@ export const EmailPreviewModal: React.FC<EmailPreviewModalProps> = ({
             </div>
 
             <button
+              type="button"
               onClick={onClose}
-              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors"
+              aria-label="Cerrar previsualizador"
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
             >
               <X size={18} />
             </button>

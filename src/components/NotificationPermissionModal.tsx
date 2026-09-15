@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Bell, CheckCircle2, Flame, ShieldAlert, Smartphone, Sparkles, Trophy, X } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
@@ -46,6 +46,17 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
     onClose();
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !requesting) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose, requesting]);
+
   if (!isOpen) return null;
 
   return (
@@ -68,12 +79,14 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
           transition={{ type: 'spring', stiffness: 320, damping: 26 }}
           className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/12 bg-[#09231F] p-6 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)] font-sans select-none"
         >
-          {/* Close button */}
+          {/* Close button with min 44px touch target */}
           <button
+            type="button"
             onClick={onClose}
-            className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors"
+            aria-label={isEs ? 'Cerrar' : 'Close'}
+            className="absolute top-4 right-4 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/5 text-[#87A9A2] hover:bg-white/10 hover:text-white transition-colors cursor-pointer active:scale-90"
           >
-            <X size={16} />
+            <X size={18} />
           </button>
 
           {/* Center Mascot Avatar with Glow */}

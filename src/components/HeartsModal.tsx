@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Heart, Clock } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
@@ -16,6 +16,15 @@ export const HeartsModal: React.FC<HeartsModalProps> = ({ isOpen, onClose, energ
   const [isPaywallOpen, setIsPaywallOpen] = useState(false);
   const maxHearts = 5;
   const isFull = energy >= maxHearts;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
@@ -41,8 +50,10 @@ export const HeartsModal: React.FC<HeartsModalProps> = ({ isOpen, onClose, energ
                 {isEs ? 'Vidas' : 'Hearts'}
               </h2>
               <button
+                type="button"
                 onClick={onClose}
-                className="w-8 h-8 flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center bg-zinc-100 text-zinc-500 hover:bg-zinc-200 rounded-full transition-colors cursor-pointer"
               >
                 <X size={20} strokeWidth={2.5} />
               </button>

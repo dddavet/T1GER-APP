@@ -91,6 +91,16 @@ export const Coach: React.FC = () => {
   }, [appUser?.uid, user]);
 
   useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveView('learn');
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setActiveView]);
+
+  useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: loading ? 'auto' : 'smooth' });
   }, [messages.length, loading]);
 
@@ -217,9 +227,11 @@ export const Coach: React.FC = () => {
       {/* Top Header Bar with Safe Area Clearance */}
       <header className="z-20 flex shrink-0 items-center justify-between border-b border-white/6 bg-[#0D0D11] px-4 pb-3 pt-[calc(.85rem+env(safe-area-inset-top))]">
         <button
+          type="button"
           onClick={() => setActiveView('learn')}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white active:scale-95 transition cursor-pointer"
+          className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/5 text-zinc-300 hover:bg-white/10 hover:text-white active:scale-95 transition cursor-pointer"
           title={isEs ? 'Volver al aprendizaje' : 'Back to learn'}
+          aria-label={isEs ? 'Volver al aprendizaje' : 'Back to learn'}
         >
           <ArrowLeft size={20} />
         </button>

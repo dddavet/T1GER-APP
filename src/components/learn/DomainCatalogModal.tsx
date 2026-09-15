@@ -93,12 +93,13 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
               </div>
               <button
                 ref={closeButtonRef}
+                type="button"
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={onClose}
                 aria-label={tr('Cerrar catálogo de dominios', 'Close domain catalog')}
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
+                className="min-h-[44px] min-w-[44px] rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
               >
-                <X size={16} weight="bold" />
+                <X size={18} weight="bold" />
               </button>
             </div>
 

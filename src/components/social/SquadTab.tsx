@@ -541,6 +541,15 @@ function FriendFinderModal({ open, viewer, isEs, initialProfile, sentIds, onClos
 
   useEffect(() => { if (open) setResults(initialProfile ? [initialProfile] : []); }, [open, initialProfile]);
 
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [open, onClose]);
+
   const search = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!term.trim()) return;
@@ -564,7 +573,65 @@ function FriendFinderModal({ open, viewer, isEs, initialProfile, sentIds, onClos
   };
 
   if (typeof document === 'undefined') return null;
-  return createPortal(<AnimatePresence>{open && <div className="fixed inset-0 z-[180] flex items-end justify-center bg-black/80 p-3 backdrop-blur-md sm:items-center"><motion.div role="dialog" aria-modal="true" aria-label={isEs ? 'Agregar amigos' : 'Add friends'} initial={{ opacity: 0, y: 32, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 24, scale: .98 }} transition={{ type: 'spring', stiffness: 520, damping: 38 }} className="max-h-[88dvh] w-full max-w-md overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 shadow-2xl"><div className="flex items-start justify-between"><div><p className="font-mono text-[8px] font-bold uppercase tracking-[.2em] text-[#FF8A1F]">Squad access</p><h2 className="mt-1 text-lg font-black text-white">{isEs ? 'Recluta a tu círculo' : 'Recruit your circle'}</h2><p className="mt-1 text-[10px] text-zinc-400">{isEs ? 'Busca por @username o código único.' : 'Search by @username or unique code.'}</p></div><button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-zinc-400"><X size={16} /></button></div><div className="mt-4 rounded-2xl border border-[#FF7300]/20 bg-[#FF7300]/[0.06] p-3"><p className="font-mono text-[8px] font-bold uppercase tracking-[.15em] text-[#FF9A3D]">{isEs ? 'Tu enlace privado' : 'Your private link'}</p><div className="mt-2 flex items-center gap-2"><div className="min-w-0 flex-1 truncate rounded-xl border border-white/[0.08] bg-[#09090B] px-3 py-2.5 font-mono text-[9px] text-zinc-300">{inviteLink}</div><button onClick={copy} className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FF7300] text-black">{copied ? <Check size={16} /> : <Copy size={16} />}</button><button onClick={share} className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white"><Share2 size={16} /></button></div></div><form onSubmit={search} className="relative mt-4"><label htmlFor="friend-search" className="sr-only">{isEs ? 'Buscar amigos' : 'Search friends'}</label><Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" /><input id="friend-search" value={term} onChange={event => setTerm(event.target.value)} placeholder={isEs ? '@usuario o código T1GER' : '@username or T1GER code'} className="h-12 w-full rounded-2xl border border-white/[0.09] bg-[#09090B] pl-10 pr-12 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-[#FF7300]/55" /><button type="submit" className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-xl bg-[#FF7300] text-black">{searching ? <LoaderCircle size={14} className="animate-spin" /> : <ChevronRight size={15} />}</button></form><div className="mt-3 space-y-2">{results.map(profile => { const sent = sentIds.has(profile.uid); return <div key={profile.uid} className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[#09090B] p-3"><Avatar name={profile.displayName} profile={profile} /><div className="min-w-0 flex-1"><p className="truncate text-[11px] font-bold text-white">{profile.displayName}</p><p className="mt-0.5 truncate font-mono text-[8px] text-zinc-500">@{profile.username} · {profile.streak}d 🔥</p></div><button disabled={sent} onClick={() => onSent(profile)} className={`rounded-xl px-3 py-2 font-mono text-[8px] font-black uppercase ${sent ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'bg-[#FF7300] text-black'}`}>{sent ? (isEs ? 'Enviada' : 'Sent') : (isEs ? 'Agregar' : 'Add')}</button></div>; })}{!searching && term && !results.length && <p className="py-5 text-center text-[10px] text-zinc-500">{isEs ? 'No encontramos ese usuario. Prueba con su código.' : 'We could not find that user. Try their code.'}</p>}</div></motion.div></div>}</AnimatePresence>, document.body);
+  return createPortal(
+    <AnimatePresence>
+      {open && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+          className="fixed inset-0 z-[180] flex items-end justify-center bg-black/80 p-3 backdrop-blur-md sm:items-center"
+        >
+          <motion.div role="dialog" aria-modal="true" aria-label={isEs ? 'Agregar amigos' : 'Add friends'} initial={{ opacity: 0, y: 32, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 24, scale: .98 }} transition={{ type: 'spring', stiffness: 520, damping: 38 }} className="max-h-[88dvh] w-full max-w-md overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 shadow-2xl">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="font-mono text-[8px] font-bold uppercase tracking-[.2em] text-[#FF8A1F]">Squad access</p>
+                <h2 className="mt-1 text-lg font-black text-white">{isEs ? 'Recluta a tu círculo' : 'Recruit your circle'}</h2>
+                <p className="mt-1 text-[10px] text-zinc-400">{isEs ? 'Busca por @username o código único.' : 'Search by @username or unique code.'}</p>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.035] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="mt-4 rounded-2xl border border-[#FF7300]/20 bg-[#FF7300]/[0.06] p-3">
+              <p className="font-mono text-[8px] font-bold uppercase tracking-[.15em] text-[#FF9A3D]">{isEs ? 'Tu enlace privado' : 'Your private link'}</p>
+              <div className="mt-2 flex items-center gap-2">
+                <div className="min-w-0 flex-1 truncate rounded-xl border border-white/[0.08] bg-[#09090B] px-3 py-2.5 font-mono text-[9px] text-zinc-300">{inviteLink}</div>
+                <button onClick={copy} className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#FF7300] text-black cursor-pointer">{copied ? <Check size={16} /> : <Copy size={16} />}</button>
+                <button onClick={share} className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] text-white cursor-pointer"><Share2 size={16} /></button>
+              </div>
+            </div>
+            <form onSubmit={search} className="relative mt-4">
+              <label htmlFor="friend-search" className="sr-only">{isEs ? 'Buscar amigos' : 'Search friends'}</label>
+              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input id="friend-search" value={term} onChange={event => setTerm(event.target.value)} placeholder={isEs ? '@usuario o código T1GER' : '@username or T1GER code'} className="h-12 w-full rounded-2xl border border-white/[0.09] bg-[#09090B] pl-10 pr-12 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-[#FF7300]/55" />
+              <button type="submit" className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-xl bg-[#FF7300] text-black cursor-pointer">{searching ? <LoaderCircle size={14} className="animate-spin" /> : <ChevronRight size={15} />}</button>
+            </form>
+            <div className="mt-3 space-y-2">
+              {results.map(profile => {
+                const sent = sentIds.has(profile.uid);
+                return (
+                  <div key={profile.uid} className="flex items-center gap-3 rounded-2xl border border-white/[0.07] bg-[#09090B] p-3">
+                    <Avatar name={profile.displayName} profile={profile} />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11px] font-bold text-white">{profile.displayName}</p>
+                      <p className="mt-0.5 truncate font-mono text-[8px] text-zinc-500">@{profile.username} · {profile.streak}d 🔥</p>
+                    </div>
+                    <button disabled={sent} onClick={() => onSent(profile)} className={`rounded-xl px-3 py-2 font-mono text-[8px] font-black uppercase cursor-pointer ${sent ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-300' : 'bg-[#FF7300] text-black'}`}>{sent ? (isEs ? 'Enviada' : 'Sent') : (isEs ? 'Agregar' : 'Add')}</button>
+                  </div>
+                );
+              })}
+              {!searching && term && !results.length && <p className="py-5 text-center text-[10px] text-zinc-500">{isEs ? 'No encontramos ese usuario. Prueba con su código.' : 'We could not find that user. Try their code.'}</p>}
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
 }
 
 function ChallengeModal({ opponent, viewer, coins, isEs, onClose, onCreate }: { opponent: SocialProfile | null; viewer: SocialViewer; coins: number; isEs: boolean; onClose: () => void; onCreate: (challenge: DirectChallenge) => void }) {
@@ -572,17 +639,128 @@ function ChallengeModal({ opponent, viewer, coins, isEs, onClose, onCreate }: { 
   const [stake, setStake] = useState(50);
   const [metric, setMetric] = useState<'missions' | 'streak'>('missions');
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!opponent) return null;
   const valid = stake <= coins;
   const create = async () => { if (!valid) return; setSaving(true); try { const result = await SocialService.createChallenge(viewer, opponent, duration, stake, metric); SocialService.haptic([15, 30, 15]); onCreate(result); } finally { setSaving(false); } };
-  return createPortal(<div className="fixed inset-0 z-[190] flex items-end justify-center bg-black/85 p-3 backdrop-blur-md sm:items-center"><motion.div role="dialog" aria-modal="true" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} className="max-h-[calc(100dvh-1.5rem)] w-full max-w-sm overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"><div className="flex items-start justify-between"><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#FF7300]/25 bg-[#FF7300]/10 text-[#FF8A1F]"><Swords size={20} /></div><div><p className="font-mono text-[8px] uppercase tracking-[.18em] text-[#FF8A1F]">1v1 Arena</p><h2 className="mt-1 text-base font-black text-white">{isEs ? `Reta a ${opponent.displayName}` : `Challenge ${opponent.displayName}`}</h2></div></div><button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400"><X size={16} /></button></div><div className="mt-5 space-y-4"><div><p className="mb-2 font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Objetivo' : 'Goal'}</p><div className="grid grid-cols-2 gap-2">{(['missions', 'streak'] as const).map(value => <button key={value} onClick={() => setMetric(value)} className={`rounded-xl border py-2.5 text-[10px] font-bold ${metric === value ? 'border-[#FF7300]/45 bg-[#FF7300]/10 text-white' : 'border-white/[0.07] text-zinc-500'}`}>{value === 'missions' ? (isEs ? 'Más misiones' : 'Most missions') : (isEs ? 'Mayor racha' : 'Best streak')}</button>)}</div></div><div><p className="mb-2 font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Duración' : 'Duration'}</p><div className="grid grid-cols-3 gap-2">{([3, 7, 14] as const).map(value => <button key={value} onClick={() => setDuration(value)} className={`rounded-xl border py-2.5 font-mono text-[10px] font-black ${duration === value ? 'border-[#FF7300]/45 bg-[#FF7300]/10 text-[#FF9A3D]' : 'border-white/[0.07] text-zinc-500'}`}>{value}D</button>)}</div></div><div><div className="mb-2 flex items-center justify-between"><p className="font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Apuesta por jugador' : 'Stake per player'}</p><span className="font-mono text-[9px] text-zinc-400">{coins} 🪙</span></div><div className="grid grid-cols-3 gap-2">{[25, 50, 100].map(value => <button key={value} onClick={() => setStake(value)} disabled={value > coins} className={`rounded-xl border py-2.5 font-mono text-[10px] font-black ${stake === value ? 'border-amber-400/40 bg-amber-400/10 text-amber-300' : 'border-white/[0.07] text-zinc-500 disabled:opacity-30'}`}>{value}</button>)}</div></div><div className="flex items-center justify-between rounded-2xl border border-white/[0.07] bg-[#09090B] p-3"><div><p className="font-mono text-[8px] uppercase text-zinc-500">{isEs ? 'Pozo total' : 'Total pot'}</p><p className="mt-1 font-mono text-xl font-black text-amber-300">{stake * 2} 🪙</p></div><p className="max-w-[10rem] text-right text-[9px] leading-relaxed text-zinc-500">{isEs ? 'Las monedas se reservan cuando ambos aceptan.' : 'Coins lock when both players accept.'}</p></div>{!valid && <p className="text-[10px] text-[#FF7474]">{isEs ? 'No tienes monedas suficientes para esta apuesta.' : 'You do not have enough coins for this stake.'}</p>}<button onClick={create} disabled={!valid || saving} className="t1ger-primary-button flex w-full items-center justify-center gap-2 py-3.5 text-[10px] disabled:opacity-40">{saving ? <LoaderCircle size={15} className="animate-spin" /> : <Swords size={15} />} {isEs ? 'ENVIAR RETO' : 'SEND CHALLENGE'}</button></div></motion.div></div>, document.body);
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[190] flex items-end justify-center bg-black/85 p-3 backdrop-blur-md sm:items-center"
+    >
+      <motion.div role="dialog" aria-modal="true" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} className="max-h-[calc(100dvh-1.5rem)] w-full max-w-sm overflow-y-auto rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#FF7300]/25 bg-[#FF7300]/10 text-[#FF8A1F]"><Swords size={20} /></div>
+            <div>
+              <p className="font-mono text-[8px] uppercase tracking-[.18em] text-[#FF8A1F]">1v1 Arena</p>
+              <h2 className="mt-1 text-base font-black text-white">{isEs ? `Reta a ${opponent.displayName}` : `Challenge ${opponent.displayName}`}</h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={isEs ? 'Cerrar' : 'Close'}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <div className="mt-5 space-y-4">
+          <div>
+            <p className="mb-2 font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Objetivo' : 'Goal'}</p>
+            <div className="grid grid-cols-2 gap-2">
+              {(['missions', 'streak'] as const).map(value => (
+                <button key={value} onClick={() => setMetric(value)} className={`rounded-xl border py-2.5 text-[10px] font-bold cursor-pointer transition-colors ${metric === value ? 'border-[#FF7300]/45 bg-[#FF7300]/10 text-white' : 'border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>{value === 'missions' ? (isEs ? 'Más misiones' : 'Most missions') : (isEs ? 'Mayor racha' : 'Best streak')}</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="mb-2 font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Duración' : 'Duration'}</p>
+            <div className="grid grid-cols-3 gap-2">
+              {([3, 7, 14] as const).map(value => (
+                <button key={value} onClick={() => setDuration(value)} className={`rounded-xl border py-2.5 font-mono text-[10px] font-black cursor-pointer transition-colors ${duration === value ? 'border-[#FF7300]/45 bg-[#FF7300]/10 text-[#FF9A3D]' : 'border-white/[0.07] text-zinc-500 hover:text-zinc-300'}`}>{value}D</button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="font-mono text-[8px] font-bold uppercase tracking-wider text-zinc-500">{isEs ? 'Apuesta por jugador' : 'Stake per player'}</p>
+              <span className="font-mono text-[9px] text-zinc-400">{coins} 🪙</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[25, 50, 100].map(value => (
+                <button key={value} onClick={() => setStake(value)} disabled={value > coins} className={`rounded-xl border py-2.5 font-mono text-[10px] font-black cursor-pointer transition-colors ${stake === value ? 'border-amber-400/40 bg-amber-400/10 text-amber-300' : 'border-white/[0.07] text-zinc-500 hover:text-zinc-300 disabled:opacity-30'}`}>{value}</button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center justify-between rounded-2xl border border-white/[0.07] bg-[#09090B] p-3">
+            <div>
+              <p className="font-mono text-[8px] uppercase text-zinc-500">{isEs ? 'Pozo total' : 'Total pot'}</p>
+              <p className="mt-1 font-mono text-xl font-black text-amber-300">{stake * 2} 🪙</p>
+            </div>
+            <p className="max-w-[10rem] text-right text-[9px] leading-relaxed text-zinc-500">{isEs ? 'Las monedas se reservan cuando ambos aceptan.' : 'Coins lock when both players accept.'}</p>
+          </div>
+          {!valid && <p className="text-[10px] text-[#FF7474]">{isEs ? 'No tienes monedas suficientes para esta apuesta.' : 'You do not have enough coins for this stake.'}</p>}
+          <button onClick={create} disabled={!valid || saving} className="t1ger-primary-button flex w-full items-center justify-center gap-2 py-3.5 text-[10px] disabled:opacity-40 cursor-pointer">
+            {saving ? <LoaderCircle size={15} className="animate-spin" /> : <Swords size={15} />} {isEs ? 'ENVIAR RETO' : 'SEND CHALLENGE'}
+          </button>
+        </div>
+      </motion.div>
+    </div>,
+    document.body
+  );
 }
 
 function CommentComposer({ activity, isEs, onClose, onSubmit }: { activity: SquadActivity | null; isEs: boolean; onClose: () => void; onSubmit: (body: string) => void }) {
   const [body, setBody] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   if (!activity) return null;
   const copy = activityCopy(activity, isEs);
-  return createPortal(<div className="fixed inset-0 z-[190] flex items-end justify-center bg-black/75 p-3 backdrop-blur-sm"><motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md rounded-[1.6rem] border border-white/10 bg-[#121216] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]"><div className="flex items-center justify-between"><div><p className="font-mono text-[8px] uppercase tracking-[.18em] text-[#FF8A1F]">{isEs ? 'Respuesta de squad' : 'Squad reply'}</p><h2 className="mt-1 max-w-[17rem] truncate text-sm font-black text-white">{copy.title}</h2></div><button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400"><X size={16} /></button></div><form onSubmit={event => { event.preventDefault(); if (body.trim()) { onSubmit(body); setBody(''); } }} className="mt-4 flex gap-2"><input autoFocus maxLength={280} value={body} onChange={event => setBody(event.target.value)} placeholder={isEs ? 'Escribe algo útil…' : 'Say something useful…'} className="h-12 min-w-0 flex-1 rounded-2xl border border-white/[0.09] bg-[#09090B] px-4 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-[#FF7300]/50" /><button type="submit" disabled={!body.trim()} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF7300] text-black disabled:opacity-40"><Send size={17} /></button></form></motion.div></div>, document.body);
+  return createPortal(
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[190] flex items-end justify-center bg-black/75 p-3 backdrop-blur-sm"
+    >
+      <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md rounded-[1.6rem] border border-white/10 bg-[#121216] p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-mono text-[8px] uppercase tracking-[.18em] text-[#FF8A1F]">{isEs ? 'Respuesta de squad' : 'Squad reply'}</p>
+            <h2 className="mt-1 max-w-[17rem] truncate text-sm font-black text-white">{copy.title}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={isEs ? 'Cerrar' : 'Close'}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/[0.04] text-zinc-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X size={16} />
+          </button>
+        </div>
+        <form onSubmit={event => { event.preventDefault(); if (body.trim()) { onSubmit(body); setBody(''); } }} className="mt-4 flex gap-2">
+          <input autoFocus maxLength={280} value={body} onChange={event => setBody(event.target.value)} placeholder={isEs ? 'Escribe algo útil…' : 'Say something useful…'} className="h-12 min-w-0 flex-1 rounded-2xl border border-white/[0.09] bg-[#09090B] px-4 text-[12px] text-white outline-none placeholder:text-zinc-600 focus:border-[#FF7300]/50" />
+          <button type="submit" disabled={!body.trim()} className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#FF7300] text-black disabled:opacity-40 cursor-pointer"><Send size={17} /></button>
+        </form>
+      </motion.div>
+    </div>,
+    document.body
+  );
 }
 
 function ModerateModal({
@@ -604,6 +782,14 @@ function ModerateModal({
   const [reason, setReason] = useState<ReportReason>('inappropriate_content');
   const [details, setDetails] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   if (!target) return null;
 
@@ -643,13 +829,23 @@ function ModerateModal({
   };
 
   return createPortal(
-    <div className="fixed inset-0 z-[250] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+    <div
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      className="fixed inset-0 z-[250] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
+    >
       <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="w-full max-w-sm rounded-3xl border border-white/10 bg-[#121216] p-5 shadow-2xl text-white">
         {step === 'menu' && (
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-sm">{isEs ? `Opciones: ${target.name}` : `Options: ${target.name}`}</h3>
-              <button onClick={onClose} className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-white cursor-pointer"><X size={16} /></button>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
             </div>
             <div className="space-y-2 pt-2">
               <button
@@ -684,7 +880,14 @@ function ModerateModal({
               <h3 className="font-bold text-sm text-amber-300 flex items-center gap-2">
                 <ShieldAlert size={16} /> {isEs ? 'Reportar usuario' : 'Report user'}
               </h3>
-              <button onClick={onClose} className="p-1.5 rounded-xl bg-white/5 text-zinc-400 hover:text-white cursor-pointer"><X size={16} /></button>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label={isEs ? 'Cerrar' : 'Close'}
+                className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={16} />
+              </button>
             </div>
             <p className="text-[11px] text-zinc-400 leading-relaxed">
               {isEs ? 'Selecciona el motivo principal del reporte:' : 'Select the main reason for the report:'}
@@ -710,8 +913,8 @@ function ModerateModal({
               className="w-full h-16 rounded-xl border border-white/10 bg-black/30 p-2.5 text-xs text-white placeholder:text-zinc-600 outline-none resize-none focus:border-[#FF7300]"
             />
             <div className="flex gap-2 pt-1">
-              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer">{isEs ? 'Atrás' : 'Back'}</button>
-              <button onClick={handleReport} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-[#FF7300] text-black text-xs font-bold cursor-pointer disabled:opacity-50">{loading ? '...' : (isEs ? 'Enviar reporte' : 'Submit report')}</button>
+              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer hover:bg-white/5 transition-colors">{isEs ? 'Atrás' : 'Back'}</button>
+              <button onClick={handleReport} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-[#FF7300] text-black text-xs font-bold cursor-pointer disabled:opacity-50 hover:brightness-110 transition-all">{loading ? '...' : (isEs ? 'Enviar reporte' : 'Submit report')}</button>
             </div>
           </div>
         )}
@@ -728,8 +931,8 @@ function ModerateModal({
                 : 'You will not see their missions in the feed, they will not be able to challenge you, and they will be removed from your social views.'}
             </p>
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer">{isEs ? 'Cancelar' : 'Cancel'}</button>
-              <button onClick={handleBlock} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold cursor-pointer disabled:opacity-50">{loading ? '...' : (isEs ? 'Sí, bloquear' : 'Yes, block')}</button>
+              <button onClick={() => setStep('menu')} className="flex-1 py-2.5 rounded-xl border border-white/10 text-xs font-bold text-zinc-400 cursor-pointer hover:bg-white/5 transition-colors">{isEs ? 'Cancelar' : 'Cancel'}</button>
+              <button onClick={handleBlock} disabled={loading} className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-xs font-bold cursor-pointer disabled:opacity-50 hover:bg-red-600 transition-colors">{loading ? '...' : (isEs ? 'Sí, bloquear' : 'Yes, block')}</button>
             </div>
           </div>
         )}

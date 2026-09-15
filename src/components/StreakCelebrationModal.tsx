@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Check, Flame, Share2 } from 'lucide-react';
+import { Check, Flame, Share2, X } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { T1gerMascot3D } from './T1gerMascot3D';
@@ -47,6 +47,15 @@ export const StreakCelebrationModal: React.FC<StreakCelebrationModalProps> = ({
     return () => clearTimeout(timer);
   }, [isOpen, newStreak, previousStreak]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const weekDaysEs = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
@@ -83,6 +92,16 @@ export const StreakCelebrationModal: React.FC<StreakCelebrationModalProps> = ({
         transition={{ duration: 0.25 }}
         className="fixed inset-0 z-[1000] flex flex-col items-center justify-between overflow-y-auto bg-gradient-to-b from-[#220B02] via-[#0D0907] to-[#09090B] px-6 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[max(env(safe-area-inset-top),2rem)] font-sans text-white select-none"
       >
+        {/* Top Close Button for Immediate Exit */}
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label={isEs ? 'Cerrar celebración' : 'Close celebration'}
+          className="absolute top-4 right-4 z-30 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-white/70 hover:bg-white/10 hover:text-white transition cursor-pointer"
+        >
+          <X size={20} />
+        </button>
+
         {/* Top Hero: Flaming Mascot */}
         <div className="relative flex w-full max-w-sm flex-col items-center pt-2">
           {/* Glowing Flame Halo behind Mascot */}
