@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'motion/react';
-import { ArrowLeft, Coins, Sparkles } from 'lucide-react';
+import { ArrowLeft, Coins, Sparkles, Shield } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface BlackMarketProps {
@@ -71,6 +71,31 @@ export const BlackMarket: React.FC<BlackMarketProps> = ({ onClose }) => {
   const coins = appUser?.coins || 0;
   const unlocked = appUser?.unlockedAccessories || [];
   const equipped = appUser?.equippedAccessories || [];
+  const streakShields = appUser?.streakShields || 0;
+  const maxShields = 5;
+  const shieldCost = 250;
+  const canBuyShield = coins >= shieldCost && streakShields < maxShields;
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const handleBuyShield = async () => {
+    if (!canBuyShield || !updateAppUser) return;
+    await updateAppUser({
+      coins: coins - shieldCost,
+      streakShields: streakShields + 1,
+    });
+    if (typeof window !== 'undefined' && window.navigator?.vibrate) {
+      window.navigator.vibrate([20, 30, 40]);
+    }
+  };
 
   const handlePurchase = async (item: MarketItem) => {
     if (coins < item.cost) return;
@@ -112,7 +137,8 @@ export const BlackMarket: React.FC<BlackMarketProps> = ({ onClose }) => {
       <header className="flex items-center justify-between z-10 w-full mb-6 pt-safe">
         <button 
           onClick={onClose}
-          className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+          aria-label="Volver"
+          className="min-w-[44px] min-h-[44px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white/60 hover:text-white hover:bg-white/10 transition-all cursor-pointer active:scale-90"
         >
           <ArrowLeft size={16} />
         </button>
@@ -130,6 +156,55 @@ export const BlackMarket: React.FC<BlackMarketProps> = ({ onClose }) => {
       </header>
 
       <div className="flex-1 overflow-y-auto space-y-3 pb-safe z-10 hide-scrollbar">
+        {/* Streak Freeze Power-Up (Key Retention Engine) */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-2xl border border-cyan-500/30 bg-gradient-to-r from-cyan-950/40 via-[#121216] to-[#121216] p-4 shadow-[0_0_20px_rgba(6,182,212,0.12)]"
+        >
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex gap-3">
+              <div className="w-12 h-12 shrink-0 rounded-xl flex items-center justify-center border border-cyan-500/30 bg-cyan-500/15 text-cyan-400 text-2xl shadow-inner">
+                🛡️
+              </div>
+              <div className="flex flex-col pt-0.5">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-[12px] font-black uppercase tracking-wide leading-tight text-white">Escudo de Racha</h4>
+                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    {streakShields} / {maxShields} activos
+                  </span>
+                </div>
+                <span className="text-[10px] text-zinc-400 leading-snug mt-1">
+                  Protege tu racha si pierdes un día de práctica. Se activa automáticamente si no completas tu meta diaria.
+                </span>
+              </div>
+            </div>
+
+            <div className="shrink-0 flex flex-col items-end gap-2">
+              <button
+                type="button"
+                onClick={handleBuyShield}
+                disabled={!canBuyShield}
+                className={`px-3 py-1.5 rounded-lg font-mono text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all ${
+                  streakShields >= maxShields
+                    ? 'bg-white/5 border border-white/10 text-zinc-500 cursor-not-allowed'
+                    : canBuyShield
+                    ? 'bg-cyan-400 text-black hover:bg-cyan-300 shadow-[0_0_12px_rgba(6,182,212,0.4)] cursor-pointer active:scale-95'
+                    : 'bg-white/5 border border-white/10 text-white/30 cursor-not-allowed'
+                }`}
+              >
+                {streakShields >= maxShields ? (
+                  <span>Lleno</span>
+                ) : (
+                  <>
+                    <Coins size={11} />
+                    <span>{shieldCost}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </motion.div>
         {MARKET_ITEMS.map((item) => {
           const isOwned = unlocked.includes(item.id);
           const isEquipped = equipped.includes(item.id);

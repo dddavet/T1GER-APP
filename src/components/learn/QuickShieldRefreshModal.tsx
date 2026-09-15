@@ -79,20 +79,37 @@ export const QuickShieldRefreshModal: React.FC<QuickShieldRefreshModalProps> = (
     }, 2400);
   };
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md cursor-default"
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95 }}
         className="w-full max-w-md rounded-3xl border border-white/12 bg-[#121216] p-6 text-zinc-100 shadow-2xl overflow-hidden relative"
       >
-        {/* Close Button */}
+        {/* Close Button with min 44px touch target */}
         <button
+          type="button"
           onClick={onClose}
-          className="absolute top-5 right-5 h-8 w-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer"
+          aria-label={isEs ? 'Cerrar' : 'Close'}
+          className="absolute top-4 right-4 min-h-[44px] min-w-[44px] rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white transition cursor-pointer active:scale-90"
         >
-          <X size={16} />
+          <X size={18} />
         </button>
 
         {finished ? (

@@ -121,7 +121,10 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
         ref={dialogRef}
         aria-label={tr('Mentor T1GER Pro', 'T1GER AI Mentor Pro')}
         onCancel={onClose}
-        className="fixed inset-0 z-[300] m-0 h-dvh max-h-none w-screen max-w-none bg-black/85 backdrop-blur-xl p-4 open:flex items-center justify-center select-none"
+        onClick={(e) => {
+          if (e.target === dialogRef.current) onClose();
+        }}
+        className="fixed inset-0 z-[300] m-0 h-dvh max-h-none w-screen max-w-none bg-black/85 backdrop-blur-xl p-4 open:flex items-center justify-center select-none cursor-default"
       >
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 16 }}
@@ -130,14 +133,13 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
           transition={{ type: 'spring', damping: 26, stiffness: 260 }}
           className="relative flex w-full max-w-sm flex-col overflow-hidden rounded-[2.5rem] border border-white/10 bg-[#111116] shadow-2xl max-h-[94vh]"
         >
-          {/* Close button */}
-          {/* Close Button */}
+          {/* Close Button with min 44px touch target */}
           <button
             type="button"
             onPointerDown={() => SoundEffects.playTap()}
             onClick={onClose}
             aria-label={tr('Cerrar', 'Close')}
-            className="absolute top-4 right-4 z-30 flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-zinc-400 hover:bg-white/20 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
+            className="absolute top-4 right-4 z-30 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/10 text-zinc-400 hover:bg-white/20 hover:text-white transition-all duration-100 ease-out cursor-pointer active:scale-90"
           >
             <X size={18} />
           </button>

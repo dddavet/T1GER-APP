@@ -24,10 +24,17 @@ export function ApplyMissionModal({ mission, locale, onClose, onComplete, onRetu
   useEffect(() => {
     const el = dialog.current;
     if (el && !el.open) el.showModal();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !saving) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
       if (el?.open) el.close();
     };
-  }, []);
+  }, [onClose, saving]);
   const complete = async () => {
     if (inFlight.current) return;
     inFlight.current = true; setSaving(true); setError('');
@@ -42,7 +49,7 @@ export function ApplyMissionModal({ mission, locale, onClose, onComplete, onRetu
       setError(tr('No pudimos guardar la acción. Conservamos tu reflexión; comprueba la conexión e inténtalo de nuevo. No se duplicará el premio.', 'We could not save the action. Your reflection is preserved; check your connection and retry. Rewards will not be duplicated.'));
     } finally { setSaving(false); inFlight.current = false; }
   };
-  return createPortal(<dialog ref={dialog} aria-labelledby="apply-title" onCancel={event => { event.preventDefault(); if (!saving) onClose(); }} className="fixed inset-0 m-auto max-h-[94dvh] w-[calc(100%-1.5rem)] max-w-md overflow-y-auto rounded-3xl border border-white/15 bg-[#121216] p-5 text-white backdrop:bg-black/80">
+  return createPortal(<dialog ref={dialog} aria-labelledby="apply-title" onCancel={event => { event.preventDefault(); if (!saving) onClose(); }} onClick={event => { if (event.target === dialog.current && !saving) onClose(); }} className="fixed inset-0 m-auto max-h-[94dvh] w-[calc(100%-1.5rem)] max-w-md overflow-y-auto rounded-3xl border border-white/15 bg-[#121216] p-5 text-white backdrop:bg-black/80 cursor-default">
     <header className="flex items-start justify-between gap-3"><div><p className="font-mono text-[10px] uppercase tracking-widest text-orange-300">{tr('Del aprendizaje a tu vida', 'From learning to living')}</p><h2 id="apply-title" className="mt-2 text-2xl font-bold">{design?.title || mission.title}</h2></div><button disabled={saving} onPointerDown={() => SoundEffects.playTap()} onClick={onClose} aria-label={tr('Cerrar acción', 'Close action')} className="t1ger-icon-button shrink-0"><X size={20} /></button></header>
     {reward !== null ? <motion.section initial={reducedMotion ? false : { scale: .92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} role="status" className="py-9 text-center">
       <CheckCircle size={72} weight="fill" className="mx-auto text-emerald-400" /><h3 className="mt-4 text-3xl font-bold">{tr('Lo llevaste a la práctica.', 'You put it into practice.')}</h3>

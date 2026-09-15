@@ -48,10 +48,26 @@ export const T1gerResuscitationModal: React.FC<ResuscitationModalProps> = ({
     }, 1200);
   };
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !charging && !isShocking) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [charging, isShocking, isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/90 backdrop-blur-lg select-none">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !charging && !isShocking) onClose();
+      }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/90 backdrop-blur-lg select-none cursor-default"
+    >
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -79,9 +95,10 @@ export const T1gerResuscitationModal: React.FC<ResuscitationModalProps> = ({
             </div>
             <button
               onClick={onClose}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white bg-white/5 border border-white/10 transition cursor-pointer"
+              aria-label={isEs ? 'Cerrar' : 'Close'}
+              className="min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl text-zinc-400 hover:text-white bg-white/5 border border-white/10 transition cursor-pointer active:scale-90"
             >
-              <X size={14} />
+              <X size={16} />
             </button>
           </div>
 

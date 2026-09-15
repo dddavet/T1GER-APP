@@ -29,7 +29,14 @@ export const LessonSummaryModal: React.FC<LessonSummaryModalProps> = ({
     if (typeof window !== 'undefined' && window.navigator.vibrate) {
       window.navigator.vibrate([40, 50, 60]);
     }
-  }, [isOpen]);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onContinue();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onContinue]);
 
   if (!isOpen) return null;
 

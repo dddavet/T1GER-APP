@@ -505,7 +505,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const cleanData = Object.fromEntries(Object.entries(data).filter(([key, value]) => value !== undefined && !serverOwnedFields.has(key)));
     setAppUser(prev => {
       const base = prev || { uid: user.uid, email: user.email || '', niche: 'none', level: 1, xp: 0, streak: 0 };
-      const next = { ...base, ...cleanData } as AppUser;
+      const next = { ...base, ...data } as AppUser;
       saveLocalAppUser(next);
       return next;
     });

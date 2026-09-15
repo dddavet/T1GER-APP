@@ -36,6 +36,17 @@ export const T1gerVitalsSettingsModal: React.FC<T1gerVitalsSettingsModalProps> =
     onClose();
   };
 
+  React.useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
@@ -44,7 +55,10 @@ export const T1gerVitalsSettingsModal: React.FC<T1gerVitalsSettingsModalProps> =
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4 select-none"
+        onClick={(e) => {
+          if (e.target === e.currentTarget) onClose();
+        }}
+        className="fixed inset-0 z-[120] flex items-center justify-center bg-black/85 backdrop-blur-xl p-4 select-none cursor-default"
       >
         <motion.div
           initial={{ scale: 0.94, opacity: 0, y: 14 }}
@@ -70,7 +84,8 @@ export const T1gerVitalsSettingsModal: React.FC<T1gerVitalsSettingsModalProps> =
 
             <button
               onClick={onClose}
-              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:text-white transition cursor-pointer"
+              aria-label={isEs ? 'Cerrar' : 'Close'}
+              className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full bg-white/5 text-zinc-400 hover:text-white transition cursor-pointer active:scale-90"
             >
               <X size={16} />
             </button>

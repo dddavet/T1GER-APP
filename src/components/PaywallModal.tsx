@@ -60,6 +60,17 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
     })();
   }, [isOpen, appUser?.uid]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handlePurchase = async () => {
@@ -124,7 +135,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
 
   return (
     <AnimatePresence>
-      <dialog ref={dialogRef} aria-label="T1GER Pro" onCancel={onClose} className="fixed inset-0 z-[300] m-0 h-dvh max-h-none w-screen max-w-none bg-black/85 backdrop-blur-xl p-4 open:flex items-center justify-center">
+      <dialog
+        ref={dialogRef}
+        aria-label="T1GER Pro"
+        onCancel={onClose}
+        onClick={(e) => {
+          if (e.target === dialogRef.current) onClose();
+        }}
+        className="fixed inset-0 z-[300] m-0 h-dvh max-h-none w-screen max-w-none bg-black/85 backdrop-blur-xl p-4 open:flex items-center justify-center cursor-default"
+      >
         <motion.div
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -132,11 +151,12 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
           transition={{ type: "spring", bounce: 0.3 }}
           className="bg-[#111115] rounded-[2.5rem] w-full max-w-sm relative shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[94vh]"
         >
-          {/* Close button */}
+          {/* Close button with min 44px HIG touch target */}
           <button
+            type="button"
             onClick={onClose}
             aria-label={tr('Cerrar', 'Close')}
-            className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/20 transition-all cursor-pointer"
+            className="absolute top-4 right-4 z-20 min-w-[44px] min-h-[44px] rounded-full bg-white/10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-white/20 transition-all cursor-pointer active:scale-90"
           >
             <X size={18} />
           </button>

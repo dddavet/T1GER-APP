@@ -81,6 +81,29 @@ const AppContent = () => {
   });
   const previewAppFromUrl = import.meta.env.DEV && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('previewApp') === '1';
 
+  // Global tactile feedback engine: micro-haptics across all interactive controls
+  useEffect(() => {
+    let lastVibrate = 0;
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+      const interactive = target.closest('button, [role="button"], a[href], summary, input[type="submit"], input[type="button"], [data-haptic="true"]');
+      if (!interactive) return;
+      if (interactive.hasAttribute('disabled') || interactive.getAttribute('aria-disabled') === 'true') return;
+
+      const now = performance.now();
+      if (now - lastVibrate < 60) return; // Debounce rapid taps
+      lastVibrate = now;
+
+      if (typeof window !== 'undefined' && window.navigator?.vibrate) {
+        window.navigator.vibrate(8);
+      }
+    };
+
+    window.addEventListener('pointerdown', handlePointerDown, { passive: true });
+    return () => window.removeEventListener('pointerdown', handlePointerDown);
+  }, []);
+
   // Register the global push deep-link bridge. The SDK itself is initialized
   // when there is a user to identify, avoiding duplicate/racing init calls.
   useEffect(() => {

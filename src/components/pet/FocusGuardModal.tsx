@@ -55,6 +55,17 @@ export const FocusGuardModal: React.FC<FocusGuardModalProps> = ({ isOpen, onClos
     };
   }, [isActive, selectedSoundscape]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const handleSelectSoundscape = (type: SoundscapeType) => {
     setSelectedSoundscape(type);
     if (isActive) {

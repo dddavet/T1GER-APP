@@ -175,6 +175,31 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
                 </div>
               </div>
 
+              {/* Shield Protection Status Banner */}
+              <div className={`rounded-2xl border p-3.5 flex items-center gap-3 transition-colors ${
+                freezes > 0
+                  ? 'border-cyan-500/25 bg-cyan-950/30 text-cyan-200'
+                  : 'border-amber-500/25 bg-amber-950/30 text-amber-200'
+              }`}>
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                  freezes > 0 ? 'bg-cyan-500/20 text-cyan-400' : 'bg-amber-500/20 text-amber-400'
+                }`}>
+                  <Shield size={18} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-white leading-tight">
+                    {freezes > 0
+                      ? (isEs ? `${freezes} ${freezes === 1 ? 'Escudo activo' : 'Escudos activos'}` : `${freezes} Active Streak ${freezes === 1 ? 'Shield' : 'Shields'}`)
+                      : (isEs ? 'Sin escudos de protección' : 'No shields active')}
+                  </p>
+                  <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
+                    {freezes > 0
+                      ? (isEs ? 'Si un día no puedes practicar, tu racha se mantendrá a salvo automáticamente.' : 'If you miss a day, your streak will be automatically saved.')
+                      : (isEs ? 'Tu racha se reiniciará si no completas tu lección diaria. Consigue escudos en la tienda.' : 'Your streak will reset if you miss today. Get shields in the store.')}
+                  </p>
+                </div>
+              </div>
+
               {/* Monthly Calendar View */}
               <div className="rounded-[1.6rem] border border-white/8 bg-[#0B2925] p-5">
                 <div className="mb-5 flex items-center justify-between">

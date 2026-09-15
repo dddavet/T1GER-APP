@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import {
   AlertCircle,
@@ -80,6 +80,16 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
   const [aiFeedback, setAiFeedback] = useState<WrittenVerificationResult | null>(null);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [showStreakCelebration, setShowStreakCelebration] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !submitting && !evaluatingAI) {
+        onComplete();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [evaluatingAI, onComplete, submitting]);
 
   const options = useMemo<QuizOption[]>(() => {
     if (mission.recallOptions?.length) return mission.recallOptions;

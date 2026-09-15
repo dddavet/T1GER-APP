@@ -55,6 +55,17 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
     return () => window.clearInterval(interval);
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   const requiresManualFallback = report.dataSource === 'manual' || report.dataSource === 'unconfigured';
   const overBudget = report.totalMinutes > petState.dailyScreenTimeLimitMinutes;
   const topApp = report.apps.find((app) => app.minutes > 0);

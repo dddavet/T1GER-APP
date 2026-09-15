@@ -47,8 +47,17 @@ export const NotificationCenterModal: React.FC<NotificationCenterModalProps> = (
   useEffect(() => {
     refreshList();
     window.addEventListener('t1ger_notifications_updated', refreshList);
-    return () => window.removeEventListener('t1ger_notifications_updated', refreshList);
-  }, []);
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('t1ger_notifications_updated', refreshList);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleNotificationClick = (notif: AppNotification) => {
     NotificationService.markAsRead(notif.id);

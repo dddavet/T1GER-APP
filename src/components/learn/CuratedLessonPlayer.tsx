@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   BookOpen,
@@ -55,6 +55,16 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
   const [showSummary, setShowSummary] = useState(false);
   const [showStreakModal, setShowStreakModal] = useState(false);
   const completionHandledRef = useRef(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
 
   const applyMission = useMemo(() => {
     const sourceLevel = pathData.track.levels.find(level =>
@@ -126,7 +136,8 @@ export const CuratedLessonPlayer: React.FC<CuratedLessonPlayerProps> = ({
         <div className="flex items-center justify-between gap-4 mb-3">
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            aria-label={language === 'es' ? 'Cerrar lección' : 'Close lesson'}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 transition cursor-pointer active:scale-90"
           >
             <X size={18} />
           </button>

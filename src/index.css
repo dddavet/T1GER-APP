@@ -252,6 +252,15 @@ html, body {
   transform: translateY(2px) scale(.95);
 }
 
+/* Universal Tactile Compression & Spring Feedback (Apple HIG & Emil Kowalski) */
+button:not(:disabled):not(.t1ger-btn-3d):not(.t1ger-primary-button):not(.t1ger-btn-squish):not(.t1ger-btn-spring):active,
+[role="button"]:not(:disabled):active,
+a:not([role="tab"]):active,
+summary:active {
+  transform: scale(0.972);
+  transition: transform 70ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
 /* Micro-spring for icon buttons, close buttons, notification bells */
 .t1ger-btn-spring {
   transform: scale(1) translateZ(0);

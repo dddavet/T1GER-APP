@@ -46,6 +46,16 @@ export const TacticalProofModal: React.FC<TacticalProofModalProps> = ({ task, fi
   }), [isEs]);
   const haptic = (strong = false) => navigator.vibrate?.(strong ? [18, 24, 36] : 10);
 
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && stage !== 'verifying') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, stage]);
+
   const acceptFile = async (file?: File) => {
     if (!file) return;
     setImage(await fileToDataUrl(file));
@@ -146,7 +156,12 @@ export const TacticalProofModal: React.FC<TacticalProofModalProps> = ({ task, fi
 
   const ready = kind === 'text' ? text.trim().length >= 24 : Boolean(image);
   const modal = (
-    <div className="fixed inset-0 z-[240] flex min-h-[100dvh] items-end justify-center overflow-y-auto bg-[#050506]/92 text-white backdrop-blur-xl sm:items-center sm:p-5">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget && stage !== 'verifying') onClose();
+      }}
+      className="fixed inset-0 z-[240] flex min-h-[100dvh] items-end justify-center overflow-y-auto bg-[#050506]/92 text-white backdrop-blur-xl sm:items-center sm:p-5 cursor-default"
+    >
       <motion.div initial={{ opacity: 0, y: 36, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} className="relative w-full max-w-md overflow-hidden rounded-t-[2rem] border border-white/10 bg-[#101014] shadow-[0_-24px_80px_rgba(0,0,0,.55)] sm:rounded-[2rem]">
         <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-[radial-gradient(circle_at_50%_-35%,rgba(255,115,0,.28),transparent_70%)]" />
         <div className="relative max-h-[94dvh] overflow-y-auto p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] sm:p-6">

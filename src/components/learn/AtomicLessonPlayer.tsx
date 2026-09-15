@@ -239,10 +239,17 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
   useEffect(() => {
     const el = dialogRef.current;
     if (el && !el.open) el.showModal();
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
+      window.removeEventListener('keydown', handleKeyDown);
       if (el?.open) el.close();
     };
-  }, []);
+  }, [onClose]);
   const [mistakes, setMistakes] = useState(0);
   const { setActiveView } = useT1ger();
   const { appUser } = useAuth();
