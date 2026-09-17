@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Bell, Bot, Check, ChevronRight, Download, FileText, Globe2, LogOut, ShieldCheck, Smartphone, Trash2, UserRound } from 'lucide-react';
+import { Bell, Bot, Check, ChevronRight, Download, FileText, Globe2, LogOut, ShieldCheck, Smartphone, Trash2, UserRound, MessageSquareHeart, LifeBuoy } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
@@ -14,6 +14,7 @@ import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
 import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
 import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
 import { PaywallModal } from '../components/PaywallModal';
+import { CustomerFeedbackModal } from '../components/CustomerFeedbackModal';
 import { SoundEffects } from '../services/soundEffects';
 
 type LegalView = 'privacy' | 'terms' | null;
@@ -32,6 +33,7 @@ export const Profile = () => {
   const [showScreenTimeModal, setShowScreenTimeModal] = useState(false);
   const [showPermissionModal, setShowPermissionModal] = useState(false);
   const [showPaywallModal, setShowPaywallModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState<PredatorReport | null>(null);
   const [loadingReport, setLoadingReport] = useState(false);
   const notificationsEnabled = appUser?.notificationPreferences?.daily_reminder ?? false;
@@ -211,6 +213,12 @@ export const Profile = () => {
         <SettingRow icon={ShieldCheck} title={isEs ? 'Términos de servicio' : 'Terms of service'} onClick={() => setLegalView('terms')} />
       </motion.section>
 
+      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .13 }} className="t1ger-panel transform-gpu overflow-hidden">
+        <div className="border-b border-white/7 p-5"><p className="t1ger-kicker">{isEs ? 'Soporte y feedback' : 'Support and feedback'}</p></div>
+        <SettingRow icon={MessageSquareHeart} title={isEs ? 'Enviar feedback o reportar fallo' : 'Send feedback or report bug'} detail={isEs ? 'Atención directa' : 'Direct help'} onClick={() => setShowFeedbackModal(true)} />
+        <SettingRow icon={LifeBuoy} title={isEs ? 'Atención al usuario por email' : 'Customer support by email'} detail="soporte@t1ger.app" onClick={() => { window.open('mailto:soporte@t1ger.app?subject=T1GER%20App%20Soporte'); }} />
+      </motion.section>
+
       <AnimatePresence initial={false}>
         {status && <motion.p role="status" initial={{ opacity: 0, y: -6, scale: .98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -4 }} className="rounded-xl bg-white/[.04] p-3 text-center text-xs text-[#9DBAB4]">{status}</motion.p>}
       </AnimatePresence>
@@ -224,6 +232,7 @@ export const Profile = () => {
       <ScreenTimeFreedomModal isOpen={showScreenTimeModal} onClose={() => setShowScreenTimeModal(false)} />
       <NotificationPermissionModal isOpen={showPermissionModal} onClose={() => setShowPermissionModal(false)} onGranted={() => setStatus(isEs ? '¡Alertas de racha activadas!' : 'Streak alerts enabled!')} />
       <PaywallModal isOpen={showPaywallModal} onClose={() => setShowPaywallModal(false)} />
+      <CustomerFeedbackModal isOpen={showFeedbackModal} onClose={() => setShowFeedbackModal(false)} />
     </div>
   );
 };

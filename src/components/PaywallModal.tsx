@@ -7,6 +7,8 @@ import { fireConfetti } from './ui/confetti';
 import { revenueCat, CHECKOUT_ENABLED } from '../services/revenueCatService';
 import { Capacitor } from '@capacitor/core';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
+import { TermsOfService } from '../pages/TermsOfService';
+import { PrivacyPolicy } from '../pages/PrivacyPolicy';
 
 interface PaywallModalProps {
   isOpen: boolean;
@@ -35,6 +37,10 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
   const [loading, setLoading] = useState(false);
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [selectedPkgId, setSelectedPkgId] = useState<string>('$rc_annual');
+  const [showingLegal, setShowingLegal] = useState<'terms' | 'privacy' | null>(null);
+
+  const platform = Capacitor.getPlatform();
+  const storeName = platform === 'ios' ? 'App Store' : 'Google Play';
 
   const isAlreadyPro = Boolean(appUser?.isPro || appUser?.isFounder);
 
@@ -130,7 +136,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
     { icon: Zap, text: tr('Coach IA Ilimitado & 4 Rutas de Negocio', 'Unlimited AI Coach & 4 Business Tracks'), color: 'text-[#FF7300]' },
     { icon: Shield, text: tr('Protección de Racha Antideserción', 'Anti-Dropout Streak Protection'), color: 'text-emerald-400' },
     { icon: HeartHandshake, text: tr('10% de ingresos donado a conservación de tigres', '10% of revenue donated to tiger conservation'), color: 'text-cyan-400' },
-    { icon: Star, text: tr('Garantía y seguridad de Google Play', 'Google Play security guarantee'), color: 'text-purple-400' },
+    { icon: Star, text: tr(`Garantía y seguridad de ${storeName}`, `${storeName} security guarantee`), color: 'text-purple-400' },
   ];
 
   return (
@@ -161,7 +167,15 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
             <X size={18} />
           </button>
 
-          {!CHECKOUT_ENABLED ? (
+          {showingLegal === 'terms' ? (
+            <div className="p-4 overflow-y-auto max-h-[90vh]">
+              <TermsOfService onBack={() => setShowingLegal(null)} />
+            </div>
+          ) : showingLegal === 'privacy' ? (
+            <div className="p-4 overflow-y-auto max-h-[90vh]">
+              <PrivacyPolicy onBack={() => setShowingLegal(null)} />
+            </div>
+          ) : !CHECKOUT_ENABLED ? (
             <section className="space-y-5 p-7 pt-14 text-white">
               <Crown className="text-orange-400" aria-hidden="true" />
               <h2 className="text-2xl font-bold">{isAlreadyPro ? tr('Tu membresía', 'Your membership') : tr('Sigue aprendiendo gratis', 'Keep learning for free')}</h2>
@@ -288,7 +302,7 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
                     <CheckCircle2 size={14} className="text-[#FF7300] mt-0.5 shrink-0" />
                     <div>
                       <p className="font-bold text-white">{tr('Día 7: Comienza tu suscripción', 'Day 7: Subscription begins')}</p>
-                      <p className="text-[10px] text-zinc-400">{tr('Cancela en cualquier momento con un clic en Google Play.', 'Cancel anytime with 1-click in Google Play.')}</p>
+                      <p className="text-[10px] text-zinc-400">{tr(`Cancela en cualquier momento con un clic en ${storeName}.`, `Cancel anytime with 1-click in ${storeName}.`)}</p>
                     </div>
                   </div>
                 </div>
@@ -358,14 +372,34 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, sou
             )}
 
             {/* Trust Footer */}
-            <div className="flex flex-col items-center gap-1 pt-1 text-center">
+            <div className="flex flex-col items-center gap-1.5 pt-1 text-center">
               <div className="flex items-center gap-1.5 text-[9px] text-zinc-500 font-mono">
                 <Shield className="w-3 h-3 text-emerald-400" />
-                <span>{tr('Procesado con máxima seguridad vía Google Play', 'Securely processed via Google Play')}</span>
+                <span>{tr(`Procesado con máxima seguridad vía ${storeName}`, `Securely processed via ${storeName}`)}</span>
               </div>
-              <p className="text-[8px] text-zinc-600 font-mono">
-                {tr('Cancela o administra tu suscripción en cualquier momento desde Google Play.', 'Cancel or manage your subscription anytime on Google Play.')}
+              <p className="text-[8.5px] text-zinc-500 font-mono leading-tight px-2">
+                {tr(
+                  `Cancela o administra tu suscripción en cualquier momento desde ${storeName}. La renovación se cobra 24 horas antes del vencimiento a menos que se cancele.`,
+                  `Cancel or manage your subscription anytime in ${storeName}. Renewal is charged 24 hours prior to expiration unless canceled.`
+                )}
               </p>
+              <div className="flex items-center justify-center gap-2 pt-1 text-[10px] text-zinc-400 font-mono">
+                <button
+                  type="button"
+                  onClick={() => setShowingLegal('terms')}
+                  className="hover:text-white underline cursor-pointer"
+                >
+                  {tr('Términos & EULA', 'Terms & EULA')}
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => setShowingLegal('privacy')}
+                  className="hover:text-white underline cursor-pointer"
+                >
+                  {tr('Privacidad', 'Privacy')}
+                </button>
+              </div>
             </div>
           </div>
           </>}

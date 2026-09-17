@@ -7,6 +7,8 @@ import { SoundEffects } from '../services/soundEffects';
 import { T1gerMascot3D } from './T1gerMascot3D';
 import { Capacitor } from '@capacitor/core';
 import { revenueCat, CHECKOUT_ENABLED } from '../services/revenueCatService';
+import { TermsOfService } from '../pages/TermsOfService';
+import { PrivacyPolicy } from '../pages/PrivacyPolicy';
 
 interface MentorPaywallModalProps {
   isOpen: boolean;
@@ -23,6 +25,10 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
   const [selectedPlan, setSelectedPlan] = useState<'annual' | 'monthly'>('annual');
   const [purchaseStatus, setPurchaseStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showingLegal, setShowingLegal] = useState<'terms' | 'privacy' | null>(null);
+
+  const platform = Capacitor.getPlatform();
+  const storeName = platform === 'ios' ? 'App Store' : 'Google Play';
 
   useEffect(() => {
     const el = dialogRef.current;
@@ -88,6 +94,29 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
     }
   };
 
+  const handleRestore = async () => {
+    SoundEffects.playTap();
+    setLoading(true);
+    setPurchaseStatus(null);
+    try {
+      if (Capacitor.isNativePlatform()) {
+        const result = await revenueCat.restore();
+        if (result.isPro) {
+          setPurchaseStatus(tr('¡Compras anteriores restauradas con éxito!', 'Previous purchases successfully restored!'));
+          setTimeout(() => onClose(), 1500);
+        } else {
+          setPurchaseStatus(tr('No encontramos compras anteriores activas.', 'No active past purchases found.'));
+        }
+      } else {
+        setPurchaseStatus(tr('Restaura desde la tienda oficial de tu dispositivo.', 'Restore from your device official store.'));
+      }
+    } catch {
+      setPurchaseStatus(tr('Error al restaurar compras.', 'Error restoring purchases.'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const features = [
     {
       image: '/t1ger-avatar.png',
@@ -144,6 +173,16 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
             <X size={18} />
           </button>
 
+          {showingLegal === 'terms' ? (
+            <div className="p-4 overflow-y-auto max-h-[90vh]">
+              <TermsOfService onBack={() => setShowingLegal(null)} />
+            </div>
+          ) : showingLegal === 'privacy' ? (
+            <div className="p-4 overflow-y-auto max-h-[90vh]">
+              <PrivacyPolicy onBack={() => setShowingLegal(null)} />
+            </div>
+          ) : (
+            <>
           {/* Ambient Glow Background */}
           <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-56 w-56 rounded-full bg-[#FF7300]/20 blur-3xl" />
 
@@ -294,14 +333,47 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
               </p>
             )}
 
-            {/* Footer Assurance */}
-            <p className="text-center font-mono text-[9px] text-zinc-500 leading-tight">
-              {tr(
-                'Sin permanencia. Cancela o cambia de plan en cualquier momento.',
-                'No commitment. Cancel or change plans anytime.'
-              )}
-            </p>
+            {/* Restore button */}
+            <div className="text-center pt-0.5">
+              <button
+                type="button"
+                onClick={handleRestore}
+                disabled={loading}
+                className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 hover:text-zinc-200 transition-colors underline cursor-pointer"
+              >
+                {tr('Restaurar compras anteriores', 'Restore previous purchases')}
+              </button>
+            </div>
+
+            {/* Footer Assurance & Compliance */}
+            <div className="space-y-1.5 pt-1 text-center">
+              <p className="font-mono text-[8.5px] text-zinc-500 leading-tight px-1">
+                {tr(
+                  `La suscripción se renueva automáticamente a menos que se cancele al menos 24 horas antes del final del periodo. Gestiona tu suscripción en cualquier momento en los ajustes de tu cuenta de ${storeName}.`,
+                  `Subscription automatically renews unless cancelled at least 24 hours before period ends. Manage anytime in ${storeName} account settings.`
+                )}
+              </p>
+              <div className="flex items-center justify-center gap-2 text-[10px] text-zinc-400 font-mono">
+                <button
+                  type="button"
+                  onClick={() => setShowingLegal('terms')}
+                  className="hover:text-white underline cursor-pointer"
+                >
+                  {tr('Términos & EULA', 'Terms & EULA')}
+                </button>
+                <span>•</span>
+                <button
+                  type="button"
+                  onClick={() => setShowingLegal('privacy')}
+                  className="hover:text-white underline cursor-pointer"
+                >
+                  {tr('Privacidad', 'Privacy')}
+                </button>
+              </div>
+            </div>
           </div>
+          </>
+          )}
         </motion.div>
       </dialog>
     </AnimatePresence>
