@@ -43,20 +43,19 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setActiveView('profile')}
-              className="relative flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-b from-amber-500/20 via-orange-500/10 to-transparent border border-amber-500/35 shadow-[0_0_14px_rgba(255,115,0,0.25)] overflow-hidden cursor-pointer active:scale-90 active:translate-y-0.5 transition-transform duration-100 ease-out group"
+              className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-[#18181D] border border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)] overflow-hidden cursor-pointer active:scale-92 transition-transform duration-120 ease-out group"
               aria-label="T1GER Mascot"
             >
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,140,0,0.35),transparent_70%)] group-hover:opacity-100 transition-opacity" />
               <img
                 src="/t1ger-avatar.png"
                 alt="T1GER Mascot"
-                className="relative z-10 h-full w-full object-contain scale-[1.48] filter drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]"
+                className="relative z-10 h-full w-full object-contain scale-[1.45] filter drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
               />
             </button>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="font-mono text-xs font-black tracking-tight text-white leading-none">T1GER</span>
-                <span className="font-mono text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-[var(--ob-accent)]/20 text-[var(--ob-accent)] border border-[var(--ob-accent)]/30">
+                <span className="font-mono text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded-full bg-white/[0.06] text-zinc-300 border border-white/10">
                   LVL {appUser?.level || 1}
                 </span>
               </div>
@@ -69,10 +68,10 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setShowStreakModal(true)}
-              className={`relative flex h-7 items-center gap-1.5 rounded-xl border px-2 font-mono text-[11px] font-bold transition-all duration-150 ease-out cursor-pointer active:scale-92 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] ${
+              className={`relative flex h-7 items-center gap-1.5 rounded-xl border px-2.5 font-mono text-[11px] font-bold transition-all duration-120 ease-out cursor-pointer active:scale-95 before:absolute before:-inset-2 before:content-[''] ${
                 isLearnStreakAtRisk
-                  ? 'border-red-500/45 bg-red-500/15 text-red-300 shadow-[0_0_16px_rgba(239,68,68,.3)]'
-                  : 'border-white/10 bg-white/[0.05] text-amber-400 hover:bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
+                  ? 'border-red-500/40 bg-red-500/10 text-red-300 shadow-[0_2px_8px_rgba(239,68,68,0.2)]'
+                  : 'border-white/10 bg-white/[0.05] text-amber-400 hover:bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
               }`}
               aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
             >
@@ -80,15 +79,15 @@ export const HUD = React.memo(() => {
               <motion.span
                 animate={
                   isLearnStreakAtRisk
-                    ? { scale: [1, 1.25, 1], rotate: [-4, 4, -4] }
-                    : { scale: [1, 1.1, 1] }
+                    ? { scale: [1, 1.2, 1], rotate: [-4, 4, -4] }
+                    : undefined
                 }
-                transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+                transition={isLearnStreakAtRisk ? { repeat: Infinity, duration: 2, ease: 'easeInOut' } : undefined}
                 className="inline-flex items-center"
               >
                 <Fire size={13} weight="fill" className={isLearnStreakAtRisk ? 'text-red-300' : 'text-amber-400'} />
               </motion.span>
-              <span className="tabular-nums">{learnStreak}</span>
+              <span className="tabular-nums text-white font-black">{learnStreak}</span>
               {Boolean(appUser?.streakShields && appUser.streakShields > 0) && (
                 <span
                   title={isEs ? `${appUser?.streakShields} Escudo${(appUser?.streakShields || 0) > 1 ? 's' : ''} de racha activo` : `${appUser?.streakShields} active streak shield${(appUser?.streakShields || 0) > 1 ? 's' : ''}`}
@@ -101,18 +100,18 @@ export const HUD = React.memo(() => {
 
             {/* Verified XP Badge */}
             <div
-              className="flex h-7 items-center gap-1.5 rounded-xl bg-[#3FC78E]/10 border border-[#3FC78E]/30 px-2 font-mono text-[11px] font-bold text-[#78DDB0] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+              className="flex h-7 items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-2.5 font-mono text-[11px] font-bold text-emerald-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               aria-label={`${stats.verifiedXP} ${isEs ? 'XP verificado' : 'verified XP'}`}
             >
-              <ShieldCheck size={14} weight="bold" />
-              <span className="tabular-nums">{stats.verifiedXP}</span>
+              <ShieldCheck size={13} weight="bold" />
+              <span className="tabular-nums text-emerald-300 font-black">{stats.verifiedXP}</span>
             </div>
 
             {/* Notification Center Bell */}
             <button
               onPointerDown={haptic}
               onClick={() => setShowNotificationCenter(true)}
-              className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white transition-all duration-150 ease-out cursor-pointer active:scale-92 active:translate-y-0.5 before:absolute before:-inset-2 before:content-[''] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+              className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all duration-120 ease-out cursor-pointer active:scale-92 before:absolute before:-inset-2 before:content-[''] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
               <motion.span

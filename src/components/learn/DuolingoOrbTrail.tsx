@@ -120,10 +120,9 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                         className="absolute -top-11 z-20 flex flex-col items-center pointer-events-none select-none"
                       >
                         <div
-                          className="px-3 py-1 rounded-xl text-[11px] font-mono font-black uppercase tracking-wider text-black shadow-lg flex items-center gap-1.5"
+                          className="px-3 py-1 rounded-xl text-[11px] font-mono font-black uppercase tracking-wider text-black shadow-[0_4px_16px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.35)] flex items-center gap-1.5"
                           style={{
                             backgroundColor: accentColor,
-                            boxShadow: `0 0 16px ${glowColor}`,
                           }}
                         >
                           <Sparkle size={12} weight="fill" />
@@ -135,29 +134,29 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
 
                     {/* The 3D Tactile Orb Button */}
                     <div className="relative">
-                      {/* Active Breathing Aura */}
+                      {/* Active Concentric Highlight Ring (GPU-Safe & Anti-Vaper) */}
                       {isCurrent && (
                         <motion.div
                           animate={
                             reducedMotion
                               ? undefined
                               : {
-                                  scale: [1, 1.12, 1],
-                                  opacity: [0.55, 0.85, 0.55],
+                                  scale: [1, 1.08, 1],
+                                  opacity: [0.6, 0.95, 0.6],
                                 }
                           }
                           transition={{
                             repeat: Infinity,
-                            duration: 2.4,
+                            duration: 2.2,
                             ease: 'easeInOut',
                           }}
-                          className="absolute -inset-2.5 rounded-full blur-md -z-10"
-                          style={{ backgroundColor: `${accentColor}55` }}
+                          className="absolute -inset-2 rounded-full border-2 -z-10 pointer-events-none"
+                          style={{ borderColor: accentColor }}
                         />
                       )}
                       {isReview && (
                         <div
-                          className="absolute -inset-2 rounded-full animate-pulse blur-sm -z-10 bg-cyan-400/35"
+                          className="absolute -inset-1.5 rounded-full border border-cyan-400/50 -z-10 pointer-events-none"
                         />
                       )}
 

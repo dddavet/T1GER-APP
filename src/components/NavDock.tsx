@@ -75,20 +75,20 @@ export const NavDock = React.memo(() => {
         {active && (
           <motion.span
             layoutId="navdock-active-pill"
-            className="absolute inset-0 rounded-2xl border border-[var(--ob-accent)]/35 bg-[var(--ob-accent)]/15 shadow-[0_0_12px_rgba(255,115,0,0.15)]"
+            className="absolute inset-0 rounded-2xl border border-white/10 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_2px_8px_rgba(0,0,0,0.4)]"
             transition={{ type: 'spring', stiffness: 500, damping: 35 }}
           />
         )}
         <motion.span
           className="relative flex z-10"
-          animate={{ y: active ? -1 : 0, scale: active ? 1.08 : 1 }}
+          animate={{ y: active ? -1 : 0, scale: active ? 1.06 : 1 }}
           transition={{ type: 'spring', stiffness: 600, damping: 35 }}
         >
           <Icon size={18} weight={active ? 'fill' : 'bold'} className={active ? 'text-[var(--ob-accent)]' : ''} />
         </motion.span>
         <motion.span
           className={`relative z-10 text-[10px] font-semibold truncate max-w-full px-1 ${
-            active ? 'text-white' : 'text-zinc-500'
+            active ? 'text-white font-bold' : 'text-zinc-500'
           }`}
           animate={{ y: active ? -1 : 0 }}
           transition={{ duration: 0.1 }}
@@ -102,10 +102,10 @@ export const NavDock = React.memo(() => {
   return (
     <>
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[calc(.5rem+env(safe-area-inset-bottom))] select-none">
-        <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.75rem] border border-white/12 bg-[#121216]/85 backdrop-blur-2xl p-1.5 shadow-[0_20px_48px_rgba(0,0,0,0.65),0_0_1px_rgba(255,255,255,0.15)]">
+        <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.85rem] border border-white/10 bg-[#121216]/90 backdrop-blur-2xl p-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.06)]">
           <nav
             aria-label={isEs ? 'Navegación principal' : 'Primary navigation'}
-            className="flex w-full items-center gap-1 rounded-[1.4rem] border border-white/[0.08] bg-[#09090B]/90 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+            className="flex w-full items-center gap-1 rounded-[1.45rem] border border-white/[0.06] bg-[#09090B]/95 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
           >
             {/* Left tabs: Learn, Apply */}
             {leftTabs.map(renderTab)}
@@ -114,34 +114,18 @@ export const NavDock = React.memo(() => {
             <div className="relative flex flex-col items-center justify-center shrink-0 px-1.5">
               <motion.button
                 type="button"
-                whileTap={{ scale: 0.88, y: 3 }}
-                whileHover={{ scale: 1.06 }}
-                animate={
-                  reducedMotion
-                    ? undefined
-                    : {
-                        boxShadow: [
-                          '0 10px 24px rgba(255,115,0,0.45)',
-                          '0 14px 30px rgba(255,115,0,0.7)',
-                          '0 10px 24px rgba(255,115,0,0.45)',
-                        ],
-                      }
-                }
-                transition={{
-                  repeat: Infinity,
-                  duration: 2.8,
-                  ease: 'easeInOut',
-                }}
+                whileTap={{ scale: 0.9, y: 2 }}
+                whileHover={{ scale: 1.05 }}
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={handleMentorClick}
                 aria-label={isEs ? 'Mentor IA T1GER' : 'T1GER AI Mentor'}
-                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-gradient-to-tr from-[#FF5500] via-[#FF7300] to-[#FFA033] p-[2px] ring-4 ring-[#121216]/90 shadow-[0_8px_20px_rgba(255,115,0,0.4)] cursor-pointer"
+                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#121216] p-[2px] ring-4 ring-[#121216] border border-white/15 shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
               >
-                <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-b from-[#FF8A2A] to-[#E65100] shadow-[inset_0_1px_2px_rgba(255,255,255,0.45)] overflow-hidden">
+                <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-b from-[#FF7300] to-[#C2410C] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] overflow-hidden">
                   <img
                     src="/t1ger-avatar.png"
                     alt="T1GER Mentor"
-                    className="h-10 w-10 scale-110 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] select-none pointer-events-none transition-transform hover:scale-125"
+                    className="h-10 w-10 scale-110 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] select-none pointer-events-none transition-transform group-hover:scale-120"
                   />
                 </div>
                 {!isPro && (
@@ -150,7 +134,7 @@ export const NavDock = React.memo(() => {
                   </span>
                 )}
               </motion.button>
-              <span className="mt-0.5 text-[9px] font-bold text-amber-400/90 tracking-tight">
+              <span className="mt-0.5 text-[9px] font-semibold text-zinc-400 tracking-tight">
                 {isEs ? 'Mentor' : 'Mentor'}
               </span>
             </div>

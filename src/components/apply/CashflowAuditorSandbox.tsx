@@ -249,7 +249,7 @@ export const CashflowAuditorSandbox: React.FC = () => {
             </button>
             <button
               onClick={handleVerifyBalance}
-              className="flex-1 py-2.5 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-black flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(255,115,0,0.3)] transition cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-black flex items-center justify-center gap-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_4px_rgba(0,0,0,0.3)] transition cursor-pointer hover:brightness-105"
             >
               <ShieldCheck size={15} />
               <span>{isEs ? 'Verificar Balance (+180 vXP)' : 'Verify Balance (+180 vXP)'}</span>

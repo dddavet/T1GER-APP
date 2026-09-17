@@ -177,146 +177,131 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
       {/* VIEW 1: Duolingo-style Winding Orb Trail (Immediate Dopamine & Action) */}
       {viewMode === 'path' ? (
         <div className="mt-1 space-y-2.5">
-          {/* Duolingo Hero Unit Banner with Lively Mascot */}
-          <div
-            className="rounded-[2rem] border p-3.5 sm:p-4.5 shadow-xl relative overflow-hidden text-white"
-            style={{
-              background: 'linear-gradient(135deg, #181822 0%, #111116 100%)',
-              borderColor: `${currentDomain.accentColor}40`,
-              boxShadow: `0 10px 30px -10px ${currentDomain.glowColor}`,
-            }}
-          >
-            {/* Ambient Background Glow */}
-            <div
-              className="absolute top-0 right-0 w-48 h-48 rounded-full blur-3xl -mr-12 -mt-12 pointer-events-none opacity-25"
-              style={{ backgroundColor: currentDomain.accentColor }}
-            />
-
-            {/* Top Unit Badge & Pedigree Citation */}
-            <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5 relative z-10">
-              <span
-                className="inline-flex items-center text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full border"
-                style={{
-                  backgroundColor: `${currentDomain.accentColor}20`,
-                  borderColor: `${currentDomain.accentColor}45`,
-                  color: currentDomain.accentColor,
-                }}
-              >
-                {tr('UNIDAD', 'UNIT')} {activeSectionIndex + 1}: {localizeLearning(activeSection.title, locale)}
-              </span>
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400">
-                <Sparkle size={10} weight="fill" className="text-orange-400 shrink-0" />
-                <span className="text-zinc-300 font-semibold">
-                  {selectedPathway.curatedSources[locale].split('(')[0].split('·')[0].trim()}
-                </span>
-              </span>
-            </div>
-
-            {/* Mascot Dialogue: Motivating Coach Speech */}
-            <div className="flex items-center gap-3 mb-2.5 relative z-10">
-              <div className="w-18 h-18 sm:w-22 sm:h-22 shrink-0 flex items-center justify-center pointer-events-none">
-                <React.Suspense
-                  fallback={
-                    <img
-                      src="/mascot/t1ger-avatar.png"
-                      alt="T1ger"
-                      className="w-18 h-18 sm:w-22 sm:h-22 object-contain drop-shadow-[0_8px_16px_rgba(255,115,0,0.3)]"
-                    />
-                  }
+          {/* Duolingo Hero Unit Banner with Lively Mascot - Double-Bezel Architecture */}
+          <div className="p-1.5 rounded-[2.1rem] border border-white/10 bg-[#121216]/90 shadow-[0_20px_48px_rgba(0,0,0,0.65)]">
+            <div className="rounded-[1.75rem] border border-white/[0.06] bg-[#09090B] p-4 sm:p-5 relative overflow-hidden text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+              {/* Top Unit Badge & Pedigree Citation */}
+              <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3 relative z-10">
+                <span
+                  className="inline-flex items-center text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.05] text-zinc-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
                 >
-                  <T1gerMascot3D
-                    mood="beast"
-                    closeUp
-                    className="w-18 h-18 sm:w-22 sm:h-22"
-                  />
-                </React.Suspense>
-              </div>
-
-              {/* Speech Dialogue Bubble */}
-              <div className="relative flex-1 rounded-2xl border border-white/15 bg-[#141419]/90 backdrop-blur-md p-2.5 sm:p-3 text-left shadow-md">
-                <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-45 border-b border-l border-white/15 bg-[#141419]" />
-                <p className="text-xs sm:text-sm text-white font-bold leading-snug">
-                  {!next ? tr('¡Base completada! Repasa lo aprendido o revisa tus acciones.', 'Foundation complete! Review what you learned or revisit your actions.') : learnStreak === 0
-                    ? tr(
-                        '¡Enciende tu racha hoy! Conquista tu primer orbe en solo 3 minutos.',
-                        'Ignite your streak today! Conquer your first orb in just 3 minutes.'
-                      )
-                    : completed > 0
-                    ? tr(
-                        '¡Imparable! Conquista el siguiente paso hacia la maestría.',
-                        'Unstoppable! Conquer the next step towards mastery.'
-                      )
-                    : tr(
-                        '3 minutos de aprendizaje activo para dominar esta habilidad.',
-                        '3 minutes of active learning to master this skill.'
-                      )}
-                </p>
-              </div>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="space-y-1 mb-3 relative z-10">
-              <div className="flex justify-between items-center text-[10px] font-mono">
-                <span className="text-zinc-300 font-bold">{selectedPathway.title[locale]}</span>
-                <span className="text-orange-400 font-bold">
-                  {completed}/{nodes.length} {tr('Orbes', 'Orbs')}
+                  {tr('UNIDAD', 'UNIT')} {activeSectionIndex + 1}: {localizeLearning(activeSection.title, locale)}
+                </span>
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-400">
+                  <Sparkle size={10} weight="fill" className="text-orange-400 shrink-0" />
+                  <span className="text-zinc-300 font-semibold">
+                    {selectedPathway.curatedSources[locale].split('(')[0].split('·')[0].trim()}
+                  </span>
                 </span>
               </div>
-              <div role="progressbar" aria-label={tr('Progreso del camino', 'Journey progress')} aria-valuemin={0} aria-valuemax={nodes.length} aria-valuenow={completed} className="h-2 w-full rounded-full bg-black/50 border border-white/10 overflow-hidden">
-                <div
-                  className="h-full transition-all duration-500 rounded-full"
-                  style={{
-                    width: `${nodes.length ? (completed / nodes.length) * 100 : 0}%`,
-                    backgroundColor: currentDomain.accentColor,
-                    boxShadow: `0 0 12px ${currentDomain.accentColor}`,
-                  }}
-                />
-              </div>
-            </div>
 
-            {/* Giant Tactile 3D Action Button */}
-            <button
-              onPointerDown={() => SoundEffects.playTap()}
-              onClick={() => {
-                if (next) open(next);
-                else setActiveView('build');
-              }}
-              className="t1ger-primary-button w-full cursor-pointer select-none uppercase tracking-wider text-black flex items-center justify-center gap-2"
-            >
-              <span>
-                {next
-                  ? next.state === 'review'
-                    ? tr('Reforzar memoria', 'Refresh memory')
-                    : pending
-                    ? tr('Continuar en Aplicar', 'Continue in Apply')
-                    : tr(`Empezar lección ${completed + 1}`, `Start lesson ${completed + 1}`)
-                  : tr('Ver mis acciones', 'See my actions')}
-              </span>
-              <ArrowRight size={18} weight="bold" />
-            </button>
+              {/* Mascot Dialogue: Motivating Coach Speech */}
+              <div className="flex items-center gap-3 mb-3 relative z-10">
+                <div className="w-18 h-18 sm:w-22 sm:h-22 shrink-0 flex items-center justify-center pointer-events-none">
+                  <React.Suspense
+                    fallback={
+                      <img
+                        src="/mascot/t1ger-avatar.png"
+                        alt="T1ger"
+                        className="w-18 h-18 sm:w-22 sm:h-22 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+                      />
+                    }
+                  >
+                    <T1gerMascot3D
+                      mood="beast"
+                      closeUp
+                      className="w-18 h-18 sm:w-22 sm:h-22"
+                    />
+                  </React.Suspense>
+                </div>
+
+                {/* Speech Dialogue Bubble */}
+                <div className="relative flex-1 rounded-2xl border border-white/10 bg-[#141419]/95 backdrop-blur-md p-3 text-left shadow-[0_4px_16px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]">
+                  <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-45 border-b border-l border-white/10 bg-[#141419]" />
+                  <p className="text-xs sm:text-sm text-white font-bold leading-snug">
+                    {!next ? tr('¡Base completada! Repasa lo aprendido o revisa tus acciones.', 'Foundation complete! Review what you learned or revisit your actions.') : learnStreak === 0
+                      ? tr(
+                          '¡Enciende tu racha hoy! Conquista tu primer orbe en solo 3 minutos.',
+                          'Ignite your streak today! Conquer your first orb in just 3 minutes.'
+                        )
+                      : completed > 0
+                      ? tr(
+                          '¡Imparable! Conquista el siguiente paso hacia la maestría.',
+                          'Unstoppable! Conquer the next step towards mastery.'
+                        )
+                      : tr(
+                          '3 minutos de aprendizaje activo para dominar esta habilidad.',
+                          '3 minutes of active learning to master this skill.'
+                        )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-1.5 mb-3.5 relative z-10">
+                <div className="flex justify-between items-center text-[10px] font-mono">
+                  <span className="text-zinc-300 font-bold">{selectedPathway.title[locale]}</span>
+                  <span className="text-zinc-400 font-bold">
+                    <span className="text-[var(--ob-accent)] font-extrabold">{completed}</span>/{nodes.length} {tr('Orbes', 'Orbs')}
+                  </span>
+                </div>
+                <div role="progressbar" aria-label={tr('Progreso del camino', 'Journey progress')} aria-valuemin={0} aria-valuemax={nodes.length} aria-valuenow={completed} className="h-2 w-full rounded-full bg-black/60 border border-white/10 overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">
+                  <div
+                    className="h-full transition-all duration-500 rounded-full"
+                    style={{
+                      width: `${nodes.length ? (completed / nodes.length) * 100 : 0}%`,
+                      backgroundColor: currentDomain.accentColor,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Button-in-Button CTA Architecture */}
+              <button
+                onPointerDown={() => SoundEffects.playTap()}
+                onClick={() => {
+                  if (next) open(next);
+                  else setActiveView('build');
+                }}
+                className="t1ger-primary-button w-full cursor-pointer select-none text-black flex items-center justify-between !py-2.5 !px-4 group"
+              >
+                <span className="font-extrabold uppercase tracking-wide text-xs sm:text-sm pl-1">
+                  {next
+                    ? next.state === 'review'
+                      ? tr('Reforzar memoria', 'Refresh memory')
+                      : pending
+                      ? tr('Continuar en Aplicar', 'Continue in Apply')
+                      : tr(`Empezar lección ${completed + 1}`, `Start lesson ${completed + 1}`)
+                    : tr('Ver mis acciones', 'See my actions')}
+                </span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 transition-transform duration-120 group-hover:translate-x-0.5 group-active:scale-95">
+                  <ArrowRight size={16} weight="bold" />
+                </span>
+              </button>
+            </div>
           </div>
 
-          {/* Daily Quest Strip - Duolingo / Apple Fitness Symmetry */}
+          {/* Daily Quest Strip - Directional Elevation */}
           <div
-            className={`mx-1 rounded-2xl border px-3.5 py-3 transition-all ${
+            className={`mx-0.5 rounded-2xl border px-3.5 py-3 transition-all ${
               completedToday
-                ? 'bg-emerald-950/20 border-emerald-500/30 shadow-[0_0_20px_rgba(16,185,129,0.12)]'
-                : 'bg-[#121216]/90 border-white/10 shadow-md'
+                ? 'bg-emerald-950/20 border-emerald-500/25 shadow-[0_8px_24px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.05)]'
+                : 'bg-[#121216]/90 border-white/10 shadow-[0_8px_24px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)]'
             }`}
           >
             <div className="flex items-center gap-3">
-              {/* Left Glowing Status Icon */}
+              {/* Left Status Icon */}
               <div
                 className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors ${
                   completedToday
-                    ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                    : 'bg-gradient-to-b from-orange-500/20 to-orange-600/10 text-[#FF8A2A] border border-orange-500/30 shadow-[0_0_12px_rgba(255,115,0,0.15)]'
+                    ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                    : 'bg-white/[0.06] text-[#FF8A2A] border border-white/10'
                 }`}
               >
                 {completedToday ? (
                   <Check size={20} weight="bold" />
                 ) : (
-                  <Fire size={20} weight="fill" className="animate-pulse" />
+                  <Fire size={20} weight="fill" />
                 )}
               </div>
 
@@ -347,14 +332,14 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${
                       completedToday
-                        ? 'w-full bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
-                        : 'w-0 bg-gradient-to-r from-orange-500 to-amber-400'
+                        ? 'w-full bg-emerald-500'
+                        : 'w-0 bg-[var(--ob-accent)]'
                     }`}
                   />
                 </div>
               </div>
 
-              {/* Right Action Button: Compact, Symmetrical, 3D Micro-Press */}
+              {/* Right Action Button */}
               <button
                 type="button"
                 onPointerDown={() => SoundEffects.playTap()}
@@ -363,10 +348,10 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                   else if (next) open(next);
                   else setActiveView('build');
                 }}
-                className={`shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider cursor-pointer select-none transition-all duration-100 ease-out active:translate-y-0.5 active:scale-95 ${
+                className={`shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider cursor-pointer select-none transition-all duration-120 ease-out active:scale-95 ${
                   completedToday
-                    ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/35 hover:bg-emerald-500/25 shadow-[0_2px_0_#065f46] active:shadow-none'
-                    : 'bg-gradient-to-r from-[#FF7300] to-[#FFA033] text-black shadow-[0_3px_0_#9a3412] hover:brightness-110 active:shadow-[0_1px_0_#9a3412]'
+                    ? 'bg-white/[0.08] text-emerald-300 border border-emerald-500/30 hover:bg-white/[0.12] shadow-sm'
+                    : 'bg-[var(--ob-accent)] text-black border border-white/20 shadow-sm hover:brightness-105'
                 }`}
               >
                 <span>{completedToday ? tr('Ver', 'View') : tr('Ir', 'Go')}</span>

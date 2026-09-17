@@ -197,7 +197,7 @@ export const CustomerFeedbackModal: React.FC<CustomerFeedbackModalProps> = ({ is
                           }}
                           className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border text-center transition-all cursor-pointer active:scale-95 ${
                             isSelected
-                              ? 'border-[#FF7300] bg-[#FF7300]/15 text-white shadow-[0_0_12px_rgba(255,115,0,0.2)]'
+                              ? 'border-white/20 bg-white/[0.08] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_12px_rgba(0,0,0,0.4)]'
                               : 'border-white/10 bg-white/[0.03] text-zinc-400 hover:border-white/20 hover:text-zinc-200'
                           }`}
                         >

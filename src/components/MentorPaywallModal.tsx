@@ -246,12 +246,12 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
                 onClick={() => handleSelectPlan('annual')}
                 className={`relative w-full rounded-2xl border p-3.5 text-left transition-all duration-100 ease-out cursor-pointer active:scale-[0.98] active:translate-y-0.5 ${
                   selectedPlan === 'annual'
-                    ? 'border-[#FF7300] bg-[#FF7300]/15 shadow-[0_0_20px_rgba(255,115,0,0.22)]'
+                    ? 'border-white/20 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(0,0,0,0.4)]'
                     : 'border-white/10 bg-white/[0.025] hover:border-white/20'
                 }`}
               >
                 {/* Discount Ribbon */}
-                <span className="absolute -top-2.5 right-3 rounded-full bg-gradient-to-r from-amber-400 to-[#FF7300] px-2 py-0.5 text-[9px] font-mono font-black uppercase text-black shadow-md">
+                <span className="absolute -top-2.5 right-3 rounded-full bg-[var(--ob-accent)] px-2 py-0.5 text-[9px] font-mono font-black uppercase text-black shadow-md">
                   {tr('AHORRA 17% · 2 MESES GRATIS', 'SAVE 17% · 2 MONTHS FREE')}
                 </span>
 
@@ -284,7 +284,7 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
                 onClick={() => handleSelectPlan('monthly')}
                 className={`relative w-full rounded-2xl border p-3.5 text-left transition-all duration-100 ease-out cursor-pointer active:scale-[0.98] active:translate-y-0.5 ${
                   selectedPlan === 'monthly'
-                    ? 'border-[#FF7300] bg-[#FF7300]/15 shadow-[0_0_20px_rgba(255,115,0,0.22)]'
+                    ? 'border-white/20 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_4px_16px_rgba(0,0,0,0.4)]'
                     : 'border-white/10 bg-white/[0.025] hover:border-white/20'
                 }`}
               >

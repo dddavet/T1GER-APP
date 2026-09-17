@@ -34,17 +34,7 @@ function DailyMomentumCard({
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216]/85 p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
-      {/* Background ambient glow */}
-      <div
-        className="pointer-events-none absolute -right-12 -top-12 h-44 w-44 rounded-full blur-3xl"
-        style={{
-          background: isDoneToday
-            ? 'radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%)'
-            : 'radial-gradient(circle, rgba(255,115,0,0.2) 0%, transparent 70%)',
-        }}
-      />
-
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216]/95 p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
       <div className="relative flex items-center gap-4">
         {/* Apple Fitness Activity Ring */}
         <div className="relative flex h-18 w-18 shrink-0 items-center justify-center">
@@ -217,7 +207,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
         isEs={isEs}
       />
 
-      {/* Navigation Tabs (Apple Segmented Style with 44pt touch targets) */}
+      {/* Navigation Tabs (Apple / Linear Segmented Style with 44pt touch targets) */}
       <nav
         aria-label={tr('Secciones de Aplicar', 'Apply sections')}
         className="flex gap-1 rounded-[1.25rem] border border-white/10 bg-[#121216]/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
@@ -230,9 +220,9 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
               aria-current={isActive ? 'page' : undefined}
               onPointerDown={() => SoundEffects.playToggle()}
               onClick={() => setView(id)}
-              className={`min-h-[44px] flex-1 rounded-xl px-2 text-xs font-bold transition-all duration-150 ease-out cursor-pointer active:scale-[0.96] active:translate-y-0.5 ${
+              className={`min-h-[44px] flex-1 rounded-xl px-2 text-xs font-bold transition-all duration-120 ease-out cursor-pointer active:scale-[0.97] ${
                 isActive
-                  ? 'bg-gradient-to-b from-[#FF7300]/25 to-[#FF7300]/15 text-[#FF9A3D] border border-[#FF7300]/35 shadow-[0_2px_8px_rgba(255,115,0,0.15)]'
+                  ? 'bg-[#1C1C22] text-white border border-white/12 shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.08)]'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
             >
@@ -251,8 +241,8 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
         <section className="space-y-4">
           {!active.length && (
             <div className="rounded-[1.75rem] border border-dashed border-white/15 bg-[#121216]/60 p-7 text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-[#FF7300]/10 border border-[#FF7300]/25 flex items-center justify-center text-[#FF8A1F] shadow-[0_0_24px_rgba(255,115,0,0.12)]">
-                <Flag size={28} weight="duotone" />
+              <div className="w-14 h-14 mx-auto rounded-2xl bg-white/[0.05] border border-white/10 flex items-center justify-center text-zinc-300 shadow-sm">
+                <Flag size={26} weight="duotone" />
               </div>
               <h2 className="mt-4 text-base sm:text-lg font-black text-white">
                 {completed.length
@@ -268,10 +258,14 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
               <button
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={() => setActiveView('learn')}
-                className="t1ger-primary-button mt-5 w-full flex items-center justify-center gap-2"
+                className="t1ger-primary-button mt-5 w-full flex items-center justify-between !py-2.5 !px-4 group cursor-pointer"
               >
-                <span>{tr('Ir a mi camino', 'Go to my journey')}</span>
-                <ArrowRight size={18} />
+                <span className="font-extrabold uppercase tracking-wide text-xs sm:text-sm pl-1">
+                  {tr('Ir a mi camino', 'Go to my journey')}
+                </span>
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 transition-transform duration-120 group-hover:translate-x-0.5 group-active:scale-95">
+                  <ArrowRight size={16} weight="bold" />
+                </span>
               </button>
             </div>
           )}
@@ -290,11 +284,8 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                   delay: reducedMotion ? 0 : idx * 0.08,
                 }}
                 whileHover={reducedMotion ? undefined : { y: -2, transition: { duration: 0.15 } }}
-                className="relative overflow-hidden rounded-[1.75rem] border border-[#FF7300]/35 bg-[#121216]/90 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-colors hover:border-[#FF7300]/50"
+                className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216]/95 p-5 shadow-[0_16px_36px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl transition-all hover:border-white/20"
               >
-                {/* Ambient glow */}
-                <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#FF7300]/12 blur-3xl" />
-
                 {/* Top metadata row */}
                 <div className="flex items-center justify-between gap-2 text-xs">
                   <div className="flex items-center gap-2">
@@ -306,7 +297,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                       ⚡ {design?.minutes || 5} MIN
                     </span>
                   </div>
-                  <span className="font-mono rounded-full border border-[#FF7300]/25 bg-[#FF7300]/10 px-2.5 py-0.5 text-[10px] font-black text-[#FF9A3D]">
+                  <span className="font-mono rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-0.5 text-[10px] font-black text-[#FF9A3D]">
                     +{mission.lessonXp + mission.executionXp} XP
                   </span>
                 </div>
@@ -329,7 +320,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                     </p>
                     {design.steps.map((step, idx) => (
                       <div key={idx} className="flex items-start gap-2 text-xs text-zinc-300 leading-snug">
-                        <span className="shrink-0 font-mono text-[10px] font-black text-[#FF8A1F] bg-[#FF7300]/10 rounded px-1.5 py-0.5">
+                        <span className="shrink-0 font-mono text-[10px] font-black text-[#FF8A1F] bg-white/[0.06] rounded px-1.5 py-0.5">
                           0{idx + 1}
                         </span>
                         <span className="line-clamp-2">{step}</span>
@@ -338,15 +329,19 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                   </div>
                 )}
 
-                {/* Tactile 3D Action Button */}
+                {/* Button-in-Button CTA Architecture */}
                 <motion.button
                   whileTap={reducedMotion ? undefined : { scale: 0.98 }}
                   onPointerDown={() => SoundEffects.playTap()}
                   onClick={() => setSelected(mission)}
-                  className="t1ger-primary-button mt-4 w-full flex items-center justify-center gap-2"
+                  className="t1ger-primary-button mt-4 w-full flex items-center justify-between !py-2.5 !px-4 group cursor-pointer"
                 >
-                  <span>{tr('Ver mi acción', 'Open my action')}</span>
-                  <ArrowRight size={18} />
+                  <span className="font-extrabold uppercase tracking-wide text-xs sm:text-sm pl-1">
+                    {tr('Ver mi acción', 'Open my action')}
+                  </span>
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 transition-transform duration-120 group-hover:translate-x-0.5 group-active:scale-95">
+                    <ArrowRight size={16} weight="bold" />
+                  </span>
                 </motion.button>
               </motion.article>
             );

@@ -285,7 +285,7 @@ export const OfferForgeSandbox: React.FC = () => {
           <button
             onClick={handleAuditOffer}
             disabled={evaluating}
-            className="w-full py-3 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-extrabold tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,115,0,0.3)] active:scale-[0.98] transition cursor-pointer disabled:opacity-50"
+            className="w-full py-3 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-extrabold tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.3)] active:scale-[0.98] transition cursor-pointer disabled:opacity-50 hover:brightness-105"
           >
             {evaluating ? (
               <>

@@ -174,7 +174,7 @@ export const PaperTradingSandbox: React.FC = () => {
                   onClick={() => setSelectedTicker(asset.ticker)}
                   className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
                     isSelected
-                      ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)]/[0.08] shadow-[0_0_15px_rgba(255,115,0,0.2)]'
+                      ? 'border-white/20 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_2px_8px_rgba(0,0,0,0.3)]'
                       : 'border-white/8 bg-white/[0.02] hover:bg-white/[0.05]'
                   }`}
                 >
@@ -257,7 +257,7 @@ export const PaperTradingSandbox: React.FC = () => {
 
           <button
             onClick={handleExecuteOrder}
-            className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--ob-accent)] to-amber-400 text-black font-mono text-xs font-black tracking-wider flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,115,0,0.3)] active:scale-[0.98] transition cursor-pointer"
+            className="w-full py-3 rounded-xl bg-[var(--ob-accent)] text-black font-mono text-xs font-black tracking-wider flex items-center justify-center gap-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.3)] active:scale-[0.98] transition cursor-pointer hover:brightness-105"
           >
             <Plus size={16} strokeWidth={3} />
             <span>{isEs ? `SIMULAR ORDEN DE $${tradeAmount} USD` : 'SIMULATE ORDER'}</span>
