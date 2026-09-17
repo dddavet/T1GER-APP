@@ -37,6 +37,7 @@
     "ios:open": "cap open ios",
     "android:sync": "npm run build && cap sync android",
     "android:build": "node scripts/build-android.mjs",
+    "android:setup-signing": "node scripts/setup-release-signing.mjs",
     "android:bundle": "node scripts/build-android.mjs --release",
     "android:open": "cap open android"
   },
