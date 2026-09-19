@@ -35,6 +35,8 @@ jobs:
           java-version: '21'
           cache: gradle
       - uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
       - run: npm ci
       - run: npm --prefix functions ci
       - name: Type safety, curriculum, economy and backend regressions
