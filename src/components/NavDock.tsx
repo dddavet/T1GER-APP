@@ -1,158 +1,62 @@
-import React, { useState, Suspense } from 'react';
-import { BookOpen, Target, Trophy, UserCircle } from '@phosphor-icons/react';
-import { motion, useReducedMotion } from 'motion/react';
+import React from 'react';
+import { BookOpen, Brain, Target, UserCircle } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
-import { useAuth } from '../contexts/AuthContext';
 import { SoundEffects } from '../services/soundEffects';
 
-const MentorPaywallModal = React.lazy(() =>
-  import('./MentorPaywallModal').then(m => ({ default: m.MentorPaywallModal }))
-);
-
 interface NavTab {
-  id: 'learn' | 'build' | 'compete' | 'profile';
+  id: 'learn' | 'build' | 'master' | 'profile';
   icon: React.ComponentType<{ size?: number; weight?: 'fill' | 'bold' | 'regular' | 'light' | 'thin' | 'duotone'; className?: string }>;
   label: string;
 }
 
 export const NavDock = React.memo(() => {
-  const reducedMotion = useReducedMotion();
   const { activeView, setActiveView } = useT1ger();
   const { language } = useBrain();
-  const { appUser } = useAuth();
-  const [showMentorPaywall, setShowMentorPaywall] = useState(false);
   const isEs = language === 'es';
-  const isPro = Boolean(appUser?.isPro || appUser?.isFounder);
-
-  const leftTabs: NavTab[] = [
+  const tabs: NavTab[] = [
     { id: 'learn', icon: BookOpen, label: isEs ? 'Aprender' : 'Learn' },
     { id: 'build', icon: Target, label: isEs ? 'Aplicar' : 'Apply' },
-  ];
-
-  const rightTabs: NavTab[] = [
-    { id: 'compete', icon: Trophy, label: isEs ? 'Competir' : 'Compete' },
+    { id: 'master', icon: Brain, label: isEs ? 'Dominar' : 'Master' },
     { id: 'profile', icon: UserCircle, label: isEs ? 'Perfil' : 'Profile' },
   ];
 
   const haptic = () => {
-    if (typeof window === 'undefined' || !window.navigator.vibrate) return;
-    window.navigator.vibrate(12);
-  };
-
-  const handleMentorClick = () => {
-    haptic();
-    SoundEffects.playTap();
-    if (isPro) {
-      setActiveView('coach');
-    } else {
-      setShowMentorPaywall(true);
-    }
-  };
-
-  const renderTab = (tab: NavTab) => {
-    const active = activeView === tab.id;
-    const Icon = tab.icon;
-    return (
-      <motion.button
-        key={tab.id}
-        type="button"
-        whileTap={{ scale: 0.92 }}
-        whileHover={{ scale: 1.02 }}
-        onPointerDown={() => {
-          if (!active) SoundEffects.playToggle();
-        }}
-        onClick={() => {
-          if (active) return;
-          haptic();
-          setActiveView(tab.id);
-        }}
-        aria-current={active ? 'page' : undefined}
-        className={`relative flex min-h-11 flex-1 min-w-0 flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors duration-200 cursor-pointer ${
-          active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'
-        }`}
-      >
-        {active && (
-          <motion.span
-            layoutId="navdock-active-pill"
-            className="absolute inset-0 rounded-2xl border border-white/10 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_2px_8px_rgba(0,0,0,0.4)]"
-            transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-          />
-        )}
-        <motion.span
-          className="relative flex z-10"
-          animate={{ y: active ? -1 : 0, scale: active ? 1.06 : 1 }}
-          transition={{ type: 'spring', stiffness: 600, damping: 35 }}
-        >
-          <Icon size={18} weight={active ? 'fill' : 'bold'} className={active ? 'text-[var(--ob-accent)]' : ''} />
-        </motion.span>
-        <motion.span
-          className={`relative z-10 text-[10px] font-semibold truncate max-w-full px-1 ${
-            active ? 'text-white font-bold' : 'text-zinc-500'
-          }`}
-          animate={{ y: active ? -1 : 0 }}
-          transition={{ duration: 0.1 }}
-        >
-          {tab.label}
-        </motion.span>
-      </motion.button>
-    );
+    if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(12);
   };
 
   return (
-    <>
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[calc(.5rem+env(safe-area-inset-bottom))] select-none">
-        <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.85rem] border border-white/10 bg-[#121216]/90 backdrop-blur-2xl p-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.06)]">
-          <nav
-            aria-label={isEs ? 'Navegación principal' : 'Primary navigation'}
-            className="flex w-full items-center gap-1 rounded-[1.45rem] border border-white/[0.06] bg-[#09090B]/95 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-          >
-            {/* Left tabs: Learn, Apply */}
-            {leftTabs.map(renderTab)}
-
-            {/* Center elevated Mentor circular button */}
-            <div className="relative flex flex-col items-center justify-center shrink-0 px-1.5">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[calc(.5rem+env(safe-area-inset-bottom))] select-none">
+      <div className="pointer-events-auto w-full max-w-[23.5rem] rounded-[1.85rem] border border-white/10 bg-[#121216]/90 p-1.5 shadow-[0_24px_48px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl">
+        <nav aria-label={isEs ? 'Navegación principal' : 'Primary navigation'} className="flex w-full items-center gap-1 rounded-[1.45rem] border border-white/[0.06] bg-[#09090B]/95 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          {tabs.map(tab => {
+            const active = activeView === tab.id;
+            const Icon = tab.icon;
+            return (
               <motion.button
+                key={tab.id}
                 type="button"
-                whileTap={{ scale: 0.9, y: 2 }}
-                whileHover={{ scale: 1.05 }}
-                onPointerDown={() => SoundEffects.playTap()}
-                onClick={handleMentorClick}
-                aria-label={isEs ? 'Mentor IA T1GER' : 'T1GER AI Mentor'}
-                className="relative -mt-6 flex h-[52px] w-[52px] items-center justify-center rounded-full bg-[#121216] p-[2px] ring-4 ring-[#121216] border border-white/15 shadow-[0_8px_20px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.2)] cursor-pointer"
+                whileTap={{ scale: 0.92 }}
+                onPointerDown={() => { if (!active) SoundEffects.playToggle(); }}
+                onClick={() => {
+                  if (active) return;
+                  haptic();
+                  setActiveView(tab.id);
+                }}
+                aria-current={active ? 'page' : undefined}
+                className={`relative flex min-h-12 min-w-0 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-2xl transition-colors duration-200 ${active ? 'text-white' : 'text-zinc-400 hover:text-zinc-200'}`}
               >
-                <div className="relative flex h-full w-full items-center justify-center rounded-full bg-gradient-to-b from-[#FF7300] to-[#C2410C] shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] overflow-hidden">
-                  <img
-                    src="/t1ger-avatar.png"
-                    alt="T1GER Mentor"
-                    className="h-10 w-10 scale-110 object-contain drop-shadow-[0_2px_4px_rgba(0,0,0,0.35)] select-none pointer-events-none transition-transform group-hover:scale-120"
-                  />
-                </div>
-                {!isPro && (
-                  <span className="absolute -top-1 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-amber-400 text-[9px] font-black text-black shadow-md ring-2 ring-[#121216]">
-                    ★
-                  </span>
+                {active && (
+                  <motion.span layoutId="navdock-active-pill" className="absolute inset-0 rounded-2xl border border-white/10 bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_2px_8px_rgba(0,0,0,0.4)]" transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
                 )}
+                <span className="relative z-10 flex"><Icon size={19} weight={active ? 'fill' : 'bold'} className={active ? 'text-[var(--ob-accent)]' : ''} /></span>
+                <span className={`relative z-10 max-w-full truncate px-1 text-[10px] ${active ? 'font-bold text-white' : 'font-semibold text-zinc-500'}`}>{tab.label}</span>
               </motion.button>
-              <span className="mt-0.5 text-[9px] font-semibold text-zinc-400 tracking-tight">
-                {isEs ? 'Mentor' : 'Mentor'}
-              </span>
-            </div>
-
-            {/* Right tabs: Compete, Profile */}
-            {rightTabs.map(renderTab)}
-          </nav>
-        </div>
+            );
+          })}
+        </nav>
       </div>
-
-      <Suspense fallback={null}>
-        {showMentorPaywall && (
-          <MentorPaywallModal
-            isOpen={showMentorPaywall}
-            onClose={() => setShowMentorPaywall(false)}
-          />
-        )}
-      </Suspense>
-    </>
+    </div>
   );
 });

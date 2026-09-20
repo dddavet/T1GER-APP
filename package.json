@@ -1,7 +1,7 @@
 {
   "name": "tiger-app",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "overrides": {
     "qs": "6.16.0"
@@ -9,6 +9,8 @@
   "scripts": {
     "postinstall": "node scripts/patch-native-dependencies.mjs",
     "dev": "vite --port=3000 --host=127.0.0.1 --strictPort",
+    "company:os": "node company-os/server.mjs",
+    "company:os:open": "node company-os/server.mjs --open",
     "dev:web": "vite --port=3000 --host=127.0.0.1 --strictPort --open \"/?previewApp=1&view=learn\"",
     "dev:phone": "vite --port=3000 --host=0.0.0.0 --strictPort",
     "dev:android": "node scripts/android-live.mjs",

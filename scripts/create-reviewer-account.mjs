@@ -13,21 +13,22 @@ if (!apiKey && existsSync(envFile)) {
   if (match) apiKey = match[1];
 }
 
-const REVIEWER_EMAIL = 'reviewer@t1ger.app';
-const REVIEWER_PASSWORD = 'T1gerReviewer2026!';
+const REVIEWER_EMAIL = process.env.T1GER_REVIEWER_EMAIL?.trim();
+const REVIEWER_PASSWORD = process.env.T1GER_REVIEWER_PASSWORD;
 
 async function provisionReviewer() {
   console.log('=== T1GER APP REVIEWER ACCOUNT PROVISIONING ===\n');
-  console.log(`Target Email:    ${REVIEWER_EMAIL}`);
-  console.log(`Target Password: ${REVIEWER_PASSWORD}`);
+  if (!REVIEWER_EMAIL || !REVIEWER_PASSWORD || REVIEWER_PASSWORD.length < 12) {
+    console.error('Set T1GER_REVIEWER_EMAIL and a T1GER_REVIEWER_PASSWORD of at least 12 characters before provisioning.');
+    process.exitCode = 1;
+    return;
+  }
+  console.log(`Target Email: ${REVIEWER_EMAIL}`);
 
   if (!apiKey) {
     console.log('\n[INFO] VITE_FIREBASE_API_KEY not detected in environment or .env.local.');
-    console.log('You can create this account manually in Firebase Console:');
-    console.log('1. Go to Firebase Console -> Authentication -> Users');
-    console.log('2. Click "Add user"');
-    console.log(`3. Email:    ${REVIEWER_EMAIL}`);
-    console.log(`4. Password: ${REVIEWER_PASSWORD}`);
+    console.log('Provide VITE_FIREBASE_API_KEY or create the reviewer account manually in Firebase Console using the environment-supplied credentials.');
+    process.exitCode = 1;
     return;
   }
 

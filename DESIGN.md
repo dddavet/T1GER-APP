@@ -1,118 +1,110 @@
----
-name: T1GER Brand Design System
-version: 1.0.0
-app: t1ger.app
-repo: dddavet/T1GER-APP
-colors:
-  primary: "#FF7300"
-  primary_dark: "#CC5C00"
-  primary_glow: "rgba(255, 115, 0, 0.4)"
-  success: "#58CC02"
-  success_dark: "#58A700"
-  danger: "#FF4B4B"
-  danger_dark: "#EA1515"
-  sky: "#1CB0F6"
-  sky_dark: "#1899D6"
-  background_app: "#F7F7F7"
-  background_card: "#FFFFFF"
-  text_primary: "#27272A"
-  text_secondary: "#52525B"
-  text_muted: "#71717A"
-typography:
-  display:
-    fontFamily: "Kanit, ui-sans-serif, system-ui, sans-serif"
-    fontWeight: 900
-    fontStyle: italic
-    letterSpacing: "-0.05em"
-    textTransform: uppercase
-  body:
-    fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif"
-    fontWeight: 600
-  mono:
-    fontFamily: "'JetBrains Mono', monospace"
-    letterSpacing: "0.15em"
-    textTransform: uppercase
----
+# T1GER Design System
 
-# T1GER APP - Brand & Design System Guide
+## Experience Direction
 
-## Overview
-T1GER (`t1ger.app`) is an ultra-gamified business skill development platform for entrepreneurs, founders, and creators. Inspired by Duolingo's high-retention mechanics, T1GER transforms complex business learning (Offer design, Sales, Marketing, Mindset, Operations, AI) into daily bite-sized missions, photo-proof actions, streak tracking, and 3D tactile micro-interactions.
+T1GER is a premium mobile learning product with a dark technical identity. It combines clear progression, active learning, restrained game energy, and tactile interaction. The design should help a learner answer three questions immediately:
 
-## Brand Voice & Positioning
-- **Tone:** High-performance, direct, empowering, tactical, gamified ("Predator Pride" mindset).
-- **Target Audience:** Entrepreneurs, SaaS founders, creators, and ambitious business builders.
-- **Core Hook:** "Learn is free. Execution is premium." Business micro-lessons combined with real-world photo proof execution and daily habit streaks.
+1. What am I learning?
+2. Where am I in the path?
+3. What should I do next?
 
-## Design Principles
-1. **3D Tactile Keys & Buttons:**
-   - All primary CTAs mimic physical keypresses with a 4px dark border bottom (`border-b-4`).
-   - Active state applies `translateY(4px)` and removes bottom border for instant haptic response.
-   - Rounded corners (`rounded-2xl` or `rounded-3xl`).
-2. **Bento Grid Architecture:**
-   - Asymmetrical card grids for dashboard phases, stats, and skill vector analysis.
-3. **Dynamic Micro-Animations:**
-   - `canvas-confetti` reward bursts upon mission completion.
-   - `BorderBeam` animated laser glows around active phase cards.
-   - `NumberFlow` rolling digit transitions for Streak, XP, Gems, and Hearts.
-   - `Magic UI Dock` bottom navigation bar with fluid scaling physics.
-4. **Duolingo-Level Visual Sparsity:**
-   - Minimize long text paragraphs. Rely on visual chips, progress meters, badge stars, and avatar emotion feedback.
-5. **Interactive 3D Mascot:**
-   - T1GER Avatar provides guidance with state emotions (`RESTING`, `PREDATOR`, `PROUD`, `DISAPPOINTED`).
+The visual system supports **Discover → Learn → Apply → Master → Return**. It must not frame the product as founder training, a hustle dashboard, or a generic self-improvement app.
 
-## Color Palette Tokens
+## Brand Character
+
+- **Tone:** ambitious, curious, modern, educational, premium.
+- **Voice:** concise, specific, evidence-aware, encouraging without hype.
+- **Mascot:** a capable learning guide, not a toy, threat, or status symbol.
+- **Motion:** reserved for orientation, feedback, state changes, and rewards.
+- **Avoid:** “Predator Pride,” hustle-bro copy, fabricated statistics, fake urgency, excessive neon, plastic extrusion, and decorative dashboards.
+
+## Core Tokens
 
 ```css
 :root {
-  /* Brand Primary */
-  --accent-main: #FF7300;       /* T1GER Orange */
-  --accent-dark: #CC5C00;       /* 3D Button Border Dark */
-  --accent-glow: rgba(255, 115, 0, 0.4);
-
-  /* Gamified Action Colors */
-  --color-success: #58CC02;     /* Duolingo Green */
-  --color-success-dark: #58A700;
-  --color-danger: #FF4B4B;      /* Red Fail / Energy */
-  --color-danger-dark: #EA1515;
-  --color-sky: #1CB0F6;         /* Gems / Level Blue */
-  --color-sky-dark: #1899D6;
-
-  /* Backgrounds & Cards */
-  --bg-app: #F7F7F7;            /* Off-white App Background */
-  --bg-card: #FFFFFF;           /* Card White */
-  --bg-[#0C0C0E]: #0C0C0E;      /* Dark Glass Accent */
+  --bg-app: #09090B;
+  --bg-surface: #121216;
+  --bg-raised: #18181D;
+  --text-primary: #FFFFFF;
+  --text-secondary: #A1A1AA;
+  --text-muted: #71717A;
+  --border-subtle: rgba(255, 255, 255, 0.10);
+  --accent-main: #FF7300;
+  --accent-dark: #CC5C00;
+  --success: #10B981;
+  --danger: #FF4B4B;
+  --info: #06B6D4;
 }
 ```
 
-## UI Component Guidelines
+Use Outfit for interface and display text. Use JetBrains Mono only for compact labels, timers, XP, ratios, and other tabular values. Do not use monospaced uppercase text for paragraphs.
 
-### 1. 3D Primary Button (Duolingo Style)
-```tsx
-<button className="w-full py-4 rounded-2xl bg-[#FF7300] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#CC5C00] active:border-b-0 active:translate-y-1 transition-all">
-  START MISSION →
-</button>
-```
+## Surface and Control Language
 
-### 2. Success Action Button
-```tsx
-<button className="w-full py-4 rounded-2xl bg-[#58CC02] text-white font-black text-[15px] uppercase tracking-widest border-b-4 border-[#58A700] active:border-b-0 active:translate-y-1 transition-all">
-  CONTINUE →
-</button>
-```
+T1GER uses obsidian surfaces with subtle titanium/specular separation:
 
-### 3. Bento Card with BorderBeam
-```tsx
-<div className="relative rounded-[1.25rem] border-2 border-zinc-200 border-b-4 border-b-zinc-300 bg-white p-4 overflow-hidden">
-  <BorderBeam size={150} duration={8} colorFrom="#FF7300" colorTo="#FFB03A" />
-  {/* Card Content */}
-</div>
-```
+- One dominant surface per hierarchy level.
+- Borders normally use `rgba(255,255,255,.08–.15)`.
+- Raised controls may use `inset 0 1px 0 rgba(255,255,255,.20–.35)`.
+- Shadows communicate elevation, not glow.
+- Orange identifies the primary next action; it is not ambient decoration.
+- Primary controls compress to approximately `scale(.97)` on press and remain at least 44×44 px.
+- Nested circular icons may reinforce direction inside a primary button.
+- The bottom dock uses concentric bezels and one quiet active indicator.
 
-### 4. Rolling Number Display
-```tsx
-<NumberFlow value={streak} className="font-black font-mono text-[#FF9600]" />
-```
+Avoid flat neon glows, thick toy-like lower borders, white/light app backgrounds, and unnecessary glass layers. Blur should be used sparingly because it can reduce legibility and increase mobile rendering cost.
 
----
-*Created for T1GER APP (`t1ger.app`) Open Design System integration.*
+## Information Hierarchy
+
+Every major screen has one page-level purpose, one unmistakable next action, current progress in plain language, and secondary exploration that does not compete with the main action.
+
+### Learn
+
+- Show the selected domain and path.
+- Show the learner’s current position and next available node.
+- Distinguish Learn, Apply, and Master/review states with text as well as color.
+- Make source attribution visible but secondary.
+- Keep the winding path and prerequisite gating.
+
+### Apply
+
+- Explain why the action matters, what to do, and what “done” means.
+- Reuse the tool created during Learn when available.
+- Distinguish self-reported personal progress from verified competitive progress.
+- Show completed actions as useful history, not an unexplained trophy wall.
+
+### Master
+
+- Present review as memory maintenance, not remediation or failure.
+- Explain that review does not duplicate completion rewards.
+- Keep the next retrieval task short and specific.
+
+### Onboarding
+
+- Begin with curiosity and the learning promise.
+- Let the user choose a subject; Investing is the flagship default, not a forced choice.
+- Explain Learn → Apply → Master before access or membership decisions.
+- Never claim unsupported income, success, retention, or speed improvements.
+- Do not assume the user is a founder, entrepreneur, or AI learner.
+
+## Motion and Feedback
+
+- Respect `prefers-reduced-motion` through `MotionConfig reducedMotion="user"` and local component behavior.
+- Use haptics and sound for deliberate taps, feedback, and meaningful completion.
+- Avoid infinite pulse/glow animations on ordinary controls.
+- Loading states explain what is happening and preserve the user’s place.
+- Success animation follows canonical completion; it must not imply a server reward before confirmation.
+
+## Accessibility
+
+- Target WCAG 2.2 AA contrast.
+- Maintain visible focus and logical keyboard order.
+- Use semantic buttons, headings, progress bars, lists, and dialogs.
+- Provide accessible names for icon-only controls.
+- Keep touch targets at least 44×44 px.
+- Never communicate locked/current/completed/review state through color alone.
+- Spanish and English strings must preserve meaning and fit at 320 px without hiding the primary action.
+
+## Architecture Boundaries
+
+The design layer may change labels and presentation without casually renaming data contracts. Internal names such as `BuildTab`, missions, artifacts, submissions, and tactical fields may remain until a dedicated migration is justified and tested. Firebase collections, progression rules, FSRS state, RevenueCat, notifications, and the 3D mascot are product infrastructure, not styling targets.

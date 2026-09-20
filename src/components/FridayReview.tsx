@@ -12,7 +12,7 @@ export const FridayReview = () => {
     if (!appUser) return;
     setLoading(true);
     try {
-      // Mock performance data for now
+      // Legacy review input; the service keeps its current persistence contract.
       const performanceData = { missionsCompleted: 4, totalMissions: 5, xpEarned: 300, failedAudits: 1 };
       
       const summaryText = await generateFridaySummary(performanceData);
@@ -27,7 +27,7 @@ export const FridayReview = () => {
 
   return (
     <div className="glass p-6 rounded-3xl border border-zinc-200">
-      <h2 className="text-xl font-black italic mb-4 text-[#FF6B00]">FRIDAY BOARD MEETING</h2>
+      <h2 className="text-xl font-black italic mb-4 text-[#FF6B00]">WEEKLY LEARNING REVIEW</h2>
       {summary ? (
         <p className="text-zinc-500 font-mono">{summary}</p>
       ) : (
@@ -37,7 +37,7 @@ export const FridayReview = () => {
           className="bg-[#FF6B00] text-zinc-800 px-6 py-3 rounded-xl font-bold hover:bg-[#FF6B00]/90 transition-all flex items-center gap-2"
         >
           {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
-          Start Review
+          Review my week
         </button>
       )}
     </div>

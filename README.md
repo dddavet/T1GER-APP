@@ -1,95 +1,75 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # T1GER
 
-React + TypeScript productivity app for entrepreneurs.
+T1GER is a React + TypeScript mobile learning app that turns useful knowledge into short interactive lessons, real-world application, and spaced-repetition mastery.
 
-## Run Locally
+The product loop is:
 
-**Prerequisites:** Node.js 22 LTS; JDK 21 and Android SDK for native builds.
+**DISCOVER → LEARN → APPLY → MASTER → RETURN**
 
+The launch catalog focuses on Investing, AI, and Psychology. Investing is the flagship reference path. Business and marketing content remains in the repository for future expansion but does not define the product.
 
-1. Install dependencies:
-   `npm install`
-2. Copy `.env.example` to `.env.local`. Provider keys are optional and are only
-   enabled for local development when `VITE_ENABLE_CLIENT_AI=true`.
-3. Run the app:
-   `npm run dev`
+## Local development
 
-## Fast mobile development
-
-Open the mobile Web experience with Hot Module Replacement and the development
-state harness:
+Prerequisites: Node.js 22 LTS. Native Android work also requires JDK 21 and the Android SDK.
 
 ```bash
+npm install
 npm run dev:web
 ```
 
-Run the same Vite session inside a physical Android phone connected by USB:
+The browser opens at `http://127.0.0.1:3000/?previewApp=1&view=learn` with the development state harness available locally. Provider keys are optional and client AI remains disabled unless explicitly enabled for development.
+
+For a physical Android phone connected by USB:
 
 ```bash
 npm run dev:android
 ```
 
-For an Android phone already paired through wireless debugging:
+For Android wireless debugging:
 
 ```bash
 npm run dev:android:wifi
 ```
 
-See [Fast Development Loop](docs/development-live-reload.md) for device setup,
-state simulation, multiple-device targeting, and troubleshooting.
+See [docs/development-live-reload.md](docs/development-live-reload.md) for device setup and troubleshooting.
 
-## Firebase
+## Architecture
 
-The app uses Firebase Auth and Cloud Firestore for account state and progress sync. Make sure `firebase-applet-config.json` points to the Firebase project you want to use.
+- Firebase Auth and Firestore synchronize accounts and progress.
+- `BrainContext` owns curriculum progress, Learn → Apply gating, streaks, and FSRS review state.
+- Capacitor provides Android/iOS bridges for camera, notifications, and supported native services.
+- Production AI calls belong behind authenticated server boundaries; browser-exposed `VITE_*` values must never contain provider secrets.
 
-The COMPETE backend includes Firestore rules/indexes and Cloud Functions for
-OneSignal nudges and 1v1 coin escrow. See [Social and competition system](docs/social-competition-system.md)
-for the data model, verification commands, required secrets, and deployment.
+Read [PRODUCT.md](PRODUCT.md), [DESIGN.md](DESIGN.md), and [AGENTS.md](AGENTS.md) before changing product language, learning progression, or visual hierarchy.
 
-## iOS
-
-The app is prepared for Capacitor. Build the web bundle before syncing native projects:
+## Verification
 
 ```bash
-npm run build
-npx cap sync ios
-```
-
-Opening and archiving the iOS project requires macOS with Xcode.
-
-## Production AI
-
-Variables prefixed with `VITE_` are shipped to the browser and must never contain
-production provider secrets. Production proof verification and the mentor use
-authenticated Cloud Functions with a server-side Gemini secret. If the backend
-is unavailable, production reports the failure and does not invent verification.
-Deterministic demos are development-only.
-
-## Android release signing
-
-Debug builds do not require signing configuration. For a signed release, copy
-`android/key.properties.example` to the ignored `android/key.properties` file and
-point it at the private upload keystore, or provide the equivalent
-`T1GER_ANDROID_*` environment variables used by CI. Never commit keystores or
-their passwords.
-
-```bash
+npm run lint
 npm run test:all
+npm run test:apply
+npm run test:shell
 npm run build:production
 npm run release:check
+```
+
+The browser tests expect the local dev server to be running. Firebase rule tests use the emulator suite.
+
+## Mobile builds
+
+```bash
+npm run android:sync
 npm run android:build
 npm run android:bundle
 ```
 
-The last command requires a valid upload key; an unsigned bundle is deliberately
-rejected. CI runs the regressions, security-rule tests, browser smoke test and
-native unit tests before uploading APK/AAB artifacts. It does not publish to Play.
+Release bundles require `android/key.properties` or the equivalent ignored `T1GER_ANDROID_*` environment variables. Never commit keystores or signing passwords. CI validates and uploads build artifacts but does not publish to a store.
 
-**Release status and Antigravity handoff:** read
-[Production readiness](docs/production-readiness.md). Passing compilation is not
-production approval; backend billing, credentials, store setup and final live
-acceptance are still separate gates.
+```bash
+npm run ios:sync
+npm run ios:open
+```
+
+Opening, signing, and archiving iOS requires macOS with Xcode.
+
+For the current handoff, external gates, and store checklist, see [docs/production-readiness.md](docs/production-readiness.md).

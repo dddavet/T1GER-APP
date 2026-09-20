@@ -60,6 +60,26 @@ export interface OrbStoryBeat {
   body: LocalizedText;
 }
 
+export interface LearningDecisionOption {
+  id: string;
+  label: LocalizedText;
+  correct?: boolean;
+}
+
+export interface GoldStandardLearningDesign {
+  prediction: {
+    prompt: LocalizedText;
+    options: readonly [LearningDecisionOption, LearningDecisionOption];
+    reveal: LocalizedText;
+  };
+  master: {
+    prompt: LocalizedText;
+    options: readonly [LearningDecisionOption, LearningDecisionOption, LearningDecisionOption];
+    explanation: LocalizedText;
+  };
+  outcome: LocalizedText;
+}
+
 /**
  * Narrative and retrieval layer inspired by cognitive-science findings:
  * prime the schema, teach one coherent idea, correct a misconception, then
@@ -73,6 +93,8 @@ export interface OrbLearningDesign {
   summaryPoints: readonly [LocalizedText, LocalizedText, LocalizedText];
   retrievalPrompt: LocalizedText;
   retrievalAnswer: LocalizedText;
+  /** Enables the continuous Learn -> Apply -> Master pilot without changing legacy lessons. */
+  goldStandard?: GoldStandardLearningDesign;
 }
 
 export interface ChallengeOption {

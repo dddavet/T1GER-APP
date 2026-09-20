@@ -20,12 +20,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useBrain } from '../../contexts/BrainContext';
 import { useT1ger } from '../../contexts/T1gerContext';
 import { FieldMissionService } from '../../services/fieldMissionService';
+import { saveLearningArtifact } from '../../services/learningArtifactService';
 import type { AtomicLesson, ChallengeOption, LearningLocale, SavedLearningArtifact } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
 import { SoundEffects } from '../../services/soundEffects';
 import { fireRewardConfetti } from '../ui/confetti';
 import { T1gerMascot3D } from '../T1gerMascot3D';
 import { MicroToolLab } from './MicroToolLab';
+import { GoldStandardLessonPlayer } from './GoldStandardLessonPlayer';
 
 interface AtomicLessonPlayerProps {
   lesson: AtomicLesson;
@@ -35,8 +37,6 @@ interface AtomicLessonPlayerProps {
   reviewOnly?: boolean;
 }
 
-const ARTIFACT_STORAGE_KEY = 't1ger_learning_artifacts_v1';
-
 const playFeedback = (correct: boolean) => {
   navigator.vibrate?.(correct ? [18, 24, 36] : [45, 35, 45]);
   if (correct) {
@@ -45,17 +45,6 @@ const playFeedback = (correct: boolean) => {
     SoundEffects.playIncorrect();
   }
 };
-
-function saveArtifact(artifact: SavedLearningArtifact, userId: string) {
-  const key = `${ARTIFACT_STORAGE_KEY}_${userId}`;
-  try {
-    const current = JSON.parse(localStorage.getItem(key) || '[]') as SavedLearningArtifact[];
-    const withoutDuplicate = current.filter((item) => item.lessonId !== artifact.lessonId);
-    localStorage.setItem(key, JSON.stringify([artifact, ...withoutDuplicate].slice(0, 100)));
-  } catch {
-    localStorage.setItem(key, JSON.stringify([artifact]));
-  }
-}
 
 interface ChallengeViewProps {
   lesson: AtomicLesson;
@@ -233,7 +222,7 @@ const ChallengeView: React.FC<ChallengeViewProps> = ({ lesson, locale, onMastere
   );
 };
 
-export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, locale, onClose, onComplete, reviewOnly = false }) => {
+const LegacyAtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, locale, onClose, onComplete, reviewOnly = false }) => {
   const { reviewMission, completeMission, brainState } = useBrain();
   const dialogRef = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -263,7 +252,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
   const phase = lesson.phases[phaseIndex];
 
   const persistArtifact = useCallback((nextArtifact: SavedLearningArtifact) => {
-    saveArtifact(nextArtifact, appUser?.uid || 'local');
+    saveLearningArtifact(appUser?.uid || 'local', nextArtifact);
     setArtifact((current) => {
       if (current && current.summary === nextArtifact.summary && current.title === nextArtifact.title) {
         return current;
@@ -314,7 +303,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
     else if (phaseIndex === 2) prepareFieldMission();
   };
 
-  const labels = locale === 'es' ? ['Orb', 'Desafío', 'Acción', 'Misión'] : ['Orb', 'Challenge', 'Action', 'Mission'];
+  const labels = locale === 'es' ? ['Aprender', 'Desafío', 'Herramienta', 'Aplicar'] : ['Learn', 'Challenge', 'Tool', 'Apply'];
   const continueLabel = phaseIndex === 0
     ? impactStep === 0
       ? (locale === 'es' ? 'Abrir Orb' : 'Open Orb')
@@ -381,13 +370,13 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
               {phase.type === 'reward' && (
                 <div className="flex min-h-full flex-col items-center justify-center py-4 text-center">
                   <motion.div initial={{ scale: 0.72, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 150, damping: 17 }} className="h-44 w-44"><T1gerMascot3D mood="beast" className="h-full w-full" /></motion.div>
-                  <span className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#FF8A2A]">{locale === 'es' ? 'MISIÓN DE CAMPO LISTA' : 'FIELD MISSION READY'}</span>
+                  <span className="mt-2 font-mono text-[10px] font-semibold uppercase tracking-[0.2em] text-[#FF8A2A]">{locale === 'es' ? 'ACCIÓN LISTA EN APLICAR' : 'ACTION READY IN APPLY'}</span>
                   <h2 className="mt-2 text-3xl font-bold tracking-tight text-white">{locale === 'es' ? 'Aprender no es terminar.' : 'Learning is not finishing.'}</h2>
                   <p className="mt-2 max-w-sm text-sm leading-relaxed text-zinc-400">{locale === 'es' ? 'Tu herramienta está lista. Haz la acción a tu ritmo y márcala como completada en Aplicar. Sin fotos ni reflexión obligatoria. Suma XP personal, no puntos de liga.' : 'Your tool is ready. Do the action at your pace and mark it complete in Apply. No photos or required reflection. Earn personal XP, not league points.'}</p>
                   <div className="mt-7 grid w-full grid-cols-3 divide-x divide-white/8 border-y border-white/8 py-4">
                     <div><Sparkle className="mx-auto text-[#FF8A2A]" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">3:00</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">{locale === 'es' ? 'Aprendido' : 'Learned'}</span></div>
                     <div><LockKey className="mx-auto text-amber-400" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">+{lesson.phases[3].xp + 50}</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">XP {locale === 'es' ? 'pend.' : 'pending'}</span></div>
-                    <div><Target className="mx-auto text-emerald-400" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">1</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">{locale === 'es' ? 'Prueba' : 'Proof'}</span></div>
+                    <div><Target className="mx-auto text-emerald-400" size={20} weight="fill" /><p className="mt-1 font-mono text-lg font-bold tabular-nums">1</p><span className="text-[9px] uppercase tracking-wider text-zinc-500">{locale === 'es' ? 'Acción' : 'Action'}</span></div>
                   </div>
                   {artifact && <div className="mt-5 w-full rounded-2xl border border-white/10 bg-white/[0.025] p-4 text-left"><div className="flex items-center gap-2 text-xs font-bold text-zinc-200"><LockKey size={16} weight="bold" className="text-[#FF8A2A]" />{artifact.title}</div><p className="mt-2 line-clamp-3 whitespace-pre-line text-xs leading-relaxed text-zinc-500">{artifact.summary}</p></div>}
                   {bridgeError && <button type="button" onClick={prepareFieldMission} className="mt-4 text-xs font-semibold text-red-300 underline underline-offset-4">{bridgeError}</button>}
@@ -430,7 +419,7 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
               disabled={(phaseIndex === 1 && !challengeMastered) || (phaseIndex === 2 && !artifact) || bridging}
               className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35"
             >
-              {phaseIndex === 2 ? (locale === 'es' ? 'Crear Misión de Campo' : 'Create Field Mission') : continueLabel}
+              {phaseIndex === 2 ? (locale === 'es' ? 'Preparar mi acción' : 'Prepare my Apply step') : continueLabel}
               <ArrowRight size={20} weight="bold" />
             </button>
           )}
@@ -440,4 +429,9 @@ export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = ({ lesson, 
   );
 
   return createPortal(player, document.body);
+};
+
+export const AtomicLessonPlayer: React.FC<AtomicLessonPlayerProps> = (props) => {
+  if (props.lesson.learningDesign.goldStandard) return <GoldStandardLessonPlayer {...props} />;
+  return <LegacyAtomicLessonPlayer {...props} />;
 };

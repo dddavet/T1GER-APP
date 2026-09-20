@@ -1,18 +1,35 @@
-# Investing journey and self-reported Apply
+# T1GER release-candidate plan
 
-## Scope and decisions
-- Back up clean `c2bc582` to `codex/backup-before-investing-journey-20260904`; origin/main is current.
-- Launch one Investing path; preserve other curricula and existing account records for compatibility.
-- Completion requires the lesson then an explicitly self-reported real-world action, not uploaded proof. Optional reflection never gates completion.
-- Keep personal rewards separate from competitive verification. Same server reward key for both completion methods prevents double claims.
-- Use existing FSRS reviews to restore prerequisite readiness; do not invent a new adaptive engine.
-- Preserve recent payment design, but fix fabricated success or onboarding traps found during audit.
+Updated: 2026-09-20
 
-## Ordered slices
-1. Canonical self-report backend transaction and emulator tests (no new paid services).
-2. Ordered journey selector: prior Apply + FSRS readiness, localized section landmarks and node states; focused tests.
-3. Rich Apply cards, optional reflection, single completion, history and return-to-path; local preview and authenticated receipts.
-4. Fix blocking payment/onboarding regressions, then types, full tests, production build and mobile browser journey.
+## Product contract
 
-## Verification / boundaries
-Test duplicate/concurrent completion, no league reward, missing prerequisites, empty reflection, review unlock and mobile overflow. Preserve legacy proofs. No actual trades, purchases, billing upgrades or production deployment are part of this pass. Document external deployment/configuration gates honestly.
+- Loop: DISCOVER → LEARN → APPLY → MASTER → RETURN.
+- Launch domains: Investing, AI, Psychology.
+- Investing remains the regression reference; stable curriculum and persistence IDs are preserved.
+- Primary navigation: Learn, Apply, Master, Profile. Social and Mentor systems remain available but are not primary V1 distractions.
+
+## Completed in this pass
+
+1. Restricted Discover and onboarding to the three real launch domains.
+2. Replaced the mislabeled Stoicism pathway with an evidence-based Psychology & Decisions curriculum while preserving legacy IDs.
+3. Reduced onboarding to the value-producing decisions and first lesson.
+4. Made Master/FSRS an explicit primary destination.
+5. Removed founder/predator positioning from launch Profile and public store metadata.
+6. Hardened the global recovery screen and removed committed reviewer credentials.
+7. Aligned web, Android, and iOS release version to 1.0.0 (build 1).
+
+## Release sequence
+
+1. Run all automated web, curriculum, journey, Apply, rules, security, and production-build gates.
+2. Sync and compile Android; generate a signed AAB only when the private upload key is present.
+3. Validate the release candidate on at least one physical Android device, including camera, notifications, screen-time permission, offline recovery, and account deletion.
+4. Complete Firebase/OneSignal/RevenueCat production configuration and store declarations.
+5. Submit first to a closed/internal track, review telemetry and feedback, then promote deliberately.
+
+## Boundaries
+
+- No fabricated store claims, pricing, rankings, or verification.
+- No production secret is stored in source control.
+- No publishing or paid transaction is performed automatically.
+- iOS signing and App Store submission require macOS/Xcode and account-owner action.

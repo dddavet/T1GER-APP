@@ -38,11 +38,19 @@ const visitTab = async (buttonName, expectedText, forbiddenText, screenshotName)
 try {
   await page.goto(baseUrl, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.getByRole('button', { name: 'Start lesson 1', exact: true }).waitFor({ timeout: 60_000 });
+  await page.getByTestId('course-domain-label').getByText('Investing', { exact: true }).waitFor();
+  await page.getByLabel('Learning loop').getByText('Learn', { exact: true }).waitFor();
+  await page.getByLabel('Learning loop').getByText('Apply', { exact: true }).waitFor();
+  await page.getByLabel('Learning loop').getByText('Master', { exact: true }).waitFor();
   await page.screenshot({ path: `${outputDir}/learn.png`, fullPage: true });
+  await page.getByTestId('course-picker-button').click();
+  await page.getByRole('dialog', { name: 'Explore Domains & Paths' }).getByRole('button', { name: 'Investing', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Close domain catalog', exact: true }).click();
   await visitTab('Apply', 'Make it part of your life.', 'Start lesson 1', 'apply');
-  await visitTab('Compete', 'Discipline is visible.', 'Make it part of your life.', 'compete');
-  await visitTab('Profile', 'Investing profile', 'Discipline is visible.', 'profile');
-  await page.getByRole('button').filter({ hasText: 'T1GER Plus / Founder' }).click();
+  await visitTab('Master', 'MASTER · SMART REVIEW', 'Make it part of your life.', 'master');
+  if (await page.getByRole('button', { name: 'Compete', exact: true }).count()) throw new Error('Compete should not distract the V1 primary navigation.');
+  await visitTab('Profile', 'Investing profile', 'MASTER · SMART REVIEW', 'profile');
+  await page.getByRole('button').filter({ hasText: 'T1GER Plus' }).click();
   await page.getByRole('dialog').getByText('Keep learning for free', { exact: true }).waitFor();
   if (await page.getByRole('dialog').getByText('START MY 7-DAY FREE TRIAL', { exact: true }).count()) throw new Error('Unavailable checkout advertised a trial');
   await page.keyboard.press('Escape');
@@ -55,6 +63,33 @@ try {
   }
   await page.setViewportSize({ width: 390, height: 844 });
   if (runtimeErrors.length) throw new Error(`Runtime errors: ${runtimeErrors.join(' | ')}`);
+
+  const onboarding = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 });
+  await onboarding.addInitScript(() => {
+    localStorage.removeItem('t1ger_onboarding_draft_v2');
+    localStorage.removeItem('t1ger_onboarding_completed');
+    localStorage.setItem('t1ger_app_language', 'en');
+  });
+  await onboarding.goto('http://127.0.0.1:3000/?forceOnboarding=1', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await onboarding.getByRole('button', { name: 'GET STARTED', exact: true }).click();
+  const investingChoice = onboarding.getByRole('button', { name: /Investing & Markets/ });
+  await investingChoice.waitFor({ state: 'visible', timeout: 60_000 });
+  if (await investingChoice.getAttribute('aria-pressed') !== 'true') {
+    throw new Error('New onboarding did not select the flagship Investing path by default.');
+  }
+  await onboarding.getByText('Build sound financial judgment with practical, evidence-based lessons.', { exact: true }).waitFor();
+  await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
+  await onboarding.getByRole('button', { name: "I'm new to this topic", exact: true }).click();
+  await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
+  await onboarding.getByRole('heading', { name: 'How much time can you protect each day?', exact: true }).waitFor();
+  await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
+  await onboarding.getByRole('button', { name: /Contribute regularly and reinvest returns/ }).click();
+  await onboarding.getByRole('button', { name: 'CHECK', exact: true }).click();
+  await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
+  await onboarding.getByRole('heading', { name: '+100 XP', exact: true }).waitFor();
+  await onboarding.getByRole('button', { name: 'SAVE PROGRESS', exact: true }).waitFor();
+  await onboarding.close();
+
   console.log(JSON.stringify({ ok: true, results }, null, 2));
 } finally {
   await browser.close();

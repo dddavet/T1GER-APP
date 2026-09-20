@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle, Copy, FloppyDisk, Sparkle } from '@phosphor-icons/react';
+import { ArrowRight, CheckCircle, Copy, FloppyDisk, Sparkle } from '@phosphor-icons/react';
 import type { ActionWidget, LearningLocale, SavedLearningArtifact, ToolField } from '../../services/interactiveCurriculumTypes';
 import { localizeLearning } from '../../services/interactiveCurriculumTypes';
 
@@ -9,6 +9,16 @@ interface MicroToolLabProps {
   widget: ActionWidget;
   locale: LearningLocale;
   onCommit: (artifact: SavedLearningArtifact) => void;
+  onCommitAndContinue?: (artifact: SavedLearningArtifact) => void;
+  requireInteraction?: boolean;
+  showCompoundBreakdown?: boolean;
+}
+
+interface ToolResult {
+  headline: string;
+  detail: string;
+  artifact: string;
+  breakdown?: { contributed: number; growth: number; finalValue: number };
 }
 
 const numberValue = (values: Record<string, string | number>, key: string, fallback = 0): number => {
@@ -19,7 +29,15 @@ const numberValue = (values: Record<string, string | number>, key: string, fallb
 const money = (value: number, locale: LearningLocale): string =>
   new Intl.NumberFormat(locale === 'es' ? 'es-US' : 'en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
 
-function calculateResult(widget: ActionWidget, values: Record<string, string | number>, locale: LearningLocale): { headline: string; detail: string; artifact: string } {
+export function calculateCompoundProjection(monthly: number, years: number, annualRatePercent: number) {
+  const months = years * 12;
+  const monthlyRate = annualRatePercent / 100 / 12;
+  const finalValue = monthlyRate === 0 ? monthly * months : monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
+  const contributed = monthly * months;
+  return { contributed, growth: Math.max(0, finalValue - contributed), finalValue };
+}
+
+function calculateResult(widget: ActionWidget, values: Record<string, string | number>, locale: LearningLocale): ToolResult {
   const es = locale === 'es';
   const text = (key: string) => String(values[key] || '').trim();
 
@@ -33,11 +51,11 @@ function calculateResult(widget: ActionWidget, values: Record<string, string | n
     case 'compound_growth': {
       const monthly = numberValue(values, 'monthly');
       const years = numberValue(values, 'years');
-      const annualRate = numberValue(values, 'rate') / 100;
-      const months = years * 12;
-      const monthlyRate = annualRate / 12;
-      const future = monthlyRate === 0 ? monthly * months : monthly * ((Math.pow(1 + monthlyRate, months) - 1) / monthlyRate);
-      return { headline: money(future, locale), detail: es ? `${money(monthly, locale)} al mes durante ${years} años` : `${money(monthly, locale)} monthly for ${years} years`, artifact: es ? `Aportaré ${money(monthly, locale)} cada mes durante ${years} años y revisaré el plan una vez al año.` : `I will contribute ${money(monthly, locale)} monthly for ${years} years and review the plan once a year.` };
+      const annualRate = numberValue(values, 'rate');
+      const cadence = String(values.reviewCadence || 'yearly');
+      const reviewRule = cadence === 'quarterly' ? (es ? 'cada 3 meses' : 'every 3 months') : (es ? 'una vez al año' : 'once a year');
+      const breakdown = calculateCompoundProjection(monthly, years, annualRate);
+      return { headline: money(breakdown.finalValue, locale), detail: es ? `${money(monthly, locale)} al mes durante ${years} años al ${annualRate}% supuesto` : `${money(monthly, locale)} monthly for ${years} years at an assumed ${annualRate}%`, artifact: es ? `Mi regla: aportar ${money(monthly, locale)} cada mes durante ${years} años y revisar el plan ${reviewRule}.` : `My rule: contribute ${money(monthly, locale)} monthly for ${years} years and review the plan ${reviewRule}.`, breakdown };
     }
     case 'etf_fee_drag': {
       const balance = numberValue(values, 'balance');
@@ -216,12 +234,13 @@ const initialValueForField = (field: ToolField, locale: LearningLocale): string 
   return '';
 };
 
-export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, widget, locale, onCommit }) => {
+export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, widget, locale, onCommit, onCommitAndContinue, requireInteraction = false, showCompoundBreakdown = false }) => {
   const [values, setValues] = useState<Record<string, string | number>>(() =>
     Object.fromEntries(widget.fields.map((field) => [field.id, initialValueForField(field, locale)]))
   );
   const [committed, setCommitted] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [interacted, setInteracted] = useState(false);
   const result = useMemo(() => calculateResult(widget, values, locale), [locale, values, widget]);
   const isValid = widget.fields.every((field) => field.kind !== 'text' || String(values[field.id] || '').trim().length >= (field.minLength || 1));
 
@@ -231,7 +250,7 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
 
   // Auto-commit valid artifact to parent so player is never deadlocked
   useEffect(() => {
-    if (isValid && result.artifact && result.artifact !== lastCommittedSummaryRef.current) {
+    if (!requireInteraction && isValid && result.artifact && result.artifact !== lastCommittedSummaryRef.current) {
       lastCommittedSummaryRef.current = result.artifact;
       const artifact: SavedLearningArtifact = {
         lessonId,
@@ -243,10 +262,11 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
       };
       onCommitRef.current(artifact);
     }
-  }, [isValid, lessonId, trackId, widget.artifactTitle, result.artifact, values, locale]);
+  }, [isValid, lessonId, trackId, widget.artifactTitle, result.artifact, values, locale, requireInteraction]);
 
   const updateValue = (id: string, value: string | number) => {
     setCommitted(false);
+    setInteracted(true);
     setValues((current) => ({ ...current, [id]: value }));
   };
 
@@ -259,11 +279,12 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
     });
     setValues(updated);
     setCommitted(true);
+    setInteracted(true);
     navigator.vibrate?.(12);
   };
 
   const commit = () => {
-    if (!isValid) return;
+    if (!isValid || (requireInteraction && !interacted)) return;
     const artifact: SavedLearningArtifact = {
       lessonId,
       trackId,
@@ -275,6 +296,7 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
     setCommitted(true);
     navigator.vibrate?.([18, 30, 18]);
     onCommit(artifact);
+    onCommitAndContinue?.(artifact);
   };
 
   const copyArtifact = async () => {
@@ -324,7 +346,7 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
               )}
             </span>
             {field.kind === 'range' && (
-              <input className="learn-range w-full" type="range" min={field.min} max={field.max} step={field.step} value={Number(values[field.id])} onChange={(event) => updateValue(field.id, Number(event.target.value))} />
+              <input className="learn-range w-full min-h-[44px] touch-pan-y" type="range" min={field.min} max={field.max} step={field.step} value={Number(values[field.id])} onChange={(event) => updateValue(field.id, Number(event.target.value))} />
             )}
             {field.kind === 'text' && (
               <textarea
@@ -348,17 +370,66 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
         <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-[#FF9B4A]">{localizeLearning(widget.resultLabel, locale)}</span>
         <p className="mt-1 text-xl font-bold leading-snug text-white">{result.headline}</p>
         <p className="mt-1 text-xs leading-relaxed text-zinc-400">{result.detail}</p>
+        {showCompoundBreakdown && result.breakdown && (() => {
+          const total = Math.max(1, result.breakdown.finalValue);
+          const contPct = Math.min(100, Math.max(0, Math.round((result.breakdown.contributed / total) * 100)));
+          const growPct = 100 - contPct;
+          return (
+            <div className="mt-4 space-y-3">
+              <div>
+                <div className="flex justify-between text-[10px] font-mono font-medium text-zinc-400 mb-1.5">
+                  <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-zinc-400" />{locale === 'es' ? 'Aportes directos' : 'Direct contributions'} ({contPct}%)</span>
+                  <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-400" />{locale === 'es' ? 'Crecimiento estimado' : 'Estimated growth'} ({growPct}%)</span>
+                </div>
+                <div className="flex h-2.5 w-full overflow-hidden rounded-full bg-zinc-800" role="progressbar" aria-label={locale === 'es' ? 'Proporción de aportes frente a crecimiento' : 'Contributions versus growth proportion'}>
+                  <div style={{ width: `${contPct}%` }} className="h-full bg-zinc-500 transition-all duration-300" />
+                  <div style={{ width: `${growPct}%` }} className="h-full bg-emerald-500 transition-all duration-300" />
+                </div>
+              </div>
+              <dl className="grid grid-cols-3 gap-px overflow-hidden rounded-xl border border-white/10 bg-white/10 text-center">
+                <div className="bg-[#111115] px-2 py-3">
+                  <dt className="text-[9px] font-semibold uppercase tracking-wide text-zinc-400">{locale === 'es' ? 'Total aportado' : 'Total contributed'}</dt>
+                  <dd className="mt-1 font-mono text-xs font-bold text-zinc-200">{money(result.breakdown.contributed, locale)}</dd>
+                </div>
+                <div className="bg-[#111115] px-2 py-3">
+                  <dt className="text-[9px] font-semibold uppercase tracking-wide text-emerald-400/90">{locale === 'es' ? 'Crecimiento' : 'Growth'}</dt>
+                  <dd className="mt-1 font-mono text-xs font-bold text-emerald-300">+{money(result.breakdown.growth, locale)}</dd>
+                </div>
+                <div className="bg-[#111115] px-2 py-3">
+                  <dt className="text-[9px] font-semibold uppercase tracking-wide text-[#FF9B4A]">{locale === 'es' ? 'Valor final' : 'Final value'}</dt>
+                  <dd className="mt-1 font-mono text-xs font-bold text-orange-300">{money(result.breakdown.finalValue, locale)}</dd>
+                </div>
+              </dl>
+              <p className="text-[10px] leading-relaxed text-zinc-500">
+                {locale === 'es'
+                  ? 'Proyección basada en un 8% anual ilustrativo según la media histórica indexada. Los rendimientos reales varían y no están garantizados.'
+                  : 'Projection based on an illustrative 8% annual return according to historical index average. Actual returns vary and are not guaranteed.'}
+              </p>
+            </div>
+          );
+        })()}
         <button type="button" onClick={copyArtifact} className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-300 transition hover:text-white active:scale-[0.98]">
           {copied ? <CheckCircle size={16} weight="fill" /> : <Copy size={16} weight="bold" />}
           {copied ? (locale === 'es' ? 'Copiado' : 'Copied') : (locale === 'es' ? 'Copiar resultado' : 'Copy result')}
         </button>
       </div>
 
-      <button type="button" disabled={!isValid || committed} onClick={commit} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35">
-        {committed ? <CheckCircle size={20} weight="fill" /> : <FloppyDisk size={20} weight="bold" />}
-        {committed ? (locale === 'es' ? '✓ Artefacto guardado' : '✓ Artifact saved') : localizeLearning(widget.commitLabel, locale)}
+      <button type="button" disabled={!isValid || committed || (requireInteraction && !interacted)} onClick={commit} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35">
+        {committed ? (
+          <CheckCircle size={20} weight="fill" />
+        ) : onCommitAndContinue ? (
+          <ArrowRight size={20} />
+        ) : (
+          <FloppyDisk size={20} weight="bold" />
+        )}
+        {committed
+          ? (locale === 'es' ? '✓ Regla guardada' : '✓ Rule saved')
+          : onCommitAndContinue
+          ? (locale === 'es' ? 'Guardar regla y continuar' : 'Save rule & continue')
+          : localizeLearning(widget.commitLabel, locale)}
       </button>
       {!isValid && <p className="text-center text-xs text-amber-300">{locale === 'es' ? 'Completa todos los campos para generar un artefacto real.' : 'Complete every field to generate a real artifact.'}</p>}
+      {requireInteraction && !interacted && <p className="text-center text-xs text-zinc-400">{locale === 'es' ? 'Ajusta al menos un control para convertir el ejemplo en tu regla.' : 'Adjust at least one control to turn the example into your rule.'}</p>}
     </div>
   );
 };

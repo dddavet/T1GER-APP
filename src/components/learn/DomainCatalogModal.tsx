@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Sparkle, ArrowRight, CheckCircle, BookOpen } from '@phosphor-icons/react';
 import {
   KINNU_DOMAINS,
+  isLaunchDomain,
   isPathwayAvailable,
   type DomainId,
   type KinnuDomain,
@@ -50,7 +51,8 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  const activeDomain = KINNU_DOMAINS.find(d => d.id === activeTabDomainId) || KINNU_DOMAINS[0];
+  const launchDomains = KINNU_DOMAINS.filter(isLaunchDomain);
+  const activeDomain = launchDomains.find(d => d.id === activeTabDomainId) || launchDomains[0];
 
   return (
     <AnimatePresence>
@@ -85,7 +87,7 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
             <div className="px-5 py-3 border-b border-white/10 flex items-center justify-between">
               <div>
                 <p className="text-[10px] font-mono font-black uppercase tracking-widest text-orange-400">
-                  {tr('Universo del Conocimiento', 'Knowledge Universe')}
+                  {tr('Elige tu próximo camino', 'Choose your next path')}
                 </p>
                 <h2 id="domain-catalog-title" className="text-lg sm:text-xl font-black text-white">
                   {tr('Explora Dominios & Rutas', 'Explore Domains & Paths')}
@@ -105,7 +107,7 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
 
             {/* Domain Tabs Rail */}
             <div className="px-4 py-2.5 bg-black/30 border-b border-white/5 overflow-x-auto flex items-center gap-1.5 no-scrollbar">
-              {KINNU_DOMAINS.map(domain => {
+              {launchDomains.map(domain => {
                 const isActive = activeTabDomainId === domain.id;
                 return (
                   <button
@@ -151,7 +153,7 @@ export const DomainCatalogModal: React.FC<DomainCatalogModalProps> = ({
                 </div>
               </div>
 
-              {activeDomain.pathways.map((pathway) => {
+              {activeDomain.pathways.filter(isPathwayAvailable).map((pathway) => {
                 const isCurrent = selectedPathwayId === pathway.id;
                 return (
                   <div

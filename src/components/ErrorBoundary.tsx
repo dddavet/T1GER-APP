@@ -1,62 +1,44 @@
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, type ErrorInfo, type ReactNode } from 'react';
 
-interface Props {
-  children: ReactNode;
-}
-
-interface State {
-  hasError: boolean;
-  error: Error | null;
-}
+interface Props { children: ReactNode }
+interface State { hasError: boolean; error: Error | null }
 
 export class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null
-  };
+  public state: State = { hasError: false, error: null };
 
   public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
+    console.error('Uncaught application error', error, errorInfo);
   }
 
+  private retry = () => {
+    this.setState({ hasError: false, error: null });
+  };
+
   public render() {
-    if (this.state.hasError) {
-      let errorMessage = this.state.error?.message || 'An unexpected error occurred.';
-      try {
-        // Try to parse if it's our custom Firestore error JSON
-        const parsed = JSON.parse(errorMessage);
-        if (parsed.error) {
-          errorMessage = parsed.error;
-        }
-      } catch (e) {
-        // Not a JSON string, keep original message
-      }
+    if (!this.state.hasError) return this.props.children;
 
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-white text-zinc-50 p-4">
-          <div className="max-w-md w-full bg-white border border-zinc-800 rounded-xl p-6 shadow-2xl">
-            <h2 className="text-xl font-bold text-red-500 mb-4 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
-              Something went wrong
-            </h2>
-            <p className="text-zinc-500 mb-6 font-mono text-sm break-words">
-              {errorMessage}
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-zinc-800 font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Reload Application
-            </button>
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#09090B] p-5 text-white">
+        <section role="alert" className="w-full max-w-md rounded-[1.75rem] border border-white/10 bg-[#121216] p-6 shadow-[0_24px_80px_rgba(0,0,0,0.65),inset_0_1px_0_rgba(255,255,255,0.08)]">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-[#FF8A2B]">T1GER · RECOVERY</p>
+          <h1 className="mt-3 text-2xl font-bold">We hit an unexpected problem.</h1>
+          <p className="mt-2 text-sm leading-relaxed text-zinc-400">Your saved learning progress is safe. Try returning to the app; if the issue continues, reload this session.</p>
+          {import.meta.env.DEV && this.state.error && (
+            <details className="mt-4 rounded-xl border border-white/8 bg-black/25 p-3 text-xs text-zinc-400">
+              <summary className="cursor-pointer font-semibold text-zinc-300">Developer details</summary>
+              <pre className="mt-2 overflow-auto whitespace-pre-wrap break-words font-mono">{this.state.error.message}</pre>
+            </details>
+          )}
+          <div className="mt-6 grid gap-3 sm:grid-cols-2">
+            <button type="button" onClick={this.retry} className="t1ger-primary-button min-h-12 text-sm font-bold text-black">Try again</button>
+            <button type="button" onClick={() => window.location.reload()} className="t1ger-secondary-button min-h-12 text-sm font-bold">Reload app</button>
           </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
+        </section>
+      </main>
+    );
   }
 }

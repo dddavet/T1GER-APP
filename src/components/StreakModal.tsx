@@ -264,7 +264,7 @@ export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, strea
                     : 'Compare your daily consistency with the T1GER community and hold top position in the league.'}
                 </p>
                 <div className="mt-5 rounded-xl border border-white/6 bg-white/[0.03] p-4 font-mono text-sm text-white">
-                  {isEs ? 'Posición actual en Liga: Top 5%' : 'Current League Rank: Top 5%'}
+                  {isEs ? 'Consulta tu ranking semanal en Compete' : 'See your weekly ranking in Compete'}
                 </div>
               </div>
             </div>

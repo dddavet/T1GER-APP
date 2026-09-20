@@ -104,6 +104,7 @@ export const Profile = () => {
     const track = appUser?.primaryTrack || brainState.currentTrackId || 'investing';
     if (track === 'ai') return isEs ? 'Perfil IA & Automatización' : 'AI & Automation profile';
     if (track === 'business') return isEs ? 'Perfil Growth & Negocios' : 'Growth & Business profile';
+    if (track === 'mindset') return isEs ? 'Perfil de Psicología' : 'Psychology profile';
     return isEs ? 'Perfil de inversión' : 'Investing profile';
   }, [appUser?.primaryTrack, brainState.currentTrackId, isEs]);
 
@@ -178,17 +179,17 @@ export const Profile = () => {
           )}
         </AnimatePresence>
         <SettingRow icon={Bell} title={isEs ? 'Recordatorios' : 'Reminders'} detail={notificationsEnabled ? (isEs ? 'Activados' : 'Enabled') : (isEs ? 'Desactivados' : 'Disabled')} onClick={toggleNotifications} />
-        <SettingRow icon={Smartphone} title={isEs ? 'Redes vs Libertad' : 'Screen Time vs Wealth'} detail={isEs ? 'Auditoría' : 'Audit'} onClick={() => setShowScreenTimeModal(true)} />
+        <SettingRow icon={Smartphone} title={isEs ? 'Tiempo de pantalla y enfoque' : 'Screen time & focus'} detail={isEs ? 'Revisar' : 'Review'} onClick={() => setShowScreenTimeModal(true)} />
         <SettingRow icon={Bot} title={isEs ? 'Mentor T1GER' : 'T1GER mentor'} detail={isEs ? 'Guía de aprendizaje' : 'Learning guidance'} onClick={() => setActiveView('coach')} />
-        <SettingRow icon={ShieldCheck} title="T1GER Plus / Founder" detail={appUser?.isPro || appUser?.isFounder ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Información' : 'Details')} onClick={() => setShowPaywallModal(true)} />
-        <SettingRow icon={UserRound} title={isEs ? 'Reiniciar Diagnóstico Táctico' : 'Reset Tactical Diagnostic'} detail={isEs ? 'Recalibrar ruta' : 'Recalibrate path'} onClick={() => { localStorage.removeItem('t1ger_onboarding_draft_v2'); void updateAppUser({ onboardingComplete: false }); }} />
+        <SettingRow icon={ShieldCheck} title="T1GER Plus" detail={appUser?.isPro || appUser?.isFounder ? (isEs ? 'Activo' : 'Active') : (isEs ? 'Información' : 'Details')} onClick={() => setShowPaywallModal(true)} />
+        <SettingRow icon={UserRound} title={isEs ? 'Revisar configuración de aprendizaje' : 'Revisit learning setup'} detail={isEs ? 'Elegir otra ruta' : 'Choose another path'} onClick={() => { localStorage.removeItem('t1ger_onboarding_draft_v2'); void updateAppUser({ onboardingComplete: false }); }} />
       </motion.section>
 
       <AchievementsWall />
       <ConsistencyHeatmap />
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .1 }} className="t1ger-panel transform-gpu overflow-hidden">
-        <div className="border-b border-white/7 p-5"><div className="flex items-center justify-between gap-3"><div><p className="t1ger-kicker">Predator report</p><p className="mt-1 text-sm font-semibold text-white">{isEs ? 'Tu ejecución semanal, sin ruido' : 'Your weekly execution, without noise'}</p></div><FileText size={20} className="text-[var(--t1ger-orange)]" /></div></div>
+        <div className="border-b border-white/7 p-5"><div className="flex items-center justify-between gap-3"><div><p className="t1ger-kicker">{isEs ? 'Progreso semanal' : 'Weekly learning'}</p><p className="mt-1 text-sm font-semibold text-white">{isEs ? 'Lo que aprendiste, aplicaste y mantuviste' : 'What you learned, applied, and retained'}</p></div><FileText size={20} className="text-[var(--t1ger-orange)]" /></div></div>
         <SettingRow icon={Bell} title={isEs ? 'Resumen semanal' : 'Weekly summary'} detail={appUser?.weeklyReportOptIn ? (isEs ? 'Activado' : 'Enabled') : (isEs ? 'Desactivado' : 'Disabled')} onClick={() => { void toggleWeeklyReport(); }} />
         <SettingRow icon={FileText} title={loadingReport ? (isEs ? 'Calculando…' : 'Calculating…') : (isEs ? 'Ver reporte actual' : 'View current report')} detail={hasCloudAccount ? '7D' : (isEs ? 'Requiere cuenta' : 'Account required')} onClick={loadingReport ? undefined : () => { void previewWeeklyReport(); }} />
         <AnimatePresence initial={false}>
@@ -227,7 +228,7 @@ export const Profile = () => {
         <button onClick={logout} className="t1ger-secondary-button"><LogOut size={17} />{isEs ? 'Salir' : 'Sign out'}</button>
         {!deleteConfirm ? <button onClick={() => setDeleteConfirm(true)} className="inline-flex min-h-13 items-center justify-center gap-2 rounded-2xl border border-[#E56A65]/25 bg-[#E56A65]/7 px-4 text-sm font-semibold text-[#F0AAA6]"><Trash2 size={17} />{isEs ? 'Eliminar' : 'Delete'}</button> : <button onClick={removeAccount} className="inline-flex min-h-13 items-center justify-center rounded-2xl bg-[#E56A65] px-4 text-sm font-semibold text-[#1F1918]">{isEs ? 'Confirmar' : 'Confirm delete'}</button>}
       </div>
-      <p className="text-center text-[11px] text-[#496C64]">{isEs ? 'T1GER App v1.0.0 · Sistema de Maestría y Ejecución para Emprendedores' : 'T1GER App v1.0.0 · Mastery & Execution Platform for Founders'}</p>
+      <p className="text-center text-[11px] text-[#496C64]">{isEs ? 'T1GER App v1.0.0 · Aprende. Aplica. Domina.' : 'T1GER App v1.0.0 · Learn it. Apply it. Master it.'}</p>
 
       <ScreenTimeFreedomModal isOpen={showScreenTimeModal} onClose={() => setShowScreenTimeModal(false)} />
       <NotificationPermissionModal isOpen={showPermissionModal} onClose={() => setShowPermissionModal(false)} onGranted={() => setStatus(isEs ? '¡Alertas de racha activadas!' : 'Streak alerts enabled!')} />

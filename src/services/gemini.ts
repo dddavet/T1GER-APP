@@ -316,7 +316,7 @@ Return ONLY valid JSON matching this exact structure:
       headline: isEs ? 'Acción Registrada' : 'Action Recorded',
       feedback: isEs
         ? 'Tu plan táctico ha sido registrado en tu bitácora de ejecución.'
-        : 'Your tactical plan has been saved to your execution log.',
+        : 'Your Apply plan has been saved to your activity log.',
       strength: isEs ? 'Compromiso de ejecución inmediata' : 'Immediate execution commitment',
     };
   }

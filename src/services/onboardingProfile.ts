@@ -13,6 +13,8 @@ export type OnboardingCourseTopic =
 
 export type OnboardingKnowledgeLevel = 'zero' | 'basic' | 'intermediate' | 'competent' | 'advanced';
 
+export const DEFAULT_ONBOARDING_TOPIC: OnboardingCourseTopic = 'investing';
+
 export const ONBOARDING_TOPIC_TRACK: Record<OnboardingCourseTopic, TrackType> = {
   technology: 'ai',
   business: 'business',
@@ -34,7 +36,7 @@ export const ONBOARDING_KNOWLEDGE_SCORE: Record<OnboardingKnowledgeLevel, number
 };
 
 export function getOnboardingTrack(topic: OnboardingCourseTopic): TrackType {
-  return ONBOARDING_TOPIC_TRACK[topic] || 'business';
+  return ONBOARDING_TOPIC_TRACK[topic] || 'investing';
 }
 
 export function getOnboardingInitialPathwayId(topic: OnboardingCourseTopic): string {
@@ -44,18 +46,18 @@ export function getOnboardingInitialPathwayId(topic: OnboardingCourseTopic): str
       return 'tech-ai';
     case 'business':
     case 'skills':
-      return 'biz-entrepreneurship';
+      return 'biz-marketing';
     case 'investing':
     case 'finance':
-      return 'invest-value';
+      return 'biz-capital';
     case 'mindset':
-      return 'mind-stoic';
+      return 'psych-biases';
     case 'productivity':
       return 'prod-deepwork';
     case 'history':
       return 'hist-strategy';
     default:
-      return 'biz-entrepreneurship';
+      return 'invest-value';
   }
 }
 

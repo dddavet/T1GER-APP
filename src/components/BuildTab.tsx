@@ -251,8 +251,8 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
               </h2>
               <p className="mt-1.5 text-xs text-zinc-400 max-w-sm mx-auto leading-relaxed">
                 {tr(
-                  'Cada lección desbloquea una misión concreta que puedes hacer hoy.',
-                  'Every lesson unlocks a specific mission you can do today.'
+                  'Cada lección desbloquea un paso concreto que puedes aplicar hoy.',
+                  'Every lesson unlocks a specific Apply step you can take today.'
                 )}
               </p>
               <button

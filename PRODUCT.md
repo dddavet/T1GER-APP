@@ -1,36 +1,77 @@
-# Product
+# T1GER Product Direction
 
-## Register
+## Product Promise
 
-product
+T1GER helps ambitious, curious learners discover, learn, apply, and retain useful knowledge. It turns short mobile sessions into durable understanding and real-world progress instead of passive course completion.
 
-## Users
+The official product loop is:
 
-T1GER serves ambitious learners, primarily people aged 18 to 30 who want practical capability in investing, AI, automation, marketing, and business. They often arrive after collecting passive courses and unfinished videos. They use T1GER in short mobile sessions, frequently with limited attention, and need to know exactly what to learn, what to execute, and whether today's progress is real.
+> **DISCOVER → LEARN → APPLY → MASTER → RETURN**
 
-## Product Purpose
+- **Discover:** Find a curated path that matches a genuine interest or goal.
+- **Learn:** Build one useful mental model through an interactive, focused lesson.
+- **Apply:** Use that model in a real decision, tool, simulation, or action.
+- **Master:** Retrieve and review the idea over time through FSRS-guided practice.
+- **Return:** Come back for the clearest next step, not an overwhelming dashboard.
 
-T1GER turns learning into verified execution. A personalized path teaches one compact mental model, tests retrieval, produces a useful micro-tool, and ends in a real-world mission with Proof of Work. Success means the user builds durable knowledge, a visible portfolio of artifacts, a protected daily streak, and stronger real-world judgment rather than merely completing content.
+## Audience
+
+T1GER is for ambitious learners, primarily ages 18–30, who are curious across multiple domains and want practical capability. They often arrive after collecting unfinished videos, books, or courses. They use T1GER in short mobile sessions and need to know what they are learning, why it matters, what to do next, and whether the knowledge is sticking.
+
+T1GER is not exclusively an entrepreneurship, founder, business, productivity, or self-improvement product. Those subjects can exist as curated domains, but they do not define the identity of the platform.
+
+## Domain Priorities
+
+1. **Investing & Smart Money** — the flagship reference path and first complete Learn → Apply → Master experience.
+2. **AI** — practical understanding, responsible use, prompting, automation, and agentic workflows.
+3. **Psychology** — decision-making, cognitive bias, learning, attention, and behavior.
+
+Business, marketing, history, productivity, and other useful subjects remain valid current or future domains. A domain must not be presented as fully available until its Learn, Apply, and Master loop is genuinely connected.
+
+## Content Standard
+
+T1GER curates knowledge from identifiable, trustworthy sources: respected books and authors, primary research, institutions, official documentation, and expert practitioners. AI may synthesize, structure, personalize, and generate interactions, but it must not be presented as the source of truth.
+
+Every learning path should make its sources legible and convert them into original interactive instruction rather than reproducing source material.
+
+## Progress Standard
+
+Progress is meaningful only when its cause is clear:
+
+- Completing a lesson creates readiness; it does not finish the loop.
+- Apply records a real decision or action and secures personal progress.
+- Master checks whether the learner can retrieve the idea later.
+- Verified artifacts may contribute to competitive status; self-reported actions remain personal progress.
+- XP, streaks, memory, and T1GER vitals must reflect canonical completion rules and remain idempotent.
+
+Internal concepts such as missions, artifacts, submissions, and `BuildTab` remain valid implementation details where changing them would risk data or progression regressions. The user-facing language is Learn, Apply, and Master.
 
 ## Brand Personality
 
-Direct, energetic, and disciplined. T1GER should feel like a demanding but supportive training partner: clear enough to trust, lively enough to return to, and serious about evidence. The mascot adds warmth and consequence without making the product childish.
+Ambitious, curious, modern, educational, and premium. T1GER should feel like a knowledgeable training partner: direct enough to create momentum, calm enough to trust, and warm enough to return to. The mascot provides guidance and consequence without making the product childish.
 
-## Anti-references
+Avoid hustle-bro language, fabricated performance claims, shame, fake urgency, corporate jargon, and generic motivational copy.
 
-- Passive course marketplaces, long video libraries, PDF-heavy curricula, and completion theater.
-- Generic dark fintech dashboards filled with decorative neon, unexplained KPIs, or nested cards.
-- Literal copies of Duolingo, Kinnu, Strava, or other reference products.
-- Punitive habit products that use shame, fake urgency, or inaccessible motion.
-- Interfaces where learning, applying, competing, and profile data feel like separate apps.
+## Product Principles
 
-## Design Principles
+1. **One next action:** Every major screen answers “What should I do next?”
+2. **Active learning:** Interaction, retrieval, and decisions replace passive consumption.
+3. **Application closes the loop:** Useful knowledge becomes a real tool, choice, simulation, or action.
+4. **Mastery is retention:** Review proves that learning remained available over time.
+5. **Curated trust:** Sources are visible and claims are supportable.
+6. **Progress is legible:** State, prerequisites, rewards, and consequences are understandable.
+7. **Energy with restraint:** Motion, sound, and the mascot support state changes without competing with the lesson.
+8. **Evolve, do not rebuild:** Preserve Firebase, BrainContext, progression, XP, streaks, FSRS, Apply missions, artifacts, subscriptions, notifications, and the mascot unless a separately approved migration requires change.
 
-1. **One next action:** Every primary screen makes today's highest-value action unmistakable.
-2. **Execution closes the loop:** Learning creates readiness; verified Proof of Work earns the full reward.
-3. **Show causality:** Screen time, decisions, missions, XP, memory, streaks, and T1GER vitals visibly affect one another.
-4. **Progress must be legible:** Use clear hierarchy, state language, and evidence instead of decorative metrics.
-5. **Energy with restraint:** Save character, motion, and celebration for guidance and state change so the core task stays fast.
+## Anti-References
+
+- Passive course marketplaces, long video libraries, and PDF-heavy curricula.
+- Founder-only positioning or business language applied to unrelated subjects.
+- Completion theater where tapping through content equals mastery.
+- Generic dark fintech dashboards filled with decorative neon or unexplained KPIs.
+- Literal copies of Duolingo, Kinnu, Brilliant, or other reference products.
+- Punitive habit products that rely on shame or inaccessible motion.
+- Interfaces where Learn, Apply, Master, Compete, and Profile feel like separate products.
 
 ## Accessibility & Inclusion
 

@@ -7,8 +7,12 @@ import {
   processMissionResult,
 } from '../src/services/brainService';
 import { ALL_ATOMIC_LESSONS } from '../src/services/interactiveCurriculum';
+import { getPathwayById } from '../src/services/curriculumCatalog';
+import { readLearningArtifacts, saveLearningArtifact } from '../src/services/learningArtifactService';
 import {
+  DEFAULT_ONBOARDING_TOPIC,
   getOnboardingExperienceLevel,
+  getOnboardingInitialPathwayId,
   getOnboardingTrack,
 } from '../src/services/onboardingProfile';
 
@@ -20,6 +24,16 @@ assert.equal(getProgressMissionById(lesson.id)?.nodeType, 'learn');
 assert.equal(getProgressMissionById(fieldMissionId)?.nodeType, 'apply');
 assert.equal(isApplyMissionId(lesson.id), false);
 assert.equal(isApplyMissionId(fieldMissionId), true);
+
+const values = new Map<string, string>();
+const storage = {
+  getItem: (key: string) => values.get(key) ?? null,
+  setItem: (key: string, value: string) => { values.set(key, value); },
+};
+values.set('t1ger_learning_artifacts_artifact-test', JSON.stringify([{ lessonId: 'legacy', trackId: 'smart-money', title: 'Legacy', summary: 'Saved before v1', values: {}, createdAt: 1 }]));
+assert.equal(readLearningArtifacts('artifact-test', storage).some(item => item.lessonId === 'legacy'), true, 'Legacy learning artifacts must remain readable.');
+saveLearningArtifact('artifact-test', { lessonId: 'current', trackId: 'smart-money', title: 'Current', summary: 'Canonical', values: {}, createdAt: 2 }, storage);
+assert.deepEqual(readLearningArtifacts('artifact-test', storage).map(item => item.lessonId).sort(), ['current', 'legacy'], 'Canonical and legacy artifacts must merge without data loss.');
 
 const initialState = structuredClone(DEFAULT_BRAIN_STATE);
 const afterLesson = processMissionResult(initialState, lesson.id, true, 100);
@@ -37,6 +51,12 @@ assert.equal(afterProof.learnStreak, 1, 'Learn + proof on the same day should se
 assert.equal(getOnboardingTrack('finance'), 'investing');
 assert.equal(getOnboardingTrack('tech'), 'ai');
 assert.equal(getOnboardingTrack('skills'), 'business');
+assert.equal(DEFAULT_ONBOARDING_TOPIC, 'investing', 'New learners should begin on the flagship Investing path.');
+assert.equal(getOnboardingTrack(DEFAULT_ONBOARDING_TOPIC), 'investing');
+assert.equal(getOnboardingInitialPathwayId(DEFAULT_ONBOARDING_TOPIC), 'biz-capital');
+assert.equal(getOnboardingInitialPathwayId('technology'), 'tech-ai');
+assert.equal(getOnboardingInitialPathwayId('mindset'), 'psych-biases');
+assert.equal(getPathwayById('biz-capital')?.domainId, 'investing', 'The flagship path must be presented as Investing, not Business.');
 assert.deepEqual(
   ['zero', 'basic', 'intermediate', 'competent', 'advanced'].map((level) =>
     getOnboardingExperienceLevel(level as Parameters<typeof getOnboardingExperienceLevel>[0]),

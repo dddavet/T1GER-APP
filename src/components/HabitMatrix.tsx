@@ -139,7 +139,7 @@ export const HabitMatrix = ({ onHabitComplete }: { onHabitComplete: () => void }
         <div className="space-y-1">
            <p className="text-[10px] font-black uppercase tracking-widest text-accent">Guidance: Verification Protocol</p>
            <p className="text-xs text-zinc-500 leading-relaxed font-medium">
-             The AI Auditor expects metadata. If you can't snap it, log the grind in detail. Remember: {dailyTacticalStatus.dayType === 'beast' ? 'BEAST MODE double rewards active. Failure is not an option.' : 'Integrity is the only metric that matters when you are your own boss.'}
+             If you cannot capture a photo, describe the action clearly. {dailyTacticalStatus.dayType === 'beast' ? 'High-focus rewards are active; complete the action when you can verify it.' : 'An honest record makes your progress useful and reviewable.'}
            </p>
         </div>
       </div>

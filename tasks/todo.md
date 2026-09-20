@@ -1,11 +1,20 @@
-# Full pass checklist
-- [x] Create backup and synchronize repository.
-- [x] Inspect Learn/Apply/progress and dispatch independent supporting-system audit.
-- [x] Self-reported backend with integrity regression tests.
-- [x] Investing-only guided path and readiness tests.
-- [x] Rich Apply completion and history connected end to end.
-- [x] Critical audit fixes and compatibility checks.
-- [x] Types, tests, production build and responsive browser verification (physical-device acceptance remains external).
-- [x] Final audit and deployment limitations documented.
-- [x] Android debug build and five native unit tests passed; generated Kotlin cache excluded from Git.
-- [x] Push validated commits to origin/main and confirm synchronization.
+# Release checklist
+
+## Automated engineering gates
+
+- [x] Product/catalog alignment for Investing, AI, and Psychology.
+- [x] Learn → Apply → Master primary navigation.
+- [x] Stable Investing progression and Apply persistence retained.
+- [x] Type checking, curriculum, core progression, journey, and responsive shell tests.
+- [x] Full aggregate test suite after final diff.
+- [x] Production web build and release preflight after final diff.
+- [x] Android debug build and native unit tests after final sync.
+- [x] Signed Android AAB generated from the release-candidate source.
+
+## External acceptance
+
+- [ ] Physical Android acceptance: camera, file picker, push permission/delivery, screen-time permission/fallback, offline/reconnect, and delete-account flow.
+- [ ] Firebase production functions/secrets deployed and smoke-tested.
+- [ ] RevenueCat products/entitlements configured before enabling checkout.
+- [ ] Google Play listing, data safety, content rating, reviewer access, screenshots, and closed-test requirements completed.
+- [ ] iOS archive and App Store setup completed on macOS if iOS ships in this release.

@@ -1,8 +1,15 @@
 import { ALL_ATOMIC_LESSONS, INTERACTIVE_MISSION_BANK, INTERACTIVE_TRACKS } from '../src/services/interactiveCurriculum';
 import { validateAtomicLesson } from '../src/services/curriculumIngestion';
 import { DEFAULT_BRAIN_STATE, processMissionReview } from '../src/services/brainService';
-import { KINNU_DOMAINS, isPathwayAvailable, getReadyPathwayForTrack } from '../src/services/curriculumCatalog';
+import {
+  KINNU_DOMAINS,
+  LAUNCH_DOMAIN_IDS,
+  isPathwayAvailable,
+  getDomainForTrackId,
+  getReadyPathwayForTrack,
+} from '../src/services/curriculumCatalog';
 import { FIELD_MISSION_CATALOG } from '../functions/src/fieldMissionCatalog';
+import { calculateCompoundProjection } from '../src/components/learn/MicroToolLab';
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) throw new Error(message);
@@ -13,6 +20,20 @@ assert(ALL_ATOMIC_LESSONS.length === 35, 'Curriculum contains thirty-five author
 const ready = KINNU_DOMAINS.flatMap(domain => domain.pathways).filter(isPathwayAvailable);
 assert(new Set(ready.map(path => path.interactiveTrackId)).size === ready.length, 'Available courses cannot alias the same lessons under different titles.');
 assert(getReadyPathwayForTrack('smart-money').id === 'biz-capital', 'Investing must open Investing, not the first Business course.');
+assert(getDomainForTrackId('smart-money').id === 'investing', 'Smart Money must resolve to the Investing domain.');
+assert(LAUNCH_DOMAIN_IDS.join('|') === 'investing|technology|psychology', 'Discover must focus the launch on Investing, AI, and Psychology.');
+assert(isPathwayAvailable(KINNU_DOMAINS.find(domain => domain.id === 'psychology')!.pathways.find(path => path.id === 'psych-biases')!), 'Psychology must have a real launch pathway.');
+assert(!isPathwayAvailable(KINNU_DOMAINS.find(domain => domain.id === 'philosophy')!.pathways.find(path => path.id === 'phil-stoicism')!), 'Stoicism cannot masquerade as the launch Psychology path.');
+assert(getDomainForTrackId('mindset-stoic').id === 'psychology', 'The legacy mindset track must resolve to Psychology for compatibility.');
+const psychologyTrack = INTERACTIVE_TRACKS.find(track => track.id === 'mindset-stoic')!;
+assert(psychologyTrack.title.en === 'Psychology & Decisions', 'The Psychology pathway needs honest user-facing positioning.');
+assert(psychologyTrack.lessons.every(lesson => !/stoic|stoicism|predator|founder|hustle|amor fati|citadel/i.test(JSON.stringify({
+  title: lesson.title,
+  objective: lesson.objective,
+  keyConcept: lesson.keyConcept,
+  phases: lesson.phases,
+  learningDesign: lesson.learningDesign,
+}))), 'Psychology lesson copy cannot retain legacy positioning.');
 for (const path of ready) {
   const track = INTERACTIVE_TRACKS.find(track => track.id === path.interactiveTrackId)!;
   assert(track.lessons.every(lesson => FIELD_MISSION_CATALOG[lesson.id]?.lessonXP === lesson.phases[3].xp), `${path.id} needs matching backend rewards for every Apply mission.`);
@@ -44,6 +65,19 @@ for (const track of INTERACTIVE_TRACKS) {
 
 assert(challengeKinds.size === 4, 'Launch curriculum must exercise all four challenge types.');
 assert(engines.size >= 15, 'Keep the original purpose-built micro-tools when extending the curriculum.');
+
+const goldLesson = ALL_ATOMIC_LESSONS.find(lesson => lesson.id === 'learn-money-02');
+assert(goldLesson, 'Investing Lesson 2 must remain available under its stable id.');
+assert(goldLesson.learningDesign.goldStandard?.prediction.options.length === 2, 'Lesson 2 must capture a prediction before revealing the answer.');
+assert(goldLesson.learningDesign.goldStandard.prediction.options.some(option => option.correct), 'Lesson 2 prediction needs a defined answer.');
+assert(goldLesson.phases[1].challenge.kind === 'multiple_choice', 'Lesson 2 must test an investing decision, not ordering recall.');
+assert(goldLesson.phases[2].widget.fields.some(field => field.id === 'reviewCadence'), 'Lesson 2 tool must save a deliberate review rule.');
+assert(goldLesson.learningDesign.goldStandard.master.options.length >= 3, 'Lesson 2 Master must be a real retrieval decision.');
+assert(goldLesson.learningDesign.goldStandard.outcome.en.includes('time and consistency'), 'Lesson 2 final reward must lead with the learned outcome.');
+const earlyPlan = calculateCompoundProjection(100, 20, 8);
+const latePlan = calculateCompoundProjection(200, 8, 8);
+assert(earlyPlan.finalValue > latePlan.finalValue, 'The committed prediction must match the simulator math.');
+assert(Math.round(earlyPlan.contributed + earlyPlan.growth) === Math.round(earlyPlan.finalValue), 'The tool must distinguish contributions from estimated growth.');
 
 const learnedOrbState = {
   ...DEFAULT_BRAIN_STATE,

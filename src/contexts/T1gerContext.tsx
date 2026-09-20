@@ -7,7 +7,7 @@ import { LeagueService } from '../services/leagueService';
 
 type User = { name: string; niche: string | null; mode: string | null; age: number | null; avatar: string };
 type Stats = { xp: number; verifiedXP: number; coins: number; streak: number; health: number; rank: string };
-type View = 'onboarding' | 'proof' | 'learn' | 'build' | 'compete' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
+type View = 'onboarding' | 'proof' | 'learn' | 'build' | 'master' | 'compete' | 'friends' | 'profile' | 'coach' | 'mission' | 'debrief' | 'market' | 'tactical';
 type Animation = 'none' | 'level-up' | 'streak-death';
 
 interface T1gerContextType {

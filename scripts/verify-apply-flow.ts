@@ -20,34 +20,76 @@ try {
   for (const lesson of getInteractiveTrack('smart-money').lessons) {
     await page.getByRole('button', { name: `Start lesson ${count + 1}`, exact: true }).click();
     const dialog = page.getByRole('dialog');
-    await dialog.getByRole('button', { name: 'Open Orb', exact: true }).click();
-    await dialog.getByRole('heading', { name: lesson.phases[0].title.en, exact: true }).waitFor();
-    await dialog.getByRole('button', { name: 'Build the model', exact: true }).click();
-    await dialog.getByText('MENTAL MODEL', { exact: true }).waitFor();
-    await dialog.getByRole('button', { name: 'Test my judgment', exact: true }).click();
-    await dialog.getByRole('heading', { name: lesson.phases[1].title.en, exact: true }).waitFor();
-    const challenge = lesson.phases[1].challenge;
-    if (challenge.kind === 'matching') {
-      for (const pair of challenge.pairs || []) await dialog.getByLabel(pair.left.en).selectOption(pair.id);
-    } else if (challenge.kind === 'ordering') {
-      const order = [...challenge.options!].reverse().map(item => item.id);
-      for (const [position, id] of challenge.orderedIds!.entries()) {
-        let current = order.indexOf(id);
-        while (current > position) {
-          await dialog.getByRole('button', { name: 'Move up', exact: true }).nth(current).click();
-          [order[current], order[current - 1]] = [order[current - 1], order[current]];
-          current--;
+    if (lesson.learningDesign?.goldStandard) {
+      await dialog.getByRole('button', { name: /Investor B/i }).click();
+      await dialog.getByRole('button', { name: 'Lock my prediction', exact: true }).click();
+      await dialog.getByText('Surprising outcome', { exact: true }).waitFor();
+      await page.screenshot({ path: 'test-results/app-shell/lesson-02-prediction.png', fullPage: true });
+      await dialog.getByRole('button', { name: 'See why it works', exact: true }).click();
+
+      await dialog.getByRole('button', { name: 'Test my judgment', exact: true }).click();
+
+      await dialog.getByRole('button', { name: 'Wait for an investment with a perfect return', exact: true }).click();
+      await dialog.getByText('A perfect rate or heroic deposit cannot fix a system that never starts or cannot survive.', { exact: true }).waitFor();
+      await dialog.getByRole('button', { name: 'Start earlier with a sustainable, consistent contribution', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Build my rule', exact: true }).click();
+
+      const rangeInput = dialog.locator('input[type="range"]').first();
+      const saveRule = dialog.getByRole('button', { name: 'Save rule & continue', exact: true });
+      assert.equal(await saveRule.isDisabled(), true, 'Lesson 2 cannot save untouched defaults.');
+      await rangeInput.fill('300');
+      await saveRule.click();
+      await dialog.locator('[data-stage="apply"]').waitFor();
+      await page.screenshot({ path: 'test-results/app-shell/lesson-02-apply.png', fullPage: true });
+
+      await page.reload();
+      await page.getByRole('button', { name: 'Continue in Apply', exact: true }).click();
+      await dialog.locator('[data-stage="apply"]').waitFor();
+
+      await dialog.getByRole('button', { name: 'I completed the action', exact: true }).click();
+      await dialog.locator('[data-stage="master"]').waitFor();
+      assert.equal(await dialog.getByRole('heading', { name: 'You put it into practice.' }).count(), 0, 'Apply must not fire a premature celebration.');
+      await page.screenshot({ path: 'test-results/app-shell/lesson-02-master.png', fullPage: true });
+
+      await page.reload();
+      await page.getByRole('button', { name: lesson.title.en, exact: true }).click();
+      await dialog.locator('[data-stage="master"]').waitFor();
+
+      await dialog.getByRole('button', { name: 'Time outside the compounding process', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Easy', exact: true }).click();
+      await dialog.getByRole('heading', { name: 'You now understand why time and consistency matter more than chasing the perfect rate.', exact: true }).waitFor();
+      await page.screenshot({ path: 'test-results/app-shell/lesson-02-reward.png', fullPage: true });
+      await dialog.getByRole('button', { name: 'Back to my path', exact: true }).click();
+    } else {
+      await dialog.getByRole('button', { name: 'Open Orb', exact: true }).click();
+      await dialog.getByRole('heading', { name: lesson.phases[0].title.en, exact: true }).waitFor();
+      await dialog.getByRole('button', { name: 'Build the model', exact: true }).click();
+      await dialog.getByText('MENTAL MODEL', { exact: true }).waitFor();
+      await dialog.getByRole('button', { name: 'Test my judgment', exact: true }).click();
+      await dialog.getByRole('heading', { name: lesson.phases[1].title.en, exact: true }).waitFor();
+      const challenge = lesson.phases[1].challenge;
+      if (challenge.kind === 'matching') {
+        for (const pair of challenge.pairs || []) await dialog.getByLabel(pair.left.en).selectOption(pair.id);
+      } else if (challenge.kind === 'ordering') {
+        const order = [...challenge.options!].reverse().map(item => item.id);
+        for (const [position, id] of challenge.orderedIds!.entries()) {
+          let current = order.indexOf(id);
+          while (current > position) {
+            await dialog.getByRole('button', { name: 'Move up', exact: true }).nth(current).click();
+            [order[current], order[current - 1]] = [order[current - 1], order[current]];
+            current--;
+          }
         }
-      }
-    } else await dialog.getByRole('button').filter({ hasText: challenge.options!.find(option => option.correct)!.label.en }).click();
-    await dialog.getByRole('button', { name: 'Check decision', exact: true }).click();
-    await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
-    await dialog.getByRole('button', { name: lesson.phases[2].widget.commitLabel.en, exact: true }).click();
-    await dialog.getByRole('button', { name: 'Create Field Mission', exact: true }).click();
-    await dialog.getByRole('button', { name: 'Go to my action', exact: true }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'I completed the action', exact: true }).click();
-    await page.getByRole('heading', { name: 'You put it into practice.' }).waitFor();
-    await page.getByRole('button', { name: 'Back to my journey', exact: true }).click();
+      } else await dialog.getByRole('button').filter({ hasText: challenge.options!.find(option => option.correct)!.label.en }).click();
+      await dialog.getByRole('button', { name: 'Check decision', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
+      await dialog.getByRole('button', { name: lesson.phases[2].widget.commitLabel.en, exact: true }).click();
+      await dialog.getByRole('button', { name: 'Prepare my Apply step', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Go to my action', exact: true }).click();
+      await page.getByRole('dialog').getByRole('button', { name: 'I completed the action', exact: true }).click();
+      await page.getByRole('heading', { name: 'You put it into practice.' }).waitFor();
+      await page.getByRole('button', { name: 'Back to my journey', exact: true }).click();
+    }
     count++;
     assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), String(count));
   }

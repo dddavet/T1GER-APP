@@ -3,11 +3,11 @@ import { db } from '../firebase';
 import { getAi } from './gemini';
 
 export const generateFridaySummary = async (performanceData: any) => {
-  const prompt = `Act as a serious business mentor for T1GER.
+  const prompt = `Act as a concise learning coach for T1GER.
   Analyze this weekly performance: ${JSON.stringify(performanceData)}.
-  If success rate > 80%, praise "Market Dominance" and suggest an aggressive weekend goal.
-  If success rate < 50%, interrogate the user: "Why are we slacking? The pride is falling behind. What is the bottleneck?"
-  Output a 3-sentence "Weekly Executive Summary".`;
+  If success rate > 80%, recognize the learner's consistency and suggest one meaningful next step.
+  If success rate < 50%, identify the likely bottleneck without shame and propose one realistic recovery action.
+  Output a direct 3-sentence "Weekly Learning Review" focused on Learn, Apply, and Master.`;
 
   const model = getAi().getGenerativeModel({ model: 'gemini-1.5-pro' });
   const response = await model.generateContent(prompt);
@@ -15,10 +15,10 @@ export const generateFridaySummary = async (performanceData: any) => {
 };
 
 export const generateWeekendMissions = async (userId: string, niche: string) => {
-  const prompt = `Generate two "Weekend Boss Missions" for a user in the ${niche} niche.
-  Mission A (Business): High-stakes task requiring a photo of a finished prototype or sent email.
-  Mission B (Personal): Recovery task (e.g., "Full digital detox for 2 hours" or "High-intensity outdoor session").
-  For each, define the "Proof of Work" photo requirement.
+  const prompt = `Generate two optional weekend Apply steps for a learner interested in ${niche}.
+  Mission A (Application): A practical action that applies something learned and can be evidenced with a photo, screenshot, or short written artifact.
+  Mission B (Personal): A recovery or reflection action that supports sustainable learning.
+  For each, define a clear evidence requirement.
   Output as JSON: { 
     "business": { "title": string, "description": string, "proofRequirement": string },
     "personal": { "title": string, "description": string, "proofRequirement": string }

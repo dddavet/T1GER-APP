@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowRight,
   CaretDown,
@@ -16,6 +16,7 @@ import { useT1ger } from '../contexts/T1gerContext';
 import { useFieldMissions } from '../hooks/useFieldMissions';
 import { isFieldMissionComplete } from '../services/fieldMissionService';
 import { getLocalDateString } from '../services/brainService';
+import { readLearningArtifacts } from '../services/learningArtifactService';
 import { getInteractiveTrack, getInteractiveTrackIdFromLegacy } from '../services/interactiveCurriculum';
 import { getJourneyNodes, getSectionsForTrack, type JourneyNode } from '../services/learningJourney';
 import { type AtomicLesson, type InteractiveTrackId, localizeLearning } from '../services/interactiveCurriculumTypes';
@@ -36,7 +37,7 @@ const Player = React.lazy(() =>
   import('../components/learn/AtomicLessonPlayer').then(m => ({ default: m.AtomicLessonPlayer }))
 );
 
-export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }> = () => {
+export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; entryMode?: 'learn' | 'master' }> = ({ entryMode = 'learn' }) => {
   const { brainState, language, learnStreak, selectTrack } = useBrain();
   const { appUser } = useAuth();
   const { setActiveView, stats } = useT1ger();
@@ -76,21 +77,26 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
   const completed = nodes.filter(node => node.state === 'completed').length;
   const completedToday = missions.some(m => isFieldMissionComplete(m) && getLocalDateString(new Date(m.submission?.createdAt || m.updatedAt)) === getLocalDateString());
   const hasArtifact = (lessonId: string) => {
-    try {
-      const key = `t1ger_learning_artifacts_${appUser?.uid || 'local'}`;
-      const saved = JSON.parse(localStorage.getItem(key) || '[]') as Array<{ lessonId: string }>;
-      return saved.some(item => item.lessonId === lessonId);
-    } catch {
-      return false;
-    }
+    return readLearningArtifacts(appUser?.uid || 'local').some(item => item.lessonId === lessonId);
   };
 
   const next = nodes.find(node => node.state !== 'completed');
   const pending = next && hasArtifact(next.lesson.id) && missions.find(m => m.lessonId === next.lesson.id && !isFieldMissionComplete(m));
+  const nextStage: 'learn' | 'apply' | 'master' = !next || next.state === 'review'
+    ? 'master'
+    : pending
+      ? 'apply'
+      : 'learn';
+  const nextStageCopy = nextStage === 'learn'
+    ? tr('Siguiente: aprende el concepto y prueba tu criterio.', 'Next: learn the concept and test your judgment.')
+    : nextStage === 'apply'
+      ? tr('Siguiente: lleva tu herramienta a una acción real.', 'Next: use your tool in one real action.')
+      : tr('Siguiente: repasa para conservar lo aprendido.', 'Next: review to retain what you learned.');
   const activeSectionIndex = Math.max(0, sections.findIndex(s => next ? s.lessonIds.includes(next.lesson.id) : false));
   const activeSection = sections[activeSectionIndex] || sections[0];
   const [lesson, setLesson] = useState<AtomicLesson | null>(null);
   const [review, setReview] = useState(false);
+  const masterEntryHandled = useRef(false);
 
   const handleSelectPathway = (pathway: KinnuPathway, domain?: KinnuDomain) => {
     if (!isPathwayAvailable(pathway)) return;
@@ -105,16 +111,38 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
       setReview(true);
       setLesson(currentTrack.lessons.find(item => item.id === node.reviewIds[0]) || null);
     } else if (node.state !== 'completed' && hasArtifact(node.lesson.id) && missions.some(m => m.lessonId === node.lesson.id && !isFieldMissionComplete(m))) {
-      setActiveView('build');
+      if (node.lesson.learningDesign?.goldStandard) {
+        setReview(false);
+        setLesson(node.lesson);
+      } else {
+        setActiveView('build');
+      }
     } else {
       setReview(node.state === 'completed');
       setLesson(node.lesson);
     }
   };
 
+  useEffect(() => {
+    if (entryMode !== 'master' || masterEntryHandled.current) return;
+    masterEntryHandled.current = true;
+    const reviewNode = nodes.find(node => node.state === 'review');
+    if (reviewNode) open(reviewNode);
+  }, [entryMode, nodes]);
+
   return (
     <div className="journey-page mx-auto max-w-lg pb-44 text-white px-2 sm:px-3">
       <h1 className="sr-only">{selectedPathway.title[locale]}</h1>
+      {entryMode === 'master' && (
+        <div role="status" className="mx-1 mt-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <p className="t1ger-kicker text-cyan-300">{tr('MASTER · REPASO INTELIGENTE', 'MASTER · SMART REVIEW')}</p>
+          <p className="mt-1 text-sm font-semibold text-white">
+            {nodes.some(node => node.state === 'review')
+              ? tr('Recupera una idea sin pistas para mantenerla disponible.', 'Retrieve an idea without clues to keep it available.')
+              : tr('Tu memoria está al día. Continúa aprendiendo para desbloquear el próximo repaso.', 'Your memory is current. Keep learning to unlock the next review.')}
+          </p>
+        </div>
+      )}
       {/* Top Header: Duolingo Course Picker & Streak Status */}
       <header className="px-1 pt-2 pb-2">
         <div className="flex items-center justify-between gap-2">
@@ -135,7 +163,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
               {resolveCurriculumIcon(currentDomain.iconName, 14, 'bold')}
             </span>
             <div className="text-left">
-              <span className="block text-[9px] font-mono uppercase tracking-wider text-zinc-400 leading-none">
+              <span data-testid="course-domain-label" className="block text-[9px] font-mono uppercase tracking-wider text-zinc-400 leading-none">
                 {currentDomain.title[locale]}
               </span>
               <span className="block text-xs font-black truncate max-w-[130px] sm:max-w-[160px] text-white group-hover:text-orange-300 transition-colors">
@@ -173,6 +201,25 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
           </div>
         </div>
       </header>
+
+      <section aria-label={tr('Ciclo de aprendizaje', 'Learning loop')} className="mx-1 mb-3 rounded-2xl border border-white/10 bg-[#121216]/80 px-3 py-2.5">
+        <ol className="grid grid-cols-3 gap-1" aria-label={tr('Etapas del ciclo', 'Loop stages')}>
+          {([
+            ['learn', tr('Aprender', 'Learn')],
+            ['apply', tr('Aplicar', 'Apply')],
+            ['master', tr('Dominar', 'Master')],
+          ] as const).map(([stage, label], index) => {
+            const isCurrent = nextStage === stage;
+            return (
+              <li key={stage} aria-current={isCurrent ? 'step' : undefined} className="flex min-w-0 items-center gap-1.5">
+                <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border font-mono text-[8px] font-bold ${isCurrent ? 'border-[#FF7300] bg-[#FF7300] text-black' : 'border-white/15 bg-white/[.04] text-zinc-500'}`}>{index + 1}</span>
+                <span className={`truncate text-[10px] font-bold ${isCurrent ? 'text-white' : 'text-zinc-500'}`}>{label}</span>
+              </li>
+            );
+          })}
+        </ol>
+        <p role="status" className="mt-2 border-t border-white/8 pt-2 text-[10px] leading-relaxed text-zinc-400">{nextStageCopy}</p>
+      </section>
 
       {/* VIEW 1: Duolingo-style Winding Orb Trail (Immediate Dopamine & Action) */}
       {viewMode === 'path' ? (

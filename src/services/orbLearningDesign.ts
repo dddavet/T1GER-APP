@@ -1,4 +1,4 @@
-import type { LocalizedText, OrbLearningDesign, OrbStoryBeat } from './interactiveCurriculumTypes';
+import type { GoldStandardLearningDesign, LocalizedText, OrbLearningDesign, OrbStoryBeat } from './interactiveCurriculumTypes';
 
 const l = (es: string, en: string): LocalizedText => ({ es, en });
 const beat = (titleEs: string, titleEn: string, bodyEs: string, bodyEn: string): OrbStoryBeat => ({
@@ -13,7 +13,8 @@ const design = (
   summaryPoints: OrbLearningDesign['summaryPoints'],
   retrievalPrompt: LocalizedText,
   retrievalAnswer: LocalizedText,
-): OrbLearningDesign => ({ curiosityQuestion: curiosity, predictionPrompt: prediction, storyBeats, misconception, summaryPoints, retrievalPrompt, retrievalAnswer });
+  goldStandard?: GoldStandardLearningDesign,
+): OrbLearningDesign => ({ curiosityQuestion: curiosity, predictionPrompt: prediction, storyBeats, misconception, summaryPoints, retrievalPrompt, retrievalAnswer, goldStandard });
 
 export const ORB_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
   'learn-money-01': design(
@@ -32,6 +33,26 @@ export const ORB_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
     l('Error común: subir el aporte tanto que el plan se rompe al primer gasto inesperado.', 'Common error: raising the contribution so high that the plan breaks at the first surprise expense.'),
     [l('Tiempo, tasa y aportes multiplican juntos.', 'Time, rate, and contributions multiply together.'), l('La constancia importa más cuando la curva parece aburrida.', 'Consistency matters most when the curve looks boring.'), l('Un aporte sostenible supera uno heroico e intermitente.', 'A sustainable contribution beats a heroic intermittent one.')],
     l('¿Qué variable no puedes recuperar después?', 'Which variable can you never recover later?'), l('El tiempo que el capital permaneció fuera del proceso compuesto.', 'The time capital spent outside the compounding process.'),
+    {
+      prediction: {
+        prompt: l('Sin calcular: ¿qué plan termina con más dinero al 8% anual?', 'Without calculating: which plan finishes with more money at 8% annually?'),
+        options: [
+          { id: 'early', label: l('$100/mes durante 20 años', '$100/month for 20 years'), correct: true },
+          { id: 'late', label: l('$200/mes durante 8 años', '$200/month for 8 years') },
+        ],
+        reveal: l('Empezar antes gana: cerca de $59k frente a $27k. La diferencia no es magia; son más meses produciendo rendimientos sobre rendimientos.', 'Starting earlier wins: about $59k versus $27k. The difference is not magic; it is more months earning returns on returns.'),
+      },
+      master: {
+        prompt: l('¿Qué variable nunca puedes recuperar?', 'Which variable can never be recovered?'),
+        options: [
+          { id: 'time', label: l('Tiempo fuera del proceso compuesto', 'Time outside the compounding process'), correct: true },
+          { id: 'rate', label: l('Una tasa de retorno más alta', 'A higher rate of return') },
+          { id: 'deposit', label: l('El último aporte mensual', 'The latest monthly contribution') },
+        ],
+        explanation: l('Puedes aumentar aportes o cambiar una tasa futura. No puedes volver a comprar los años que dejaste fuera del proceso.', 'You can raise contributions or change a future rate. You cannot buy back years left outside the process.'),
+      },
+      outcome: l('Ahora entiendes por qué el tiempo y la constancia importan más que perseguir la tasa perfecta.', 'You now understand why time and consistency matter more than chasing the perfect rate.'),
+    },
   ),
   'learn-money-03': design(
     l('¿Por qué dos fondos “parecidos” pueden dejarte resultados muy distintos?', 'Why can two “similar” funds leave you with very different outcomes?'),
@@ -359,8 +380,56 @@ export const ORB_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
   ),
 };
 
+const PSYCHOLOGY_LEARNING_DESIGNS: Record<string, OrbLearningDesign> = {
+  'learn-mindset-01': design(
+    l('¿Qué evidencia podría hacerte cambiar de opinión?', 'What evidence could make you change your mind?'),
+    l('Piensa en una creencia reciente y predice qué dato contrario tenderías a ignorar.', 'Think of a recent belief and predict which contrary fact you might ignore.'),
+    [beat('La preferencia', 'The preference', 'Una creencia previa orienta qué información buscamos.', 'A prior belief steers which information we seek.'), beat('La interpretación', 'The interpretation', 'La misma evidencia puede parecer fuerte o débil según lo que esperamos.', 'The same evidence can look strong or weak depending on what we expect.'), beat('La salida', 'The exit', 'Definir por adelantado qué cambiaría tu opinión convierte la curiosidad en una prueba.', 'Defining what would change your mind turns curiosity into a test.')],
+    l('Error común: reunir más argumentos a favor y llamarlo investigación.', 'Common error: collecting more supporting arguments and calling it research.'),
+    [l('Busca evidencia contraria.', 'Seek contrary evidence.'), l('Define una condición de falsación.', 'Define a falsification condition.'), l('Actualiza tu opinión cuando cambian los datos.', 'Update your view when the evidence changes.')],
+    l('¿Cuál es el antídoto práctico contra el sesgo de confirmación?', 'What is a practical antidote to confirmation bias?'),
+    l('Buscar una prueba que pueda refutar tu creencia y decidir de antemano qué resultado la cambiaría.', 'Seek a test that could disprove your belief and decide in advance which result would change it.'),
+  ),
+  'learn-mindset-02': design(
+    l('¿Cuándo el miedo a perder cambia una decisión razonable?', 'When does fear of loss distort a reasonable decision?'),
+    l('Compara una decisión incierta usando criterios escritos antes de imaginar el peor resultado.', 'Compare an uncertain decision using criteria written before imagining the worst outcome.'),
+    [beat('La asimetría', 'The asymmetry', 'Las pérdidas pueden pesar más que ganancias comparables.', 'Losses can weigh more than comparable gains.'), beat('La distorsión', 'The distortion', 'Ese peso puede llevarnos a evitar riesgos razonables o mantener una opción por miedo.', 'That weight can make us avoid reasonable risks or cling to an option from fear.'), beat('La regla previa', 'The prior rule', 'Límites definidos con calma protegen la decisión cuando llega la presión.', 'Limits set calmly protect the decision when pressure arrives.')],
+    l('Error común: tratar toda pérdida posible como prueba de que una opción es mala.', 'Common error: treating any possible loss as proof that an option is bad.'),
+    [l('Reconoce la emoción.', 'Recognize the emotion.'), l('Compara riesgo y beneficio.', 'Compare risk and benefit.'), l('Usa límites definidos de antemano.', 'Use precommitted limits.')],
+    l('¿Por qué conviene definir un límite antes de conocer el resultado?', 'Why define a limit before knowing the outcome?'),
+    l('Porque reduce la posibilidad de que el miedo inmediato cambie el criterio.', 'Because it reduces the chance that immediate fear changes the criterion.'),
+  ),
+  'learn-mindset-03': design(
+    l('Si aún no hubieras invertido nada, ¿elegirías lo mismo hoy?', 'If you had invested nothing yet, would you make the same choice today?'),
+    l('Separa lo ya perdido de los costes y beneficios que todavía pueden cambiar.', 'Separate what is already gone from costs and benefits that can still change.'),
+    [beat('El compromiso', 'The commitment', 'Lo invertido crea una presión por justificar el pasado.', 'Past investment creates pressure to justify the past.'), beat('La trampa', 'The trap', 'Continuar puede sentirse coherente aunque empeore el futuro.', 'Continuing can feel consistent even when it worsens the future.'), beat('El reinicio', 'The reset', 'Evaluar desde hoy devuelve el foco a las alternativas reales.', 'Evaluating from today restores focus to real alternatives.')],
+    l('Error común: gastar más solo para evitar admitir que el primer gasto no funcionó.', 'Common error: spending more only to avoid admitting the first spend did not work.'),
+    [l('El pasado es irrecuperable.', 'The past is unrecoverable.'), l('El futuro aún se puede elegir.', 'The future can still be chosen.'), l('Compara alternativas desde hoy.', 'Compare alternatives from today.')],
+    l('¿Qué pregunta neutraliza un coste hundido?', 'Which question neutralizes a sunk cost?'),
+    l('Si empezara hoy sin inversión previa, ¿qué opción elegiría?', 'If I started today with no prior investment, which option would I choose?'),
+  ),
+  'learn-mindset-04': design(
+    l('¿Lo recuerdas porque es frecuente o porque fue impactante?', 'Do you remember it because it is frequent or because it was striking?'),
+    l('Antes de estimar un riesgo, predice qué tasa base necesitarías conocer.', 'Before estimating a risk, predict which base rate you would need.'),
+    [beat('La facilidad', 'Ease', 'Los ejemplos recientes o vívidos aparecen primero en la mente.', 'Recent or vivid examples appear first in mind.'), beat('La inferencia', 'The inference', 'Esa facilidad puede confundirse con frecuencia o probabilidad.', 'That ease can be mistaken for frequency or probability.'), beat('La corrección', 'The correction', 'Una tasa base o muestra amplia vuelve a anclar la estimación.', 'A base rate or broader sample reanchors the estimate.')],
+    l('Error común: convertir una anécdota memorable en una tendencia general.', 'Common error: turning a memorable anecdote into a general trend.'),
+    [l('Detecta el ejemplo vívido.', 'Spot the vivid example.'), l('Busca la tasa base.', 'Find the base rate.'), l('Revisa la conclusión.', 'Revise the conclusion.')],
+    l('¿Qué dato corrige mejor la heurística de disponibilidad?', 'Which data best corrects the availability heuristic?'),
+    l('Una tasa base relevante o una muestra más amplia que el ejemplo recordado.', 'A relevant base rate or a broader sample than the remembered example.'),
+  ),
+  'learn-mindset-05': design(
+    l('¿Podrías explicar la idea sin volver a verla?', 'Could you explain the idea without looking at it again?'),
+    l('Cierra el material y reconstruye de memoria sus tres puntos esenciales.', 'Close the material and reconstruct its three essential points from memory.'),
+    [beat('La fluidez', 'Fluency', 'Releer se siente fácil y puede crear una ilusión de dominio.', 'Rereading feels easy and can create an illusion of mastery.'), beat('La recuperación', 'Retrieval', 'Recordar sin mirar revela huecos y ejercita la ruta de acceso.', 'Recalling without looking reveals gaps and exercises the access path.'), beat('La corrección', 'Correction', 'Comprobar después evita consolidar errores.', 'Checking afterward prevents errors from becoming fixed.')],
+    l('Error común: confundir familiaridad inmediata con recuerdo duradero.', 'Common error: confusing immediate familiarity with durable recall.'),
+    [l('Cierra el material.', 'Close the material.'), l('Recupera sin pistas.', 'Retrieve without clues.'), l('Comprueba y corrige.', 'Check and correct.')],
+    l('¿Qué secuencia convierte una lectura en práctica de recuperación?', 'Which sequence turns reading into retrieval practice?'),
+    l('Cerrar, intentar recordar, comprobar la respuesta y corregir los huecos.', 'Close, attempt recall, check the answer, and correct the gaps.'),
+  ),
+};
+
 export function getOrbLearningDesign(lessonId: string): OrbLearningDesign {
-  const learningDesign = ORB_LEARNING_DESIGNS[lessonId];
+  const learningDesign = PSYCHOLOGY_LEARNING_DESIGNS[lessonId] || ORB_LEARNING_DESIGNS[lessonId];
   if (!learningDesign) throw new Error(`Missing Orb learning design for ${lessonId}`);
   return learningDesign;
 }

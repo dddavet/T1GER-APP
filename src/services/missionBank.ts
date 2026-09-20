@@ -824,7 +824,7 @@ export const COMPETENCY_LABELS: Record<Competency, string> = {
   offer: 'Offer Design',
   sales: 'Sales & Closing',
   marketing: 'Marketing & Leads',
-  mindset: 'Founder Mindset',
+  mindset: 'Learning Mindset',
   operations: 'Systems & Ops',
   investing: 'Investing Basics',
   accounting: 'Accounting',

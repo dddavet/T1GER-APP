@@ -1,6 +1,7 @@
 import type { InteractiveTrackId } from './interactiveCurriculumTypes';
 
 export type DomainId =
+  | 'investing'
   | 'technology'
   | 'business'
   | 'history'
@@ -33,7 +34,49 @@ export interface KinnuDomain {
   pathways: KinnuPathway[];
 }
 
+export const LAUNCH_DOMAIN_IDS: DomainId[] = ['investing', 'technology', 'psychology'];
+
+export function isLaunchDomain(domain: KinnuDomain): boolean {
+  return LAUNCH_DOMAIN_IDS.includes(domain.id);
+}
+
 export const KINNU_DOMAINS: KinnuDomain[] = [
+  {
+    id: 'investing',
+    title: { es: 'Inversión', en: 'Investing' },
+    shortName: { es: 'Inversión', en: 'Investing' },
+    subtitle: {
+      es: 'Criterio financiero, inversión indexada y gestión de riesgo.',
+      en: 'Financial judgment, index investing, and risk management.'
+    },
+    mascotSpeech: {
+      es: 'Aprende a tomar decisiones financieras con evidencia, paciencia y control del riesgo.',
+      en: 'Learn to make financial decisions with evidence, patience, and risk control.'
+    },
+    iconName: 'TrendUp',
+    accentColor: '#FF7300',
+    glowColor: 'rgba(255, 115, 0, 0.25)',
+    pathways: [
+      {
+        id: 'biz-capital',
+        domainId: 'investing',
+        title: { es: 'Investing & Capital', en: 'Investing & Capital' },
+        description: {
+          es: 'Construcción de liquidez, inversión indexada pasiva, DCA y control de riesgos.',
+          en: 'Liquidity engineering, passive index investing, DCA, and systemic risk control.'
+        },
+        curatedSources: {
+          es: 'Morgan Housel (Psychology of Money) · Ray Dalio · John Bogle',
+          en: 'Morgan Housel (Psychology of Money) · Ray Dalio · John Bogle'
+        },
+        iconName: 'TrendUp',
+        orbsCount: 5,
+        interactiveTrackId: 'smart-money',
+        badge: { es: 'RUTA PRINCIPAL', en: 'FLAGSHIP' },
+        difficulty: 'beginner',
+      },
+    ],
+  },
   {
     id: 'technology',
     title: { es: 'Technology', en: 'Technology' },
@@ -171,24 +214,6 @@ export const KINNU_DOMAINS: KinnuDomain[] = [
         orbsCount: 5,
         interactiveTrackId: 'viral-growth',
         difficulty: 'intermediate',
-      },
-      {
-        id: 'biz-capital',
-        domainId: 'business',
-        title: { es: 'Investing & Capital', en: 'Investing & Capital' },
-        description: {
-          es: 'Construcción de liquidez, inversión indexada pasiva, DCA y control de riesgos.',
-          en: 'Liquidity engineering, passive index investing, DCA, and systemic risk control.'
-        },
-        curatedSources: {
-          es: 'Morgan Housel (Psychology of Money) · Ray Dalio · John Bogle',
-          en: 'Morgan Housel (Psychology of Money) · Ray Dalio · John Bogle'
-        },
-        iconName: 'TrendUp',
-        orbsCount: 5,
-        interactiveTrackId: 'smart-money',
-        badge: { es: 'ESENCIAL', en: 'CORE' },
-        difficulty: 'beginner',
       },
       {
         id: 'biz-marketing',
@@ -576,9 +601,9 @@ export function getDomainForTrackId(trackId: InteractiveTrackId): KinnuDomain {
   if (trackId === 'ai-automation') return getDomainById('technology');
   if (trackId === 'viral-growth') return getDomainById('business');
   if (trackId === 'history-strategy') return getDomainById('history');
-  if (trackId === 'mindset-stoic') return getDomainById('philosophy');
+  if (trackId === 'mindset-stoic') return getDomainById('psychology');
   if (trackId === 'peak-performance') return getDomainById('science');
-  if (trackId === 'smart-money') return getDomainById('business');
+  if (trackId === 'smart-money') return getDomainById('investing');
   return getDomainById('technology');
 }
 
@@ -586,11 +611,7 @@ export function getDomainForTrackId(trackId: InteractiveTrackId): KinnuDomain {
 const READY_PATHWAYS = [
   'tech-ai',
   'biz-capital',
-  'biz-marketing',
-  'tech-datascience',
-  'hist-rome',
-  'sci-physiology',
-  'phil-stoicism',
+  'psych-biases',
 ];
 export function isPathwayAvailable(pathway: KinnuPathway): boolean {
   return READY_PATHWAYS.includes(pathway.id);

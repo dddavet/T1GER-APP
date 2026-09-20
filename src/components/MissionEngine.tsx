@@ -381,7 +381,7 @@ export const MissionEngine: React.FC<MissionEngineProps> = ({ mission: sourceMis
                 </button>
               ) : answerIsCorrect ? (
                 <button disabled={submitting} onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); finishMission(); }} className="t1ger-primary-button mt-5 w-full">
-                  {isEs ? 'Crear Misión de Campo' : 'Create Field Mission'} <ArrowRight size={18} />
+                  {isEs ? 'Preparar paso Apply' : 'Prepare Apply step'} <ArrowRight size={18} />
                 </button>
               ) : (
                 <button onClick={() => { if (typeof window !== 'undefined' && window.navigator.vibrate) window.navigator.vibrate(10); setSelectedOption(null); setAnswerChecked(false); }} className="t1ger-secondary-button mt-5 w-full">

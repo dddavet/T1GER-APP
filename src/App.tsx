@@ -43,7 +43,7 @@ const DevHarness = import.meta.env.DEV
   ? lazy(() => import('./dev/DevHarness').then(module => ({ default: module.DevHarness })))
   : null;
 
-const TAB_VIEW_ORDER = ['learn', 'build', 'compete', 'profile'] as const;
+const TAB_VIEW_ORDER = ['learn', 'build', 'master', 'profile'] as const;
 const PAGE_VARIANTS = {
   initial: ({ direction, isTab }: { direction: number; isTab: boolean }) => ({
     opacity: 0,
@@ -187,7 +187,7 @@ const AppContent = () => {
       return;
     }
     const requestedView = new URLSearchParams(window.location.search).get('view');
-    const allowedViews = ['learn', 'build', 'compete', 'profile', 'coach'];
+    const allowedViews = ['learn', 'build', 'master', 'compete', 'profile', 'coach'];
     if (requestedView === 'home') {
       setActiveView('learn');
     } else if (requestedView && allowedViews.includes(requestedView)) {
@@ -414,6 +414,7 @@ const AppContent = () => {
     if (activeView === 'debrief') return <EveningInterrogation onComplete={() => setActiveView('learn')} />;
     if (activeView === 'build' || activeView === 'tactical') return <BuildTab onStartMission={startMission} />;
     if (activeView === 'learn') return <Learn onStartMission={startMission} />;
+    if (activeView === 'master') return <Learn onStartMission={startMission} entryMode="master" />;
     if (activeView === 'compete' || activeView === 'friends') return <SquadTab />;
     if (activeView === 'profile') return <Profile />;
     if (activeView === 'coach') return <Coach />;

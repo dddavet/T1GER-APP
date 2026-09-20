@@ -66,6 +66,10 @@ const sources = {
   suntzu: { id: 'src-suntzu-art-of-war', kind: 'book', title: 'The Art of War', author: 'Sun Tzu', rights: 'fair_use_summary' },
   marcus: { id: 'src-marcus-meditations', kind: 'book', title: 'Meditations', author: 'Marcus Aurelius', rights: 'fair_use_summary' },
   kahneman: { id: 'src-kahneman-fast-slow', kind: 'book', title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', rights: 'fair_use_summary' },
+  nickerson: { id: 'src-nickerson-confirmation', kind: 'article', title: 'Confirmation Bias: A Ubiquitous Phenomenon in Many Guises', author: 'Raymond S. Nickerson', url: 'https://doi.org/10.1037/1089-2680.2.2.175', rights: 'fair_use_summary' },
+  availability: { id: 'src-tversky-kahneman-availability', kind: 'article', title: 'Availability: A heuristic for judging frequency and probability', author: 'Amos Tversky & Daniel Kahneman', url: 'https://doi.org/10.1016/0010-0285(73)90033-9', rights: 'fair_use_summary' },
+  sunkCost: { id: 'src-arkes-blumer-sunk-cost', kind: 'article', title: 'The psychology of sunk cost', author: 'Hal R. Arkes & Catherine Blumer', url: 'https://doi.org/10.1016/0749-5978(85)90049-4', rights: 'fair_use_summary' },
+  retrieval: { id: 'src-roediger-karpicke-retrieval', kind: 'article', title: 'Test-enhanced learning: Taking memory tests improves long-term retention', author: 'Henry L. Roediger III & Jeffrey D. Karpicke', url: 'https://pubmed.ncbi.nlm.nih.gov/16507066/', rights: 'fair_use_summary' },
   newport: { id: 'src-newport-deep-work', kind: 'book', title: 'Deep Work', author: 'Cal Newport', rights: 'fair_use_summary' },
   clear: { id: 'src-clear-atomic-habits', kind: 'book', title: 'Atomic Habits', author: 'James Clear', rights: 'fair_use_summary' },
   silver: { id: 'src-silver-signal-noise', kind: 'book', title: 'The Signal and the Noise', author: 'Nate Silver', rights: 'fair_use_summary' },
@@ -109,13 +113,19 @@ const smartMoneyLessons: AtomicLesson[] = [
     objective: l('Convertir una cantidad mensual en una proyección de diez años.', 'Turn a monthly amount into a ten-year projection.'),
     keyConcept: l('La tasa ayuda; el tiempo y la constancia hacen la mayor parte del trabajo.', 'Rate helps; time and consistency do most of the work.'),
     impact: { eyebrow: l('SMART MONEY 02', 'SMART MONEY 02'), title: l('La riqueza crece en la parte aburrida', 'Wealth grows in the boring part'), body: l('Los resultados parecen lentos al principio porque los rendimientos aún trabajan sobre una base pequeña. Interrumpir el proceso reinicia la parte más poderosa.', 'Results look slow at first because returns still work on a small base. Interrupting the process resets its most powerful part.'), tacticalRule: l('Aporta primero; ajusta después. La automatización vence a la motivación.', 'Contribute first; adjust later. Automation beats motivation.'), metric: { value: '120', label: l('aportes mensuales en diez años', 'monthly deposits in ten years') } },
-    challenge: { title: l('Ordena el motor', 'Order the engine'), challenge: { kind: 'ordering', prompt: l('Ordena el proceso para construir un hábito de inversión sostenible.', 'Order the process for building a sustainable investing habit.'), options: [
-      { id: 'fund', label: l('Crear un colchón básico', 'Create a basic cash buffer') }, { id: 'auto', label: l('Automatizar el aporte mensual', 'Automate the monthly contribution') }, { id: 'hold', label: l('Mantener el plan durante volatilidad normal', 'Keep the plan through normal volatility') },
-    ], orderedIds: ['fund', 'auto', 'hold'], feedback: { correct: l('Sistema antes que emoción.', 'System before emotion.'), incorrect: l('No expongas el fondo de emergencia ni improvises cada mes.', 'Do not expose emergency cash or improvise each month.'), explanation: l('Liquidez, automatización y permanencia forman una secuencia robusta.', 'Liquidity, automation, and staying invested form a robust sequence.') } } },
+    challenge: { title: l('Elige la palanca', 'Choose the lever'), challenge: { kind: 'multiple_choice', prompt: l('Si solo puedes cambiar una cosa hoy, ¿qué decisión fortalece más el plan?', 'If you can change only one thing today, which decision strengthens the plan most?'), options: [
+      { id: 'start', label: l('Empezar antes con un aporte sostenible y constante', 'Start earlier with a sustainable, consistent contribution'), correct: true },
+      { id: 'rate', label: l('Esperar una inversión con una tasa perfecta', 'Wait for an investment with a perfect return') },
+      { id: 'heroic', label: l('Hacer un aporte enorme y pausar cuando sea incómodo', 'Make one huge contribution and pause when it gets uncomfortable') },
+    ], feedback: { correct: l('Protegiste la variable irrecuperable: el tiempo.', 'You protected the variable you cannot recover: time.'), incorrect: l('Una tasa o un aporte heroico no compensa un sistema que nunca empieza o no sobrevive.', 'A perfect rate or heroic deposit cannot fix a system that never starts or cannot survive.'), explanation: l('Empezar antes y mantener un aporte sostenible da al interés compuesto más tiempo para trabajar.', 'Starting earlier and keeping a sustainable contribution gives compounding more time to work.') } } },
     action: { title: l('Proyecta tu máquina', 'Project your engine'), widget: { engine: 'compound_growth', title: l('Simulador de aportes', 'Contribution simulator'), instruction: l('Elige un aporte sostenible y un horizonte real.', 'Choose a sustainable contribution and a real horizon.'), fields: [
       { id: 'monthly', kind: 'range', label: l('Aporte mensual', 'Monthly contribution'), min: 25, max: 1500, step: 25, defaultValue: 250, unit: l('USD', 'USD') },
       { id: 'years', kind: 'range', label: l('Horizonte', 'Horizon'), min: 5, max: 30, step: 5, defaultValue: 10, unit: l('años', 'years') },
       { id: 'rate', kind: 'range', label: l('Retorno anual supuesto', 'Assumed annual return'), min: 3, max: 10, step: 1, defaultValue: 8, unit: l('%', '%') },
+      { id: 'reviewCadence', kind: 'select', label: l('Revisaré mi regla', 'I will review my rule'), defaultValue: 'yearly', options: [
+        { value: 'quarterly', label: l('Cada 3 meses', 'Every 3 months') },
+        { value: 'yearly', label: l('Una vez al año', 'Once a year') },
+      ] },
     ], resultLabel: l('Valor futuro estimado', 'Estimated future value'), artifactTitle: l('Mi plan compuesto', 'My compounding plan'), commitLabel: l('Fijar aporte', 'Lock contribution') } },
     reward: { title: l('Motor activado', 'Engine activated'), body: l('Ya tienes una cifra que puedes ejecutar este mes.', 'You now have a number you can execute this month.'), xp: 130, petRecovery: 20 },
   }),
@@ -418,6 +428,88 @@ const mindsetLessons: AtomicLesson[] = [
     reward: { title: l('Soberanía mental', 'Mental sovereignty'), body: l('Has completado la maestría de Mente & Estoicismo.', 'You completed the Mindset & Stoicism mastery.'), xp: 170, petRecovery: 25 },
   }),
 ];
+
+// Stable legacy lesson IDs are intentionally preserved so existing progress and FSRS cards migrate safely.
+// All learner-facing content is replaced by the evidence-based Psychology launch curriculum below.
+const psychologyLessonContent = [
+  {
+    slug: 'confirmation-bias', source: sources.nickerson,
+    title: l('Sesgo de confirmación', 'Confirmation bias'),
+    objective: l('Buscar evidencia que pueda refutar una creencia, no solo confirmarla.', 'Seek evidence that could disprove a belief, not only confirm it.'),
+    keyConcept: l('La mente tiende a buscar e interpretar información a favor de lo que ya cree.', 'The mind tends to seek and interpret information in ways that favor existing beliefs.'),
+    impact: { eyebrow: l('PSICOLOGÍA 01', 'PSYCHOLOGY 01'), title: l('Tu mente edita la evidencia', 'Your mind edits the evidence'), body: l('Cuando una idea importa, solemos notar los datos que la apoyan y explicar los que la contradicen. Una decisión mejora cuando intentas demostrarte que estás equivocado.', 'When an idea matters, we tend to notice supporting evidence and explain away contradictions. Decisions improve when you try to prove yourself wrong.'), tacticalRule: l('Antes de decidir, escribe qué evidencia cambiaría tu opinión.', 'Before deciding, write what evidence would change your mind.'), metric: { value: '1', label: l('prueba contraria antes de decidir', 'disconfirming test before deciding') } },
+    challenge: { prompt: l('Crees que una app nueva será útil. ¿Qué prueba reduce mejor tu sesgo?', 'You believe a new app will be useful. Which test best reduces your bias?'), options: [{ id: 'a', label: l('Leer solo reseñas de cinco estrellas', 'Read only five-star reviews') }, { id: 'b', label: l('Definir una semana de prueba y una condición clara para abandonarla', 'Define a one-week test and a clear condition for dropping it'), correct: true }, { id: 'c', label: l('Preguntar a un amigo que ya está de acuerdo', 'Ask a friend who already agrees') }], correct: l('Creaste una prueba capaz de cambiar tu opinión.', 'You created a test capable of changing your mind.'), incorrect: l('Eso protege la creencia en vez de ponerla a prueba.', 'That protects the belief instead of testing it.'), explanation: l('Una condición de falsación obliga a considerar evidencia contraria.', 'A falsification condition forces you to consider contrary evidence.') },
+    action: { title: l('Diseña una prueba contraria', 'Design a disconfirming test'), instruction: l('Elige una decisión real y define cómo intentarás refutarla.', 'Choose a real decision and define how you will try to disprove it.'), labels: [l('Creencia actual', 'Current belief'), l('Evidencia que la debilitaría', 'Evidence that would weaken it'), l('Prueba de esta semana', 'Test this week')], artifact: l('Mi prueba contra el sesgo', 'My bias check') },
+    reward: { title: l('Decisión más limpia', 'Cleaner decision'), body: l('Ahora tienes una forma concreta de cuestionar tu primera impresión.', 'You now have a concrete way to challenge your first impression.'), xp: 120, petRecovery: 18 },
+  },
+  {
+    slug: 'loss-aversion', source: sources.kahneman,
+    title: l('Aversión a la pérdida', 'Loss aversion'),
+    objective: l('Separar el miedo a perder de la calidad real de una decisión.', 'Separate fear of loss from the actual quality of a decision.'),
+    keyConcept: l('Las pérdidas suelen pesar más que ganancias comparables, lo que puede distorsionar decisiones bajo riesgo.', 'Losses often weigh more than comparable gains, which can distort decisions under risk.'),
+    impact: { eyebrow: l('PSICOLOGÍA 02', 'PSYCHOLOGY 02'), title: l('El miedo cambia el cálculo', 'Fear changes the calculation'), body: l('Evitar toda pérdida puede impedir decisiones razonables. El objetivo no es ignorar el riesgo, sino compararlo con criterios definidos antes de sentir presión.', 'Avoiding every loss can block reasonable choices. The goal is not to ignore risk, but to compare it with criteria set before pressure arrives.'), tacticalRule: l('Define límites y criterios antes de conocer el resultado.', 'Set limits and criteria before you know the outcome.'), metric: { value: '2', label: l('columnas: riesgo y beneficio esperado', 'columns: risk and expected benefit') } },
+    challenge: { prompt: l('¿Qué decisión controla mejor la aversión a la pérdida?', 'Which decision best controls loss aversion?'), options: [{ id: 'a', label: l('Cambiar la regla cada vez que aparece miedo', 'Change the rule whenever fear appears') }, { id: 'b', label: l('Comparar opciones con límites definidos de antemano', 'Compare options using limits defined in advance'), correct: true }, { id: 'c', label: l('Elegir siempre la opción que no puede perder', 'Always choose the option that cannot lose') }], correct: l('Los criterios previos reducen decisiones impulsivas.', 'Precommitted criteria reduce impulsive decisions.'), incorrect: l('Evitar cualquier pérdida también puede tener un coste.', 'Avoiding every loss can also carry a cost.'), explanation: l('Una regla previa permite evaluar el riesgo sin negar la emoción.', 'A prior rule lets you evaluate risk without denying emotion.') },
+    action: { title: l('Crea una regla de decisión', 'Create a decision rule'), instruction: l('Convierte una decisión incierta en límites explícitos.', 'Turn an uncertain choice into explicit limits.'), labels: [l('Decisión', 'Decision'), l('Pérdida máxima aceptable', 'Maximum acceptable loss'), l('Condición para avanzar', 'Condition to proceed')], artifact: l('Mi regla ante pérdidas', 'My loss decision rule') },
+    reward: { title: l('Riesgo con criterio', 'Risk with judgment'), body: l('El miedo ya no decide solo.', 'Fear no longer decides alone.'), xp: 130, petRecovery: 20 },
+  },
+  {
+    slug: 'sunk-cost', source: sources.sunkCost,
+    title: l('La trampa del coste hundido', 'The sunk-cost trap'),
+    objective: l('Decidir con el valor futuro en vez de defender recursos ya gastados.', 'Decide using future value instead of defending resources already spent.'),
+    keyConcept: l('Un coste irrecuperable no debería cambiar cuál opción es mejor desde hoy.', 'An unrecoverable cost should not change which option is best from today.'),
+    impact: { eyebrow: l('PSICOLOGÍA 03', 'PSYCHOLOGY 03'), title: l('El pasado no vota', 'The past does not vote'), body: l('Tiempo, dinero o esfuerzo ya gastados pueden empujarte a continuar una mala opción. La pregunta útil es: si empezara hoy, ¿volvería a elegir esto?', 'Time, money, or effort already spent can push you to continue a poor choice. The useful question is: if I started today, would I choose this again?'), tacticalRule: l('Ignora lo irrecuperable; compara solo costes y beneficios futuros.', 'Ignore what cannot be recovered; compare only future costs and benefits.'), metric: { value: '0', label: l('peso del coste pasado en la próxima decisión', 'weight of past cost in the next decision') } },
+    challenge: { prompt: l('Pagaste un curso que ya no responde a tu meta. ¿Qué criterio importa?', 'You paid for a course that no longer serves your goal. Which criterion matters?'), options: [{ id: 'a', label: l('Terminarlo porque ya pagaste', 'Finish it because you already paid') }, { id: 'b', label: l('Comparar el valor futuro de continuar con la mejor alternativa actual', 'Compare the future value of continuing with the best current alternative'), correct: true }, { id: 'c', label: l('Invertir más para justificar la compra', 'Invest more to justify the purchase') }], correct: l('La decisión empieza desde el presente.', 'The decision starts from the present.'), incorrect: l('El pago ya ocurrió; no mejora la opción futura.', 'The payment already happened; it does not improve the future option.'), explanation: l('Los costes hundidos explican el pasado, pero no deben gobernar el siguiente paso.', 'Sunk costs explain the past but should not govern the next step.') },
+    action: { title: l('Reevalúa desde cero', 'Re-evaluate from zero'), instruction: l('Analiza un compromiso actual como si todavía no hubieras empezado.', 'Analyze a current commitment as if you had not started yet.'), labels: [l('Coste ya irrecuperable', 'Unrecoverable cost'), l('Valor futuro de continuar', 'Future value of continuing'), l('Mejor decisión desde hoy', 'Best decision from today')], artifact: l('Mi decisión sin coste hundido', 'My sunk-cost reset') },
+    reward: { title: l('Pasado separado', 'Past separated'), body: l('Tu siguiente decisión ya no necesita justificar la anterior.', 'Your next decision no longer has to justify the previous one.'), xp: 140, petRecovery: 20 },
+  },
+  {
+    slug: 'availability-heuristic', source: sources.availability,
+    title: l('Heurística de disponibilidad', 'Availability heuristic'),
+    objective: l('Evitar confundir lo fácil de recordar con lo frecuente o probable.', 'Avoid confusing what is easy to recall with what is frequent or likely.'),
+    keyConcept: l('Los ejemplos vívidos o recientes vienen a la mente con facilidad y pueden inflar nuestra estimación de probabilidad.', 'Vivid or recent examples come to mind easily and can inflate our estimate of probability.'),
+    impact: { eyebrow: l('PSICOLOGÍA 04', 'PSYCHOLOGY 04'), title: l('Recordable no significa probable', 'Memorable does not mean likely'), body: l('Una historia impactante puede dominar cien casos silenciosos. Antes de estimar riesgo, busca una tasa base o una muestra más amplia.', 'One striking story can dominate a hundred quiet cases. Before estimating risk, look for a base rate or a broader sample.'), tacticalRule: l('Pide la tasa base antes de confiar en la anécdota.', 'Ask for the base rate before trusting the anecdote.'), metric: { value: '1', label: l('tasa base antes de una conclusión', 'base rate before a conclusion') } },
+    challenge: { prompt: l('Ves dos noticias sobre robos esta semana. ¿Cuál es el siguiente paso más sólido?', 'You see two theft stories this week. What is the soundest next step?'), options: [{ id: 'a', label: l('Asumir que el riesgo se duplicó', 'Assume the risk doubled') }, { id: 'b', label: l('Comparar datos históricos y locales antes de concluir', 'Compare historical and local data before concluding'), correct: true }, { id: 'c', label: l('Compartir las historias para confirmar la impresión', 'Share the stories to confirm the impression') }], correct: l('Buscaste frecuencia real, no facilidad de recuerdo.', 'You looked for actual frequency, not ease of recall.'), incorrect: l('Una historia vívida no revela por sí sola la tasa real.', 'A vivid story does not reveal the real rate by itself.'), explanation: l('Las tasas base corrigen la influencia de ejemplos recientes o dramáticos.', 'Base rates correct the pull of recent or dramatic examples.') },
+    action: { title: l('Comprueba la tasa base', 'Check the base rate'), instruction: l('Elige una preocupación reciente y compárala con datos más amplios.', 'Choose a recent concern and compare it with broader data.'), labels: [l('Historia o ejemplo visible', 'Visible story or example'), l('Dato base que necesitas', 'Base-rate data you need'), l('Conclusión revisada', 'Revised conclusion')], artifact: l('Mi chequeo de disponibilidad', 'My availability check') },
+    reward: { title: l('Señal sobre ruido', 'Signal over noise'), body: l('Ahora puedes separar una historia memorable de una tendencia real.', 'You can now separate a memorable story from a real trend.'), xp: 150, petRecovery: 22 },
+  },
+  {
+    slug: 'retrieval-practice', source: sources.retrieval,
+    title: l('Recordar para aprender', 'Retrieve to learn'),
+    objective: l('Usar recuperación activa para fortalecer memoria a largo plazo.', 'Use active retrieval to strengthen long-term memory.'),
+    keyConcept: l('Intentar recuperar una idea puede mejorar la retención futura más que releerla repetidamente.', 'Trying to retrieve an idea can improve later retention more than repeatedly rereading it.'),
+    impact: { eyebrow: l('PSICOLOGÍA 05', 'PSYCHOLOGY 05'), title: l('La memoria necesita esfuerzo', 'Memory needs effort'), body: l('Releer se siente fluido, pero esa familiaridad puede confundirse con dominio. Cerrar el material y reconstruir la idea revela qué recuerdas y fortalece la ruta.', 'Rereading feels fluent, but that familiarity can be mistaken for mastery. Closing the material and reconstructing the idea reveals what you remember and strengthens the path.'), tacticalRule: l('Cierra, recupera, comprueba y corrige.', 'Close, retrieve, check, and correct.'), metric: { value: '4', label: l('pasos para una revisión activa', 'steps in an active review') } },
+    challenge: { prompt: l('Quieres recordar una idea dentro de una semana. ¿Qué práctica es más útil?', 'You want to remember an idea in one week. Which practice is more useful?'), options: [{ id: 'a', label: l('Releerla cinco veces seguidas', 'Reread it five times in a row') }, { id: 'b', label: l('Cerrar el texto, explicarla de memoria y revisar errores', 'Close the text, explain it from memory, and check errors'), correct: true }, { id: 'c', label: l('Subrayar cada frase', 'Highlight every sentence') }], correct: l('La recuperación activa hace visible y entrena la memoria.', 'Active retrieval reveals and trains memory.'), incorrect: l('La familiaridad inmediata no garantiza recuerdo futuro.', 'Immediate familiarity does not guarantee future recall.'), explanation: l('Recuperar sin mirar exige reconstruir la idea y luego corregir huecos.', 'Retrieving without looking requires reconstructing the idea and then correcting gaps.') },
+    action: { title: l('Crea una pregunta de memoria', 'Create a retrieval prompt'), instruction: l('Convierte algo que aprendiste hoy en una revisión futura.', 'Turn something you learned today into a future review.'), labels: [l('Idea clave', 'Key idea'), l('Pregunta sin pistas', 'Prompt without clues'), l('Respuesta breve verificable', 'Short checkable answer')], artifact: l('Mi tarjeta de recuperación', 'My retrieval card') },
+    reward: { title: l('Memoria entrenada', 'Memory trained'), body: l('Completaste Psicología & Decisiones con una herramienta para seguir recordando.', 'You completed Psychology & Decisions with a tool for continued retention.'), xp: 170, petRecovery: 25 },
+  },
+] as const;
+
+const psychologyLessons: AtomicLesson[] = mindsetLessons.map((lesson, index) => {
+  const content = psychologyLessonContent[index];
+  const fields = content.action.labels.map((label, fieldIndex) => ({
+    id: ['situation', 'evidence', 'decision'][fieldIndex],
+    kind: 'text' as const,
+    label,
+    placeholder: l('Escribe una respuesta concreta', 'Write a concrete response'),
+    minLength: 5,
+  }));
+  return {
+    ...lesson,
+    slug: content.slug,
+    title: content.title,
+    objective: content.objective,
+    keyConcept: content.keyConcept,
+    sources: [content.source],
+    ingestion: { ...lesson.ingestion, sourceIds: [content.source.id] },
+    learningDesign: getOrbLearningDesign(lesson.id),
+    phases: [
+      { type: 'impact', durationSeconds: 45, ...content.impact },
+      { type: 'challenge', durationSeconds: 60, title: l('Decide con evidencia', 'Decide with evidence'), challenge: { kind: 'multiple_choice', prompt: content.challenge.prompt, options: [...content.challenge.options], feedback: { correct: content.challenge.correct, incorrect: content.challenge.incorrect, explanation: content.challenge.explanation } } },
+      { type: 'action', durationSeconds: 60, title: content.action.title, widget: { engine: 'control_filter', title: content.action.title, instruction: content.action.instruction, fields, resultLabel: l('Herramienta lista', 'Tool ready'), artifactTitle: content.action.artifact, commitLabel: l('Guardar herramienta', 'Save tool') } },
+      { type: 'reward', durationSeconds: 15, ...content.reward },
+    ],
+  };
+});
 
 const perfLessons: AtomicLesson[] = [
   makeLesson({
@@ -758,9 +850,9 @@ export const INTERACTIVE_TRACKS: InteractiveTrack[] = [
     outcome: l('Terminas con principios de terreno, maniobra, niebla de guerra y resiliencia.', 'Finish with principles of terrain, maneuver, fog of war, and resilience.'), lessons: historyLessons,
   },
   {
-    id: 'mindset-stoic', legacyTrackId: 'mindset', title: l('Mente & Estoicismo', 'Mindset & Stoicism'), shortTitle: l('Mente', 'Mindset'),
-    promise: l('Domina tu diálogo interno, elimina sesgos cognitivos y forja una mente inquebrantable.', 'Master internal dialogue, eliminate cognitive biases, and forge an unbreakable mind.'),
-    outcome: l('Terminas con dicotomía del control, superación de pérdidas y fortaleza estoica.', 'Finish with dichotomy of control, loss mastery, and stoic fortitude.'), lessons: mindsetLessons,
+    id: 'mindset-stoic', legacyTrackId: 'mindset', title: l('Psicología & Decisiones', 'Psychology & Decisions'), shortTitle: l('Psicología', 'Psychology'),
+    promise: l('Detecta sesgos, decide con evidencia y aprende de una forma que perdure.', 'Spot biases, decide with evidence, and learn in a way that lasts.'),
+    outcome: l('Terminas con cinco herramientas prácticas para pensar, decidir y recordar mejor.', 'Finish with five practical tools to think, decide, and remember better.'), lessons: psychologyLessons,
   },
   {
     id: 'smart-money', legacyTrackId: 'investing', title: l('Smart Money & Capital', 'Smart Money & Capital'), shortTitle: l('Capital', 'Capital'),

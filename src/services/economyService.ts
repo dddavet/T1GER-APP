@@ -6,15 +6,15 @@ export const adjustEconomy = async (userId: string, economyProfile: any) => {
   const fallbackEconomy = {
     streak_freeze_price: 200,
     unlocked_special_items: [],
-    market_message: 'El mercado se mantiene estable. Mantén tu racha activa para dominar.'
+    market_message: 'El mercado se mantiene estable. Mantén tu racha con un siguiente paso sostenible.'
   };
 
   try {
-    const prompt = `You are the T1GER AI Economist. Your goal is to prevent users from getting 'comfortable' and hoarding wealth.
+    const prompt = `You are the T1GER learning-economy balancer. Keep rewards useful, fair, and resistant to hoarding.
     Economy_Profile: ${JSON.stringify(economyProfile)}
 
-    If a user has a low weekly_success_rate but keeps buying 'Streak Freezes', apply hyper-inflation. Raise the price of the Streak Freeze by 200%. They must feel the financial pain of laziness.
-    If a user has a 90%+ success rate and is hoarding coins, unlock a 'Hidden Boss Tier' item in the shop to drain their wallet and reward their dominance.
+    If a learner has a low weekly_success_rate and repeatedly buys 'Streak Freezes', increase the price gradually while keeping recovery achievable.
+    If a learner has a 90%+ success rate and is hoarding coins, unlock an optional advanced reward that recognizes sustained learning.
     
     Return ONLY a strict JSON object: { "streak_freeze_price": number, "unlocked_special_items": string[], "market_message": string }`;
 

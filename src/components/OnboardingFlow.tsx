@@ -22,7 +22,6 @@ import {
   ShieldCheck,
   Smartphone,
   Sparkles,
-  Star,
   RefreshCw,
   Target,
   TrendingDown,
@@ -44,6 +43,7 @@ import { ProofVerificationService } from '../services/proofVerificationService';
 import { revenueCat, CHECKOUT_ENABLED } from '../services/revenueCatService';
 import type { PurchasesPackage } from '@revenuecat/purchases-capacitor';
 import {
+  DEFAULT_ONBOARDING_TOPIC,
   getOnboardingExperienceLevel,
   getOnboardingTrack,
   type OnboardingCourseTopic,
@@ -112,12 +112,8 @@ const ONBOARDING_XP = 100;
 const STEP_ORDER: OnboardingStep[] = [
   'welcome',
   'topic_select',
-  'acquisition_source',
   'knowledge_level',
-  'motivation_reason',
-  'screen_time',
   'daily_goal',
-  'course_building',
   'micro_lesson',
   'success',
   'save_progress',
@@ -128,7 +124,7 @@ const STEP_ORDER: OnboardingStep[] = [
 const defaultDraft: OnboardingDraft = {
   version: 2,
   step: 'welcome',
-  topic: 'technology',
+  topic: DEFAULT_ONBOARDING_TOPIC,
   acquisitionSource: null,
   knowledgeLevel: 'zero',
   motivation: null,
@@ -149,42 +145,25 @@ const COURSE_TOPICS: Array<{
   badge?: LocalizedText;
 }> = [
   {
+    id: 'investing',
+    title: { es: 'Inversión & Mercados', en: 'Investing & Markets' },
+    subtitle: { es: 'Fundamentos, fondos indexados y gestión de riesgo', en: 'Foundations, index funds & risk management' },
+    icon: '💰',
+    badge: { es: 'RUTA PRINCIPAL', en: 'FLAGSHIP' },
+  },
+  {
     id: 'technology',
     title: { es: 'Technology', en: 'Technology' },
     subtitle: { es: 'IA, Data Science, Ciberseguridad & Computación', en: 'AI, Data Science, Cybersecurity & Computing' },
     icon: '🤖',
-    badge: { es: 'POPULAR', en: 'TRENDING' },
-  },
-  {
-    id: 'business',
-    title: { es: 'Business', en: 'Business' },
-    subtitle: { es: 'Entrepreneurship, Ventas, Capital & Producto', en: 'Entrepreneurship, Sales, Capital & Product' },
-    icon: '💼',
-    badge: { es: 'TOP', en: 'CORE' },
-  },
-  {
-    id: 'investing',
-    title: { es: 'Investing & Markets', en: 'Investing & Markets' },
-    subtitle: { es: 'Value Investing, Mercados & Apuestas Asimétricas', en: 'Value Investing, Markets & Asymmetric Bets' },
-    icon: '💰',
+    badge: { es: 'PRIORIDAD', en: 'PRIORITY' },
   },
   {
     id: 'mindset',
-    title: { es: 'Mental Health & Mindset', en: 'Mental Health & Mindset' },
-    subtitle: { es: 'Estoicismo, Modelos Mentales & Pensamiento Crítico', en: 'Stoicism, Mental Models & Critical Thinking' },
+    title: { es: 'Psicología & Conducta', en: 'Psychology & Behavior' },
+    subtitle: { es: 'Sesgos cognitivos, aprendizaje y toma de decisiones', en: 'Cognitive biases, learning & decision-making' },
     icon: '🧠',
-  },
-  {
-    id: 'productivity',
-    title: { es: 'Productivity', en: 'Productivity' },
-    subtitle: { es: 'Deep Work, Hábitos Atómicos & Maestría del Tiempo', en: 'Deep Work, Atomic Habits & Time Mastery' },
-    icon: '⚡',
-  },
-  {
-    id: 'history',
-    title: { es: 'Strategic History', en: 'Strategic History' },
-    subtitle: { es: 'Estrategia Militar, Grandes Imperios & Geopolítica', en: 'Military Strategy, Great Empires & Geopolitics' },
-    icon: '🏛️',
+    badge: { es: 'PRIORIDAD', en: 'PRIORITY' },
   },
 ];
 
@@ -232,109 +211,109 @@ const triggerHaptic = (duration = 10) => {
 // Dynamic contextual mascot responses (Active Personalization & Commitment Bias)
 const TOPIC_FEEDBACK: Record<CourseTopic, LocalizedText> = {
   technology: {
-    es: '¡Excelente elección! La IA es el multiplicador de ingresos #1 de esta década.',
-    en: 'Great choice! AI is the #1 income multiplier of this decade.',
+    es: 'Entiende cómo funciona la IA moderna y aprende a usarla con criterio.',
+    en: 'Understand how modern AI works and learn to use it with sound judgment.',
   },
   tech: {
-    es: '¡Excelente elección! La IA es el multiplicador de ingresos #1 de esta década.',
-    en: 'Great choice! AI is the #1 income multiplier of this decade.',
+    es: 'Entiende cómo funciona la IA moderna y aprende a usarla con criterio.',
+    en: 'Understand how modern AI works and learn to use it with sound judgment.',
   },
   business: {
-    es: '¡Mentalidad de fundador! Aprenderás a crear ofertas irresistibles y validar clientes.',
-    en: 'Founder mindset! You will learn to craft irresistible offers and validate customers.',
+    es: 'Aprende cómo se crean, prueban y mejoran productos útiles.',
+    en: 'Learn how useful products are shaped, tested, and improved.',
   },
   skills: {
-    es: '¡Mentalidad de fundador! Aprenderás a crear ofertas irresistibles y validar clientes.',
-    en: 'Founder mindset! You will learn to craft irresistible offers and validate customers.',
+    es: 'Aprende cómo se crean, prueban y mejoran productos útiles.',
+    en: 'Learn how useful products are shaped, tested, and improved.',
   },
   investing: {
-    es: '¡Hacer que el capital trabaje para ti 24/7! La clave del 1% financieramente libre.',
-    en: 'Make capital work for you 24/7! The secret of the financially free 1%.',
+    es: 'Construye criterio financiero sólido con lecciones prácticas basadas en evidencia.',
+    en: 'Build sound financial judgment with practical, evidence-based lessons.',
   },
   finance: {
-    es: '¡Hacer que el capital trabaje para ti 24/7! La clave del 1% financieramente libre.',
-    en: 'Make capital work for you 24/7! The secret of the financially free 1%.',
+    es: 'Construye criterio financiero sólido con lecciones prácticas basadas en evidencia.',
+    en: 'Build sound financial judgment with practical, evidence-based lessons.',
   },
   mindset: {
-    es: '¡Control estoico y modelos mentales para tomar decisiones bajo máxima presión!',
-    en: 'Stoic control and mental models to execute under extreme pressure!',
+    es: 'Descubre cómo la atención, los sesgos y las emociones influyen en tus decisiones.',
+    en: 'Discover how attention, bias, and emotion shape your decisions.',
   },
   productivity: {
-    es: '¡Deep Work sin distracciones! Multiplicarás tu rendimiento y tiempo libre.',
-    en: 'Deep Work with zero distractions! Multiply your output and reclaim free time.',
+    es: 'Aprende a proteger tu atención y convertirla en progreso sostenible.',
+    en: 'Learn to protect your attention and turn it into sustainable progress.',
   },
   history: {
-    es: '¡Estrategia pura! Aplica las tácticas maestras de los imperios más influyentes.',
-    en: 'Pure strategy! Apply the master tactics of history’s greatest leaders.',
+    es: 'Usa decisiones del pasado para comprender mejor el presente.',
+    en: 'Use decisions from the past to understand the present more clearly.',
   },
 };
 
 const KNOWLEDGE_FEEDBACK: Record<KnowledgeLevel, LocalizedText> = {
   zero: {
-    es: '¡Perfecto! Sin tecnicismos vacíos. Aprenderás con decisiones prácticas desde el día 1.',
-    en: 'Perfect! Zero fluff. You will learn with real decisions from day 1.',
+    es: 'Empezaremos con fundamentos claros y una decisión práctica desde el primer día.',
+    en: 'We will start with clear foundations and one practical decision from day one.',
   },
   basic: {
     es: '¡Buen punto de partida! Nos saltaremos lo obvio e iremos directo a lo que funciona.',
     en: 'Great starting point! We’ll skip the obvious and focus on what works.',
   },
   intermediate: {
-    es: '¡Sólido! Puliremos tus puntos ciegos para que tomes decisiones de alto calibre.',
-    en: 'Solid! We’ll sharpen your blind spots so you can make high-stakes decisions.',
+    es: 'Conectaremos lo que ya sabes con decisiones y aplicaciones más exigentes.',
+    en: 'We will connect what you know to more demanding decisions and applications.',
   },
   competent: {
-    es: '¡Nivel avanzado! Te desafiaremos con escenarios complejos y de alta presión.',
-    en: 'Advanced tier! We’ll challenge you with complex, high-pressure scenarios.',
+    es: 'Te propondremos escenarios complejos y repasos adaptados a tu nivel.',
+    en: 'You will get complex scenarios and reviews calibrated to your level.',
   },
   advanced: {
-    es: '¡Nivel maestro! Escenarios tácticos extremos para llevar tu criterio al 1%.',
-    en: 'Mastery level! Extreme tactical scenarios to bring your edge into the top 1%.',
+    es: 'Iremos directo a matices, casos límite y retención a largo plazo.',
+    en: 'We will focus on nuance, edge cases, and long-term retention.',
   },
 };
 
 const MOTIVATION_FEEDBACK: Record<string, LocalizedText> = {
   career: {
-    es: '¡La ventaja competitiva que necesitas para destacar y liderar tu sector!',
-    en: 'The competitive edge you need to stand out and lead your industry!',
+    es: 'Convertiremos conocimiento útil en decisiones que puedas usar en tu trabajo.',
+    en: 'We will turn useful knowledge into decisions you can use at work.',
   },
   wealth: {
-    es: '¡Construir activos reales y flujo de caja constante es la meta #1!',
-    en: 'Building real assets and consistent cash flow is the #1 goal!',
+    es: 'Construiremos fundamentos para tomar decisiones financieras más informadas.',
+    en: 'We will build the foundations for more informed financial decisions.',
   },
   productivity: {
-    es: '¡Reclamar tu atención del algoritmo es el superpoder más valioso!',
-    en: 'Reclaiming your attention from the algorithm is the ultimate superpower!',
+    es: 'Diseñaremos una rutina breve que proteja tu atención sin saturarte.',
+    en: 'We will design a short routine that protects your attention without overload.',
   },
   future_tech: {
-    es: '¡Dominar herramientas de IA te convertirá en un operador 10x!',
-    en: 'Mastering AI tools will transform you into a 10x operator!',
+    es: 'Aprenderás qué puede hacer la IA, dónde falla y cómo aplicarla con criterio.',
+    en: 'You will learn what AI can do, where it fails, and how to apply it thoughtfully.',
   },
   fun: {
-    es: '¡Aprender jugando con misiones tácticas es la forma más rápida de absorber!',
-    en: 'Learning through gamified tactical missions is the fastest way to grow!',
+    es: 'Explorarás ideas útiles mediante desafíos breves y experiencias interactivas.',
+    en: 'You will explore useful ideas through short challenges and interactive experiences.',
   },
   other: {
-    es: '¡Cualquiera sea tu meta, T1GER estará contigo en cada paso diario!',
-    en: 'Whatever your goal, T1GER will be with you every single day!',
+    es: 'Personalizaremos el camino y siempre dejaremos claro qué hacer después.',
+    en: 'We will personalize the path and always make the next step clear.',
   },
 };
 
 const GOAL_FEEDBACK: Record<number, LocalizedText> = {
   5: {
-    es: '¡5 minutos consistentes vencen a 2 horas de motivación esporádica!',
-    en: '5 consistent minutes beat 2 hours of sporadic motivation!',
+    es: 'Un ritmo breve y sostenible para aprender algo útil cada día.',
+    en: 'A short, sustainable pace for learning something useful every day.',
   },
   10: {
-    es: '¡La dosis óptima! 10 min al día equivalen a dominar 18 libros al año.',
-    en: 'The sweet spot! 10 min a day equals reading 18 books a year.',
+    es: 'Tiempo suficiente para aprender, practicar y volver mañana.',
+    en: 'Enough time to learn, practice, and return tomorrow.',
   },
   15: {
-    es: '¡Ritmo enfocado! Construirás un hábito blindado y avanzarás 2x más rápido.',
-    en: 'Focused rhythm! You will build an ironclad habit and progress 2x faster.',
+    es: 'Un ritmo enfocado con espacio para profundizar y aplicar.',
+    en: 'A focused pace with room to go deeper and apply what you learn.',
   },
   20: {
-    es: '¡Modo Bestia! Entrarás en el top 5% de mayor disciplina y retención.',
-    en: 'Beast Mode! You’ll enter the top 5% in discipline and retention.',
+    es: 'Una sesión más larga para quienes quieren explorar y repasar más.',
+    en: 'A longer session for learners who want more exploration and review.',
   },
 };
 
@@ -442,11 +421,11 @@ const CourseBuildingView: React.FC<{
     <div className="flex min-h-full flex-col justify-between py-5 text-center select-none">
       <div className="pt-2">
         <span className="font-mono text-[10px] font-black uppercase tracking-[0.2em] text-[var(--ob-accent)]">
-          {phase === 4 ? tr('PLAN BLINDADO', 'IRONCLAD PLAN') : tr('SÍNTESIS INTELIGENTE', 'SMART SYNTHESIS')}
+          {phase === 4 ? tr('RUTA PERSONAL LISTA', 'PERSONAL PATH READY') : tr('SÍNTESIS INTELIGENTE', 'SMART SYNTHESIS')}
         </span>
         <h2 className="text-xl sm:text-2xl font-black text-white mt-1">
           {phase === 4
-            ? tr('¡Tu Plan Táctico está Listo!', 'Your Tactical Plan is Ready!')
+            ? tr('Tu ruta de aprendizaje está lista', 'Your learning path is ready')
             : tr('Creando tu Ruta de Maestría', 'Building Your Mastery Path')}
         </h2>
       </div>
@@ -501,7 +480,7 @@ const CourseBuildingView: React.FC<{
           }`}>
             <CheckCircle2 size={16} className={phase >= 3 ? 'text-emerald-400 shrink-0' : phase === 2 ? 'text-amber-400 animate-pulse shrink-0' : 'text-zinc-600 shrink-0'} />
             <span className="text-xs font-semibold leading-tight">
-              {tr(`${dailyGoal} min/día · Protección de racha blindada`, `${dailyGoal} min/day · Streak armor calibrated`)}
+              {tr(`${dailyGoal} min/día · Ritmo sostenible`, `${dailyGoal} min/day · Sustainable pace`)}
             </span>
           </div>
 
@@ -527,7 +506,7 @@ const CourseBuildingView: React.FC<{
   );
 };
 
-// 3D Tactile Primary Button (Duolingo Style)
+// Shared machined control used across onboarding.
 export const PrimaryAction: React.FC<
   React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' }
 > = ({ className = '', variant = 'primary', children, ...props }) => {
@@ -535,10 +514,10 @@ export const PrimaryAction: React.FC<
   return (
     <button
       {...props}
-      className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-black uppercase tracking-wider transition-all active:translate-y-1 active:shadow-none cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${
+      className={`flex min-h-14 w-full items-center justify-center gap-2 rounded-2xl px-5 text-sm font-black uppercase tracking-wider transition-all active:scale-[0.97] cursor-pointer disabled:opacity-40 disabled:pointer-events-none ${
         isPrimary
-          ? 'bg-[var(--ob-accent)] text-black shadow-[0_5px_0_#C2410C,0_10px_20px_rgba(255,115,0,0.25)] hover:bg-[#FF8C33]'
-          : 'bg-white/[.06] border border-white/10 text-zinc-300 hover:bg-white/[.1] shadow-[0_4px_0_rgba(255,255,255,0.05)]'
+          ? 't1ger-primary-button text-black shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_rgba(0,0,0,0.35)]'
+          : 'border border-white/10 bg-white/[.06] text-zinc-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:bg-white/[.1]'
       } ${className}`}
     >
       {children}
@@ -795,8 +774,8 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               </h1>
               <p className="text-sm font-medium text-zinc-400 mt-1 max-w-xs">
                 {tr(
-                  'Aprende en minutos. Demuéstralo con acciones reales.',
-                  'Learn in minutes. Prove it through real action.'
+                  'Descubre. Aprende. Aplica. Domina.',
+                  'Discover. Learn. Apply. Master.'
                 )}
               </p>
             </div>
@@ -821,9 +800,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         return (
           <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={topicFeedback ? localize(topicFeedback, language) : tr('¿Qué habilidad de alto impacto quieres dominar?', 'What high-impact skill do you want to master?')}
+              speech={topicFeedback ? localize(topicFeedback, language) : tr('¿Qué tema despierta más tu curiosidad?', 'What topic are you most curious about?')}
               mood={draft.topic ? 'beast' : 'thinking'}
-              eyebrow={tr('Elige tu ruta táctica', 'Choose your tactical path')}
+              eyebrow={tr('Elige tu primer camino', 'Choose your first path')}
               title={tr('¿Qué te gustaría aprender?', 'What would you like to learn?')}
             />
 
@@ -834,6 +813,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <button
                     key={topic.id}
                     type="button"
+                    aria-pressed={isSelected}
                     onClick={() => {
                       triggerHaptic();
                       patchDraft({ topic: topic.id });
@@ -903,7 +883,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
         return (
           <div className="flex min-h-full flex-col py-3 select-none">
             <DuolingoHeader
-              speech={draft.acquisitionSource ? tr('¡Increíble! Cada vez más emprendedores se unen a la manada.', 'Awesome! More founders join the pack every day.') : tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
+              speech={draft.acquisitionSource ? tr('Gracias. Esto nos ayuda a construir una mejor experiencia para cada estudiante.', 'Thanks. This helps us build a better experience for every learner.') : tr('¿Cómo te enteraste de T1GER?', 'How did you hear about T1GER?')}
               mood={draft.acquisitionSource ? 'happy' : 'idle'}
               eyebrow={tr('Comunidad T1GER', 'T1GER Community')}
               title={tr('¿De dónde vienes?', 'Where are you from?')}
@@ -1281,9 +1261,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           },
           {
             minutes: 20,
-            tag: { es: 'Modo Bestia', en: 'Beast Mode' },
-            icon: '🔥',
-            desc: { es: 'Dominio acelerado', en: 'Fast-track mastery' },
+            tag: { es: 'Profundo', en: 'Deep dive' },
+            icon: '🧠',
+            desc: { es: 'Aprender + repasar', en: 'Learn + review' },
           },
         ];
 
@@ -1606,14 +1586,14 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             ],
           },
           mindset: {
-            prompt: '¿Cuál es el principio central de la dicotomía estoica del control?',
-            promptEn: 'What is the core principle of the Stoic dichotomy of control?',
-            explanation: 'Separar lo que depende 100% de ti (tus acciones y juicios) de lo externo elimina la ansiedad improductiva.',
-            explanationEn: 'Separating what is 100% within your control (actions & judgments) from the external eliminates useless anxiety.',
+            prompt: '¿Qué acción reduce mejor el sesgo de confirmación?',
+            promptEn: 'Which action best reduces confirmation bias?',
+            explanation: 'Definir qué evidencia cambiaría tu opinión convierte una creencia en una hipótesis que sí puede ponerse a prueba.',
+            explanationEn: 'Defining what evidence would change your mind turns a belief into a hypothesis that can actually be tested.',
             options: [
-              { es: 'Enfocar tu energía solo en lo que depende 100% de ti.', en: 'Focus your energy only on what is 100% within your control.', correct: true },
-              { es: 'Preocuparse por eventos externos para intentar prevenirlos.', en: 'Worry about external events to try to prevent them.', correct: false },
-              { es: 'Suprimir todas las emociones sin analizarlas.', en: 'Suppress all emotions without analyzing them.', correct: false },
+              { es: 'Buscar una prueba que podría demostrar que estás equivocado.', en: 'Seek a test that could show you are wrong.', correct: true },
+              { es: 'Reunir más opiniones que ya coinciden contigo.', en: 'Collect more opinions that already agree with you.', correct: false },
+              { es: 'Ignorar los datos que complican la decisión.', en: 'Ignore data that complicates the decision.', correct: false },
             ],
           },
           productivity: {
@@ -2031,10 +2011,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 <div className="rounded-3xl border border-[#FF7300]/35 bg-gradient-to-b from-[#FF7300]/15 via-black/50 to-transparent p-4 text-left relative overflow-hidden shadow-[0_0_30px_rgba(255,115,0,0.15)]">
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#FF7300]/20 text-[#FF7300] border border-[#FF7300]/30">
-                      {tr('PROYECCIÓN DE DISCIPLINA A 30 DÍAS', '30-DAY DISCIPLINE PROJECTION')}
+                      {tr('TU CICLO DE APRENDIZAJE', 'YOUR LEARNING LOOP')}
                     </span>
                     <span className="text-xs font-mono font-bold text-emerald-400">
-                      {tr('89% Éxito', '89% Success')}
+                      {tr('5 ETAPAS', '5 STAGES')}
                     </span>
                   </div>
 
@@ -2075,20 +2055,20 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     </svg>
 
                     <div className="flex justify-between items-center text-[9px] font-mono text-zinc-500 pt-1">
-                      <span>{tr('Día 1', 'Day 1')}</span>
-                      <span>{tr('Día 15', 'Day 15')}</span>
-                      <span className="text-[#FF7300] font-bold">{tr('Día 30 (Obsidian)', 'Day 30 (Obsidian)')}</span>
+                      <span>{tr('Descubrir', 'Discover')}</span>
+                      <span>{tr('Aplicar', 'Apply')}</span>
+                      <span className="text-[#FF7300] font-bold">{tr('Volver', 'Return')}</span>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-white/10 text-[10px]">
                     <div className="flex items-center gap-1.5 text-zinc-400">
                       <span className="w-2.5 h-0.5 bg-red-500 inline-block" />
-                      <span>{tr('Sin disciplina: 85% abandono', 'No system: 85% drop')}</span>
+                      <span>{tr('Sin guía: fuentes dispersas', 'No guide: scattered sources')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-[#FF8C33] font-bold">
                       <span className="w-2.5 h-1 bg-[#FF7300] rounded inline-block" />
-                      <span>{tr('Con T1GER: +89% constancia', 'With T1GER: +89% habit')}</span>
+                      <span>{tr('Con T1GER: un próximo paso', 'With T1GER: one next step')}</span>
                     </div>
                   </div>
                 </div>
@@ -2097,25 +2077,25 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 <div className="grid grid-cols-3 gap-2">
                   <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
                     <Clock size={16} className="text-[#FF7300] mx-auto mb-1" />
-                    <span className="text-xs font-mono font-black text-white block">+2.4h</span>
-                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Enfoque/día', 'Focus/day')}</span>
+                    <span className="text-xs font-mono font-black text-white block">LEARN</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Modelo + reto', 'Model + challenge')}</span>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
                     <Flame size={16} className="text-amber-400 mx-auto mb-1" />
-                    <span className="text-xs font-mono font-black text-white block">30 Días</span>
-                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Racha invicta', 'Streak goal')}</span>
+                    <span className="text-xs font-mono font-black text-white block">APPLY</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Acción real', 'Real action')}</span>
                   </div>
                   <div className="p-3 rounded-2xl bg-white/[.03] border border-white/8 text-center">
                     <Zap size={16} className="text-emerald-400 mx-auto mb-1" />
-                    <span className="text-xs font-mono font-black text-white block">4.5x</span>
-                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Velocidad', 'Speed')}</span>
+                    <span className="text-xs font-mono font-black text-white block">MASTER</span>
+                    <span className="text-[9px] text-zinc-400 leading-tight block">{tr('Repaso inteligente', 'Smart review')}</span>
                   </div>
                 </div>
               </div>
 
               <div className="pt-2">
                 <PrimaryAction onClick={() => setAccessSubPage(2)}>
-                  {tr('CONTINUAR A LA TRANSFORMACIÓN', 'CONTINUE TO TRANSFORMATION')} <ChevronRight size={18} />
+                  {tr('VER CÓMO FUNCIONA', 'SEE HOW IT WORKS')} <ChevronRight size={18} />
                 </PrimaryAction>
               </div>
             </div>
@@ -2128,11 +2108,11 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div className="flex min-h-full flex-col justify-between py-2 text-left">
               <DuolingoHeader
                 speech={tr(
-                  'El 95% de los emprendedores se estancan por falta de presión real y mentoría. T1GER te lleva a cerrar resultados.',
-                  '95% of founders stall due to lack of real accountability. T1GER drives you to close real results.'
+                  'El conocimiento útil se pierde cuando solo se consume. T1GER conecta cada lección con una acción y un repaso.',
+                  'Useful knowledge fades when it is only consumed. T1GER connects every lesson to action and review.'
                 )}
-                mood="beast"
-                eyebrow={tr('LA TRANSFORMACIÓN // 2 DE 3', 'TRANSFORMATION // 2 OF 3')}
+                mood="happy"
+                eyebrow={tr('EL MÉTODO // 2 DE 3', 'THE METHOD // 2 OF 3')}
                 title={tr('¿Por Qué Funciona T1GER?', 'Why Does T1GER Work?')}
               />
 
@@ -2141,12 +2121,12 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 <div className="grid grid-cols-2 gap-2.5 text-left">
                   <div className="p-3.5 rounded-2xl border border-red-500/20 bg-red-500/[.04] space-y-2">
                     <span className="text-[9px] font-mono font-black uppercase tracking-wider text-red-400 block">
-                      {tr('❌ Entrenar Solo', '❌ Training Alone')}
+                      {tr('SIN ESTRUCTURA', 'UNSTRUCTURED')}
                     </span>
                     <ul className="text-[10px] text-zinc-400 space-y-1.5 leading-snug">
-                      <li>• {tr('Scroll infinito en redes', 'Endless social scrolling')}</li>
-                      <li>• {tr('Teoría sin ejecución', 'Theory with zero action')}</li>
-                      <li>• {tr('Abandono al día 10', 'Quitting by day 10')}</li>
+                      <li>• {tr('Fuentes dispersas', 'Scattered sources')}</li>
+                      <li>• {tr('Contenido pasivo', 'Passive content')}</li>
+                      <li>• {tr('Olvido sin repaso', 'Forgetting without review')}</li>
                     </ul>
                   </div>
 
@@ -2155,68 +2135,53 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                       {tr('⚡ Con T1GER Pro', '⚡ With T1GER Pro')}
                     </span>
                     <ul className="text-[10px] text-zinc-200 space-y-1.5 leading-snug">
-                      <li>✓ {tr('Coach IA 24/7 implacable', '24/7 relentless AI coach')}</li>
-                      <li>✓ {tr('Misiones con prueba real', 'Real proof missions')}</li>
-                      <li>✓ {tr('Ligas de 30 fundadores', '30-member founder leagues')}</li>
+                      <li>✓ {tr('Rutas de fuentes curadas', 'Curated-source paths')}</li>
+                      <li>✓ {tr('Aplicación en la vida real', 'Real-world application')}</li>
+                      <li>✓ {tr('Repasos adaptativos', 'Adaptive reviews')}</li>
                     </ul>
                   </div>
                 </div>
 
-                {/* Testimonial Card */}
+                {/* Product loop explanation */}
                 <div className="p-4 rounded-2xl border border-amber-500/30 bg-white/[.02] text-left space-y-2">
-                  <div className="flex items-center gap-1 text-amber-400">
-                    <Star size={13} fill="#F59E0B" />
-                    <Star size={13} fill="#F59E0B" />
-                    <Star size={13} fill="#F59E0B" />
-                    <Star size={13} fill="#F59E0B" />
-                    <Star size={13} fill="#F59E0B" />
-                    <span className="text-[10px] font-mono font-bold text-zinc-300 ml-1.5">5.0 / 5.0</span>
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <BookOpen size={16} />
+                    <span className="text-[10px] font-mono font-bold text-zinc-300">{tr('APRENDE → APLICA → DOMINA', 'LEARN → APPLY → MASTER')}</span>
                   </div>
-                  <p className="text-[11px] text-zinc-300 italic leading-relaxed">
-                    "{tr(
-                      'T1GER me obligó a validar mi oferta y cerrar mi primer cliente en 7 días en vez de pasarme 6 meses dudando.',
-                      'T1GER forced me to validate my offer and close my first customer in 7 days instead of spending 6 months overthinking.'
-                    )}"
+                  <p className="text-[11px] text-zinc-300 leading-relaxed">
+                    {tr(
+                      'Aprende una idea con interacción, aplícala en una decisión real y vuelve a recuperarla antes de olvidarla.',
+                      'Learn one idea interactively, apply it in a real decision, and retrieve it again before it fades.'
+                    )}
                   </p>
-                  <div className="flex items-center gap-2 pt-1 border-t border-white/5">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#FF7300] to-amber-500 flex items-center justify-center text-[10px] font-black text-black">
-                      CM
-                    </div>
-                    <div>
-                      <strong className="text-[10px] text-white block">Carlos Mendoza</strong>
-                      <span className="text-[9px] text-zinc-400">{tr('Fundador SaaS // Liga Obsidian', 'SaaS Founder // Obsidian League')}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               <div className="pt-2">
                 <PrimaryAction onClick={() => setAccessSubPage(3)}>
-                  {tr('VER MI OFERTA DE BIENVENIDA', 'VIEW MY WELCOME OFFER')} <Sparkles size={18} />
+                  {tr('EXPLORAR OPCIONES DE ACCESO', 'EXPLORE ACCESS OPTIONS')} <Sparkles size={18} />
                 </PrimaryAction>
               </div>
             </div>
           );
         }
 
-        // --- SUB-PAGE 3: The Hard Paywall with 50% Launch Discount & Calm Timeline ---
-        const isAnnualTrial = selectedPaywallPkgId.includes('annual');
-        const isLifetime = selectedPaywallPkgId.includes('lifetime');
+        // --- SUB-PAGE 3: Optional membership, using store-provided product terms ---
 
         return (
           <div className="flex h-full flex-col justify-between py-1 text-left overflow-hidden select-none">
             {/* Top Badge & Header */}
             <div className="text-center pt-0.5">
               <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-[10px] font-mono font-black uppercase bg-gradient-to-r from-emerald-500/20 via-[#FF7300]/20 to-transparent text-orange-400 border border-orange-500/30">
-                🔥 {tr('OFERTA DE LANZAMIENTO // 50% OFF', 'LAUNCH OFFER // 50% OFF')}
+                {tr('MEMBRESÍA OPCIONAL', 'OPTIONAL MEMBERSHIP')}
               </span>
               <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight mt-1.5 leading-tight">
-                {tr('Desbloquea tu potencial táctico', 'Unlock your tactical potential')}
+                {tr('Desbloquea la experiencia completa', 'Unlock the complete learning experience')}
               </h2>
               <p className="text-[11px] sm:text-xs text-zinc-400 mt-1 max-w-xs mx-auto leading-relaxed">
                 {tr(
-                  'Entrena tu criterio diario, pon a prueba tus decisiones y domina tu mercado.',
-                  'Train your daily judgment, test your decisions, and master your market.'
+                  'Explora más rutas, aplica lo aprendido y conserva el conocimiento con repasos.',
+                  'Explore more paths, apply what you learn, and retain it through review.'
                 )}
               </p>
             </div>
@@ -2245,7 +2210,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     >
                       {isPkgAnnual && (
                         <span className="absolute -top-2 right-3 px-2 py-0.2 rounded-full text-[8px] font-black uppercase bg-gradient-to-r from-emerald-400 to-[#3FC78E] text-black shadow-sm">
-                          {tr('⭐ 7 DÍAS GRATIS · $0 HOY', '⭐ 7 DAYS FREE · $0 TODAY')}
+                          {tr('PLAN ANUAL', 'ANNUAL PLAN')}
                         </span>
                       )}
 
@@ -2259,21 +2224,14 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                           <div>
                             <h4 className="text-xs font-black text-white leading-tight">{pkg.product.title}</h4>
                             <p className="text-[10px] text-zinc-400 leading-tight mt-0.5">
-                              {isPkgAnnual
-                                ? tr('7 días gratis, luego $59.99/año', '7 days free, then $59.99/year')
-                                : pkg.product.description}
+                              {pkg.product.description}
                             </p>
                           </div>
                         </div>
 
                         <div className="text-right shrink-0">
-                          {isPkgAnnual && (
-                            <span className="text-[9px] text-zinc-500 line-through font-mono block">
-                              $119.99
-                            </span>
-                          )}
                           <span className="text-xs sm:text-sm font-black text-white font-mono block">
-                            {isPkgAnnual ? '$4.99/mes' : pkg.product.priceString}
+                            {pkg.product.priceString}
                           </span>
                         </div>
                       </div>
@@ -2286,22 +2244,11 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 </div>
               )}
 
-              {/* Calm-Style Micro Timeline */}
-              <div className="rounded-xl border border-white/8 bg-white/[.02] px-3 py-2 flex items-center justify-between text-[10px]">
-                <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-                  <span>📅</span>
-                  <span>{tr('Hoy: $0', 'Today: $0')}</span>
-                </div>
-                <span className="text-zinc-600 font-mono">→</span>
-                <div className="flex items-center gap-1.5 text-amber-400 font-bold">
-                  <span>🔔</span>
-                  <span>{tr('Día 5: Aviso', 'Day 5: Notice')}</span>
-                </div>
-                <span className="text-zinc-600 font-mono">→</span>
-                <div className="flex items-center gap-1.5 text-orange-400 font-bold">
-                  <span>🛡️</span>
-                  <span>{tr('Día 7: Cancela fácil', 'Day 7: Easy cancel')}</span>
-                </div>
+              <div className="rounded-xl border border-white/8 bg-white/[.02] px-3 py-2 text-center text-[10px] leading-relaxed text-zinc-400">
+                {tr(
+                  'Google Play confirmará el precio y cualquier prueba disponible antes de comprar.',
+                  'Google Play will confirm the price and any available trial before purchase.'
+                )}
               </div>
             </div>
 
@@ -2312,9 +2259,8 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               </p>
             )}
 
-            {/* Dual CTAs: Start Free Trial & Empezar Gratis */}
+            {/* Paid and free access choices */}
             <div className="space-y-2 pt-1">
-              {/* Button 1: Big Start Free Trial Button */}
               <button
                 type="button"
                 onClick={handleOnboardingPurchase}
@@ -2326,14 +2272,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     <RefreshCw size={18} className="animate-spin" />
                     {tr('PROCESANDO...', 'PROCESSING...')}
                   </>
-                ) : isAnnualTrial ? (
-                  <>
-                    <span>{tr('INICIAR PRUEBA GRATUITA DE 7 DÍAS', 'START 7-DAY FREE TRIAL')}</span>
-                    <ChevronRight size={18} className="stroke-[3]" />
-                  </>
                 ) : (
                   <>
-                    <span>{tr('DESBLOQUEAR PLAN PRO', 'UNLOCK PRO PLAN')}</span>
+                    <span>{tr('CONTINUAR CON PRO', 'CONTINUE WITH PRO')}</span>
                     <Sparkles size={18} />
                   </>
                 )}
@@ -2368,7 +2309,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                 </button>
                 <div className="flex items-center gap-1 text-zinc-400">
                   <Shield size={11} className="text-emerald-400" />
-                  <span>{tr('Google Play Seguro · Cancela en 1 toque', 'Google Play Secure · Cancel anytime')}</span>
+                  <span>{tr('Compra segura con Google Play', 'Secure purchase with Google Play')}</span>
                 </div>
               </div>
             </div>
