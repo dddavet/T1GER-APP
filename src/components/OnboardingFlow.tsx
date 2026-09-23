@@ -1793,12 +1793,17 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             await updateAppUser(getProfilePatch(false));
 
             await googleSignIn();
-            
-            // If using popup, we reach here. If redirect, page unloads.
             goTo('reminders');
           } catch (err: any) {
             console.error('Google Auth Error:', err);
-            setAuthError(err.message || tr('Error al conectar con Google.', 'Failed to connect with Google.'));
+            const msg = err.message || '';
+            if (msg.includes('auth/popup-closed-by-user')) {
+              setAuthError('');
+            } else if (msg.includes('auth/native-unsupported-provider') || msg.includes('auth/unauthorized-domain')) {
+              setAuthError(tr('Para esta red/dispositivo, por favor ingresa con tu correo abajo o continúa como invitado.', 'For this connection/device, please use email below or continue as guest.'));
+            } else {
+              setAuthError(tr('No se pudo conectar con Google. Puedes usar tu correo abajo o continuar como invitado.', 'Could not connect with Google. You can use email below or continue as guest.'));
+            }
           } finally {
             setAuthLoading(false);
           }

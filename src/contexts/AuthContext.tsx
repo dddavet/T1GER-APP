@@ -407,32 +407,73 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const devHarness = useDevHarnessState();
 
   const googleSignIn = useCallback(async () => {
-    if (Capacitor.isNativePlatform()) {
-      throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
-    }
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
-    
-    // Check if we are in a mobile/tablet environment where popups often fail
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    if (isMobile) {
-      // Use redirect on mobile browsers to avoid popup blockers and COOP issues
-      await signInWithRedirect(auth, provider);
-    } else {
-      // Use popup on desktop
+
+    try {
+      // Try popup first - works in modern mobile browsers (Chrome/Safari) without reloading or losing state
       await signInWithPopup(auth, provider);
+    } catch (popupError: any) {
+      console.warn('Google signInWithPopup notice:', popupError?.code, popupError?.message);
+
+      // If user closed the popup deliberately, rethrow cleanly
+      if (popupError?.code === 'auth/popup-closed-by-user') {
+        throw new Error('auth/popup-closed-by-user: Inicio de sesión cancelado.');
+      }
+
+      // If popup was blocked by browser, attempt redirect on web
+      if (
+        (popupError?.code === 'auth/popup-blocked' ||
+         popupError?.code === 'auth/cancelled-popup-request') &&
+        !Capacitor.isNativePlatform()
+      ) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+
+      // If running inside Capacitor native webview where Google blocks web OAuth
+      if (
+        Capacitor.isNativePlatform() &&
+        (popupError?.code === 'auth/operation-not-supported-in-this-environment' ||
+         popupError?.message?.includes('disallowed_useragent') ||
+         popupError?.code === 'auth/unauthorized-domain')
+      ) {
+        throw new Error('auth/native-unsupported-provider: En la app nativa, por favor inicia sesión con tu correo electrónico o enlace de acceso.');
+      }
+
+      // If domain is unauthorized in Firebase console (e.g. testing via local network IP)
+      if (popupError?.code === 'auth/unauthorized-domain') {
+        throw new Error('auth/unauthorized-domain: Esta dirección IP local no está en la lista de dominios autorizados de Firebase. Usa correo y contraseña para probar en red local.');
+      }
+
+      throw popupError;
     }
   }, []);
 
   const appleSignIn = useCallback(async () => {
-    if (Capacitor.isNativePlatform()) {
-      throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
-    }
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
-    await signInWithPopup(auth, provider);
+
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (popupError: any) {
+      if (popupError?.code === 'auth/popup-closed-by-user') {
+        throw new Error('auth/popup-closed-by-user: Inicio de sesión cancelado.');
+      }
+      if (
+        (popupError?.code === 'auth/popup-blocked' ||
+         popupError?.code === 'auth/cancelled-popup-request') &&
+        !Capacitor.isNativePlatform()
+      ) {
+        await signInWithRedirect(auth, provider);
+        return;
+      }
+      if (Capacitor.isNativePlatform()) {
+        throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
+      }
+      throw popupError;
+    }
   }, []);
 
   const emailPasswordSignIn = useCallback(async (email: string, password: string) => {
@@ -675,6 +716,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Email link sign-in failed:', err);
       setLoading(false);
     });
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (result?.user) {
+          await fetchAppUser(result.user);
+        }
+      })
+      .catch((err) => {
+        if (err?.code !== 'auth/credential-already-in-use') {
+          console.warn('Redirect sign-in notice:', err?.code, err?.message);
+        }
+      });
 
     const safetyTimer = setTimeout(() => {
       setLoading(false);

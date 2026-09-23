@@ -42,6 +42,12 @@ export const AuthGate: React.FC<AuthGateProps> = ({ embedded = false, onAuthSucc
         'On mobile, please sign in with email and password or email link.'
       );
     }
+    if (message.includes('auth/unauthorized-domain')) {
+      return tr(
+        'IP o dominio no autorizado en Firebase. Usa correo y contraseña o agrega la IP en Firebase Console.',
+        'Domain/IP not authorized in Firebase. Use email & password or authorize the IP in Firebase Console.'
+      );
+    }
     if (message.includes('auth/invalid-credential') || message.includes('auth/wrong-password')) return tr('El correo o la contraseña no son correctos.', 'Email or password is incorrect.');
     if (message.includes('auth/email-already-in-use')) return tr('Ya existe una cuenta con ese correo.', 'That email already has an account.');
     if (message.includes('auth/weak-password')) return tr('La contraseña debe tener al menos 6 caracteres.', 'Password needs at least 6 characters.');

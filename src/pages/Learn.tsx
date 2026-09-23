@@ -225,11 +225,13 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                 <div className="w-18 h-18 sm:w-22 sm:h-22 shrink-0 flex items-center justify-center pointer-events-none">
                   <React.Suspense
                     fallback={
-                      <img
-                        src="/mascot/t1ger-avatar.png"
-                        alt="T1ger"
-                        className="w-18 h-18 sm:w-22 sm:h-22 scale-[2.15] object-contain"
-                      />
+                      <div className="w-18 h-18 sm:w-22 sm:h-22 flex items-center justify-center">
+                        <img
+                          src="/mascot/t1ger-avatar.png"
+                          alt="T1ger"
+                          className="w-full h-full object-contain opacity-80"
+                        />
+                      </div>
                     }
                   >
                     <T1gerMascot3D

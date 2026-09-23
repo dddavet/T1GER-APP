@@ -173,6 +173,8 @@ function DemandFrameDriver({ paused }: { paused: boolean }) {
   return null;
 }
 
+const loadedModelPaths = new Set<string>();
+
 export const T1gerMascot3D: React.FC<MascotProps> = ({
   modelPath = DEFAULT_MODEL,
   mood = 'idle',
@@ -187,7 +189,9 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
   onPet,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [readyModelPath, setReadyModelPath] = useState<string | null>(null);
+  const [readyModelPath, setReadyModelPath] = useState<string | null>(() =>
+    loadedModelPaths.has(modelPath) ? modelPath : null
+  );
   const modelReady = readyModelPath === modelPath;
   const isInView = useInView(containerRef, { amount: 0.1 });
   const prefersReducedMotion = Boolean(useReducedMotion());
@@ -216,10 +220,10 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
         src="/mascot/t1ger-avatar.png"
         alt=""
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full scale-[2.15] object-contain transition-opacity duration-150 ${modelReady ? 'opacity-0' : 'opacity-100'}`}
+        className={`absolute inset-0 h-full w-full object-contain pointer-events-none transition-opacity duration-300 ease-out ${modelReady ? 'opacity-0' : 'opacity-85'}`}
       />
       <Canvas
-        className={`relative transition-opacity duration-150 ${modelReady ? 'opacity-100' : 'opacity-0'}`}
+        className={`relative transition-opacity duration-300 ease-out ${modelReady ? 'opacity-100' : 'opacity-0'}`}
         frameloop="demand"
         camera={{ position: cameraPosition, fov: closeUp ? 35 : 36, near: 0.1, far: 20 }}
         dpr={[1, 1.3]}
@@ -237,7 +241,16 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
         <directionalLight position={[-3.8, 1.4, 4]} intensity={0.46} color="#DBEEE9" />
         <pointLight position={[1.8, -2.2, 3.2]} intensity={0.22} color="#F3A169" />
         <Suspense fallback={null}>
-          <ReactiveTigerModel key={modelPath} url={modelPath} mood={reactiveMood} reducedMotion={prefersReducedMotion} onReady={() => setReadyModelPath(modelPath)} />
+          <ReactiveTigerModel
+            key={modelPath}
+            url={modelPath}
+            mood={reactiveMood}
+            reducedMotion={prefersReducedMotion}
+            onReady={() => {
+              loadedModelPaths.add(modelPath);
+              setReadyModelPath(modelPath);
+            }}
+          />
         </Suspense>
       </Canvas>
     </div>
