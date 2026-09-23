@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import { ArrowRight, CheckCircle, Flag, Target } from '@phosphor-icons/react';
-import { Check, Flame, Trophy, TrendingUp, Calculator, ChevronRight } from 'lucide-react';
+import { ArrowRight, Calculator, CaretRight, Check, CheckCircle, Fire, Flag, Target, TrendUp } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
 import { useFieldMissions } from '../hooks/useFieldMissions';
 import { FieldMissionService, isFieldMissionComplete, type FieldMission } from '../services/fieldMissionService';
 import { getApplyDesign } from '../services/applyMissionDesign';
+import { isApplyCompletedOnDate } from '../services/applyDayStatus';
 import { SoundEffects } from '../services/soundEffects';
 const Trading = React.lazy(() => import('./apply/PaperTradingSandbox').then(m => ({ default: m.PaperTradingSandbox })));
 import { ApplyMissionModal } from './apply/ApplyMissionModal';
@@ -17,24 +17,26 @@ import { ApplyMissionModal } from './apply/ApplyMissionModal';
  */
 function DailyMomentumCard({
   completedCount,
+  completedTodayCount,
   activeCount,
   streak,
   isEs,
 }: {
   completedCount: number;
+  completedTodayCount: number;
   activeCount: number;
   streak: number;
   isEs: boolean;
 }) {
   const reducedMotion = useReducedMotion();
-  const isDoneToday = completedCount > 0 && activeCount === 0;
-  const progressPercent = isDoneToday ? 100 : activeCount > 0 ? 35 : 0;
+  const isDoneToday = completedTodayCount > 0;
+  const progressPercent = isDoneToday ? 100 : 0;
   const radius = 28;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
   return (
-    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216]/95 p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
+    <div className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-[#121216] p-4 sm:p-5 shadow-[0_16px_36px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.06)]">
       <div className="relative flex items-center gap-4">
         {/* Apple Fitness Activity Ring */}
         <div className="relative flex h-18 w-18 shrink-0 items-center justify-center">
@@ -73,9 +75,9 @@ function DailyMomentumCard({
             className="absolute inset-0 flex items-center justify-center"
           >
             {isDoneToday ? (
-              <Check className="text-emerald-400" size={24} strokeWidth={3} />
+              <Check className="text-emerald-400" size={24} weight="bold" />
             ) : (
-              <Flame className="text-[#FF8A1F]" size={22} />
+              <Fire className="text-[#FF8A1F]" size={22} weight="fill" />
             )}
           </motion.div>
         </div>
@@ -91,23 +93,27 @@ function DailyMomentumCard({
               }`}
             >
               {isDoneToday
-                ? (isEs ? 'Misión de hoy completa' : "Today's action complete")
-                : (isEs ? 'Acción pendiente hoy' : 'Action pending today')}
+                ? (isEs ? 'Acción de hoy completa' : "Today's action complete")
+                : activeCount > 0
+                  ? (isEs ? 'Acción pendiente hoy' : 'Action pending today')
+                  : (isEs ? 'Sin acción pendiente' : 'No action pending')}
             </span>
           </div>
 
           <h3 className="mt-1 text-base font-extrabold text-white tracking-tight">
-            {isDoneToday
-              ? (isEs ? 'Hábito protegido hoy' : 'Habit locked in today')
-              : (isEs ? 'Haz tu acción en el mundo real' : 'Take your real-world step')}
+              {isDoneToday
+              ? (isEs ? 'Aplicaste lo aprendido hoy' : 'You applied what you learned today')
+              : activeCount > 0
+                ? (isEs ? 'Haz tu acción en el mundo real' : 'Take your real-world step')
+                : (isEs ? 'Tu próxima acción empieza en Learn' : 'Your next action starts in Learn')}
           </h3>
 
-          <div className="mt-2.5 grid grid-cols-3 gap-2">
+          <div className="mt-3 grid grid-cols-3 divide-x divide-white/[.08]">
             <motion.div
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.1 }}
-              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              className="px-2 text-center"
             >
               <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Hoy' : 'Today'}
@@ -117,33 +123,33 @@ function DailyMomentumCard({
                   isDoneToday ? 'text-emerald-300' : 'text-[#FF8A1F]'
                 }`}
               >
-                {isDoneToday ? '1 / 1' : `${Math.min(1, completedCount)} / 1`}
+                {isDoneToday ? '1 / 1' : '0 / 1'}
               </p>
             </motion.div>
             <motion.div
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.16 }}
-              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              className="px-2 text-center"
             >
               <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Racha' : 'Streak'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-amber-400">
-                {streak}d 🔥
+                {streak}d
               </p>
             </motion.div>
             <motion.div
               initial={reducedMotion ? undefined : { opacity: 0, y: 4 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.2, delay: 0.22 }}
-              className="rounded-xl border border-white/[0.08] bg-black/40 p-2 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              className="px-2 text-center"
             >
               <p className="font-mono text-[8.5px] font-bold uppercase tracking-wider text-zinc-500">
                 {isEs ? 'Victorias' : 'Wins'}
               </p>
               <p className="mt-0.5 font-mono text-xs font-black text-white">
-                {completedCount} 🏆
+                {completedCount}
               </p>
             </motion.div>
           </div>
@@ -166,6 +172,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
   const [view, setView] = useState<'active' | 'history' | 'tools'>('active');
   const [selected, setSelected] = useState<FieldMission | null>(null);
   const completed = useMemo(() => missions.filter(isFieldMissionComplete), [missions]);
+  const completedTodayCount = useMemo(() => completed.filter(mission => isApplyCompletedOnDate(mission)).length, [completed]);
   const active = useMemo(() => missions.filter(m => !isFieldMissionComplete(m)), [missions]);
 
   useEffect(() => {
@@ -193,24 +200,27 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
         </h1>
         <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
           {tr(
-            'Aprende con teoría. Domina con la práctica. Haz una acción real y marca tu victoria.',
-            'Theory is good. Action builds mastery. Take one real-world step and log your win.'
+            'Completa una acción real de tu lección. Tu racha cuenta cuando terminas Apply.',
+            'Complete one real action from your lesson. Your streak counts when Apply is done.'
           )}
         </p>
       </header>
 
       {/* Daily Momentum Summary Ring */}
-      <DailyMomentumCard
-        completedCount={completed.length}
-        activeCount={active.length}
-        streak={stats.streak}
-        isEs={isEs}
-      />
+      {(active.length > 0 || completedTodayCount > 0) && (
+        <DailyMomentumCard
+          completedCount={completed.length}
+          completedTodayCount={completedTodayCount}
+          activeCount={active.length}
+          streak={stats.streak}
+          isEs={isEs}
+        />
+      )}
 
       {/* Navigation Tabs (Apple / Linear Segmented Style with 44pt touch targets) */}
       <nav
         aria-label={tr('Secciones de Aplicar', 'Apply sections')}
-        className="flex gap-1 rounded-[1.25rem] border border-white/10 bg-[#121216]/85 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md"
+        className="flex gap-1 rounded-[1.25rem] border border-white/10 bg-[#121216] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
       >
         {(['active', 'history', 'tools'] as const).map(id => {
           const isActive = view === id;
@@ -294,7 +304,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                       {tr('ACCIÓN REAL', 'REAL ACTION')}
                     </span>
                     <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 font-mono text-[9px] font-bold uppercase text-zinc-400">
-                      ⚡ {design?.minutes || 5} MIN
+                      {design?.minutes || 5} MIN
                     </span>
                   </div>
                   <span className="font-mono rounded-full border border-white/10 bg-white/[0.05] px-2.5 py-0.5 text-[10px] font-black text-[#FF9A3D]">
@@ -369,7 +379,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
               >
                 <div>
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-400/25 bg-cyan-400/10 text-cyan-300 mb-2.5">
-                    <TrendingUp size={18} />
+                    <TrendUp size={18} />
                   </div>
                   <h3 className="text-xs font-black text-white leading-tight">
                     {tr('Simulador de Trading', 'Trading Simulator')}
@@ -380,7 +390,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                 </div>
                 <div className="mt-3 flex items-center text-[10px] font-bold text-cyan-400 group-hover:translate-x-0.5 transition-transform">
                   <span>{tr('Abrir terminal', 'Open terminal')}</span>
-                  <ChevronRight size={12} className="ml-1" />
+                  <CaretRight size={12} className="ml-1" />
                 </div>
               </motion.button>
 
@@ -405,7 +415,7 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
                 </div>
                 <div className="mt-3 flex items-center text-[10px] font-bold text-amber-400 group-hover:translate-x-0.5 transition-transform">
                   <span>{tr('Calcular ahora', 'Calculate now')}</span>
-                  <ChevronRight size={12} className="ml-1" />
+                  <CaretRight size={12} className="ml-1" />
                 </div>
               </motion.button>
             </div>

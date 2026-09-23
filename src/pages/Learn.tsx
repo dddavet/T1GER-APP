@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowRight,
   CaretDown,
@@ -37,8 +37,8 @@ const Player = React.lazy(() =>
   import('../components/learn/AtomicLessonPlayer').then(m => ({ default: m.AtomicLessonPlayer }))
 );
 
-export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; entryMode?: 'learn' | 'master' }> = ({ entryMode = 'learn' }) => {
-  const { brainState, language, learnStreak, selectTrack } = useBrain();
+export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }> = () => {
+  const { brainState, language, selectTrack } = useBrain();
   const { appUser } = useAuth();
   const { setActiveView, stats } = useT1ger();
   const missions = useFieldMissions(appUser?.uid || 'local');
@@ -87,7 +87,9 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
     : pending
       ? 'apply'
       : 'learn';
-  const nextStageCopy = nextStage === 'learn'
+  const nextStageCopy = !next
+    ? tr('Camino completado. Master mantendrá frescos los conceptos.', 'Path complete. Master will help keep these concepts fresh.')
+    : nextStage === 'learn'
     ? tr('Siguiente: aprende el concepto y prueba tu criterio.', 'Next: learn the concept and test your judgment.')
     : nextStage === 'apply'
       ? tr('Siguiente: lleva tu herramienta a una acción real.', 'Next: use your tool in one real action.')
@@ -96,7 +98,6 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
   const activeSection = sections[activeSectionIndex] || sections[0];
   const [lesson, setLesson] = useState<AtomicLesson | null>(null);
   const [review, setReview] = useState(false);
-  const masterEntryHandled = useRef(false);
 
   const handleSelectPathway = (pathway: KinnuPathway, domain?: KinnuDomain) => {
     if (!isPathwayAvailable(pathway)) return;
@@ -123,27 +124,10 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
     }
   };
 
-  useEffect(() => {
-    if (entryMode !== 'master' || masterEntryHandled.current) return;
-    masterEntryHandled.current = true;
-    const reviewNode = nodes.find(node => node.state === 'review');
-    if (reviewNode) open(reviewNode);
-  }, [entryMode, nodes]);
-
   return (
-    <div className="journey-page mx-auto max-w-lg pb-44 text-white px-2 sm:px-3">
+    <div className="journey-page mx-auto max-w-lg pb-44 text-white px-1 sm:px-2">
       <h1 className="sr-only">{selectedPathway.title[locale]}</h1>
-      {entryMode === 'master' && (
-        <div role="status" className="mx-1 mt-2 rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.06] px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-          <p className="t1ger-kicker text-cyan-300">{tr('MASTER · REPASO INTELIGENTE', 'MASTER · SMART REVIEW')}</p>
-          <p className="mt-1 text-sm font-semibold text-white">
-            {nodes.some(node => node.state === 'review')
-              ? tr('Recupera una idea sin pistas para mantenerla disponible.', 'Retrieve an idea without clues to keep it available.')
-              : tr('Tu memoria está al día. Continúa aprendiendo para desbloquear el próximo repaso.', 'Your memory is current. Keep learning to unlock the next review.')}
-          </p>
-        </div>
-      )}
-      {/* Top Header: Duolingo Course Picker & Streak Status */}
+      {/* Course picker and path view control; the HUD owns streak status. */}
       <header className="px-1 pt-2 pb-2">
         <div className="flex items-center justify-between gap-2">
           {/* Sleek Course Picker Button */}
@@ -173,13 +157,12 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
             <CaretDown size={14} weight="bold" className="text-zinc-400 group-hover:text-white transition-transform group-hover:translate-y-0.5" />
           </button>
 
-          {/* Controls: Mode Switcher & Streak Counter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <button
               onPointerDown={() => SoundEffects.playToggle()}
               onClick={() => setViewMode(v => (v === 'path' ? 'tree' : 'path'))}
               aria-label={viewMode === 'path' ? tr('Ver Árbol del Saber', 'View Knowledge Tree') : tr('Ver Sendero de Orbes', 'View Orb Trail')}
-              className="flex items-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-white/[0.06] hover:bg-white/15 border border-white/10 text-xs font-bold text-zinc-300 hover:text-white transition-all duration-100 ease-out cursor-pointer select-none active:scale-[0.92]"
+              className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.06] px-3 text-xs font-bold text-zinc-300 transition-colors duration-150 hover:bg-white/15 hover:text-white cursor-pointer select-none active:scale-[0.97]"
             >
               {viewMode === 'path' ? (
                 <>
@@ -194,15 +177,11 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
               )}
             </button>
 
-            <span className="flex items-center gap-1.5 text-xs font-black text-zinc-200 bg-[#14141A] px-2.5 py-1.5 rounded-full border border-white/10 shadow-sm transition-transform active:scale-95">
-              <Fire weight="fill" className="text-orange-400 animate-pulse" />
-              <span>{learnStreak}</span>
-            </span>
           </div>
         </div>
       </header>
 
-      <section aria-label={tr('Ciclo de aprendizaje', 'Learning loop')} className="mx-1 mb-3 rounded-2xl border border-white/10 bg-[#121216]/80 px-3 py-2.5">
+      <section aria-label={tr('Ciclo de aprendizaje', 'Learning loop')} className="mx-1 mb-4 border-b border-white/[.07] px-1 pb-3 pt-1">
         <ol className="grid grid-cols-3 gap-1" aria-label={tr('Etapas del ciclo', 'Loop stages')}>
           {([
             ['learn', tr('Aprender', 'Learn')],
@@ -218,15 +197,14 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
             );
           })}
         </ol>
-        <p role="status" className="mt-2 border-t border-white/8 pt-2 text-[10px] leading-relaxed text-zinc-400">{nextStageCopy}</p>
+        <p role="status" className="mt-2 text-[10px] leading-relaxed text-zinc-500">{nextStageCopy}</p>
       </section>
 
       {/* VIEW 1: Duolingo-style Winding Orb Trail (Immediate Dopamine & Action) */}
       {viewMode === 'path' ? (
         <div className="mt-1 space-y-2.5">
           {/* Duolingo Hero Unit Banner with Lively Mascot - Double-Bezel Architecture */}
-          <div className="p-1.5 rounded-[2.1rem] border border-white/10 bg-[#121216]/90 shadow-[0_20px_48px_rgba(0,0,0,0.65)]">
-            <div className="rounded-[1.75rem] border border-white/[0.06] bg-[#09090B] p-4 sm:p-5 relative overflow-hidden text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
+          <div className="rounded-[1.75rem] bg-[#121216] p-4 sm:p-5 relative overflow-hidden text-white ring-1 ring-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.07),0_18px_42px_rgba(0,0,0,.35)]">
               {/* Top Unit Badge & Pedigree Citation */}
               <div className="flex flex-wrap items-center justify-between gap-1.5 mb-3 relative z-10">
                 <span
@@ -250,7 +228,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
                       <img
                         src="/mascot/t1ger-avatar.png"
                         alt="T1ger"
-                        className="w-18 h-18 sm:w-22 sm:h-22 object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.6)]"
+                        className="w-18 h-18 sm:w-22 sm:h-22 scale-[2.15] object-contain"
                       />
                     }
                   >
@@ -262,24 +240,21 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
                   </React.Suspense>
                 </div>
 
-                {/* Speech Dialogue Bubble */}
-                <div className="relative flex-1 rounded-2xl border border-white/10 bg-[#141419]/95 backdrop-blur-md p-3 text-left shadow-[0_4px_16px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.06)]">
-                  <div className="absolute -left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rotate-45 border-b border-l border-white/10 bg-[#141419]" />
-                  <p className="text-xs sm:text-sm text-white font-bold leading-snug">
-                    {!next ? tr('¡Base completada! Repasa lo aprendido o revisa tus acciones.', 'Foundation complete! Review what you learned or revisit your actions.') : learnStreak === 0
-                      ? tr(
-                          '¡Enciende tu racha hoy! Conquista tu primer orbe en solo 3 minutos.',
-                          'Ignite your streak today! Conquer your first orb in just 3 minutes.'
-                        )
-                      : completed > 0
-                      ? tr(
-                          '¡Imparable! Conquista el siguiente paso hacia la maestría.',
-                          'Unstoppable! Conquer the next step towards mastery.'
-                        )
-                      : tr(
-                          '3 minutos de aprendizaje activo para dominar esta habilidad.',
-                          '3 minutes of active learning to master this skill.'
-                        )}
+                <div className="relative min-w-0 flex-1 py-2 text-left">
+                  <p className="font-mono text-[9px] font-bold uppercase tracking-[.15em] text-[#FF9A4A]">
+                    {!next ? tr('Camino completado', 'Path complete') : nextStage === 'apply' ? tr('Tu siguiente acción', 'Your next action') : nextStage === 'master' ? tr('Repaso pendiente', 'Review needed') : tr('Siguiente lección', 'Next lesson')}
+                  </p>
+                  <h2 className="mt-1 text-sm font-extrabold leading-tight tracking-tight text-white sm:text-base">
+                    {next ? next.lesson.title[locale] : tr('Camino completado', 'Path complete')}
+                  </h2>
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-zinc-400">
+                    {!next
+                      ? tr('Ve a Master para mantener frescas estas ideas.', 'Go to Master to keep these ideas fresh.')
+                      : nextStage === 'apply'
+                        ? tr('Usa la herramienta que acabas de crear en una acción real.', 'Use the tool you just built in one real action.')
+                        : nextStage === 'master'
+                          ? tr('Recupera el concepto antes de avanzar.', 'Recall the concept before moving on.')
+                          : next.lesson.objective[locale]}
                   </p>
                 </div>
               </div>
@@ -308,7 +283,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
                 onPointerDown={() => SoundEffects.playTap()}
                 onClick={() => {
                   if (next) open(next);
-                  else setActiveView('build');
+                  else setActiveView('master');
                 }}
                 className="t1ger-primary-button w-full cursor-pointer select-none text-black flex items-center justify-between !py-2.5 !px-4 group"
               >
@@ -319,14 +294,13 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
                       : pending
                       ? tr('Continuar en Aplicar', 'Continue in Apply')
                       : tr(`Empezar lección ${completed + 1}`, `Start lesson ${completed + 1}`)
-                    : tr('Ver mis acciones', 'See my actions')}
+                    : tr('Ir a Master', 'Go to Master')}
                 </span>
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 transition-transform duration-120 group-hover:translate-x-0.5 group-active:scale-95">
                   <ArrowRight size={16} weight="bold" />
                 </span>
               </button>
             </div>
-          </div>
 
           {/* Daily Quest Strip - Directional Elevation */}
           <div
@@ -352,58 +326,19 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
                 )}
               </div>
 
-              {/* Center Content: Title, Progress Fraction, and Micro-Bar */}
+              {/* One daily state; the lesson hero remains the primary action. */}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-extrabold tracking-tight text-white">
-                      {tr('Meta diaria', 'Daily goal')}
-                    </span>
-                    <span
-                      className={`text-[9px] font-mono font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                        completedToday
-                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                          : 'bg-orange-500/15 text-orange-300 border border-orange-500/25'
-                      }`}
-                    >
-                      {completedToday ? '1 / 1' : '0 / 1'}
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-mono font-bold text-zinc-400">
-                    {completedToday ? tr('¡Racha protegida! 🔥', 'Streak protected! 🔥') : tr('1 acción hoy', '1 action today')}
-                  </span>
-                </div>
-
-                {/* Sleek Progress Bar */}
-                <div className="h-1.5 w-full rounded-full bg-black/40 border border-white/5 overflow-hidden">
-                  <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      completedToday
-                        ? 'w-full bg-emerald-500'
-                        : 'w-0 bg-[var(--ob-accent)]'
-                    }`}
-                  />
-                </div>
+                <p className="text-xs font-extrabold tracking-tight text-white">
+                  {completedToday ? tr('Acción de hoy completa', "Today's action complete") : tr('Acción de hoy', "Today's action")}
+                </p>
+                <p className="mt-0.5 text-[11px] leading-4 text-zinc-400">
+                  {completedToday ? tr('Racha protegida', 'Streak protected') : tr('Completa Apply para cuidar tu racha', 'Complete Apply to protect your streak')}
+                </p>
               </div>
+              <span className={`shrink-0 font-mono text-xs font-bold tabular-nums ${completedToday ? 'text-emerald-300' : 'text-zinc-400'}`}>
+                {completedToday ? '1 / 1' : '0 / 1'}
+              </span>
 
-              {/* Right Action Button */}
-              <button
-                type="button"
-                onPointerDown={() => SoundEffects.playTap()}
-                onClick={() => {
-                  if (completedToday) setActiveView('build');
-                  else if (next) open(next);
-                  else setActiveView('build');
-                }}
-                className={`shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl text-[10px] font-mono font-black uppercase tracking-wider cursor-pointer select-none transition-all duration-120 ease-out active:scale-95 ${
-                  completedToday
-                    ? 'bg-white/[0.08] text-emerald-300 border border-emerald-500/30 hover:bg-white/[0.12] shadow-sm'
-                    : 'bg-[var(--ob-accent)] text-black border border-white/20 shadow-sm hover:brightness-105'
-                }`}
-              >
-                <span>{completedToday ? tr('Ver', 'View') : tr('Ir', 'Go')}</span>
-                <ArrowRight size={12} weight="bold" />
-              </button>
             </div>
           </div>
 
@@ -413,7 +348,6 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void; 
             nodes={nodes}
             locale={locale}
             accentColor={currentDomain.accentColor}
-            glowColor={currentDomain.glowColor}
             onOpenNode={open}
           />
         </div>

@@ -11,6 +11,7 @@ import { AchievementTracker } from './components/AchievementTracker';
 import { TacticalPomodoro } from './components/TacticalPomodoro';
 
 import { AppSkeleton } from './components/ui/AppSkeleton';
+import { ScreenLoadingState } from './components/ui/ScreenLoadingState';
 import { MissionSkeleton } from './components/ui/MissionSkeleton';
 import { MISSION_BANK } from './services/missionBank';
 import type { BankMission } from './services/missionBank';
@@ -26,6 +27,7 @@ type ActiveMission = BankMission & {
 
 const BuildTab = lazy(() => import('./components/BuildTab').then(m => ({ default: m.BuildTab })));
 const Learn = lazy(() => import('./pages/Learn').then(m => ({ default: m.Learn })));
+const Master = lazy(() => import('./pages/Master').then(m => ({ default: m.Master })));
 const Profile = lazy(() => import('./pages/Profile').then(m => ({ default: m.Profile })));
 const SquadTab = lazy(() => import('./components/social/SquadTab').then(m => ({ default: m.SquadTab })));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy').then(m => ({ default: m.PrivacyPolicy })));
@@ -414,7 +416,7 @@ const AppContent = () => {
     if (activeView === 'debrief') return <EveningInterrogation onComplete={() => setActiveView('learn')} />;
     if (activeView === 'build' || activeView === 'tactical') return <BuildTab onStartMission={startMission} />;
     if (activeView === 'learn') return <Learn onStartMission={startMission} />;
-    if (activeView === 'master') return <Learn onStartMission={startMission} entryMode="master" />;
+    if (activeView === 'master') return <Master />;
     if (activeView === 'compete' || activeView === 'friends') return <SquadTab />;
     if (activeView === 'profile') return <Profile />;
     if (activeView === 'coach') return <Coach />;
@@ -455,7 +457,7 @@ const AppContent = () => {
             animate="animate"
             className={isFullscreen ? 'h-full flex flex-col w-full' : 'min-h-full w-full'}
           >
-            <Suspense fallback={<div role="status" className="p-6 text-center text-sm text-zinc-400">{language === 'es' ? 'Cargando…' : 'Loading…'}</div>}>
+            <Suspense fallback={<ScreenLoadingState view={activeView} language={language === 'es' ? 'es' : 'en'} />}>
               {activeContent}
             </Suspense>
           </motion.div>

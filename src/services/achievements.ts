@@ -10,7 +10,7 @@ export interface Achievement {
 }
 
 export const ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_blood', name: 'Primera sangre', nameEn: 'First proof', description: 'Completa tu primera misión táctica.', descriptionEn: 'Complete your first tactical mission.', icon: '🩸', color: 'from-rose-500 to-red-600', condition: (_, __, brainState) => (brainState?.missionHistory?.length || 0) > 0 },
+  { id: 'first_blood', name: 'Primer concepto', nameEn: 'First concept', description: 'Completa tu primer paso de aprendizaje.', descriptionEn: 'Complete your first learning step.', icon: '🧠', color: 'from-orange-500 to-amber-500', condition: (_, __, brainState) => (brainState?.missionHistory?.length || 0) > 0 },
   { id: 'streak_3', name: 'Disciplina base', nameEn: 'Base discipline', description: 'Alcanza 3 días de racha consecutivos.', descriptionEn: 'Reach a three-day streak.', icon: '🔥', color: 'from-orange-500 to-amber-500', condition: (_, __, brainState) => brainState?.learnStreak >= 3 },
   { id: 'streak_7', name: 'Semana titán', nameEn: 'Titan week', description: 'Siete días seguidos forjando el hábito.', descriptionEn: 'Build the habit for seven straight days.', icon: '⚡', color: 'from-emerald-400 to-teal-500', condition: (_, __, brainState) => brainState?.learnStreak >= 7 },
   { id: 'rich_kid', name: 'Capitalista', nameEn: 'Capital builder', description: 'Acumula más de 10,000 monedas.', descriptionEn: 'Accumulate more than 10,000 coins.', icon: '💰', color: 'from-yellow-400 to-yellow-600', condition: user => (user?.coins || 0) >= 10000 },

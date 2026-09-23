@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Check, Sparkles, Zap, Shield, Crown, CheckCircle2, ArrowRight } from 'lucide-react';
+import { X, Check, Sparkles, Zap, Crown, CheckCircle2, ArrowRight } from 'lucide-react';
 import { useBrain } from '../contexts/BrainContext';
 import { useAuth } from '../contexts/AuthContext';
 import { SoundEffects } from '../services/soundEffects';
@@ -129,12 +129,6 @@ export const MentorPaywallModal: React.FC<MentorPaywallModalProps> = ({ isOpen, 
       title: tr('Feedback Táctico de Negocios e Inversión', 'Tactical Business & Investment Feedback'),
       desc: tr('Auditoría en tiempo real de tus ofertas, cálculos de capital y decisiones.', 'Real-time teardowns of your offers, capital math, and decisions.'),
       color: 'text-amber-400',
-    },
-    {
-      icon: Shield,
-      title: tr('Escudos de Racha Infinitos', 'Infinite Streak Shields'),
-      desc: tr('Protege tu disciplina diaria ante imprevistos para no romper tu racha.', 'Protect your daily streak when life happens and never lose momentum.'),
-      color: 'text-emerald-400',
     },
     {
       icon: Crown,

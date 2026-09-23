@@ -414,7 +414,7 @@ export const MicroToolLab: React.FC<MicroToolLabProps> = ({ lessonId, trackId, w
         </button>
       </div>
 
-      <button type="button" disabled={!isValid || committed || (requireInteraction && !interacted)} onClick={commit} className="t1ger-primary-button w-full disabled:cursor-not-allowed disabled:opacity-35">
+      <button type="button" disabled={!isValid || committed || (requireInteraction && !interacted)} onClick={commit} className={`w-full min-h-12 justify-center gap-2 rounded-xl text-sm font-bold transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-35 ${onCommitAndContinue ? 't1ger-primary-button' : 'inline-flex border border-white/15 bg-[#1A1A20] text-zinc-100 hover:border-white/25 hover:bg-[#222229]'}`}>
         {committed ? (
           <CheckCircle size={20} weight="fill" />
         ) : onCommitAndContinue ? (

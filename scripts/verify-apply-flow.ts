@@ -1,11 +1,22 @@
 import assert from 'node:assert/strict';
+import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 import { getInteractiveTrack } from '../src/services/interactiveCurriculum';
+import { isApplyCompletedOnDate } from '../src/services/applyDayStatus';
+
+const sampleMission = { status: 'verified', submission: { createdAt: new Date(2026, 8, 20, 12).getTime() } } as const;
+assert.equal(isApplyCompletedOnDate(sampleMission, new Date(2026, 8, 20, 18)), true, 'A proof submitted today secures the daily action.');
+assert.equal(isApplyCompletedOnDate(sampleMission, new Date(2026, 8, 21, 9)), false, 'An old win cannot masquerade as today’s action.');
+await mkdir('test-results/app-shell', { recursive: true });
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
 const errors: string[] = [];
 page.on('pageerror', error => errors.push(error.message));
+const captureStable = async (name: string) => {
+  await page.waitForTimeout(450);
+  await page.screenshot({ path: `test-results/app-shell/${name}.png`, fullPage: true });
+};
 await page.addInitScript(() => {
   if (localStorage.getItem('apply-e2e-initialized')) return;
   localStorage.setItem('apply-e2e-initialized', 'true');
@@ -61,12 +72,17 @@ try {
       await page.screenshot({ path: 'test-results/app-shell/lesson-02-reward.png', fullPage: true });
       await dialog.getByRole('button', { name: 'Back to my path', exact: true }).click();
     } else {
+      await dialog.getByRole('button', { name: 'Open Orb', exact: true }).waitFor();
+      if (count === 0) await captureStable('lesson-hook');
       await dialog.getByRole('button', { name: 'Open Orb', exact: true }).click();
       await dialog.getByRole('heading', { name: lesson.phases[0].title.en, exact: true }).waitFor();
+      if (count === 0) await captureStable('lesson-impact');
       await dialog.getByRole('button', { name: 'Build the model', exact: true }).click();
       await dialog.getByText('MENTAL MODEL', { exact: true }).waitFor();
+      if (count === 0) await captureStable('lesson-learn');
       await dialog.getByRole('button', { name: 'Test my judgment', exact: true }).click();
       await dialog.getByRole('heading', { name: lesson.phases[1].title.en, exact: true }).waitFor();
+      if (count === 0) await captureStable('lesson-interact');
       const challenge = lesson.phases[1].challenge;
       if (challenge.kind === 'matching') {
         for (const pair of challenge.pairs || []) await dialog.getByLabel(pair.left.en).selectOption(pair.id);
@@ -83,8 +99,16 @@ try {
       } else await dialog.getByRole('button').filter({ hasText: challenge.options!.find(option => option.correct)!.label.en }).click();
       await dialog.getByRole('button', { name: 'Check decision', exact: true }).click();
       await dialog.getByRole('button', { name: 'Continue', exact: true }).click();
+      await dialog.getByRole('button', { name: lesson.phases[2].widget.commitLabel.en, exact: true }).waitFor();
+      if (count === 0) await captureStable('lesson-microtool');
       await dialog.getByRole('button', { name: lesson.phases[2].widget.commitLabel.en, exact: true }).click();
       await dialog.getByRole('button', { name: 'Prepare my Apply step', exact: true }).click();
+      await dialog.getByRole('button', { name: 'Go to my action', exact: true }).waitFor();
+      if (count === 0) {
+        await dialog.getByRole('heading', { name: 'Learning is not finishing.' }).waitFor({ state: 'visible' });
+        await page.waitForTimeout(800);
+        await captureStable('lesson-apply-handoff');
+      }
       await dialog.getByRole('button', { name: 'Go to my action', exact: true }).click();
       await page.getByRole('dialog').getByRole('button', { name: 'I completed the action', exact: true }).click();
       await page.getByRole('heading', { name: 'You put it into practice.' }).waitFor();
@@ -94,10 +118,12 @@ try {
     assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), String(count));
   }
   await page.reload();
-  await page.getByRole('button', { name: 'See my actions', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Go to Master', exact: true }).waitFor();
   assert.equal(await page.locator('[aria-label="0 verified XP"]').count(), 1, 'Self-reported progress never reaches the verified XP counter.');
   assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), '5');
   await page.screenshot({ path: 'test-results/app-shell/journey-completed.png', fullPage: true });
+  await page.getByRole('button', { name: 'Go to Master', exact: true }).click();
+  await page.getByRole('heading', { name: 'Make it stick.' }).waitFor();
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
   await page.getByRole('button', { name: 'Wins', exact: true }).click();
   await page.getByRole('heading', { name: '5 completed actions' }).waitFor();

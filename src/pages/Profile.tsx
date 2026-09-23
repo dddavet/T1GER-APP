@@ -9,7 +9,6 @@ import { downloadT1gerDataExport } from '../services/dataPortability';
 import { generateWeeklyReport, type PredatorReport } from '../services/predatorReportService';
 import { PrivacyPolicy } from './PrivacyPolicy';
 import { TermsOfService } from './TermsOfService';
-import { MascotGuide } from '../components/MascotGuide';
 import { ScreenTimeFreedomModal } from '../components/ScreenTimeFreedomModal';
 import { NotificationPermissionModal } from '../components/NotificationPermissionModal';
 import { ConsistencyHeatmap } from '../components/ConsistencyHeatmap';
@@ -133,20 +132,18 @@ export const Profile = () => {
         </div>
       </header>
 
-      <MascotGuide surface="profile" />
-
-      <section className="grid grid-cols-3 gap-2">
+      <dl className="grid grid-cols-3 divide-x divide-white/[.08] border-y border-white/[.08] py-4">
         {[
           { value: appUser?.level || 1, label: isEs ? 'nivel' : 'level' },
           { value: learnStreak, label: isEs ? 'racha' : 'streak' },
           { value: stats.verifiedXP, label: 'vXP' },
         ].map(item => (
-          <div key={item.label} className="rounded-2xl border border-white/8 bg-[#121216] p-4 text-center">
-            <span className="block font-mono text-lg font-semibold text-white">{item.value}</span>
-            <span className="mt-1 block text-[11px] text-zinc-400">{item.label}</span>
+          <div key={item.label} className="flex flex-col px-3 text-center">
+            <dt className="order-2 mt-1 block text-[11px] text-zinc-500">{item.label}</dt>
+            <dd className="order-1 block font-mono text-lg font-semibold text-white">{item.value}</dd>
           </div>
         ))}
-      </section>
+      </dl>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#121216] p-3.5 shadow-lg">
         <div className="flex items-center gap-3">

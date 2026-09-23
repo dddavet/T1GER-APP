@@ -1,6 +1,5 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { Bell, Fire, Shield, ShieldCheck } from '@phosphor-icons/react';
+import { Bell, Fire, ShieldCheck } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
@@ -73,29 +72,13 @@ export const HUD = React.memo(() => {
                   ? 'border-red-500/40 bg-red-500/10 text-red-300 shadow-[0_2px_8px_rgba(239,68,68,0.2)]'
                   : 'border-white/10 bg-white/[0.05] text-amber-400 hover:bg-white/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
               }`}
-              aria-label={isLearnStreakAtRisk ? (isEs ? 'Racha en riesgo antes de medianoche' : 'Streak at risk before midnight') : (isEs ? 'Ver Racha' : 'View Streak')}
+              aria-label={isLearnStreakAtRisk ? (isEs ? `Racha de ${learnStreak} días: haz tu acción hoy` : `${learnStreak}-day streak: take today's action`) : (isEs ? `Ver racha de ${learnStreak} días` : `View Streak: ${learnStreak} days`)}
             >
-              {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 animate-pulse rounded-full bg-red-400" />}
-              <motion.span
-                animate={
-                  isLearnStreakAtRisk
-                    ? { scale: [1, 1.2, 1], rotate: [-4, 4, -4] }
-                    : undefined
-                }
-                transition={isLearnStreakAtRisk ? { repeat: Infinity, duration: 2, ease: 'easeInOut' } : undefined}
-                className="inline-flex items-center"
-              >
+              {isLearnStreakAtRisk && <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-400" />}
+              <span className="inline-flex items-center">
                 <Fire size={13} weight="fill" className={isLearnStreakAtRisk ? 'text-red-300' : 'text-amber-400'} />
-              </motion.span>
+              </span>
               <span className="tabular-nums text-white font-black">{learnStreak}</span>
-              {Boolean(appUser?.streakShields && appUser.streakShields > 0) && (
-                <span
-                  title={isEs ? `${appUser?.streakShields} Escudo${(appUser?.streakShields || 0) > 1 ? 's' : ''} de racha activo` : `${appUser?.streakShields} active streak shield${(appUser?.streakShields || 0) > 1 ? 's' : ''}`}
-                  className="flex items-center text-cyan-400 pl-1 border-l border-white/10"
-                >
-                  <Shield size={11} weight="fill" />
-                </span>
-              )}
             </button>
 
             {/* Verified XP Badge */}
@@ -114,13 +97,9 @@ export const HUD = React.memo(() => {
               className="relative flex h-7 w-7 items-center justify-center rounded-xl bg-white/[0.05] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all duration-120 ease-out cursor-pointer active:scale-92 before:absolute before:-inset-2 before:content-[''] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
               aria-label={isEs ? 'Notificaciones' : 'Notifications'}
             >
-              <motion.span
-                animate={unreadCount > 0 ? { rotate: [0, -12, 12, -8, 8, 0] } : {}}
-                transition={{ repeat: Infinity, repeatDelay: 3.5, duration: 0.6 }}
-                className="inline-flex items-center justify-center"
-              >
+              <span className="inline-flex items-center justify-center">
                 <Bell size={14} weight="bold" />
-              </motion.span>
+              </span>
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[var(--ob-accent)] text-[8px] font-black text-black shadow-md ring-2 ring-[#0D0D11]">
                   {unreadCount}

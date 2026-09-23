@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import { useInView, useReducedMotion } from 'motion/react';
@@ -100,10 +100,11 @@ function getModelMotion(mood: MascotReaction, elapsed: number): ModelMotion {
   return idle;
 }
 
-function ReactiveTigerModel({ url, mood, reducedMotion }: { url: string; mood: MascotReaction; reducedMotion: boolean }) {
+function ReactiveTigerModel({ url, mood, reducedMotion, onReady }: { url: string; mood: MascotReaction; reducedMotion: boolean; onReady: () => void }) {
   const { scene } = useGLTF(url);
   const model = useMemo(() => scene.clone(true), [scene]);
   const rootRef = useRef<THREE.Group>(null);
+  const hasDrawnRef = useRef(false);
   const expressionNodes = useMemo(() => ({
     leftEye: model.getObjectByName('leftEye'),
     rightEye: model.getObjectByName('rightEye'),
@@ -122,6 +123,10 @@ function ReactiveTigerModel({ url, mood, reducedMotion }: { url: string; mood: M
   useFrame((state, delta) => {
     const root = rootRef.current;
     if (!root) return;
+    if (!hasDrawnRef.current) {
+      hasDrawnRef.current = true;
+      onReady();
+    }
     const elapsed = state.clock.getElapsedTime();
     const target = getModelMotion(mood, elapsed);
     const smooth = (current: number, next: number, speed: number) =>
@@ -182,6 +187,8 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
   onPet,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [readyModelPath, setReadyModelPath] = useState<string | null>(null);
+  const modelReady = readyModelPath === modelPath;
   const isInView = useInView(containerRef, { amount: 0.1 });
   const prefersReducedMotion = Boolean(useReducedMotion());
   const cameraPosition: Point3 = closeUp ? [0, 0.04, 3.58] : [0, 0.03, 3.34];
@@ -205,7 +212,14 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
       aria-label={onPet ? 'Interactuar con T1GER' : undefined}
       aria-hidden={onPet ? undefined : true}
     >
+      <img
+        src="/mascot/t1ger-avatar.png"
+        alt=""
+        aria-hidden="true"
+        className={`absolute inset-0 h-full w-full scale-[2.15] object-contain transition-opacity duration-150 ${modelReady ? 'opacity-0' : 'opacity-100'}`}
+      />
       <Canvas
+        className={`relative transition-opacity duration-150 ${modelReady ? 'opacity-100' : 'opacity-0'}`}
         frameloop="demand"
         camera={{ position: cameraPosition, fov: closeUp ? 35 : 36, near: 0.1, far: 20 }}
         dpr={[1, 1.3]}
@@ -223,7 +237,7 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
         <directionalLight position={[-3.8, 1.4, 4]} intensity={0.46} color="#DBEEE9" />
         <pointLight position={[1.8, -2.2, 3.2]} intensity={0.22} color="#F3A169" />
         <Suspense fallback={null}>
-          <ReactiveTigerModel url={modelPath} mood={reactiveMood} reducedMotion={prefersReducedMotion} />
+          <ReactiveTigerModel key={modelPath} url={modelPath} mood={reactiveMood} reducedMotion={prefersReducedMotion} onReady={() => setReadyModelPath(modelPath)} />
         </Suspense>
       </Canvas>
     </div>

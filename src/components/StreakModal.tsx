@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Flame, Shield, Trophy, ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { ArrowRight, CheckCircle, Fire, X } from '@phosphor-icons/react';
 import { useAuth } from '../contexts/AuthContext';
 import { useBrain } from '../contexts/BrainContext';
 import { useT1ger } from '../contexts/T1gerContext';
+import { useFieldMissions } from '../hooks/useFieldMissions';
+import { isFieldMissionComplete } from '../services/fieldMissionService';
+import { getDailyStreak } from '../services/dailyStreak';
 import { T1gerMascot3D } from './T1gerMascot3D';
 import { SoundEffects } from '../services/soundEffects';
+import { useDevHarnessState } from '../dev/devHarnessState';
 
 interface StreakModalProps {
   isOpen: boolean;
@@ -14,263 +18,122 @@ interface StreakModalProps {
 }
 
 export const StreakModal: React.FC<StreakModalProps> = ({ isOpen, onClose, streak }) => {
-  const [activeTab, setActiveTab] = useState<'personal' | 'squad'>('personal');
-  const { appUser } = useAuth();
-  const { language, learnStreak, tacticalStreak } = useBrain();
-  const { stats } = useT1ger();
+  const { appUser, user } = useAuth();
+  const { brainState, language, isLearnStreakAtRisk } = useBrain();
+  const { setActiveView } = useT1ger();
+  const missions = useFieldMissions(appUser?.uid || 'local');
+  const devHarness = useDevHarnessState();
+  const reducedMotion = useReducedMotion();
+  const closeRef = useRef<HTMLButtonElement>(null);
   const isEs = language === 'es';
+  const tr = (es: string, en: string) => isEs ? es : en;
+  const dailyStreak = getDailyStreak(
+    streak,
+    user ? appUser?.lastVerifiedMissionDay : brainState.lastLearnDate,
+    Date.now(),
+    user ? appUser?.timeZone : undefined,
+  );
+  const completedToday = devHarness.streak === 'active' || (devHarness.streak === 'real' && dailyStreak.completedToday);
+  const pendingApply = missions.some(mission => !isFieldMissionComplete(mission));
+  const destination = !completedToday && pendingApply ? 'build' : 'learn';
+  const milestone = [3, 7, 14, 30, 100].find(day => day > streak);
 
   useEffect(() => {
-    if (isOpen) {
-      SoundEffects.playStreakFlame();
-    }
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        SoundEffects.playTap();
-        onClose();
-      }
+    if (!isOpen) return;
+    closeRef.current?.focus();
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
-
-  const freezes = appUser?.streakShields || 0;
-  const hasStreak = streak > 0;
-
-  const today = new Date();
-  const currentMonth = today.toLocaleString(isEs ? 'es-ES' : 'en-US', { month: 'long' });
-  const currentYear = today.getFullYear();
-
-  const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).getDay();
-  const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-
-  const days: (number | null)[] = [];
-  for (let i = 0; i < (firstDayOfMonth + 6) % 7; i++) {
-    days.push(null);
-  }
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i);
-  }
-
-  const currentDay = today.getDate();
-  const isDayActive = (day: number | null) => {
-    if (!day) return false;
-    return day <= currentDay && day > currentDay - streak;
-  };
 
   if (!isOpen) return null;
 
+  const goToNextStep = () => {
+    SoundEffects.playTap();
+    onClose();
+    setActiveView(destination);
+  };
+
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: '100%' }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: '100%' }}
-        transition={{ type: 'spring', damping: 28, stiffness: 240 }}
-        className="fixed inset-0 z-[9999] flex flex-col overflow-hidden bg-[#09090B] font-sans text-white select-none"
-      >
-        {/* Header Ribbon */}
-        <div className="relative shrink-0 overflow-hidden bg-gradient-to-b from-[#180A04] via-[#0E201B] to-[#09090B] px-5 pb-6 pt-[max(env(safe-area-inset-top),1rem)]">
-          <div className="relative z-20 flex items-center justify-between gap-3">
-            <button
-              onClick={() => {
-                SoundEffects.playTap();
-                onClose();
-              }}
-              aria-label={isEs ? 'Cerrar racha' : 'Close streak'}
-              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            >
-              <X size={22} />
-            </button>
+    <motion.div
+      role="dialog"
+      aria-modal="true"
+      aria-label={tr('Tu racha', 'Your streak')}
+      initial={reducedMotion ? false : { opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reducedMotion ? undefined : { opacity: 0, y: 24 }}
+      transition={{ duration: 0.24, ease: 'easeOut' }}
+      className="fixed inset-0 z-[200] overflow-y-auto bg-[#09090B] text-white"
+    >
+      <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-[calc(1rem+env(safe-area-inset-top))]">
+        <header className="flex items-center justify-between gap-4">
+          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#FF8A2A]">{tr('Tu racha', 'Your streak')}</p>
+          <button ref={closeRef} type="button" onClick={onClose} aria-label={tr('Cerrar racha', 'Close streak')} className="grid h-11 w-11 place-items-center rounded-xl bg-white/[.05] text-zinc-300 ring-1 ring-white/10 transition active:scale-[.97]">
+            <X size={19} weight="bold" />
+          </button>
+        </header>
 
-            <span className="text-sm font-semibold tracking-[-0.01em] text-white truncate text-center flex-1">
-              {isEs ? 'Racha y Disciplina' : 'Streak & Consistency'}
-            </span>
-
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--t1ger-orange)]/15 text-[var(--t1ger-orange)] font-mono text-sm font-bold">
-              {streak}
+        <main className="flex flex-1 flex-col pt-7">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="flex items-baseline gap-2">
+                <Fire size={24} weight="fill" className={completedToday ? 'text-[#FF8A2A]' : 'text-zinc-500'} aria-hidden="true" />
+                <span className="font-mono text-[4.5rem] font-semibold leading-none tabular-nums tracking-[-0.09em]">{streak}</span>
+              </div>
+              <p className="mt-2 text-sm font-semibold text-zinc-400">{tr(streak === 1 ? 'día seguido' : 'días seguidos', streak === 1 ? 'day in a row' : 'days in a row')}</p>
+            </div>
+            <div className="h-28 w-28 shrink-0" aria-hidden="true">
+              <T1gerMascot3D mood={completedToday ? 'happy' : isLearnStreakAtRisk ? 'warning' : 'thinking'} closeUp className="h-full w-full" />
             </div>
           </div>
 
-          {/* Sub-tabs */}
-          <div className="relative z-20 mt-5 flex border-b border-white/10">
-            <button
-              className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors relative ${
-                activeTab === 'personal' ? 'text-white' : 'text-white/40 hover:text-white/70'
-              }`}
-              onClick={() => {
-                SoundEffects.playTap();
-                setActiveTab('personal');
-              }}
-            >
-              {isEs ? 'Personal' : 'Personal'}
-              {activeTab === 'personal' && (
-                <motion.div layoutId="streakTab" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-[var(--t1ger-orange)] rounded-full" />
-              )}
-            </button>
-            <button
-              className={`flex-1 py-2.5 text-xs font-semibold uppercase tracking-[0.14em] transition-colors relative ${
-                activeTab === 'squad' ? 'text-white' : 'text-white/40 hover:text-white/70'
-              }`}
-              onClick={() => {
-                SoundEffects.playTap();
-                setActiveTab('squad');
-              }}
-            >
-              {isEs ? 'Squad' : 'Squad'}
-              {activeTab === 'squad' && (
-                <motion.div layoutId="streakTab" className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-[var(--t1ger-orange)] rounded-full" />
-              )}
-            </button>
-          </div>
-
-          {/* Hero Section */}
-          {activeTab === 'personal' && (
-            <div className="relative z-10 flex items-center justify-between pt-6">
-              <div>
-                <span className="font-mono text-6xl font-extrabold tracking-tight text-white drop-shadow-[0_4px_16px_rgba(255,115,0,0.4)]">
-                  {streak}
-                </span>
-                <span className="mt-1 block text-sm font-semibold uppercase tracking-[0.14em] text-[#FF8A4C]">
-                  {isEs ? (streak === 1 ? 'día de racha' : 'días de racha') : (streak === 1 ? 'day streak' : 'days streak')}
-                </span>
-              </div>
-
-              {/* 3D Mascot Preview */}
-              <div className="relative flex h-32 w-32 items-center justify-center">
-                <T1gerMascot3D mood={hasStreak ? 'celebrate' : 'thinking'} closeUp className="h-full w-full" />
-              </div>
+          <section className="mt-9 border-t border-white/10 pt-6" aria-live="polite">
+            <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400">
+              {completedToday ? <CheckCircle size={18} weight="fill" className="text-emerald-400" /> : <Fire size={18} weight="fill" className="text-[#FF8A2A]" />}
+              {tr('Estado de hoy', "Today's status")}
             </div>
-          )}
-        </div>
+            <h1 className="mt-3 text-[1.7rem] font-extrabold leading-tight tracking-[-0.04em] text-balance">
+              {completedToday
+                ? tr('La racha está a salvo hoy.', 'Your streak is safe today.')
+                : streak === 0
+                  ? tr('Empieza con una acción real.', 'Start with one real action.')
+                  : isLearnStreakAtRisk
+                    ? tr('Una acción antes de medianoche.', 'One action before midnight.')
+                    : tr('Haz tu acción de hoy.', "Take today's action.")}
+            </h1>
+            <p className="mt-3 text-sm leading-6 text-zinc-400">
+              {completedToday
+                ? tr('Aplicaste lo aprendido. Mañana tendrás otra oportunidad para continuar.', 'You applied what you learned. Come back tomorrow to keep going.')
+                : pendingApply
+                  ? tr('Ya tienes una acción lista en Apply. Complétala para cuidar tu racha.', 'An action is ready in Apply. Complete it to protect your streak.')
+                  : tr('Una lección abre el camino; la racha cuenta cuando completas el paso Apply.', 'A lesson opens the path; your streak counts when you complete its Apply step.')}
+            </p>
+          </section>
 
-        {/* Content Body */}
-        <div className="flex-1 overflow-y-auto px-5 pb-10 pt-4">
-          {activeTab === 'personal' && (
-            <div className="space-y-6">
-              {/* Dual Streak & Freeze Protection Badges */}
-              <div className="grid grid-cols-3 gap-3">
-                <div className="rounded-2xl border border-white/8 bg-[#0D2E28] p-3 text-center">
-                  <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[var(--t1ger-orange)]/15 text-[var(--t1ger-orange)]">
-                    <Flame size={20} />
-                  </div>
-                  <span className="mt-2 block font-mono text-base font-bold text-white">{learnStreak}</span>
-                  <span className="block text-[10px] text-[#73968E]">{isEs ? 'Aprender' : 'Learn'}</span>
-                </div>
-
-                <div className="rounded-2xl border border-white/8 bg-[#0D2E28] p-3 text-center">
-                  <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[#10B981]/15 text-[#10B981]">
-                    <Trophy size={20} />
-                  </div>
-                  <span className="mt-2 block font-mono text-base font-bold text-white">{tacticalStreak}</span>
-                  <span className="block text-[10px] text-[#73968E]">{isEs ? 'Táctico' : 'Tactical'}</span>
-                </div>
-
-                <div className="rounded-2xl border border-white/8 bg-[#0D2E28] p-3 text-center">
-                  <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl bg-[#06B6D4]/15 text-[#06B6D4]">
-                    <Shield size={20} />
-                  </div>
-                  <span className="mt-2 block font-mono text-base font-bold text-white">{freezes}</span>
-                  <span className="block text-[10px] text-[#73968E]">{isEs ? 'Escudos' : 'Freezes'}</span>
-                </div>
+          {milestone && streak > 0 && (
+            <section className="mt-8" aria-label={tr('Próximo hito', 'Next milestone')}>
+              <div className="flex items-center justify-between gap-3 text-xs">
+                <span className="font-semibold text-zinc-400">{tr('Próximo hito', 'Next milestone')}</span>
+                <span className="font-mono tabular-nums text-zinc-300">{streak} / {milestone} {tr('días', 'days')}</span>
               </div>
-
-              {/* Shield Protection Status Banner */}
-              <div className={`rounded-2xl border p-3.5 flex items-center gap-3 transition-colors ${
-                freezes > 0
-                  ? 'border-cyan-500/25 bg-cyan-950/30 text-cyan-200'
-                  : 'border-amber-500/25 bg-amber-950/30 text-amber-200'
-              }`}>
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-                  freezes > 0 ? 'bg-cyan-500/20 text-cyan-400' : 'bg-amber-500/20 text-amber-400'
-                }`}>
-                  <Shield size={18} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-white leading-tight">
-                    {freezes > 0
-                      ? (isEs ? `${freezes} ${freezes === 1 ? 'Escudo activo' : 'Escudos activos'}` : `${freezes} Active Streak ${freezes === 1 ? 'Shield' : 'Shields'}`)
-                      : (isEs ? 'Sin escudos de protección' : 'No shields active')}
-                  </p>
-                  <p className="text-[11px] text-zinc-400 mt-0.5 leading-snug">
-                    {freezes > 0
-                      ? (isEs ? 'Si un día no puedes practicar, tu racha se mantendrá a salvo automáticamente.' : 'If you miss a day, your streak will be automatically saved.')
-                      : (isEs ? 'Tu racha se reiniciará si no completas tu lección diaria. Consigue escudos en la tienda.' : 'Your streak will reset if you miss today. Get shields in the store.')}
-                  </p>
-                </div>
+              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10" role="progressbar" aria-label={tr('Progreso al próximo hito', 'Progress to next milestone')} aria-valuemin={0} aria-valuemax={milestone} aria-valuenow={streak}>
+                <div className="h-full rounded-full bg-[#FF7300]" style={{ width: `${streak / milestone * 100}%` }} />
               </div>
-
-              {/* Monthly Calendar View */}
-              <div className="rounded-[1.6rem] border border-white/8 bg-[#0B2925] p-5">
-                <div className="mb-5 flex items-center justify-between">
-                  <h2 className="text-base font-semibold capitalize text-white">
-                    {currentMonth} {currentYear}
-                  </h2>
-                  <div className="flex gap-1.5">
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">
-                      <ChevronLeft size={18} />
-                    </button>
-                    <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 text-white/60 hover:text-white">
-                      <ChevronRight size={18} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Day Labels */}
-                <div className="grid grid-cols-7 gap-y-3 text-center">
-                  {(isEs ? ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'] : ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']).map((d) => (
-                    <div key={d} className="text-[11px] font-semibold text-[#668B83]">
-                      {d}
-                    </div>
-                  ))}
-
-                  {/* Days */}
-                  {days.map((day, idx) => {
-                    if (!day) return <div key={`empty-${idx}`} />;
-                    const active = isDayActive(day);
-                    const isToday = day === currentDay;
-
-                    return (
-                      <div key={day} className="flex items-center justify-center py-1">
-                        <div
-                          className={`flex h-9 w-9 items-center justify-center rounded-xl text-xs font-mono font-semibold transition-all ${
-                            active
-                              ? 'bg-gradient-to-tr from-[#FF7300] to-[#F59E0B] text-white shadow-[0_0_12px_rgba(255,115,0,0.4)]'
-                              : isToday
-                              ? 'border border-[var(--t1ger-orange)] text-[var(--t1ger-orange)]'
-                              : 'bg-white/[0.03] text-[#557871]'
-                          }`}
-                        >
-                          {active ? <Flame size={16} className="fill-white stroke-none" /> : day}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+            </section>
           )}
 
-          {activeTab === 'squad' && (
-            <div className="space-y-4 pt-2 text-center text-[#87A9A2]">
-              <div className="rounded-[1.6rem] border border-white/8 bg-[#0B2925] p-6">
-                <Trophy size={36} className="mx-auto mb-3 text-[var(--t1ger-orange)]" />
-                <h3 className="text-base font-semibold text-white">
-                  {isEs ? 'Racha de la comunidad' : 'Community Streak'}
-                </h3>
-                <p className="mt-2 text-xs leading-5 text-[#7A9C95]">
-                  {isEs
-                    ? 'Compara tu constancia diaria con la comunidad T1GER y mantén la primera posición en la liga.'
-                    : 'Compare your daily consistency with the T1GER community and hold top position in the league.'}
-                </p>
-                <div className="mt-5 rounded-xl border border-white/6 bg-white/[0.03] p-4 font-mono text-sm text-white">
-                  {isEs ? 'Consulta tu ranking semanal en Compete' : 'See your weekly ranking in Compete'}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </motion.div>
-    </AnimatePresence>
+          <p className="mt-8 text-xs leading-5 text-zinc-500">
+            {tr('Repasar en Master fortalece tu memoria, pero no suma otro día de racha.', 'Reviewing in Master strengthens memory, but does not add another streak day.')}
+          </p>
+        </main>
+
+        <button type="button" onClick={goToNextStep} className="t1ger-primary-button mt-8 w-full justify-between px-5 text-black">
+          <span>{completedToday ? tr('Seguir aprendiendo', 'Keep learning') : pendingApply ? tr('Ir a mi acción', 'Go to my action') : tr('Ir a Learn', 'Go to Learn')}</span>
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-black/15"><ArrowRight size={17} weight="bold" /></span>
+        </button>
+      </div>
+    </motion.div>
   );
 };
