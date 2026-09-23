@@ -376,6 +376,16 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
         </div>
       )}
 
+      {/* Regulatory Legal Disclaimer */}
+      <footer className="mt-8 px-4 text-center">
+        <p className="font-mono text-[10px] text-zinc-600 leading-relaxed">
+          {tr(
+            'Simulación educativa. T1GER no proporciona asesoramiento financiero ni recomendaciones de inversión.',
+            'Educational simulation. T1GER does not provide financial or investment advice.'
+          )}
+        </p>
+      </footer>
+
       {/* Bottom Modal for Switching Domains & Pathways */}
       <DomainCatalogModal
         isOpen={isCatalogOpen}

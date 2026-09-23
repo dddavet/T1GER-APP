@@ -156,7 +156,11 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
                   : isEs ? 'ESTIMACIÓN MANUAL · PRIVADA' : 'MANUAL ESTIMATE · PRIVATE'}
             </p>
           </div>
-          <button onClick={onClose} aria-label={isEs ? 'Cerrar auditoría' : 'Close audit'} className="grid h-10 w-10 place-items-center border border-white/12 bg-white/[.035] text-zinc-300 transition-colors hover:border-white/25 hover:text-white active:scale-95">
+          <button
+            onClick={onClose}
+            aria-label={isEs ? 'Cerrar auditoría' : 'Close audit'}
+            className="grid h-11 w-11 place-items-center rounded-xl border border-white/12 bg-white/[.035] text-zinc-300 transition-colors hover:border-white/25 hover:text-white active:scale-95 cursor-pointer"
+          >
             <X size={18} />
           </button>
         </header>
@@ -209,7 +213,10 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
                   <p className="mt-1 text-xs leading-5 text-zinc-400">
                     {isEs ? 'Android procesa los minutos en este dispositivo. T1GER sólo recibe el total de las seis apps seleccionadas.' : 'Android processes minutes on-device. T1GER only receives totals for the six selected apps.'}
                   </p>
-                  <button onClick={handlePermissionRequest} className="mt-3 border border-[#FF7300] bg-[#FF7300] px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[.1em] text-black active:translate-y-px">
+                  <button
+                    onClick={handlePermissionRequest}
+                    className="mt-3 min-h-[44px] inline-flex items-center justify-center rounded-xl border border-[#FF7300] bg-[#FF7300] px-4 py-2 font-mono text-[11px] font-black uppercase tracking-[.1em] text-black active:translate-y-px cursor-pointer"
+                  >
                     {isEs ? 'Abrir acceso de uso →' : 'Open usage access →'}
                   </button>
                 </div>
@@ -228,7 +235,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
               </div>
               <div className="space-y-4">
                 {manualApps.map((app) => (
-                  <label key={app.packageName} className="block">
+                  <label key={app.packageName} className="block py-1">
                     <span className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[.08em]">
                       <span className="text-zinc-300">{app.iconEmoji} {app.appName}</span>
                       <data value={app.minutes} className="tabular-nums text-[#FF7300]">{app.minutes} MIN</data>
@@ -240,7 +247,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
                       step="1"
                       value={app.minutes}
                       onChange={(event) => updateManualMinutes(app.packageName, Number(event.target.value))}
-                      className="mt-2 h-1.5 w-full cursor-pointer appearance-none bg-white/12 accent-[#FF7300]"
+                      className="mt-2.5 h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/12 accent-[#FF7300]"
                     />
                   </label>
                 ))}
@@ -265,7 +272,14 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
             </div>
             <div className="mt-3 grid grid-cols-4 gap-px bg-white/12">
               {[10, 15, 25, 50].map((wage) => (
-                <button key={wage} onClick={() => updateWage(wage)} aria-pressed={hourlyWage === wage} className={`min-h-10 bg-[#121216] font-mono text-xs transition-colors ${hourlyWage === wage ? 'bg-[#FF7300] text-black' : 'text-zinc-400 hover:text-white'}`}>
+                <button
+                  key={wage}
+                  onClick={() => updateWage(wage)}
+                  aria-pressed={hourlyWage === wage}
+                  className={`min-h-[44px] bg-[#121216] font-mono text-xs font-bold transition-colors cursor-pointer ${
+                    hourlyWage === wage ? 'bg-[#FF7300] text-black' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
                   ${wage}
                 </button>
               ))}
@@ -283,9 +297,16 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
         </main>
 
         <footer className="fixed inset-x-0 bottom-0 z-20 mx-auto max-w-md border-t border-white/12 bg-[#09090B]/96 px-4 pb-[calc(.8rem+env(safe-area-inset-bottom))] pt-3 backdrop-blur-xl">
-          <button onClick={recoverFocus} className="t1ger-primary-button min-h-14 w-full !rounded-[.35rem] !bg-[#FF7300] !text-black !shadow-[0_5px_0_#9A3E00] active:!translate-y-[3px] active:!shadow-[0_2px_0_#9A3E00]">
-            <span>{isEs ? 'Recuperar enfoque → Salvar a T1GER' : 'Reclaim focus → Save T1GER'}</span>
-            <ArrowRight size={18} />
+          <button
+            onClick={recoverFocus}
+            className="t1ger-primary-button min-h-[48px] w-full flex items-center justify-between !py-2.5 !px-4 group cursor-pointer"
+          >
+            <span className="font-extrabold uppercase tracking-wide text-xs sm:text-sm pl-1">
+              {isEs ? 'Recuperar enfoque · Salvar a T1GER' : 'Reclaim focus · Save T1GER'}
+            </span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 transition-transform duration-120 group-hover:translate-x-0.5 group-active:scale-95">
+              <ArrowRight size={16} />
+            </span>
           </button>
         </footer>
       </div>

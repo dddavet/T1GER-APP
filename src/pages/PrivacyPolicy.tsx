@@ -71,11 +71,11 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             </div>
 
             <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
-              <strong className="text-white block font-mono text-xs">{isEs ? 'B. Tiempo de pantalla' : 'B. Screen time'}</strong>
-              <p className="text-zinc-400 mt-1 text-[11px]">
+              <strong className="text-white block font-mono text-xs">{isEs ? 'B. Tiempo de pantalla y bienestar digital' : 'B. Screen time & digital wellness'}</strong>
+              <p className="text-zinc-400 mt-1 text-[11px] leading-relaxed">
                 {isEs 
-                  ? 'El acceso a estadísticas de uso (UsageStatsManager) se ejecuta 100% de manera local en su dispositivo para alimentar las mecánicas de bienestar del T1GER 3D. Jamás compartimos ni vendemos sus registros de uso a terceros ni a redes de publicidad.'
-                  : 'Screen time metrics (UsageStatsManager) are processed 100% locally on your device to calculate your 3D pet vitals. We never sell or transmit your app usage data to third-party ad networks.'}
+                  ? 'El acceso opcional a estadísticas de uso (mediante android.permission.PACKAGE_USAGE_STATS) se ejecuta 100% de manera local y efímera en la memoria de su dispositivo para alimentar las mecánicas de vitales del T1GER 3D. Ningún identificador de aplicación, historial de navegación, contenido en pantalla ni registro individualizado se transmite, sincroniza ni almacena en servidores en la nube de Firebase ni en redes de publicidad.'
+                  : 'Optional access to device usage statistics (via android.permission.PACKAGE_USAGE_STATS) executes 100% locally and ephemerally in device memory to calculate T1GER 3D vitals. No application package IDs, browsing history, screen content, or detailed usage logs are ever transmitted, synced, or stored on Firebase cloud servers or shared with advertising networks.'}
               </p>
             </div>
 
@@ -111,6 +111,24 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             <CheckCircle2 size={14} className="text-rose-400 shrink-0" />
             <a href="/delete-account" className="underline">{isEs ? 'Gestionar la eliminación de mi cuenta' : 'Manage account deletion'}</a>
           </div>
+        </div>
+      </div>
+
+      {/* 4. Child Safety & Age Policy (COPPA & GDPR) */}
+      <div className="rounded-[1.6rem] border border-white/10 bg-[#121216]/95 p-1.5 shadow-xl">
+        <div className="rounded-[1.3rem] border border-white/[0.08] bg-[#09090B] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] space-y-3">
+          <div className="flex items-center gap-2 border-b border-white/6 pb-2">
+            <Lock size={15} className="text-[var(--ob-accent)]" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-white font-mono">
+              {isEs ? '3. Política de Menores (COPPA & RGPD)' : '3. Minors & Children Policy (COPPA & GDPR)'}
+            </h2>
+          </div>
+
+          <p className="text-xs text-zinc-300 leading-relaxed">
+            {isEs
+              ? 'T1GER está dirigida exclusivamente a usuarios a partir de 13 años (o 16 años en el Espacio Económico Europeo y Reino Unido). No recopilamos conscientemente datos de menores de dicha edad. Si detectamos una cuenta perteneciente a un menor sin consentimiento parental demostrable, sus datos serán eliminados permanentemente.'
+              : 'T1GER is strictly designed for individuals aged 13 and older (or 16 in the European Economic Area and United Kingdom). We do not knowingly collect personal data from children under these minimum ages. Any account confirmed to belong to an unauthorized minor will be purged immediately.'}
+          </p>
         </div>
       </div>
     </div>

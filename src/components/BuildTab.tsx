@@ -11,6 +11,7 @@ import { isApplyCompletedOnDate } from '../services/applyDayStatus';
 import { SoundEffects } from '../services/soundEffects';
 const Trading = React.lazy(() => import('./apply/PaperTradingSandbox').then(m => ({ default: m.PaperTradingSandbox })));
 import { ApplyMissionModal } from './apply/ApplyMissionModal';
+import { OpportunityCostCard } from './OpportunityCostCard';
 
 /**
  * Daily Momentum Card (Apple Fitness Activity Ring Inspired)
@@ -357,6 +358,11 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
             );
           })}
 
+          {/* Screen Time Opportunity Cost Audit */}
+          <div className="pt-1">
+            <OpportunityCostCard />
+          </div>
+
           {/* Quick Practice Toolbox Dock */}
           <div className="pt-2">
             <div className="flex items-center justify-between px-1 mb-2.5">
@@ -496,6 +502,16 @@ export const BuildTab = (_props: { onStartMission?: (mission: unknown) => void }
           <Trading />
         </React.Suspense>
       )}
+
+      {/* Regulatory Legal Disclaimer */}
+      <footer className="mt-8 px-4 text-center">
+        <p className="font-mono text-[10px] text-zinc-600 leading-relaxed">
+          {tr(
+            'Simulación educativa sin riesgo real. T1GER no proporciona asesoramiento financiero ni recomendaciones de inversión.',
+            'Educational simulation with zero real risk. T1GER does not provide financial or investment advice.'
+          )}
+        </p>
+      </footer>
 
       {selected && (
         <ApplyMissionModal

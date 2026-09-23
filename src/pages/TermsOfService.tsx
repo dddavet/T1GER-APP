@@ -65,10 +65,25 @@ export const TermsOfService: React.FC<TermsOfServiceProps> = ({ onBack }) => {
             )}
           </p>
 
+          <div className="p-3 rounded-xl bg-white/[0.03] border border-white/6 space-y-2 text-[11px] text-zinc-300">
+            <p>
+              <strong>{isEs ? '• Entorno de Simulación Sin Valor Monetario:' : '• Simulation Environment With Zero Fiat Value:'}</strong>{' '}
+              {isEs
+                ? 'Todos los módulos de inversión (Paper Trading Sandbox, Proyección de Interés Compuesto y Asignación de Activos) operan exclusivamente con saldos virtuales ficticios. Dichos saldos carecen de valor monetario real, no constituyen activos financieros y no son canjeables ni transferibles.'
+                : 'All investment modules (Paper Trading Sandbox, Compound Growth Projector, and Asset Allocation) operate strictly with fictional virtual balances. These balances possess zero real-world cash value, do not represent financial assets, and cannot be redeemed or transferred.'}
+            </p>
+            <p>
+              <strong>{isEs ? '• Estatus Regulatorio:' : '• Regulatory Status:'}</strong>{' '}
+              {isEs
+                ? 'T1GER no es una entidad financiera, sociedad de valores ni asesor registrado ante la SEC, FINRA, CNMV o cualquier otra autoridad reguladora internacional. Los rendimientos pasados o simulados no garantizan resultados futuros.'
+                : 'T1GER is not a financial institution, broker-dealer, or registered investment advisor with the SEC, FINRA, CNMV, or any international regulatory authority. Past or simulated performance does not guarantee future results.'}
+            </p>
+          </div>
+
           <p className="text-[11px] text-zinc-400 leading-relaxed">
             {isEs
-              ? 'Las simulaciones no garantizan resultados. Verifica las sugerencias de IA y consulta a un profesional cualificado cuando lo necesites. Este aviso no limita los derechos que te correspondan por ley.'
-              : 'Simulations do not guarantee results. Verify AI suggestions and consult a qualified professional when needed. This notice does not limit your statutory rights.'}
+              ? 'Las simulaciones no garantizan resultados en los mercados reales. Verifica cualquier decisión de asignación patrimonial con un profesional financiero cualificado. Este aviso no limita los derechos irrenunciables que te correspondan por ley.'
+              : 'Simulations do not guarantee real-world market outcomes. Always verify capital allocation decisions with a licensed financial professional. This notice does not limit non-waivable statutory consumer rights.'}
           </p>
         </div>
       </div>
