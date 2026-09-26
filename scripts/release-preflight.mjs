@@ -7,6 +7,7 @@ const sensitive = [
   /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
   /\b(?:ghp|github_pat)_[A-Za-z0-9_]{30,}\b/,
   /\bsk-(?:proj-|or-v1-)?[A-Za-z0-9_-]{35,}\b/,
+  /\b(?:sk|rk)_(?:live|test)_[A-Za-z0-9]{12,}\b/,
   /["']type["']\s*:\s*["']service_account["']/,
 ];
 const paths = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], { encoding: 'utf8' }).split('\0').filter(Boolean);
@@ -25,7 +26,7 @@ const privateValues = [];
 for (const name of ['.env', '.env.local', '.env.production', '.env.production.local']) {
   if (!existsSync(name)) continue;
   for (const line of readFileSync(name, 'utf8').split(/\r?\n/)) {
-    const match = line.match(/^\s*(?:VITE_)?(?:GEMINI_API_KEY|OPENROUTER_API_KEY|ONESIGNAL_REST_API_KEY)\s*=\s*(.*?)\s*$/);
+    const match = line.match(/^\s*(?:VITE_)?(?:GEMINI_API_KEY|OPENROUTER_API_KEY|ONESIGNAL_REST_API_KEY|STRIPE_SECRET_KEY|STRIPE_RESTRICTED_KEY)\s*=\s*(.*?)\s*$/);
     const value = match?.[1]?.replace(/^['"]|['"]$/g, '');
     if (value && value.length > 15) privateValues.push(value);
   }

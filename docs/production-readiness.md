@@ -1,6 +1,6 @@
 # T1GER production readiness
 
-Last updated: 2026-09-20
+Last updated: 2026-09-26
 
 ## Current status
 
@@ -16,6 +16,7 @@ Passing compilation is not permission to publish. Publication, billing activatio
 - Psychology uses stable legacy persistence IDs but presents five evidence-based Psychology & Decisions lessons.
 - Primary V1 navigation: Learn, Apply, Master, Profile.
 - Compete and Mentor code is preserved; Mentor remains accessible from Profile and both can be opened by supported internal/development routes.
+- Native Android/iOS onboarding currently offers email and password only. Web Google/Apple buttons remain available; do not advertise native social sign-in or email-link sign-in until native credentials and deep links have passed device acceptance.
 
 ## Automated release matrix
 
@@ -62,6 +63,20 @@ cd android
 3. **RevenueCat:** create matching store products and entitlements, validate purchase/restore with sandbox accounts, then explicitly enable checkout. The app must not advertise a trial while checkout is unavailable.
 4. **Push and device acceptance:** validate OneSignal delivery, Android usage-access permission/fallback, camera/file evidence, offline recovery, deep links, and deletion on a physical release-mode device.
 5. **iOS (if included):** use macOS/Xcode for signing, archive validation, capabilities, privacy manifests, TestFlight, and App Store Connect submission.
+
+## Signed Android acceptance — required before production access
+
+The debug/live-reload app is not the release candidate. Upload the signed AAB to a Play internal-testing track, install **that track's build** on a physical Android phone, and record device model, Android version, app version/code, build SHA, tester account, and pass/fail evidence. Do not use production user data for this test.
+
+1. Fresh install: complete onboarding, create an email/password account, restart the app, and confirm the chosen path and progress survive. Confirm unavailable native Google/Apple/email-link options are absent.
+2. Complete Investing lesson 1 through challenge, micro-tool and Apply evidence. Interrupt the app once before submitting; reopen, submit, and confirm XP/streak/mascot state exactly once. Log in on a second device and confirm server-backed recovery.
+3. Test camera and file proof with allow/deny/retry, including a failed network upload. Confirm no reward is claimed for an unsubmitted or rejected proof.
+4. Test usage-access permission with deny, grant and revoke. Confirm manual fallback remains navigable and raw package usage is not sent to Firebase.
+5. Test push permission denied and granted, one scheduled reminder and one Squad nudge. Confirm the notification opens the correct destination. Check OneSignal delivery status; a local button tap is not proof of push delivery.
+6. Test offline launch, reconnect, deep links, account export, in-app deletion, and the deployed public `/delete-account` web route. Verify deletion removes Firebase Auth, Firestore profile/subcollections and proof storage, and that another device cannot restore the deleted account.
+7. Review crash-free operation and user-visible errors on the installed build. There is no configured production crash provider yet; selecting one, updating consent/privacy disclosures and verifying its delivery remain an explicit launch gate.
+
+Stop release on any failed step. After a fix, create a new signed AAB, rerun the affected step and the complete Investing path, then recapture store screenshots from that final candidate. The Play Console owner must separately complete Data Safety, permission declarations, content rating, public URLs, reviewer access and any account-specific closed-test requirement.
 
 ## Analytics and incident visibility
 
