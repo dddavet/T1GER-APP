@@ -132,6 +132,19 @@ try {
   await onboarding.getByRole('button', { name: 'SAVE PROGRESS', exact: true }).waitFor();
   await onboarding.close();
 
+  const nativeOnboarding = await browser.newPage({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await nativeOnboarding.addInitScript(() => {
+    window.CapacitorCustomPlatform = { name: 'android' };
+    localStorage.setItem('t1ger_app_language', 'en');
+    localStorage.setItem('t1ger_onboarding_draft_v2', JSON.stringify({ version: 2, step: 'save_progress', topic: 'investing', lessonCompleted: true }));
+  });
+  await nativeOnboarding.goto('http://127.0.0.1:3000/?forceOnboarding=1', { waitUntil: 'domcontentloaded', timeout: 120_000 });
+  await nativeOnboarding.getByRole('button', { name: 'CREATE ACCOUNT' }).waitFor({ timeout: 60_000 });
+  if (await nativeOnboarding.getByRole('button', { name: /Google|Apple/i }).count()) {
+    throw new Error('Native onboarding advertises a social provider that cannot complete sign-in.');
+  }
+  await nativeOnboarding.close();
+
   for (const [preset, heading] of [
     ['active', 'Your streak is safe today.'],
     ['at_risk', 'One action before midnight.'],

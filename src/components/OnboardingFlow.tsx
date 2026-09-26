@@ -1782,8 +1782,9 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
           </div>
         );
 
-      // Frame 16: Profile Creation (Duolingo 1-Tap Google Sign-In)
+      // Frame 16: Profile creation; web social providers are not available in native builds.
       case 'save_progress': {
+        const nativeAuth = Capacitor.isNativePlatform();
         const handleGoogle = async () => {
           setAuthError('');
           setAuthLoading(true);
@@ -1847,7 +1848,7 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             goTo('reminders');
           } catch (err: any) {
             console.error('Email auth error:', err);
-            setAuthError(tr('Verifica tus datos o continúa con Google.', 'Verify credentials or continue with Google.'));
+            setAuthError(tr('Verifica tu correo y contraseña e inténtalo de nuevo.', 'Check your email and password, then try again.'));
           } finally {
             setAuthLoading(false);
           }
@@ -1866,8 +1867,13 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
             />
 
             <div className="space-y-3 my-auto">
-              {/* Google 1-Tap Button */}
-              <button
+              {nativeAuth && (
+                <p className="rounded-xl border border-white/10 bg-white/[.04] px-4 py-3 text-center text-xs text-zinc-300">
+                  {tr('En este dispositivo, guarda tu progreso con correo y contraseña.', 'On this device, save your progress with email and password.')}
+                </p>
+              )}
+              {/* Web Google sign-in */}
+              {!nativeAuth && <button
                 type="button"
                 onClick={handleGoogle}
                 disabled={authLoading}
@@ -1880,10 +1886,10 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                 </svg>
                 {authLoading ? tr('Conectando…', 'Connecting…') : tr('Continuar con Google', 'Sign in with Google')}
-              </button>
+              </button>}
 
               {/* Apple Button */}
-              <button
+              {!nativeAuth && <button
                 type="button"
                 onClick={handleApple}
                 disabled={authLoading}
@@ -1893,15 +1899,15 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                   <path d="M17.05 20.28c-.98 1.4-2.05 2.72-3.68 2.72-1.63 0-2.12-.96-3.95-.96-1.83 0-2.37.96-3.95.96-1.63 0-2.8-1.46-3.95-3.36-1.15-1.9-2.05-5.38-2.05-8.38 0-4.32 2.8-6.62 5.58-6.62 1.63 0 3.03 1.1 4.05 1.1 1.03 0 2.75-1.1 4.58-1.1 1.1 0 3.95.13 5.8 2.88-0.15.1-2.55 1.46-2.55 4.53 0 3.55 3.05 4.88 3.2 4.96-0.03.06-0.5 1.78-1.7 3.58zM12.55 4.5c0-2.1 1.5-4.1 3.75-4.35-0.2 0.9-0.7 2.1-2.05 3.65-1.35 1.55-2.9 2.3-4.45 2.15 0.15-0.9 0.7-2.1 2.05-3.65z"/>
                 </svg>
                 {tr('Continuar con Apple', 'Sign in with Apple')}
-              </button>
+              </button>}
 
-              <div className="flex items-center gap-3 my-2">
+              {!nativeAuth && <div className="flex items-center gap-3 my-2">
                 <div className="h-px flex-1 bg-white/10" />
                 <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
                   {tr('O con tu correo', 'Or with email')}
                 </span>
                 <div className="h-px flex-1 bg-white/10" />
-              </div>
+              </div>}
 
               {/* Email Form */}
               <form onSubmit={handleEmailSubmit} className="space-y-2">

@@ -407,6 +407,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const devHarness = useDevHarnessState();
 
   const googleSignIn = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      throw new Error('auth/native-unsupported-provider: Use email and password on this device.');
+    }
     const provider = new GoogleAuthProvider();
     provider.setCustomParameters({ prompt: 'select_account' });
 
@@ -424,21 +427,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If popup was blocked by browser, attempt redirect on web
       if (
         (popupError?.code === 'auth/popup-blocked' ||
-         popupError?.code === 'auth/cancelled-popup-request') &&
-        !Capacitor.isNativePlatform()
+         popupError?.code === 'auth/cancelled-popup-request')
       ) {
         await signInWithRedirect(auth, provider);
         return;
-      }
-
-      // If running inside Capacitor native webview where Google blocks web OAuth
-      if (
-        Capacitor.isNativePlatform() &&
-        (popupError?.code === 'auth/operation-not-supported-in-this-environment' ||
-         popupError?.message?.includes('disallowed_useragent') ||
-         popupError?.code === 'auth/unauthorized-domain')
-      ) {
-        throw new Error('auth/native-unsupported-provider: En la app nativa, por favor inicia sesión con tu correo electrónico o enlace de acceso.');
       }
 
       // If domain is unauthorized in Firebase console (e.g. testing via local network IP)
@@ -451,6 +443,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const appleSignIn = useCallback(async () => {
+    if (Capacitor.isNativePlatform()) {
+      throw new Error('auth/native-unsupported-provider: Use email and password on this device.');
+    }
     const provider = new OAuthProvider('apple.com');
     provider.addScope('email');
     provider.addScope('name');
@@ -463,14 +458,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       if (
         (popupError?.code === 'auth/popup-blocked' ||
-         popupError?.code === 'auth/cancelled-popup-request') &&
-        !Capacitor.isNativePlatform()
+         popupError?.code === 'auth/cancelled-popup-request')
       ) {
         await signInWithRedirect(auth, provider);
         return;
-      }
-      if (Capacitor.isNativePlatform()) {
-        throw new Error('auth/native-unsupported-provider: En la versión móvil nativa, inicia sesión con tu correo electrónico y contraseña o enlace de acceso.');
       }
       throw popupError;
     }
@@ -485,6 +476,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const sendEmailSignInLink = useCallback(async (email: string) => {
+    if (Capacitor.isNativePlatform()) {
+      throw new Error('auth/native-unsupported-provider: Email links require a configured native deep link.');
+    }
     const cleanEmail = email.trim();
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://t1ger.app';
     await sendSignInLinkToEmail(auth, cleanEmail, {
