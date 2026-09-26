@@ -43,9 +43,9 @@ declare global {
 
 const AWAKE_MINUTES_PER_DAY = 16 * 60;
 const DEFAULT_HOURLY_WAGE = 10;
-const MANUAL_APPS_KEY = 't1ger_manual_social_usage_v2';
+const MANUAL_APPS_KEY = 't1ger_manual_social_usage_v3';
 const HOURLY_WAGE_KEY = 't1ger_hourly_wage';
-const LEGACY_HOURS_KEY = 't1ger_screen_time_hours';
+const MANUAL_USAGE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 export const TRACKED_SOCIAL_APPS: ReadonlyArray<Omit<AppUsage, 'minutes' | 'percentage'>> = [
   { packageName: 'com.zhiliaoapp.musically', appName: 'TikTok', iconEmoji: '♪' },
@@ -164,35 +164,36 @@ export class AndroidScreenTimeService {
     }
   }
 
-  public static getManualApps(): AppUsage[] {
-    if (typeof window === 'undefined') return normalizeApps([]);
-
+  private static readManualApps(): AppUsage[] | null {
+    if (typeof window === 'undefined') return null;
     try {
       const saved = localStorage.getItem(MANUAL_APPS_KEY);
-      if (saved) return normalizeApps(JSON.parse(saved));
+      if (saved) {
+        const { apps, savedAt } = JSON.parse(saved);
+        const age = Date.now() - savedAt;
+        if (Array.isArray(apps) && Number.isFinite(age) && age >= 0 && age < MANUAL_USAGE_MAX_AGE_MS) {
+          return normalizeApps(apps);
+        }
+      }
     } catch {
-      localStorage.removeItem(MANUAL_APPS_KEY);
+      // Invalid or legacy data is not a trustworthy last-24h reading.
     }
+    return null;
+  }
 
-    const legacyHours = clampNumber(localStorage.getItem(LEGACY_HOURS_KEY) || 0, 0, 24);
-    const legacyMinutes = Math.round(legacyHours * 60);
-    if (legacyMinutes > 0) {
-      return normalizeApps(TRACKED_SOCIAL_APPS.map((app, index) => ({
-        ...app,
-        minutes: Math.round(legacyMinutes * LEGACY_DISTRIBUTION[index]),
-      })));
-    }
-
-    return normalizeApps([]);
+  public static getManualApps(): AppUsage[] {
+    return this.readManualApps() ?? normalizeApps([]);
   }
 
   public static saveManualUsage(apps: Array<Pick<AppUsage, 'packageName' | 'appName' | 'minutes' | 'iconEmoji'>>, hourlyWage: number): ScreenTimeReport {
     const normalized = normalizeApps(apps);
     const safeWage = clampNumber(hourlyWage, 1, 1000);
     if (typeof window !== 'undefined') {
-      localStorage.setItem(MANUAL_APPS_KEY, JSON.stringify(normalized.map(({ percentage, ...app }) => app)));
+      localStorage.setItem(MANUAL_APPS_KEY, JSON.stringify({
+        savedAt: Date.now(),
+        apps: normalized.map(({ percentage, ...app }) => app),
+      }));
       localStorage.setItem(HOURLY_WAGE_KEY, String(safeWage));
-      localStorage.setItem(LEGACY_HOURS_KEY, String(round(normalized.reduce((sum, app) => sum + app.minutes, 0) / 60, 2)));
     }
     return this.createReport(normalized, safeWage, 'manual', this.isAndroidNative(), this.checkPermission());
   }
@@ -245,12 +246,11 @@ export class AndroidScreenTimeService {
       }
     }
 
-    const manualApps = this.getManualApps();
-    const hasManualData = manualApps.some((app) => app.minutes > 0);
+    const manualApps = this.readManualApps();
     return this.createReport(
-      manualApps,
+      manualApps ?? normalizeApps([]),
       hourlyWage,
-      hasManualData ? 'manual' : 'unconfigured',
+      manualApps ? 'manual' : 'unconfigured',
       isNativeAndroid,
       hasPermission,
     );

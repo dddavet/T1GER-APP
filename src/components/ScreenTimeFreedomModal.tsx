@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'motion/react';
 import {
@@ -33,6 +33,10 @@ const formatCurrency = (value: number, language: 'es' | 'en') =>
   }).format(value);
 
 export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ isOpen, onClose }) => {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const { language, getDailyPipelineMissions, petState } = useBrain();
   const isEs = language === 'es';
   const [report, setReport] = useState<ScreenTimeReport>(() => AndroidScreenTimeService.getReport());
@@ -57,14 +61,38 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
 
   useEffect(() => {
     if (!isOpen) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const previousOverflow = document.body.style.overflow;
+    const appRoot = document.getElementById('root');
+    const wasInert = appRoot?.hasAttribute('inert');
+    document.body.style.overflow = 'hidden';
+    appRoot?.setAttribute('inert', '');
+    closeButtonRef.current?.focus();
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
+      } else if (e.key === 'Tab') {
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])');
+        if (!focusable?.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (!wasInert) appRoot?.removeAttribute('inert');
+      previousFocus?.focus();
+    };
+  }, [isOpen]);
 
   const requiresManualFallback = report.dataSource === 'manual' || report.dataSource === 'unconfigured';
   const overBudget = report.totalMinutes > petState.dailyScreenTimeLimitMinutes;
@@ -135,6 +163,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
 
   return createPortal(
     <motion.div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby="screen-time-audit-title"
@@ -157,6 +186,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
             </p>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={onClose}
             aria-label={isEs ? 'Cerrar auditoría' : 'Close audit'}
             className="grid h-11 w-11 place-items-center rounded-xl border border-white/12 bg-white/[.035] text-zinc-300 transition-colors hover:border-white/25 hover:text-white active:scale-95 cursor-pointer"
@@ -247,7 +277,7 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
                       step="1"
                       value={app.minutes}
                       onChange={(event) => updateManualMinutes(app.packageName, Number(event.target.value))}
-                      className="mt-2.5 h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/12 accent-[#FF7300]"
+                      className="mt-1 h-11 w-full cursor-pointer accent-[#FF7300]"
                     />
                   </label>
                 ))}
@@ -290,8 +320,8 @@ export const ScreenTimeFreedomModal: React.FC<ScreenTimeFreedomModalProps> = ({ 
             <Zap size={18} className="mt-0.5 shrink-0 text-[#FF7300]" />
             <p className="text-xs leading-5 text-zinc-300">
               {isEs
-                ? 'Completa la lección diaria para restaurar las vitales de T1GER, asegurar la racha de hoy y recibir XP verificado.'
-                : 'Complete today’s lesson to restore T1GER’s vitals, secure today’s streak, and earn verified XP.'}
+                ? 'Aprende y completa la acción Apply de hoy para cuidar a T1GER y asegurar tu racha. El XP competitivo requiere una prueba verificada.'
+                : 'Learn and complete today’s Apply action to care for T1GER and secure your streak. Competitive XP requires verified proof.'}
             </p>
           </section>
         </main>

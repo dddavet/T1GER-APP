@@ -17,7 +17,14 @@ export const OpportunityCostCard: React.FC = () => {
   const overBudget = configured && report.totalMinutes > petState.dailyScreenTimeLimitMinutes;
 
   useEffect(() => {
-    setReport(AndroidScreenTimeService.getReport());
+    const refresh = () => setReport(AndroidScreenTimeService.getReport());
+    refresh();
+    window.addEventListener('focus', refresh);
+    document.addEventListener('visibilitychange', refresh);
+    return () => {
+      window.removeEventListener('focus', refresh);
+      document.removeEventListener('visibilitychange', refresh);
+    };
   }, [devHarness.screenTime]);
 
   const closeModal = () => {
