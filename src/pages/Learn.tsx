@@ -135,7 +135,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
             data-testid="course-picker-button"
             onPointerDown={() => SoundEffects.playTap()}
             onClick={() => setIsCatalogOpen(true)}
-            className="flex items-center gap-2 py-1.5 px-3 rounded-2xl bg-[#14141A] hover:bg-[#1C1C24] border border-white/15 text-white shadow-sm transition-all duration-100 ease-out cursor-pointer group select-none active:scale-[0.96] active:translate-y-0.5"
+            className="flex min-h-11 items-center gap-2 py-1.5 px-3 rounded-2xl bg-[#14141A] hover:bg-[#1C1C24] border border-white/15 text-white shadow-sm transition-all duration-100 ease-out cursor-pointer group select-none active:scale-[0.96] active:translate-y-0.5"
           >
             <span
               className="w-6 h-6 rounded-lg flex items-center justify-center shrink-0"
@@ -192,12 +192,12 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
             return (
               <li key={stage} aria-current={isCurrent ? 'step' : undefined} className="flex min-w-0 items-center gap-1.5">
                 <span className={`grid h-5 w-5 shrink-0 place-items-center rounded-full border font-mono text-[8px] font-bold ${isCurrent ? 'border-[#FF7300] bg-[#FF7300] text-black' : 'border-white/15 bg-white/[.04] text-zinc-500'}`}>{index + 1}</span>
-                <span className={`truncate text-[10px] font-bold ${isCurrent ? 'text-white' : 'text-zinc-500'}`}>{label}</span>
+                <span className={`truncate text-[11px] font-bold ${isCurrent ? 'text-white' : 'text-zinc-500'}`}>{label}</span>
               </li>
             );
           })}
         </ol>
-        <p role="status" className="mt-2 text-[10px] leading-relaxed text-zinc-500">{nextStageCopy}</p>
+        <p role="status" className="mt-2 text-xs leading-relaxed text-zinc-400">{nextStageCopy}</p>
       </section>
 
       {/* VIEW 1: Duolingo-style Winding Orb Trail (Immediate Dopamine & Action) */}
@@ -249,7 +249,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                   <h2 className="mt-1 text-sm font-extrabold leading-tight tracking-tight text-white sm:text-base">
                     {next ? next.lesson.title[locale] : tr('Camino completado', 'Path complete')}
                   </h2>
-                  <p className="mt-1 line-clamp-2 text-[11px] leading-snug text-zinc-400">
+                  <p className="mt-1 line-clamp-2 text-xs leading-snug text-zinc-400">
                     {!next
                       ? tr('Ve a Master para mantener frescas estas ideas.', 'Go to Master to keep these ideas fresh.')
                       : nextStage === 'apply'
@@ -266,7 +266,7 @@ export const Learn: React.FC<{ onStartMission?: (mission: BankMission) => void }
                 <div className="flex justify-between items-center text-[10px] font-mono">
                   <span className="text-zinc-300 font-bold">{selectedPathway.title[locale]}</span>
                   <span className="text-zinc-400 font-bold">
-                    <span className="text-[var(--ob-accent)] font-extrabold">{completed}</span>/{nodes.length} {tr('Orbes', 'Orbs')}
+                    <span className="text-[var(--ob-accent)] font-extrabold">{completed}</span>/{nodes.length} {tr('Lecciones', 'Lessons')}
                   </span>
                 </div>
                 <div role="progressbar" aria-label={tr('Progreso del camino', 'Journey progress')} aria-valuemin={0} aria-valuemax={nodes.length} aria-valuenow={completed} className="h-2 w-full rounded-full bg-black/60 border border-white/10 overflow-hidden shadow-[inset_0_1px_2px_rgba(0,0,0,0.6)]">

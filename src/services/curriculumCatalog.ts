@@ -79,15 +79,15 @@ export const KINNU_DOMAINS: KinnuDomain[] = [
   },
   {
     id: 'technology',
-    title: { es: 'Tecnología', en: 'Technology' },
-    shortName: { es: 'Tecnología', en: 'Tech' },
+    title: { es: 'IA y automatización', en: 'AI & Automation' },
+    shortName: { es: 'IA', en: 'AI' },
     subtitle: {
-      es: 'De la inteligencia artificial a la computación moderna.',
-      en: 'From artificial intelligence to modern computing.'
+      es: 'Comprende la IA y úsala con criterio en tareas reales.',
+      en: 'Understand AI and use it with judgment in real tasks.'
     },
     mascotSpeech: {
       es: 'Explora cómo funcionan la IA y los sistemas digitales que usas cada día.',
-      en: 'Technology Domain: master the algorithms and AI moving the world.'
+      en: 'Explore how AI works and where it can help you act.'
     },
     iconName: 'Cpu',
     accentColor: '#06B6D4',

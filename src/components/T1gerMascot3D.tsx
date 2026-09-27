@@ -173,8 +173,6 @@ function DemandFrameDriver({ paused }: { paused: boolean }) {
   return null;
 }
 
-const loadedModelPaths = new Set<string>();
-
 export const T1gerMascot3D: React.FC<MascotProps> = ({
   modelPath = DEFAULT_MODEL,
   mood = 'idle',
@@ -189,13 +187,12 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
   onPet,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [readyModelPath, setReadyModelPath] = useState<string | null>(() =>
-    loadedModelPaths.has(modelPath) ? modelPath : null
-  );
+  // A cached GLB still needs a first frame in each newly mounted canvas.
+  const [readyModelPath, setReadyModelPath] = useState<string | null>(null);
   const modelReady = readyModelPath === modelPath;
   const isInView = useInView(containerRef, { amount: 0.1 });
   const prefersReducedMotion = Boolean(useReducedMotion());
-  const cameraPosition: Point3 = closeUp ? [0, 0.04, 3.58] : [0, 0.03, 3.34];
+  const cameraPosition: Point3 = closeUp ? [0, 0.04, 3.1] : [0, 0.03, 3.34];
   const reactiveMood: MascotReaction = isEating || isPetted
     ? 'happy'
     : isMeditating
@@ -220,7 +217,7 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
         src="/mascot/t1ger-avatar.png"
         alt=""
         aria-hidden="true"
-        className={`absolute inset-0 h-full w-full object-contain pointer-events-none transition-opacity duration-300 ease-out ${modelReady ? 'opacity-0' : 'opacity-85'}`}
+        className={`absolute inset-0 h-full w-full object-contain pointer-events-none transition-opacity duration-300 ease-out ${closeUp ? 'scale-[1.7]' : ''} ${modelReady ? 'opacity-0' : 'opacity-85'}`}
       />
       <Canvas
         className={`relative transition-opacity duration-300 ease-out ${modelReady ? 'opacity-100' : 'opacity-0'}`}
@@ -247,7 +244,6 @@ export const T1gerMascot3D: React.FC<MascotProps> = ({
             mood={reactiveMood}
             reducedMotion={prefersReducedMotion}
             onReady={() => {
-              loadedModelPaths.add(modelPath);
               setReadyModelPath(modelPath);
             }}
           />

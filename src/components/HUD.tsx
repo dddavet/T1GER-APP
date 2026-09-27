@@ -42,7 +42,7 @@ export const HUD = React.memo(() => {
             <button
               onPointerDown={haptic}
               onClick={() => setActiveView('profile')}
-              className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-[#18181D] border border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)] overflow-hidden cursor-pointer active:scale-92 transition-transform duration-120 ease-out group"
+              className="relative flex h-11 w-11 items-center justify-center rounded-xl bg-[#18181D] border border-white/15 shadow-[0_2px_8px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)] overflow-hidden cursor-pointer active:scale-92 transition-transform duration-120 ease-out group"
               aria-label="T1GER Mascot"
             >
               <img

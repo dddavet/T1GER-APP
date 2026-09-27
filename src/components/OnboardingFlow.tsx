@@ -5,6 +5,7 @@ import {
   ArrowRight,
   Bell,
   BookOpen,
+  Brain,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -141,29 +142,25 @@ const COURSE_TOPICS: Array<{
   id: CourseTopic;
   title: LocalizedText;
   subtitle: LocalizedText;
-  icon: string;
-  badge?: LocalizedText;
+  icon: React.ReactNode;
 }> = [
   {
     id: 'investing',
     title: { es: 'Inversión & Mercados', en: 'Investing & Markets' },
     subtitle: { es: 'Fundamentos, fondos indexados y gestión de riesgo', en: 'Foundations, index funds & risk management' },
-    icon: '💰',
-    badge: { es: 'RUTA PRINCIPAL', en: 'FLAGSHIP' },
+    icon: <LineChart size={23} strokeWidth={2} aria-hidden="true" />,
   },
   {
     id: 'technology',
-    title: { es: 'Technology', en: 'Technology' },
-    subtitle: { es: 'IA, Data Science, Ciberseguridad & Computación', en: 'AI, Data Science, Cybersecurity & Computing' },
-    icon: '🤖',
-    badge: { es: 'PRIORIDAD', en: 'PRIORITY' },
+    title: { es: 'IA y automatización', en: 'AI & Automation' },
+    subtitle: { es: 'Entiende los modelos, crea mejores prompts y automatiza con criterio', en: 'Understand models, build better prompts, and automate with judgment' },
+    icon: <Sparkles size={23} strokeWidth={2} aria-hidden="true" />,
   },
   {
     id: 'mindset',
     title: { es: 'Psicología & Conducta', en: 'Psychology & Behavior' },
     subtitle: { es: 'Sesgos cognitivos, aprendizaje y toma de decisiones', en: 'Cognitive biases, learning & decision-making' },
-    icon: '🧠',
-    badge: { es: 'PRIORIDAD', en: 'PRIORITY' },
+    icon: <Brain size={23} strokeWidth={2} aria-hidden="true" />,
   },
 ];
 
@@ -820,34 +817,29 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
                     }}
                     className={`flex items-center gap-3.5 w-full py-3 px-3.5 rounded-2xl border text-left transition-all active:scale-[0.985] cursor-pointer min-h-[60px] ${
                       isSelected
-                        ? 'border-[var(--ob-accent)] bg-gradient-to-r from-[var(--ob-accent)]/20 to-[var(--ob-accent)]/5 text-white shadow-[0_0_20px_rgba(255,115,0,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] ring-1 ring-[var(--ob-accent)]/60'
+                        ? 'border-[var(--ob-accent)] bg-[#1E1915] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]'
                         : 'border-white/10 bg-[#121216]/80 backdrop-blur-md text-zinc-300 hover:border-white/20 hover:bg-[#16161c] shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
                     }`}
                   >
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 transition-colors ${
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                       isSelected ? 'bg-[var(--ob-accent)]/20 border border-[var(--ob-accent)]/40 shadow-sm' : 'bg-white/[.04] border border-white/5'
                     }`}>
                       {topic.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <strong className="text-sm font-bold text-white block truncate">
+                        <strong className="text-sm font-bold leading-tight text-white block">
                           {localize(topic.title, language)}
                         </strong>
-                        {topic.badge && (
-                          <span className="px-2 py-0.5 rounded-full bg-[var(--ob-accent)] text-black text-[9px] font-black uppercase tracking-wider shrink-0 shadow-sm">
-                            {localize(topic.badge, language)}
-                          </span>
-                        )}
                       </div>
-                      <span className="text-xs text-zinc-400 block mt-0.5 line-clamp-1">
+                      <span className="text-xs leading-snug text-zinc-400 block mt-0.5 line-clamp-2">
                         {localize(topic.subtitle, language)}
                       </span>
                     </div>
                     <span
                       className={`h-6 w-6 rounded-full border flex items-center justify-center shrink-0 transition-all duration-150 ${
                         isSelected
-                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black shadow-[0_0_10px_rgba(255,115,0,0.5)]'
+                          ? 'border-[var(--ob-accent)] bg-[var(--ob-accent)] text-black'
                           : 'border-white/20 bg-white/[.03] text-transparent'
                       }`}
                     >
@@ -2346,12 +2338,12 @@ export const OnboardingFlow: React.FC<{ onComplete: () => void }> = ({ onComplet
               <button
                 onClick={back}
                 aria-label={isEs ? 'Volver' : 'Back'}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[.04] text-zinc-300 active:scale-95 cursor-pointer"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[.04] text-zinc-300 active:scale-95 cursor-pointer"
               >
                 <ArrowLeft size={18} />
               </button>
             ) : (
-              <div className="h-10 w-10 shrink-0" />
+              <div className="h-11 w-11 shrink-0" />
             )}
 
             <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-white/10">

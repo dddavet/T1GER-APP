@@ -49,6 +49,17 @@ try {
   await page.getByLabel('Learning loop').getByText('Learn', { exact: true }).waitFor();
   await page.getByLabel('Learning loop').getByText('Apply', { exact: true }).waitFor();
   await page.getByLabel('Learning loop').getByText('Master', { exact: true }).waitFor();
+  await page.getByText(/\/5 Lessons/).waitFor();
+  for (const [label, selector] of [
+    ['Course picker', '[data-testid="course-picker-button"]'],
+    ['Mascot profile shortcut', 'button[aria-label="T1GER Mascot"]'],
+  ]) {
+    const target = await page.locator(selector).boundingBox();
+    if (!target || target.width < 44 || target.height < 44) throw new Error(`${label} must have a 44px touch target.`);
+  }
+  const currentOrb = page.locator('button[aria-current="step"]');
+  const orbBackground = await currentOrb.evaluate(element => getComputedStyle(element).backgroundColor);
+  if (orbBackground === 'rgb(255, 115, 0)') throw new Error('The path marker should not compete with the primary lesson action.');
   await page.screenshot({ path: `${outputDir}/learn.png`, fullPage: true });
   await page.getByRole('button', { name: 'View Streak' }).click();
   await page.getByRole('dialog', { name: 'Your streak' }).getByRole('heading', { name: 'Start with one real action.' }).waitFor();
@@ -116,9 +127,28 @@ try {
   await onboarding.getByRole('button', { name: 'GET STARTED', exact: true }).click();
   const investingChoice = onboarding.getByRole('button', { name: /Investing & Markets/ });
   await investingChoice.waitFor({ state: 'visible', timeout: 60_000 });
+  await onboarding.getByRole('button', { name: /AI & Automation/ }).waitFor();
+  const topicIcon = investingChoice.locator('div').first();
+  if (!await topicIcon.locator('svg').count()) throw new Error('Onboarding domain icons should use the product icon system, not emoji.');
+  const backTarget = await onboarding.getByRole('button', { name: 'Back', exact: true }).boundingBox();
+  if (!backTarget || backTarget.width < 44 || backTarget.height < 44) throw new Error('Onboarding back control must have a 44px touch target.');
   if (await investingChoice.getAttribute('aria-pressed') !== 'true') {
     throw new Error('New onboarding did not select the flagship Investing path by default.');
   }
+  await onboarding.waitForTimeout(400);
+  await onboarding.screenshot({ path: `${outputDir}/onboarding-choice.png`, fullPage: true });
+  await onboarding.setViewportSize({ width: 320, height: 720 });
+  if (await onboarding.evaluate(() => document.documentElement.scrollWidth > innerWidth)) throw new Error('Onboarding topic choice overflows at 320px.');
+  await onboarding.screenshot({ path: `${outputDir}/onboarding-choice-320.png`, fullPage: true });
+  await onboarding.setViewportSize({ width: 390, height: 844 });
+  await onboarding.getByRole('button', { name: /AI & Automation/ }).click();
+  if (await onboarding.getByRole('button', { name: /AI & Automation/ }).getAttribute('aria-pressed') !== 'true') {
+    throw new Error('Onboarding did not retain the learner-selected AI path.');
+  }
+  await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
+  await onboarding.getByRole('heading', { name: 'What is your level in AI & Automation?' }).waitFor();
+  await onboarding.getByRole('button', { name: 'Back', exact: true }).click();
+  await investingChoice.click();
   await onboarding.getByText('Build sound financial judgment with practical, evidence-based lessons.', { exact: true }).waitFor();
   await onboarding.getByRole('button', { name: 'CONTINUE', exact: true }).click();
   await onboarding.getByRole('button', { name: "I'm new to this topic", exact: true }).click();

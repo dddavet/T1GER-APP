@@ -136,13 +136,14 @@ export const DuolingoOrbTrail: React.FC<DuolingoOrbTrailProps> = ({
                           isCompleted
                             ? 'bg-emerald-500 text-black shadow-[inset_0_2px_0_rgba(255,255,255,.24),0_7px_16px_rgba(0,0,0,.4)] hover:brightness-110'
                             : isCurrent
-                            ? 'text-black shadow-[inset_0_2px_0_rgba(255,255,255,.3),0_7px_18px_rgba(255,115,0,.22)] hover:brightness-110'
+                            ? 'border-2 bg-[#181820] shadow-[inset_0_1px_0_rgba(255,255,255,.12),0_7px_18px_rgba(0,0,0,.35)] hover:bg-[#24242C]'
                             : isReview
                             ? 'bg-cyan-400 text-black shadow-[inset_0_2px_0_rgba(255,255,255,.3),0_7px_16px_rgba(0,0,0,.4)] hover:brightness-110'
                             : 'bg-[#181820] text-zinc-500 border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,.06)] cursor-not-allowed opacity-80'
                         }`}
                         style={{
-                          backgroundColor: isCurrent ? accentColor : undefined,
+                          borderColor: isCurrent ? accentColor : undefined,
+                          color: isCurrent ? accentColor : undefined,
                         }}
                       >
                         <div className="absolute inset-1.5 rounded-full border border-white/20 pointer-events-none" />
