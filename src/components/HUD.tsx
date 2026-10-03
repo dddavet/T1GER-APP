@@ -84,7 +84,7 @@ export const HUD = React.memo(() => {
             {/* Verified XP Badge */}
             <div
               className="flex h-7 items-center gap-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 px-2.5 font-mono text-[11px] font-bold text-emerald-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
-              aria-label={`${stats.verifiedXP} ${isEs ? 'XP verificado' : 'verified XP'}`}
+              aria-label={`${stats.verifiedXP} ${isEs ? 'XP de evidencia de Apply revisada' : 'XP from reviewed Apply evidence'}`}
             >
               <ShieldCheck size={13} weight="bold" />
               <span className="tabular-nums text-emerald-300 font-black">{stats.verifiedXP}</span>

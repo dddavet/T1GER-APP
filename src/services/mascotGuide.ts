@@ -96,8 +96,8 @@ export function resolveMascotGuide({
     if (verifiedXP > 0) {
       return {
         mood: 'happy',
-        eyebrow: localized(isEs, 'Progreso verificado', 'Verified progress'),
-        message: localized(isEs, `${verifiedXP} vXP provienen de acciones que T1GER pudo comprobar.`, `${verifiedXP} vXP came from actions T1GER could verify.`),
+        eyebrow: localized(isEs, 'Evidencia revisada', 'Reviewed evidence'),
+        message: localized(isEs, `${verifiedXP} vXP provienen de evidencia de Apply revisada; no son una medida de dominio.`, `${verifiedXP} vXP came from reviewed Apply evidence; they are not a measure of mastery.`),
       };
     }
     return {

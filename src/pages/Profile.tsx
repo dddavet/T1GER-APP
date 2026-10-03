@@ -144,6 +144,11 @@ export const Profile = () => {
           </div>
         ))}
       </dl>
+      <p className="text-xs leading-relaxed text-zinc-400">
+        {isEs
+          ? 'XP reconoce tu actividad. vXP cuenta evidencia de Apply revisada, no dominio. Master te ayuda a practicar lo que recuerdas.'
+          : 'XP recognizes activity. vXP counts reviewed Apply evidence, not mastery. Master helps you practice what you remember.'}
+      </p>
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-[#121216] p-3.5 shadow-lg">
         <div className="flex items-center gap-3">
@@ -206,7 +211,7 @@ export const Profile = () => {
 
       <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 31, delay: .12 }} className="t1ger-panel transform-gpu overflow-hidden">
         <div className="border-b border-white/7 p-5"><p className="t1ger-kicker">{isEs ? 'Datos y privacidad' : 'Data and privacy'}</p></div>
-        <SettingRow icon={Download} title={isEs ? 'Exportar mis datos' : 'Export my data'} detail="JSON" onClick={() => { downloadT1gerDataExport(appUser, brainState); setStatus(isEs ? 'Exportación creada.' : 'Export created.'); }} />
+        <SettingRow icon={Download} title={isEs ? 'Exportar datos de este dispositivo' : 'Export this device’s data'} detail="JSON" onClick={() => { downloadT1gerDataExport(appUser, brainState); setStatus(isEs ? 'Exportación local creada. No incluye todos los registros de la nube.' : 'Device export created. It does not include all cloud records.'); }} />
         <SettingRow icon={UserRound} title={isEs ? 'Política de privacidad' : 'Privacy policy'} onClick={() => setLegalView('privacy')} />
         <SettingRow icon={ShieldCheck} title={isEs ? 'Términos de servicio' : 'Terms of service'} onClick={() => setLegalView('terms')} />
       </motion.section>

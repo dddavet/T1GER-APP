@@ -40,11 +40,20 @@ Progress is meaningful only when its cause is clear:
 
 - Completing a lesson creates readiness; it does not finish the loop.
 - Apply records a real decision or action and secures personal progress.
-- Master checks whether the learner can retrieve the idea later.
+- Master practices retrieval later and tracks review evidence separately from completion.
 - Verified artifacts may contribute to competitive status; self-reported actions remain personal progress.
 - XP, streaks, memory, and T1GER vitals must reflect canonical completion rules and remain idempotent.
 
 Internal concepts such as missions, artifacts, submissions, and `BuildTab` remain valid implementation details where changing them would risk data or progression regressions. The user-facing language is Learn, Apply, and Master.
+
+### XP is activity, not mastery
+
+- Personal XP and levels recognize participation in the learning loop. The current canonical reward bundles the lesson reward and 50 Apply XP when its matching Apply step is recorded; the onboarding reward is separate and one-time. Passing the lesson alone does not unlock the next node.
+- Self-reported Apply completion and an optional written reflection record personal practice. They do not prove understanding, earn competitive XP, or become verified simply because the user opens a tool.
+- `vXP` / `verifiedXP` is a legacy name for competitive XP from reviewed Apply evidence. Currently an AI-approved image artifact with the required confidence may earn it. Text-only reflections do not. An AI review checks the submitted evidence; it is not independent verification of the real-world action or a claim of mastery.
+- Objectively correct challenge, transfer, and retrieval answers are evidence for the specific question answered, not general mastery. The current economy does not introduce a separate competitive XP award for these answers. Written reflections, arbitrary free text, tool opening, lesson completion alone, and self-ratings are participation evidence only.
+- Master describes delayed retrieval and FSRS scheduling separately from XP. Good/Easy self-ratings adjust the review schedule; they are not objective comprehension evidence. Review does not issue a second completion reward.
+- Canonical reward events identify the user and mission. Retries, reloads, duplicate submissions, and changing a previous submission's verification tier must not pay the same completion reward twice.
 
 ## Brand Personality
 
@@ -57,7 +66,7 @@ Avoid hustle-bro language, fabricated performance claims, shame, fake urgency, c
 1. **One next action:** Every major screen answers “What should I do next?”
 2. **Active learning:** Interaction, retrieval, and decisions replace passive consumption.
 3. **Application closes the loop:** Useful knowledge becomes a real tool, choice, simulation, or action.
-4. **Mastery is retention:** Review proves that learning remained available over time.
+4. **Mastery is retention:** Review practices retrieval and builds retention evidence over time.
 5. **Curated trust:** Sources are visible and claims are supportable.
 6. **Progress is legible:** State, prerequisites, rewards, and consequences are understandable.
 7. **Energy with restraint:** Motion, sound, and the mascot support state changes without competing with the lesson.

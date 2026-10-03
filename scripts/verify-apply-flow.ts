@@ -119,7 +119,7 @@ try {
   }
   await page.reload();
   await page.getByRole('button', { name: 'Go to Master', exact: true }).waitFor();
-  assert.equal(await page.locator('[aria-label="0 verified XP"]').count(), 1, 'Self-reported progress never reaches the verified XP counter.');
+  assert.equal(await page.locator('[aria-label="0 XP from reviewed Apply evidence"]').count(), 1, 'Self-reported progress never reaches the competitive XP counter.');
   assert.equal(await page.getByRole('progressbar', { name: 'Journey progress' }).getAttribute('aria-valuenow'), '5');
   await page.screenshot({ path: 'test-results/app-shell/journey-completed.png', fullPage: true });
   await page.getByRole('button', { name: 'Go to Master', exact: true }).click();

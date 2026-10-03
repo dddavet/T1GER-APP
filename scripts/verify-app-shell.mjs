@@ -93,6 +93,13 @@ try {
   await page.getByText('Memory is current', { exact: true }).waitFor();
   if (await page.getByRole('button', { name: 'Compete', exact: true }).count()) throw new Error('Compete should not distract the V1 primary navigation.');
   await visitTab('Profile', 'Investing profile', 'Make it stick.', 'profile');
+  await page.getByRole('button').filter({ hasText: 'Reminders' }).click();
+  const notifications = page.getByRole('dialog', { name: 'Alerts unavailable' });
+  await notifications.waitFor({ state: 'visible' });
+  if (await notifications.getByRole('button', { name: 'Enable Streak Alerts' }).count()) throw new Error('Unconfigured push advertised working alerts.');
+  await notifications.getByRole('button', { name: 'Continue without alerts' }).click();
+  await notifications.waitFor({ state: 'detached' });
+  await page.getByText('XP recognizes activity.', { exact: false }).waitFor();
   await page.getByRole('button').filter({ hasText: 'T1GER Plus' }).click();
   await page.getByRole('dialog').getByText('Keep learning for free', { exact: true }).waitFor();
   if (await page.getByRole('dialog').getByText('START MY 7-DAY FREE TRIAL', { exact: true }).count()) throw new Error('Unavailable checkout advertised a trial');

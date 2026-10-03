@@ -27,6 +27,11 @@ export class OneSignalService {
   private static runtime: 'native' | 'web' | null = null;
   private static onNotificationClickHandler?: (data: NotificationPayloadData) => void;
 
+  public static isConfigured(): boolean {
+    const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
+    return typeof appId === 'string' && /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i.test(appId) && !appId.includes('0000-0000');
+  }
+
   /**
    * Initializes OneSignal reading VITE_ONESIGNAL_APP_ID
    */
@@ -38,7 +43,7 @@ export class OneSignalService {
     }
 
     const appId = import.meta.env.VITE_ONESIGNAL_APP_ID;
-    if (!appId || appId.includes('0000-0000')) {
+    if (!this.isConfigured()) {
       console.log('[OneSignal] Skipping initialization: No valid VITE_ONESIGNAL_APP_ID provided.');
       return;
     }
@@ -86,7 +91,8 @@ export class OneSignalService {
       }
     } catch (err) {
       console.warn('[OneSignal] Initialization note (dev/preview mode):', err);
-      this.isInitialized = true;
+      this.isInitialized = false;
+      this.runtime = null;
     }
   }
 
@@ -154,6 +160,7 @@ export class OneSignalService {
     };
 
     try {
+      if (!this.isInitialized) return;
       if ((window as any).plugins?.OneSignal) {
         (window as any).plugins.OneSignal.User.addTags(tags);
         return;
@@ -185,11 +192,8 @@ export class OneSignalService {
         return OneSignal.Notifications.permission;
       }
 
-      // Browser Fallback
-      if (typeof Notification !== 'undefined') {
-        const result = await Notification.requestPermission();
-        return result === 'granted';
-      }
+      // Browser permission alone cannot register a subscription or deliver push.
+      // Without a successfully initialized provider, reminders remain disabled.
     } catch (e) {
       console.warn('[OneSignal] Request permission error:', e);
     }

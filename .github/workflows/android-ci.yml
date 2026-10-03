@@ -39,8 +39,16 @@ jobs:
           packages: 'platform-tools platforms;android-36 build-tools;35.0.0'
       - run: npm ci
       - run: npm --prefix functions ci
+      - name: Install test browser
+        run: npx playwright install --with-deps chromium
       - name: Type safety, curriculum, economy and backend regressions
-        run: npm run test:all
+        run: |
+          npm run dev > /tmp/t1ger-vite.log 2>&1 &
+          VITE_PID=$!
+          trap 'kill "$VITE_PID" || true' EXIT
+          for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:3000 > /dev/null && break || sleep 1; done
+          curl -fsS http://127.0.0.1:3000 > /dev/null
+          npm run test:all
       - name: Audit shipped dependencies
         run: |
           npm audit --omit=dev --audit-level=high
@@ -49,14 +57,13 @@ jobs:
         run: npm run build:production
       - name: Check secrets and release isolation
         run: npm run release:check
-      - name: Install test browser
-        run: npx playwright install --with-deps chromium
       - name: Mobile web smoke test
         run: |
           npm run dev > /tmp/t1ger-vite.log 2>&1 &
           VITE_PID=$!
           trap 'kill "$VITE_PID" || true' EXIT
           for attempt in $(seq 1 60); do curl -fsS http://127.0.0.1:3000 > /dev/null && break || sleep 1; done
+          curl -fsS http://127.0.0.1:3000 > /dev/null
           npm run test:shell
           npm run test:apply
       - name: Optional native push configuration

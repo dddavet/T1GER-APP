@@ -20,13 +20,18 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
   const { appUser, updateAppUser } = useAuth();
   const isEs = language === 'es';
   const [requesting, setRequesting] = useState(false);
+  const [error, setError] = useState('');
+  const configured = OneSignalService.isConfigured();
 
   const handleEnable = async () => {
     setRequesting(true);
-    const granted = await OneSignalService.requestPermission();
-    setRequesting(false);
-
-    if (granted) {
+    setError('');
+    try {
+      const granted = await OneSignalService.requestPermission();
+      if (!granted) {
+        setError(isEs ? 'No pudimos activar las alertas. Puedes continuar sin ellas.' : 'We could not enable alerts. You can continue without them.');
+        return;
+      }
       if (appUser?.uid) {
         await OneSignalService.identifyUser(appUser.uid, {
           streak_days: learnStreak,
@@ -42,8 +47,12 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
         },
       });
       onGranted?.();
+      onClose();
+    } catch {
+      setError(isEs ? 'No pudimos guardar tus preferencias. Inténtalo de nuevo.' : 'We could not save your preferences. Please try again.');
+    } finally {
+      setRequesting(false);
     }
-    onClose();
   };
 
   useEffect(() => {
@@ -78,6 +87,9 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
           transition={{ type: 'spring', stiffness: 320, damping: 26 }}
           className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/12 bg-[#09231F] p-6 text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)] font-sans select-none"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="notification-permission-title"
         >
           {/* Close button with min 44px touch target */}
           <button
@@ -103,18 +115,18 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
               </div>
             </div>
 
-            <h3 className="mt-4 text-lg font-black tracking-tight text-white">
-              {isEs ? 'Protege tu Racha Diaria' : 'Protect Your Daily Streak'}
+            <h3 id="notification-permission-title" className="mt-4 text-lg font-black tracking-tight text-white">
+              {configured ? (isEs ? 'Protege tu Racha Diaria' : 'Protect Your Daily Streak') : (isEs ? 'Alertas no disponibles' : 'Alerts unavailable')}
             </h3>
             <p className="mt-1 text-xs text-[#87A9A2] leading-relaxed">
-              {isEs
+              {!configured ? (isEs ? 'Las notificaciones aún no están configuradas en esta versión. Puedes seguir aprendiendo sin activarlas.' : 'Notifications are not configured in this version yet. You can keep learning without enabling them.') : isEs
                 ? 'Activa las alertas inteligentes de T1GER para no perder tu progreso ni tus gemas.'
                 : 'Turn on smart T1GER alerts to protect your progress and gems.'}
             </p>
           </div>
 
           {/* Value Proposition List */}
-          <div className="mt-5 space-y-3 rounded-2xl border border-white/8 bg-black/20 p-4">
+          {configured && <div className="mt-5 space-y-3 rounded-2xl border border-white/8 bg-black/20 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#FF4500]/15 text-[#FF4500]">
                 <Flame size={15} />
@@ -162,24 +174,25 @@ export const NotificationPermissionModal: React.FC<NotificationPermissionModalPr
                 </p>
               </div>
             </div>
-          </div>
+          </div>}
 
           {/* Action Buttons */}
           <div className="mt-6 flex flex-col gap-2.5">
-            <button
+            {error && <p role="status" className="text-center text-xs leading-relaxed text-zinc-300">{error}</p>}
+            {configured && <button
               onClick={handleEnable}
               disabled={requesting}
               className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[var(--t1ger-orange)] font-bold text-xs uppercase tracking-wider text-[#09231F] shadow-[0_4px_16px_rgba(255,115,0,0.35)] hover:bg-[#FF8C33] active:scale-98 transition-all cursor-pointer disabled:opacity-50"
             >
               <Bell size={15} />
               <span>{requesting ? (isEs ? 'Activando…' : 'Enabling…') : (isEs ? 'Activar Alertas de Racha' : 'Enable Streak Alerts')}</span>
-            </button>
+            </button>}
 
             <button
               onClick={onClose}
               className="py-2 text-center text-xs font-semibold text-[#6F918A] hover:text-white transition-colors cursor-pointer"
             >
-              {isEs ? 'Quizás más tarde' : 'Maybe later'}
+              {!configured ? (isEs ? 'Continuar sin alertas' : 'Continue without alerts') : (isEs ? 'Quizás más tarde' : 'Maybe later')}
             </button>
           </div>
         </motion.div>

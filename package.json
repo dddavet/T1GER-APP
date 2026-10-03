@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "overrides": {
-    "qs": "6.16.0"
+    "qs": "6.16.0",
+    "@grpc/grpc-js": "1.14.5"
   },
   "scripts": {
     "postinstall": "node scripts/patch-native-dependencies.mjs",
@@ -27,7 +28,7 @@
     "test:curriculum": "tsx scripts/verify-interactive-curriculum.ts",
     "test:social": "tsx scripts/verify-social-engine.ts",
     "test:core": "tsx scripts/verify-core-progression.ts",
-    "test:journey": "tsx scripts/verify-learning-journey.ts && node scripts/verify-payments.mjs",
+    "test:journey": "tsx scripts/verify-learning-journey.ts && node scripts/verify-payments.mjs && node scripts/verify-notifications.mjs",
     "test:master": "tsx scripts/verify-mastery-experience.ts",
     "test:shell": "node scripts/verify-app-shell.mjs",
     "test:apply": "tsx scripts/verify-apply-flow.ts",
